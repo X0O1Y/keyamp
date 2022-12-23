@@ -1,0 +1,24 @@
+{
+    "title": "F5 → ⌘ + ⭾",
+    "rules": [
+        {
+            "description": "F5 → ⌘ + ⭾",
+            "manipulators": [
+                {
+                    "type": "basic",
+                    "from": {
+                        "key_code": "f5"
+                    },
+                    "to": [
+                        {
+                            "key_code": "tab",
+                            "modifiers": [
+                                "command"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
