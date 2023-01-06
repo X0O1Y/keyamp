@@ -60,6 +60,67 @@ Thumb cluster for common keyboard, no heavy pinky use, arrows on home row, numbe
 
 [[desktop.png]]
 
+*** Titlebar
+#+begin_src elisp
+(add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
+
+(when (display-graphic-p)
+  (setq display-time-default-load-average nil)
+  (setq battery-mode-line-format "%p%%   ")
+  (setq display-time-format "%a %e %b %R")
+  (setq ns-use-proxy-icon nil)
+
+  (setq frame-title-format
+        (list
+         (let ((xstr ""))
+            (dotimes (_ 212) ;; align right spacer
+              (setq xstr (concat " " xstr)))
+            xstr)
+         '(:eval mode-line-misc-info)))
+
+  (display-battery-mode 1)
+  (display-time-mode 1))
+#+end_src
+
+*** Modeline
+#+begin_src elisp
+(setq-default mode-line-format nil) ;; on top
+(setq-default header-line-format
+              (list
+               " "
+               ;; mode indicator
+               (when (not (display-graphic-p))
+                 '(:eval mode-line-front-space))
+
+               ;; buffer name
+               '(:eval (propertize " %b"
+                                   'face
+                                   (if (buffer-modified-p)
+                                       'font-lock-string-face
+                                     'font-lock-builtin-face)
+                                   'help-echo
+                                   (buffer-file-name)))
+
+               ;; branch
+               '(:eval (when
+                           (and vc-mode
+                                (not (string-equal (substring vc-mode 5) "master")))
+                         (list " " (substring vc-mode 5))))
+
+               ;; align right spacer
+               '(:eval (propertize
+                        " " 'display
+                        `((space :align-to
+                                 (- (+ right right-fringe right-margin) ,
+                                    (+ (length (format-mode-line "%l:%c "))
+                                       ))))))
+
+               ;; position
+               '(:eval (propertize "%l:%c "
+                                   'face 'font-lock-builtin-face))
+               ))
+#+end_src
+
 * iOS setup
 
 Emacs in pocket with unicode support. Use [[https://apps.apple.com/us/app/termius-terminal-ssh-client/id549039908][Termius]] client. Custom keyboard.
@@ -270,67 +331,6 @@ Useful config additional to XahEmacs.
 (setq calendar-latitude 0.0)
 (setq calendar-longitude 0.0)
 (setq calendar-location-name "Home")
-#+end_src
-
-*** Frame title
-#+begin_src elisp
-(add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
-
-(when (display-graphic-p)
-  (setq display-time-default-load-average nil)
-  (setq battery-mode-line-format "%p%%   ")
-  (setq display-time-format "%a %e %b %R")
-  (setq ns-use-proxy-icon nil)
-
-  (setq frame-title-format
-        (list
-         (let ((xstr ""))
-            (dotimes (_ 212) ;; align right spacer
-              (setq xstr (concat " " xstr)))
-            xstr)
-         '(:eval mode-line-misc-info)))
-
-  (display-battery-mode 1)
-  (display-time-mode 1))
-#+end_src
-
-*** Modeline
-#+begin_src elisp
-(setq-default mode-line-format nil) ;; on top
-(setq-default header-line-format
-              (list
-               " "
-               ;; mode indicator
-               (when (not (display-graphic-p))
-                 '(:eval mode-line-front-space))
-
-               ;; buffer name
-               '(:eval (propertize " %b"
-                                   'face
-                                   (if (buffer-modified-p)
-                                       'font-lock-string-face
-                                     'font-lock-builtin-face)
-                                   'help-echo
-                                   (buffer-file-name)))
-
-               ;; branch
-               '(:eval (when
-                           (and vc-mode
-                                (not (string-equal (substring vc-mode 5) "master")))
-                         (list " " (substring vc-mode 5))))
-
-               ;; align right spacer
-               '(:eval (propertize
-                        " " 'display
-                        `((space :align-to
-                                 (- (+ right right-fringe right-margin) ,
-                                    (+ (length (format-mode-line "%l:%c "))
-                                       ))))))
-
-               ;; position
-               '(:eval (propertize "%l:%c "
-                                   'face 'font-lock-builtin-face))
-               ))
 #+end_src
 
 *** Dired
