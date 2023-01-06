@@ -12,13 +12,13 @@ You need [[http://xahlee.info/emacs/misc/xahemacs.html][XahEmacs]] or [[https://
 * Macbook efficient setup
 
 Thumb cluster for common keyboard, no heavy pinky use, arrows on home row, number row by touch and more.
- 
+
 - Karabiner config file: [[karabiner.json]]
 - [[http://www.keyboard-layout-editor.com/#/gists/e7927c1676fbf713531d43c3db9ca4c1][Layout]]:
 [[macbook.png]]
 
-- Translate [Command ⌘] to [Control ^] e.g. s-u to C-u
-  - basically you need only *single* «control» key for GUI: [Command ⌘]
+- Translate 【Command ⌘】 to 【Control ^】 e.g. s-u to C-u
+  - basically you need only *single* «control» key for GUI: 【Command ⌘】
   #+begin_src elisp
   (define-key key-translation-map (kbd "s-2")      (kbd "C-2"))
   (define-key key-translation-map (kbd "s-3")      (kbd "C-3"))
@@ -29,7 +29,6 @@ Thumb cluster for common keyboard, no heavy pinky use, arrows on home row, numbe
   (define-key key-translation-map (kbd "s-8")      (kbd "C-8"))
   (define-key key-translation-map (kbd "s-9")      (kbd "C-9"))
   (define-key key-translation-map (kbd "s-0")      (kbd "C-0"))
-
   (define-key key-translation-map (kbd "s-q")      (kbd "C-q"))
   (define-key key-translation-map (kbd "s-t")      (kbd "C-t"))
   (define-key key-translation-map (kbd "s-u")      (kbd "C-u"))
@@ -42,15 +41,19 @@ Thumb cluster for common keyboard, no heavy pinky use, arrows on home row, numbe
   #+end_src
 
 - «⌘ + ijkl → Arrows» karabiner complex modification OS wide: [[cmdijkl2arrows.json]]
-- [Fn] → [Left Control ^]
-- [Left Control ^] → [Left Option ⌥]
-- [Left Option ⌥] → [Backspace ⌫]
-- [Backspace ⌫] → [Delete ⌦]
-- [Right Command ⌘] → [F5]
+- «Grave accent → Escape» karabiner complex modification OS wide: [[graveaccent2esc.json]]
+  - 【Esc】 → 【Fn】
+  - 【Grave accent】 → 【Esc】
+  - 【Fn】 + 【Grave accent】 → 【Grave accent】
+- 【Fn】 → 【Left Control ^】
+- 【Left Control ^】 → 【Left Option ⌥】
+- 【Left Option ⌥】 → 【Backspace ⌫】
+- 【Backspace ⌫】 → 【Delete ⌦】
+- 【Right Command ⌘】 → 【F5】
   - «F5 → ⌘ + ⭾» karabiner complex modification OS wide: [[f52cmdtab.json]]
-- [Right Option] → [F7] (XFK Global Leader key)
-- [Shift] to [Sticky Shift]
-- [Caps Lock] to [Home]
+- 【Right Option】 → 【F7】 (XFK Global Leader key)
+- 【Shift】 to 【Sticky Shift】
+- 【Caps Lock】 to 【Home】
 
 - Replace 3 and 8 keycaps with additional F and J ones:
   - easy to find ‘homing’ key by touch
@@ -61,7 +64,7 @@ Thumb cluster for common keyboard, no heavy pinky use, arrows on home row, numbe
 
 Emacs in pocket with unicode support. Use [[https://apps.apple.com/us/app/termius-terminal-ssh-client/id549039908][Termius]] client. Custom keyboard.
 
-[[smartphone1.jpeg]] [[smartphone2.jpeg]]
+[[mobile.jpeg]]
 
 - Set terminal and keyboard coding system to utf-8:
 #+begin_src elisp
@@ -89,26 +92,16 @@ Emacs in pocket with unicode support. Use [[https://apps.apple.com/us/app/termiu
 (setq xah-fly-command-mode-indicator "🟢")
 (setq xah-fly-insert-mode-indicator "🟠")
 #+end_src
-- Decrease GUI font size for the indicator, circle 🟢 too big:
-#+begin_src elisp
-(defface my-indicator-face '((t :height 0.7))
-  "Face for displaying XFK mode indicator.")
 
-(setq-default mode-line-format
-              `("%e" (:eval (propertize mode-line-front-space 'face 'my-indicator-face))  mode-line-mule-info mode-line-client mode-line-modified mode-line-remote mode-line-frame-identification mode-line-buffer-identification "   " mode-line-position
-                (vc-mode vc-mode)
-                "  " mode-line-modes mode-line-misc-info mode-line-end-spaces))
-#+end_src
 - Set word wrap
 - Global highlight current line
 - Don't show menu bar
-- Don't show line numbers
-- Use visual line for some buffers
+- Use visual line
 
 *** Custom iOS screen keyboard
 - ABC and Cyrillic layouts
   - App Store: [[https://apps.apple.com/us/app/xkeyboard-custom-keyboard/id1440245962][xKeyboard - Custom Keyboard]]
-  - Config file: [[ABC - 10-key - АБВ.xkeyboard]]
+  - Config file: [[ABC-АБВ.xkeyboard]]
 
 *** Screen keyboard add-on Termius
 - ↑ ↓ ^g home ctrl F7 ← →
@@ -279,27 +272,66 @@ Useful config additional to XahEmacs.
 (setq calendar-location-name "Home")
 #+end_src
 
+*** Frame title
+#+begin_src elisp
+(add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
+
+(when (display-graphic-p)
+  (setq display-time-default-load-average nil)
+  (setq battery-mode-line-format "%p%%   ")
+  (setq display-time-format "%a %e %b %R")
+  (setq ns-use-proxy-icon nil)
+
+  (setq frame-title-format
+        (list
+         (let ((xstr ""))
+            (dotimes (_ 212) ;; align right spacer
+              (setq xstr (concat " " xstr)))
+            xstr)
+         '(:eval mode-line-misc-info)))
+
+  (display-battery-mode 1)
+  (display-time-mode 1))
+#+end_src
+
 *** Modeline
-- Display custom date time format: 「22.11.22 17:10」
 #+begin_src elisp
-(setq display-time-default-load-average nil)
-(setq display-time-format "「%d.%m.%y %R」")
-(display-time-mode 1)
+(setq-default mode-line-format nil) ;; on top
+(setq-default header-line-format
+              (list
+               " "
+               ;; mode indicator
+               (when (not (display-graphic-p))
+                 '(:eval mode-line-front-space))
+
+               ;; buffer name
+               '(:eval (propertize " %b"
+                                   'face
+                                   (if (buffer-modified-p)
+                                       'font-lock-string-face
+                                     'font-lock-builtin-face)
+                                   'help-echo
+                                   (buffer-file-name)))
+
+               ;; branch
+               '(:eval (when
+                           (and vc-mode
+                                (not (string-equal (substring vc-mode 5) "master")))
+                         (list " " (substring vc-mode 5))))
+
+               ;; align right spacer
+               '(:eval (propertize
+                        " " 'display
+                        `((space :align-to
+                                 (- (+ right right-fringe right-margin) ,
+                                    (+ (length (format-mode-line "%l:%c "))
+                                       ))))))
+
+               ;; position
+               '(:eval (propertize "%l:%c "
+                                   'face 'font-lock-builtin-face))
+               ))
 #+end_src
-- Display battery status: 〔63%〕
-#+begin_src elisp
-(setq battery-mode-line-format '"〔%p%%〕 ")
-(display-battery-mode 1)
-#+end_src
-- Remove «Git-» prefix
-#+begin_src elisp
-(defun my-replace-git-status ($xstr)
-  "Remove «Git-» or «Git:» prefix.
-Version 2022-11-28"
-  (replace-regexp-in-string "Git." "" $xstr))
-(advice-add 'vc-git-mode-line-string :filter-return 'my-replace-git-status)
-#+end_src
-- Diminish some modes
 
 *** Dired
 - Omit some files
