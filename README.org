@@ -133,7 +133,7 @@ Emacs in pocket with unicode support. Use [[https://apps.apple.com/us/app/termiu
   - Config file: [[ABC-АБВ.xkeyboard]]
 
 *** Screen keyboard add-on Termius
-- ↑ ↓ ^g home ctrl F7 ← →
+- 【↑】 【↓】 【^g】 【home】 【ctrl】 【F7】 【←】 【→】
 
 *** Preferences
 - Set terminal and keyboard coding system to utf-8:
