@@ -58,7 +58,7 @@ Thumb cluster for common keyboard, no heavy pinky use, arrows on home row, numbe
 - Replace 3 and 8 keycaps with additional F and J ones:
   - easy to find ‘homing’ key by touch
 
-[[desktop.png]]
+[[desktop1.png]]
 
 * iOS setup
 
