@@ -135,6 +135,7 @@ Emacs in pocket with unicode support. Use [[https://apps.apple.com/us/app/termiu
 *** Screen keyboard add-on Termius
 - ↑ ↓ ^g home ctrl F7 ← →
 
+*** Preferences
 - Set terminal and keyboard coding system to utf-8:
 #+begin_src elisp
 (set-terminal-coding-system 'utf-8)
