@@ -127,6 +127,14 @@ Emacs in pocket with unicode support. Use [[https://apps.apple.com/us/app/termiu
 
 [[mobile.jpeg]]
 
+*** Custom iOS screen keyboard
+- ABC and Cyrillic layouts
+  - App Store: [[https://apps.apple.com/us/app/xkeyboard-custom-keyboard/id1440245962][xKeyboard - Custom Keyboard]]
+  - Config file: [[ABC-АБВ.xkeyboard]]
+
+*** Screen keyboard add-on Termius
+- ↑ ↓ ^g home ctrl F7 ← →
+
 - Set terminal and keyboard coding system to utf-8:
 #+begin_src elisp
 (set-terminal-coding-system 'utf-8)
@@ -158,14 +166,6 @@ Emacs in pocket with unicode support. Use [[https://apps.apple.com/us/app/termiu
 - Global highlight current line
 - Don't show menu bar
 - Use visual line
-
-*** Custom iOS screen keyboard
-- ABC and Cyrillic layouts
-  - App Store: [[https://apps.apple.com/us/app/xkeyboard-custom-keyboard/id1440245962][xKeyboard - Custom Keyboard]]
-  - Config file: [[ABC-АБВ.xkeyboard]]
-
-*** Screen keyboard add-on Termius
-- ↑ ↓ ^g home ctrl F7 ← →
 
 * Vimium bindings inspired by [[https://github.com/xahlee/xah-fly-keys][xah-fly-keys]]
 
