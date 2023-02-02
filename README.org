@@ -158,7 +158,7 @@ Emacs in pocket with unicode support. Use [[https://apps.apple.com/us/app/termiu
   (define-key xah-fly-command-map (kbd ":")          'xah-fly-leader-key-map)
 #+end_src  
 
-[[mobile1.jpeg]]
+[[mobile.jpeg]]
 
 - Emacs in tmux - instant remote access. Put in .bashrc:
 #+begin_src bash
