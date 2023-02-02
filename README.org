@@ -17,6 +17,16 @@ Thumb cluster for common keyboard, no heavy pinky use, arrows on home row, numbe
 - [[http://www.keyboard-layout-editor.com/#/gists/e7927c1676fbf713531d43c3db9ca4c1][Layout]]:
 [[macbook.png]]
 
+- Hack 【Escape】 for GUI only: allows to activate command mode, quit minibuffer and cancel selection.
+
+#+begin_src elisp
+(when (display-graphic-p)
+  (global-set-key                 (kbd "<escape>")   'xah-fly-command-mode-activate)
+  (define-key key-translation-map (kbd "<escape>")   (kbd "C-g"))
+  (global-set-key                 (kbd "C-g")        'xah-fly-command-mode-activate)
+  (add-hook 'xah-fly-command-mode-activate-hook      'deactivate-mark))
+#+end_src
+
 - Translate 【Command ⌘】 to 【Control ^】 e.g. s-u to C-u
   - basically you need only *single* «control» key for GUI: 【Command ⌘】
   #+begin_src elisp
@@ -41,19 +51,16 @@ Thumb cluster for common keyboard, no heavy pinky use, arrows on home row, numbe
   #+end_src
 
 - «⌘ + ijkl → Arrows» karabiner complex modification OS wide: [[cmdijkl2arrows.json]]
-- «Grave accent → Escape» karabiner complex modification OS wide: [[graveaccent2esc.json]]
-  - 【Esc】 → 【Fn】
-  - 【Grave accent】 → 【Esc】
-  - 【Fn】 + 【Grave accent】 → 【Grave accent】
 - 【Fn】 → 【Left Control ^】
 - 【Left Control ^】 → 【Left Option ⌥】
-- 【Left Option ⌥】 → 【Backspace ⌫】
+- 【Left Option ⌥】 → 【F7】 (XFK Global Leader key)
+- 【Right Command ⌘】 → 【Backspace ⌫】
 - 【Backspace ⌫】 → 【Delete ⌦】
-- 【Right Command ⌘】 → 【F5】
+- 【Right Option】 → 【F5】
   - «F5 → ⌘ + ⭾» karabiner complex modification OS wide: [[f52cmdtab.json]]
-- 【Right Option】 → 【F7】 (XFK Global Leader key)
 - 【Shift】 to 【Sticky Shift】
-- 【Caps Lock】 to 【Home】
+- 【Caps Lock】 to 【Esc】
+- 【Esc】 to 【Fn】
 
 - Replace 3 and 8 keycaps with additional F and J ones:
   - easy to find ‘homing’ key by touch
@@ -125,15 +132,13 @@ Thumb cluster for common keyboard, no heavy pinky use, arrows on home row, numbe
 
 Emacs in pocket with unicode support. Use [[https://apps.apple.com/us/app/termius-terminal-ssh-client/id549039908][Termius]] client. Custom keyboard.
 
-[[mobile.jpeg]]
-
 *** Custom iOS screen keyboard
 - ABC and Cyrillic layouts
   - App Store: [[https://apps.apple.com/us/app/xkeyboard-custom-keyboard/id1440245962][xKeyboard - Custom Keyboard]]
   - Config file: [[ABC-АБВ.xkeyboard]]
 
 *** Screen keyboard add-on Termius
-- 【↑】 【↓】 【^g】 【home】 【ctrl】 【F7】 【←】 【→】
+- 【←】 【→】 【↑】 【↓】 【^g】 【ctrl】 【F7】 【F8】
 
 *** Preferences
 - Set terminal and keyboard coding system to utf-8:
@@ -141,6 +146,20 @@ Emacs in pocket with unicode support. Use [[https://apps.apple.com/us/app/termiu
 (set-terminal-coding-system 'utf-8)
 (set-keyboard-coding-system 'utf-8)
 #+end_src
+
+- Use C-g as Escape:
+#+begin_src bash
+  (global-set-key                   (kbd "C-g")      'xah-fly-command-mode-activate)
+  (add-hook 'xah-fly-command-mode-activate-hook      'deactivate-mark)  
+#+end_src
+
+- Use 【:】 as leader to bind combinations to candidates keys:
+#+begin_src bash
+  (define-key xah-fly-command-map (kbd ":")          'xah-fly-leader-key-map)
+#+end_src  
+
+[[mobile1.jpeg]]
+
 - Emacs in tmux - instant remote access. Put in .bashrc:
 #+begin_src bash
   alias tmux='tmux -u'
@@ -155,6 +174,7 @@ Emacs in pocket with unicode support. Use [[https://apps.apple.com/us/app/termiu
       fi
   fi
 #+end_src
+
 - Nord theme for Emacs and Termius. Works worthy for GUI and terminal.
 - Color mode indicators
   - Useful for terminal without i-beam cursor shape
@@ -215,9 +235,6 @@ unmap gs
 unmap [[
 unmap ]]
 unmap `
-
-# map esc to caps lock
-mapkey <home> <c-[>
 
 # right hand mappings
 map i scrollPageUp
@@ -293,15 +310,18 @@ map <backspace>g Vomnibar.activateEditUrl
 #+end_src
 
 * More keyboards and options
-- Kinesis Advantage2 [[http://www.keyboard-layout-editor.com/#/gists/6a1a62133ab9f741589bd556cb946792][layout]]:
+- Kinesis Advantage2 [[http://www.keyboard-layout-editor.com/#/gists/6a1a62133ab9f741589bd556cb946792][layout]] and [[qwerty2.txt][config]]:
 [[advantage2.png]]
 
 Highly recommend portable lightweight keyboard:
 - [[https://www.aliexpress.com/i/32837821853.html][AVATTO A20 Portable Leather Folding Mini Bluetooth]] weight 174 g
-  - Bind Caps Lock to C-p in Termius and to command mode activate
   #+begin_src elisp
-  ;; same bind to caps lock in termuis
-  (global-set-key (kbd "C-p")                      'xah-fly-command-mode-activate)
+  ;; bind C-p to capslock in termius for portable hardware keyboard
+  (global-set-key                 (kbd "C-p")        'xah-fly-command-mode-activate)
+  (define-key key-translation-map (kbd "C-p")        (kbd "C-g"))
+  ;; use C-g as escape
+  (global-set-key                 (kbd "C-g")        'xah-fly-command-mode-activate)
+  (add-hook 'xah-fly-command-mode-activate-hook      'deactivate-mark)
   #+end_src
 
 * Common settings
@@ -351,42 +371,4 @@ Version 2022-11-21"
 - Listing -alhG
 #+begin_src elisp
 (setq dired-listing-switches "-alhG")
-#+end_src
-
-*** Other
-- Toggle light and dark appearance
-#+begin_src elisp
-(defun my-toggle-appearance ()
-  "Toggle appearance.
-Version 2022-08-07 2022-10-31"
-  (interactive)
-  (if (get 'my-toggle-appearance 'state)
-      (progn
-        (load-theme 'nord t)
-        (put 'my-toggle-appearance 'state nil))
-    (progn
-      (disable-theme 'nord)
-      (put 'my-toggle-appearance 'state t))))
-#+end_src
-- Custom python calculator
-- Google translate via xah-lookup-word-on-internet
-#+begin_src elisp
-(defun my-translate-word-google ()
-  "Lookup current word or text selection in Google Translate.
-Version: 2022-10-30"
-  (interactive)
-  (xah-lookup-word-on-internet
-   nil
-   "https://translate.google.com/?sl=en&tl=ru&text=curlicue"
-   nil))
-#+end_src
-- Alternate buffer
-#+begin_src elisp
-(defun my-alternate-buffer ()
-  "Alternate buffer.
-Version: 2022-12-16"
-  (interactive)
-  (switch-to-buffer (other-buffer)))
-
-(define-key xah-fly-command-map (kbd "]")        'my-alternate-buffer)
 #+end_src

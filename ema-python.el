@@ -4,7 +4,7 @@
 (elpy-enable)
 (setq elpy-rpc-virtualenv-path "~/.emacs.d/elpy")
 
-(defun my-run-python ()
+(defun ema-run-python ()
   "Run and show python shell, do not select other window.
 Version 2022-11-08"
   (interactive)
@@ -16,11 +16,18 @@ Version 2022-11-08"
 ;; disable flymake proc legacy warning messages
 (remove-hook 'flymake-diagnostic-functions 'flymake-proc-legacy-flymake)
 
-(defun my-pdb ()
+(defun ema-pdb ()
   "Debug current file with pdb.
 Verstion 2022-12-22"
   (interactive)
   (pdb (concat "python3 -m pdb " (file-name-nondirectory buffer-file-name))))
+
+
+;; bindings
+
+(define-key python-mode-map (kbd "TAB")          'python-indent-shift-right)
+(define-key python-mode-map (kbd "<backtab>")    'python-indent-shift-left)
+(define-key python-mode-map (kbd "<f7> j k")     'xah-python-format-buffer)
 
 
 ;; format python code
@@ -74,5 +81,3 @@ Version 2022-08-25 2022-08-28"
      (format "%s - -q" xah-python-formatter-black-path)
      nil
      t))))
-
-
