@@ -1,7 +1,7 @@
 #+title: Emacs and Keyboards
-#+author: Yegor Maltsev
+#+author: Egor Maltsev
 
-You need [[http://xahlee.info/emacs/misc/xahemacs.html][XahEmacs]] or [[https://github.com/xahlee/xah-fly-keys][xah-fly-keys]]. Below some features how to use it.
+Based on [[https://github.com/xahlee/xah-fly-keys][xah-fly-keys]]. Below some features how to use it.
 
 ** Features
 - Macbook efficient setup
