@@ -27,27 +27,9 @@ Thumb cluster for common keyboard, no heavy pinky use, arrows on home row, numbe
   (add-hook 'xah-fly-command-mode-activate-hook      'deactivate-mark))
 #+end_src
 
-- Translate 【Command ⌘】 to 【Control ^】 e.g. s-u to C-u
-  - basically you need only *single* «control» key for GUI: 【Command ⌘】
+- Basically you need only *single* «control» key for GUI: 【Command ⌘】
   #+begin_src elisp
-  (define-key key-translation-map (kbd "s-2")      (kbd "C-2"))
-  (define-key key-translation-map (kbd "s-3")      (kbd "C-3"))
-  (define-key key-translation-map (kbd "s-4")      (kbd "C-4"))
-  (define-key key-translation-map (kbd "s-5")      (kbd "C-5"))
-  (define-key key-translation-map (kbd "s-6")      (kbd "C-6"))
-  (define-key key-translation-map (kbd "s-7")      (kbd "C-7"))
-  (define-key key-translation-map (kbd "s-8")      (kbd "C-8"))
-  (define-key key-translation-map (kbd "s-9")      (kbd "C-9"))
-  (define-key key-translation-map (kbd "s-0")      (kbd "C-0"))
-  (define-key key-translation-map (kbd "s-q")      (kbd "C-q"))
-  (define-key key-translation-map (kbd "s-t")      (kbd "C-t"))
-  (define-key key-translation-map (kbd "s-u")      (kbd "C-u"))
-  (define-key key-translation-map (kbd "s-d")      (kbd "C-d"))
-  (define-key key-translation-map (kbd "s-g")      (kbd "C-g"))
-  (define-key key-translation-map (kbd "s-h")      (kbd "C-h"))
-  (define-key key-translation-map (kbd "s-c")      (kbd "C-c"))
-  (define-key key-translation-map (kbd "s-,")      (kbd "C-,"))
-  (define-key key-translation-map (kbd "s-.")      (kbd "C-."))
+    (setq mac-command-modifier 'control)
   #+end_src
 
 - «⌘ + ijkl → Arrows» karabiner complex modification OS wide: [[cmdijkl2arrows.json]]
