@@ -1,7 +1,7 @@
 ;;; python-mode.el --- Major mode for editing Python code. -*- coding: utf-8; lexical-binding: t; -*-
 
 ;; Author: Egor Maltsev <x0o1@ya.ru>
-;; URL: https://github.com/xegorka/keyboard/python-mode.el
+;; URL: https://github.com/xegorka/keyboard/
 ;; Version: 0.7
 ;; Created: Mar 2023
 
