@@ -1,12 +1,12 @@
 #+title: Emacs and Keyboards
 #+author: Egor Maltsev
 
-Based on [[https://github.com/xahlee/xah-fly-keys][xah-fly-keys]]. Below some features how to use it.
+Based on [[https://github.com/xegorka/flykeys][flykeys]]. Below some features how to use it.
 
 ** Features
 - Macbook efficient setup
 - iOS setup
-- [[https://github.com/philc/vimium][Vimium]] bindings inspired by [[https://github.com/xahlee/xah-fly-keys][xah-fly-keys]]
+- [[https://github.com/philc/vimium][Vimium]] bindings inspired by [[https://github.com/xegorka/flykeys][flykeys]]
 - More keyboards and options
 
 * Macbook efficient setup
@@ -21,10 +21,10 @@ Thumb cluster for common keyboard, no heavy pinky use, arrows on home row, numbe
 
 #+begin_src elisp
 (when (display-graphic-p)
-  (global-set-key                 (kbd "<escape>")   'xah-fly-command-mode-activate)
+  (global-set-key                 (kbd "<escape>")   'flykeys-command-mode-activate)
   (define-key key-translation-map (kbd "<escape>")   (kbd "C-g"))
-  (global-set-key                 (kbd "C-g")        'xah-fly-command-mode-activate)
-  (add-hook 'xah-fly-command-mode-activate-hook      'deactivate-mark))
+  (global-set-key                 (kbd "C-g")        'flykeys-command-mode-activate)
+  (add-hook 'flykeys-command-mode-activate-hook      'deactivate-mark))
 #+end_src
 
 - Basically you need only *single* «control» key for GUI: 【Command ⌘】
@@ -43,6 +43,7 @@ Thumb cluster for common keyboard, no heavy pinky use, arrows on home row, numbe
 - 【Shift】 to 【Sticky Shift】
 - 【Caps Lock】 to 【Esc】
 - 【Esc】 to 【Fn】
+- 【Left Command ⌘】 modifier instead of 【Fn】 for media keys: [[cmd2media.json]]
 
 - Replace 3 and 8 keycaps with additional F and J ones:
   - easy to find ‘homing’ key by touch
@@ -131,13 +132,13 @@ Emacs in pocket with unicode support. Use [[https://apps.apple.com/us/app/termiu
 
 - Use C-g as Escape:
 #+begin_src bash
-  (global-set-key                   (kbd "C-g")      'xah-fly-command-mode-activate)
-  (add-hook 'xah-fly-command-mode-activate-hook      'deactivate-mark)  
+  (global-set-key                   (kbd "C-g")      'flykeys-command-mode-activate)
+  (add-hook 'flykeys-command-mode-activate-hook      'deactivate-mark)  
 #+end_src
 
 - Use 【:】 as leader to bind combinations to candidates keys:
 #+begin_src bash
-  (define-key xah-fly-command-map (kbd ":")          'xah-fly-leader-key-map)
+  (define-key flykeys-command-map (kbd ":")          'flykeys-leader-key-map)
 #+end_src  
 
 [[mobile.jpeg]]
@@ -161,8 +162,8 @@ Emacs in pocket with unicode support. Use [[https://apps.apple.com/us/app/termiu
 - Color mode indicators
   - Useful for terminal without i-beam cursor shape
 #+begin_src elisp
-(setq xah-fly-command-mode-indicator "🟢")
-(setq xah-fly-insert-mode-indicator "🟠")
+(setq flykeys-command-mode-indicator "🟢")
+(setq flykeys-insert-mode-indicator "🟠")
 #+end_src
 
 - Set word wrap
@@ -170,7 +171,7 @@ Emacs in pocket with unicode support. Use [[https://apps.apple.com/us/app/termiu
 - Don't show menu bar
 - Use visual line
 
-* Vimium bindings inspired by [[https://github.com/xahlee/xah-fly-keys][xah-fly-keys]]
+* Vimium bindings inspired by [[https://github.com/xegorka/flykeys][flykeys]]
 
 - Complete config file: [[vimium-options.json]]
 - [[http://www.keyboard-layout-editor.com/#/gists/5818428d1d8bcc4f7768d54720e9ef07][Bindings redesign]]:
@@ -299,9 +300,9 @@ Highly recommend portable lightweight keyboard:
 - [[https://www.aliexpress.com/i/32837821853.html][AVATTO A20 Portable Leather Folding Mini Bluetooth]] weight 174 g
   #+begin_src elisp
   ;; bind C-p to capslock in termius for portable hardware keyboard
-  (global-set-key                 (kbd "C-p")        'xah-fly-command-mode-activate)
+  (global-set-key                 (kbd "C-p")        'flykeys-command-mode-activate)
   (define-key key-translation-map (kbd "C-p")        (kbd "C-g"))
   ;; use C-g as escape
-  (global-set-key                 (kbd "C-g")        'xah-fly-command-mode-activate)
-  (add-hook 'xah-fly-command-mode-activate-hook      'deactivate-mark)
+  (global-set-key                 (kbd "C-g")        'flykeys-command-mode-activate)
+  (add-hook 'flykeys-command-mode-activate-hook      'deactivate-mark)
   #+end_src
