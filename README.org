@@ -50,23 +50,30 @@ Thumb cluster for common keyboard, no heavy pinky use, arrows on home row, numbe
 
 [[desktop.png]]
 
-*** Titlebar
+*** Title bar
 #+begin_src elisp
 (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
 
 (when (display-graphic-p)
   (setq display-time-default-load-average nil)
-  (setq battery-mode-line-format "%p%%   ")
+  (setq battery-mode-line-format "%b%p%%   ")
   (setq display-time-format "%a %e %b %R")
   (setq ns-use-proxy-icon nil)
 
   (setq frame-title-format
         (list
-         (let ((xstr ""))
-            (dotimes (_ 212) ;; align right spacer
-              (setq xstr (concat " " xstr)))
-            xstr)
-         '(:eval mode-line-misc-info)))
+         '(:eval (mu4e--modeline-string))
+
+         (let ((xph "")
+              (xmu4e (length '(:eval (mu4e--modeline-string))))
+              (xcount 120))
+           (dotimes (_ (- xcount xmu4e)) ;; placeholder
+            (setq xph (concat "	" xph))) ;; note tab char
+          xph)
+
+         ;; '(:eval global-mode-string)
+         'battery-mode-line-string
+         'display-time-string))
 
   (display-battery-mode 1)
   (display-time-mode 1))
