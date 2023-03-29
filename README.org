@@ -141,7 +141,7 @@ Emacs in pocket with unicode support. Use [[https://apps.apple.com/us/app/termiu
   (define-key flykeys-command-map (kbd ":")          'flykeys-leader-key-map)
 #+end_src  
 
-[[mobile.jpeg]]
+[[mobile-s50.png]]
 
 - Emacs in tmux - instant remote access. Put in .bashrc:
 #+begin_src bash
