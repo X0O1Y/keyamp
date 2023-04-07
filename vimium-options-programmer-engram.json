@@ -1,0 +1,26 @@
+{
+  "settingsVersion": "1.67.4",
+  "exclusionRules": [
+    {
+      "pattern": "https?://mail.google.com/*",
+      "passKeys": ""
+    }
+  ],
+  "filterLinkHints": false,
+  "waitForEnterForFilteredHints": true,
+  "hideHud": false,
+  "keyMappings": "# unmap defaults\nunmap W\nunmap J\nunmap P\nunmap X\nunmap F\nunmap <c-e>\nunmap <c-y>\nunmap gg\nunmap G\nunmap zH\nunmap zL\nunmap yy\nunmap gu\nunmap gU\nunmap gi\nunmap <a-f>\nunmap yf\nunmap gf\nunmap gF\nunmap O\nunmap B\nunmap ge\nunmap gE\nunmap N\nunmap H\nunmap gt\nunmap gT\nunmap ^\nunmap g0\nunmap g$\nunmap yt\nunmap <a-p>\nunmap <a-m>\nunmap >>\nunmap <<\nunmap ?\nunmap gs\nunmap [[\nunmap ]]\nunmap `\n\n# right hand mappings\nmap d scrollPageUp\nmap t scrollPageDown\nmap h previousTab\nmap s nextTab\nmap . goBack\nmap n goForward\nmap r scrollUp\nmap m scrollDown\nmap f toggleMuteTab\nmap p showHelp\nmap \" Vomnibar.activateTabSelection\nmap w Vomnibar.activateInNewTab\nmap v visitPreviousTab\nmap l Vomnibar.activateInNewTab keyword=b\nmap ? enterFindMode\nmap - Vomnibar.activateBookmarksInNewTab\n\n# left hand mappings\nmap b togglePinTab\nmap y reload hard\nmap o scrollPageUp\nmap u reload\nmap ' enterVisualMode\nmap c focusInput\nmap i LinkHints.activateModeToOpenInNewTab\nmap e scrollPageDown\nmap a LinkHints.activateMode\nmap , createTab\nmap g restoreTab\nmap x removeTab\nmap j copyCurrentUrl\nmap k duplicateTab\n\n# scroll with arrows too\nmap <up> scrollUp\nmap <down> scrollDown\n\n# navigate search results\nmap <right> performFind\nmap <left> performBackwardsFind\n\n# navigate paginated site\nmap z goPrevious\nmap { goNext\n\nmap @ LinkHints.activateMode action=focus\nmap & LinkHints.activateMode action=hover\nmap / moveTabLeft\nmap $ moveTabRight\nmap * firstTab\nmap = lastTab\nmap # scrollFullPageUp\nmap % scrollFullPageDown\n\nmap <space><space> LinkHints.activateMode\nmap <space><backspace> LinkHints.activateMode\nmap <backspace><space> LinkHints.activateMode\nmap <backspace><backspace> LinkHints.activateMode\nmap <space><enter> focusInput\nmap <backspace><enter> focusInput\nmap <space>. scrollToTop\nmap <backspace>. scrollToTop\nmap <space>n scrollToBottom\nmap <backspace>n scrollToBottom\nmap <space>i LinkHints.activateModeToOpenInNewTab count=99\nmap <backspace>i LinkHints.activateModeToOpenInNewTab count=99\nmap <space>j LinkHints.activateModeToCopyLinkUrl\nmap <backspace>j LinkHints.activateModeToCopyLinkUrl\nmap <space>k LinkHints.activateModeToDownloadLink\nmap <backspace>k LinkHints.activateModeToDownloadLik\nmap <space>a LinkHints.activateModeToOpenInNewForegroundTab\nmap <backspace>a LinkHints.activateModeToOpenInNewForegroundTab\nmap <space>, Vomnibar.activateEditUrl\nmap <backspace>, Vomnibar.activateEditUrl\n\n# custom shortcuts\nmap T createTab https://translate.google.com/\nmap Y createTab https://news.ycombinator.com/\nmap V createTab https://www.vedomosti.ru/\nmap L createTab https://www.reddit.com/r/nextfuckinglevel/top/\nmap K createTab https://pastvu.com/ps?f=r!827\nmap J createTab https://www.youtube.com/\nmap F createTab https://leetcode.com/problem-list/top-interview-questions/\nmap R createTab https://web.telegram.org/\nmap E createTab https://excalidraw.com/\nmap D createTab https://discord.com/channels/630186623555862538/688072482598420560\nmap H createTab https://radio.garden/listen/systrumsistumssr1/A7e8_nXI",
+  "linkHintCharacters": "dhtsoiea",
+  "linkHintNumbers": "0123456789",
+  "newTabUrl": "about:newtab",
+  "nextPatterns": "next,more,newer,>,›,→,»,≫",
+  "previousPatterns": "prev,previous,back,older,<,‹,←,«,≪,<<",
+  "regexFindMode": false,
+  "ignoreKeyboardLayout": false,
+  "scrollStepSize": 80,
+  "smoothScroll": true,
+  "grabBackFocus": true,
+  "searchEngines": "w: https://www.wikipedia.org/w/index.php?title=Special:Search&search=%s Wikipedia\n\n# More examples.\n#\n# (Vimium supports search completion Wikipedia, as\n# above, and for these.)\n#\n# g: https://www.google.com/search?q=%s Google\n# l: https://www.google.com/search?q=%s&btnI I'm feeling lucky...\n# y: https://www.youtube.com/results?search_query=%s Youtube\n# gm: https://www.google.com/maps?q=%s Google maps\n# b: https://www.bing.com/search?q=%s Bing\n#d: https://duckduckgo.com/?q=%s DuckDuckGo\n# az: https://www.amazon.com/s/?field-keywords=%s Amazon\n# qw: https://www.qwant.com/?q=%s Qwant\nb: https://search.brave.com/search?q=%s Brave",
+  "searchUrl": "https://search.brave.com/search?q=",
+  "userDefinedLinkHintCss": "div > .vimiumHintMarker {\n/* linkhint boxes */\nbackground: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#FFF785),\n  color-stop(100%,#FFC542));\nborder: 1px solid #E3BE23;\n}\n\ndiv > .vimiumHintMarker span {\n/* linkhint text */\ncolor: black;\nfont-weight: bold;\nfont-size: 12px;\n}\n\ndiv > .vimiumHintMarker > .matchingCharacter {\n}"
+}

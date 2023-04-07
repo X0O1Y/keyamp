@@ -11,10 +11,11 @@ Based on [[https://github.com/xegorka/flykeys][flykeys]]. Below some features ho
 
 * Macbook efficient setup
 
-Thumb cluster for common keyboard, no heavy pinky use, arrows on home row, number row by touch and more.
+Thumb cluster for common keyboard, arrows on home row, number row by touch and more.
 
 - Karabiner config file: [[karabiner.json]]
-- [[http://www.keyboard-layout-editor.com/#/gists/e7927c1676fbf713531d43c3db9ca4c1][Layout]]:
+- [[http://www.keyboard-layout-editor.com/#/gists/106550cd49793787784ed1b9c9117c3d][Layout]]:
+  
 [[macbook.png]]
 
 - Hack 【Escape】 for GUI only: allows to activate command mode, quit minibuffer and cancel selection.
@@ -125,10 +126,11 @@ Emacs in pocket with unicode support. Use [[https://apps.apple.com/us/app/termiu
 *** Custom iOS screen keyboard
 - ABC and Cyrillic layouts
   - App Store: [[https://apps.apple.com/us/app/xkeyboard-custom-keyboard/id1440245962][xKeyboard - Custom Keyboard]]
+  - Config file: [[programmer-engram.xkeyboard]]
   - Config file: [[ABC-АБВ.xkeyboard]]
 
 *** Screen keyboard add-on Termius
-- 【←】 【→】 【↑】 【↓】 【^g】 【ctrl】 【F7】 【F8】
+- 【^c】 【ctrl】 【F7】 【^g】 【↑】 【↓】 【←】 【→】 
 
 *** Preferences
 - Set terminal and keyboard coding system to utf-8:
