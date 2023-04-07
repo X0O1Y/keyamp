@@ -183,6 +183,7 @@ Emacs in pocket with unicode support. Use [[https://apps.apple.com/us/app/termiu
 * Vimium bindings inspired by [[https://github.com/xegorka/flykeys][flykeys]]
 
 - Complete config file: [[vimium-options.json]]
+- Complete config file: [[vimium-options-programmer-engram.json]]
 - [[http://www.keyboard-layout-editor.com/#/gists/5818428d1d8bcc4f7768d54720e9ef07][Bindings redesign]]:
 [[vimium.png]]
 #+begin_src
