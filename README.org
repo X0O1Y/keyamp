@@ -14,7 +14,7 @@ Based on [[https://github.com/xegorka/flykeys][flykeys]]. Below some features ho
 Thumb cluster for common keyboard, arrows on home row, number row by touch and more.
 
 - Karabiner config file: [[karabiner.json]]
-- [[http://www.keyboard-layout-editor.com/#/gists/106550cd49793787784ed1b9c9117c3d][Layout]]:
+- [[http://www.keyboard-layout-editor.com/#/gists/106550cd49793787784ed1b9c9117c3d][Layout]] based on [[https://github.com/xegorka/engram][Programmer Engram]]:
   
 [[macbook.png]]
 
