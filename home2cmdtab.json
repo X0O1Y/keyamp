@@ -1,13 +1,13 @@
 {
-    "title": "F5 → ⌘ + ⭾",
+    "title": "Home → ⌘ + ⭾",
     "rules": [
         {
-            "description": "F5 → ⌘ + ⭾",
+            "description": "Home → ⌘ + ⭾",
             "manipulators": [
                 {
                     "type": "basic",
                     "from": {
-                        "key_code": "f5"
+                        "key_code": "home"
                     },
                     "to": [
                         {

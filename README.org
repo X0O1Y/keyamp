@@ -1,7 +1,17 @@
 #+title: Emacs and Keyboards
 #+author: Egor Maltsev
 
-Based on [[https://github.com/xegorka/flykeys][flykeys]]. Below some features how to use it.
+Based on [[https://github.com/xegorka/flykeys][flykeys]] and Emacs Mac Port. 
+
+#+begin_src bash
+# emacs-mac
+brew tap railwaycat/emacsmacport
+brew install emacs-mac --with-natural-title-bar
+defaults write org.gnu.Emacs TransparentTitleBar DARK
+defaults write org.gnu.Emacs HideDocumentIcon YES
+#+end_src
+
+Below some features how to use it.
 
 ** Features
 - Macbook efficient setup
@@ -15,7 +25,7 @@ Thumb cluster for common keyboard, arrows on home row, number row by touch and m
 
 - Karabiner config file: [[karabiner.json]]
 - [[http://www.keyboard-layout-editor.com/#/gists/106550cd49793787784ed1b9c9117c3d][Layout]] based on [[https://github.com/xegorka/engram][Programmer Engram]]:
-  
+
 [[macbook.png]]
 
 - Hack 【Escape】 for GUI only: allows to activate command mode, quit minibuffer and cancel selection.
@@ -28,20 +38,40 @@ Thumb cluster for common keyboard, arrows on home row, number row by touch and m
   (add-hook 'flykeys-command-mode-activate-hook      'deactivate-mark))
 #+end_src
 
-- Basically you need only *single* «control» key for GUI: 【Command ⌘】
+- Translate command to control. Basically you need only *single* «control» key for GUI: 【Command ⌘】
   #+begin_src elisp
-    (setq mac-command-modifier 'control)
+(when (string-equal system-type "darwin")
+  (setq mac-command-modifier 'super)
+
+  (define-key key-translation-map (kbd "s-a")        (kbd "C-_"))
+  (define-key key-translation-map (kbd "s-<escape>") (kbd "C-<escape>"))
+  (define-key key-translation-map (kbd "s-'")        (kbd "C-t"))
+  (define-key key-translation-map (kbd "s-k")        (kbd "C-v"))
+  (define-key key-translation-map (kbd "s-e")        (kbd "C-d"))
+  (define-key key-translation-map (kbd "s-.")        (kbd "C-h"))
+  (define-key key-translation-map (kbd "s-m")        (kbd "C-,")) ; flyspell-goto-next-error
+  (define-key key-translation-map (kbd "s-f")        (kbd "C-.")) ; flyspell-auto-correct-word
+  (define-key key-translation-map (kbd "s-l")        (kbd "C-u"))
+  (define-key key-translation-map (kbd "s-b")        (kbd "C-q"))
+  (define-key key-translation-map (kbd "s-j")        (kbd "C-c"))
+
+  (global-set-key (kbd "s-<f7>")  'emms-seek-backward-or-previous)
+  (global-set-key (kbd "s-<f8>")  'emms-pause)
+  (global-set-key (kbd "s-<f9>")  'emms-seek-forward-or-next)
+  ;;
+  )
   #+end_src
 
 - «⌘ + ijkl → Arrows» karabiner complex modification OS wide: [[cmdijkl2arrows.json]]
 - 【Fn】 → 【Left Control ^】
 - 【Left Control ^】 → 【Left Option ⌥】
-- 【Left Option ⌥】 → 【F7】 (XFK Global Leader key)
+- 【Left Option ⌥】 → 【Home】
+  - «Home → ⌘ + ⭾» karabiner complex modification OS wide: [[home2cmdtab.json]]
 - 【Right Command ⌘】 → 【Backspace ⌫】
 - 【Backspace ⌫】 → 【Delete ⌦】
-- 【Right Option】 → 【F5】
-  - «F5 → ⌘ + ⭾» karabiner complex modification OS wide: [[f52cmdtab.json]]
-- 【Shift】 to 【Sticky Shift】
+- 【Right Option】 → 【Home】
+  - «Home → ⌘ + ⭾» karabiner complex modification OS wide: [[home2cmdtab.json]]
+- 【Shift】 to 【Shift Lock】
 - 【Caps Lock】 to 【Esc】
 - 【Esc】 to 【Fn】
 - 【Left Command ⌘】 modifier instead of 【Fn】 for media keys: [[cmd2media.json]]
@@ -124,13 +154,13 @@ Thumb cluster for common keyboard, arrows on home row, number row by touch and m
 Emacs in pocket with unicode support. Use [[https://apps.apple.com/us/app/termius-terminal-ssh-client/id549039908][Termius]] client. Custom keyboard.
 
 *** Custom iOS screen keyboard
-- ABC and Cyrillic layouts
+- ABC, Cyrillic and Programmer Engram layouts
   - App Store: [[https://apps.apple.com/us/app/xkeyboard-custom-keyboard/id1440245962][xKeyboard - Custom Keyboard]]
-  - Config file: [[programmer-engram.xkeyboard]]
-  - Config file: [[ABC-АБВ.xkeyboard]]
+  - Layout file: [[ABC-АБВ.xkeyboard]]
+  - Layout file: [[programmer-engram.xkeyboard]]
 
 *** Screen keyboard add-on Termius
-- 【^c】 【ctrl】 【F7】 【^g】 【↑】 【↓】 【←】 【→】 
+- 【^c】 【ctrl】 【^_】 【^g】 【↑】 【↓】 【←】 【→】
 
 *** Preferences
 - Set terminal and keyboard coding system to utf-8:
@@ -142,13 +172,13 @@ Emacs in pocket with unicode support. Use [[https://apps.apple.com/us/app/termiu
 - Use C-g as Escape:
 #+begin_src bash
   (global-set-key                   (kbd "C-g")      'flykeys-command-mode-activate)
-  (add-hook 'flykeys-command-mode-activate-hook      'deactivate-mark)  
+  (add-hook 'flykeys-command-mode-activate-hook      'deactivate-mark)
 #+end_src
 
 - Use 【:】 as leader to bind combinations to candidates keys:
 #+begin_src bash
   (define-key flykeys-command-map (kbd ":")          'flykeys-leader-key-map)
-#+end_src  
+#+end_src
 
 [[mobile-s50.png]]
 
@@ -315,4 +345,8 @@ Highly recommend portable lightweight keyboard:
   ;; use C-g as escape
   (global-set-key                 (kbd "C-g")        'flykeys-command-mode-activate)
   (add-hook 'flykeys-command-mode-activate-hook      'deactivate-mark)
+  #+end_src
+- Programmer Engram layout on Emacs level
+  #+begin_src elisp
+  (toggle-qwerty-to-programmer-engram)
   #+end_src
