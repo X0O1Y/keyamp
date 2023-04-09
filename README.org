@@ -96,8 +96,8 @@ Thumb cluster for common keyboard, arrows on home row, number row by touch and m
   - «Home → ⌘ + ⭾» karabiner complex modification OS wide: [[home2cmdtab.json]]
 - 【Right Command ⌘】 → 【Backspace ⌫】
 - 【Backspace ⌫】 → 【Delete ⌦】
-- 【Right Option】 → 【Home】
-  - «Home → ⌘ + ⭾» karabiner complex modification OS wide: [[home2cmdtab.json]]
+- 【Right Option】 → 【End】
+  - toggle Emacs
 - 【Shift】 to 【Shift Lock】
 - 【Caps Lock】 to 【Esc】
 - 【Esc】 to 【Fn】
