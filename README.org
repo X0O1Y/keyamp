@@ -196,12 +196,6 @@ Emacs in pocket with unicode support. Use [[https://apps.apple.com/us/app/termiu
 (set-keyboard-coding-system 'utf-8)
 #+end_src
 
-- Use C-g as Escape:
-#+begin_src bash
-  (global-set-key                   (kbd "C-g")      'flykeys-command-mode-activate)
-  (add-hook 'flykeys-command-mode-activate-hook      'deactivate-mark)
-#+end_src
-
 - Use 【:】 as leader to bind combinations to candidates keys:
 #+begin_src bash
   (define-key flykeys-command-map (kbd ":")          'flykeys-leader-key-map)
