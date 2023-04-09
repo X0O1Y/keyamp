@@ -1,7 +1,7 @@
 #+title: Emacs and Keyboards
 #+author: Egor Maltsev
 
-Based on [[https://github.com/xegorka/flykeys][flykeys]] and Emacs Mac Port. 
+Based on [[https://github.com/xegorka/flykeys][flykeys]] and Emacs Mac Port.
 
 #+begin_src bash
 # emacs-mac
@@ -31,33 +31,60 @@ Thumb cluster for common keyboard, arrows on home row, number row by touch and m
 - Hack 【Escape】 for GUI only: allows to activate command mode, quit minibuffer and cancel selection.
 
 #+begin_src elisp
-(when (display-graphic-p)
-  (global-set-key                 (kbd "<escape>")   'flykeys-command-mode-activate)
-  (define-key key-translation-map (kbd "<escape>")   (kbd "C-g"))
-  (global-set-key                 (kbd "C-g")        'flykeys-command-mode-activate)
-  (add-hook 'flykeys-command-mode-activate-hook      'deactivate-mark))
+;; 1. <escape> set to flykeys-command-mode-activate in flykeys-shared-map
+;; 2. <escape> set to flykeys-escape in flykeys-command-map
+;; 3. catched tty ESC translates to <escape>
+
+(progn
+  (defun flykeys-escape ()
+    "Hack escape."
+    (interactive)
+    (when (region-active-p)
+      (deactivate-mark))
+    (when (active-minibuffer-window)
+      (abort-recursive-edit)))
+
+  (define-key flykeys-command-map (kbd "<escape>") 'flykeys-escape))
+
+(progn
+  (defvar flykeys-fast-keyseq-timeout 50)
+
+  (defun flykeys-tty-ESC-filter (map)
+    (if (and (equal (this-single-command-keys) [?\e])
+             (sit-for (/ flykeys-fast-keyseq-timeout 1000.0)))
+        [escape] map))
+
+  (defun flykeys-lookup-key (map key)
+    (catch 'found
+      (map-keymap (lambda (k b) (if (equal key k) (throw 'found b))) map)))
+
+  (defun flykeys-catch-tty-ESC ()
+    "Setup key mappings of current terminal to turn a tty's ESC into
+`escape'."
+    (when (memq (terminal-live-p (frame-terminal)) '(t pc))
+      (let ((esc-binding (flykeys-lookup-key input-decode-map ?\e)))
+        (define-key input-decode-map
+          [?\e] `(menu-item "" ,esc-binding :filter flykeys-tty-ESC-filter)))))
+
+  (flykeys-catch-tty-ESC)
+
+  (define-key key-translation-map (kbd "ESC") (kbd "<escape>")))
 #+end_src
 
 - Translate command to control. Basically you need only *single* «control» key for GUI: 【Command ⌘】
   #+begin_src elisp
-(when (string-equal system-type "darwin")
+(when (string-equal system-type "darwin") ; translate command to control
   (setq mac-command-modifier 'super)
-
-  (define-key key-translation-map (kbd "s-a")        (kbd "C-_"))
-  (define-key key-translation-map (kbd "s-<escape>") (kbd "C-<escape>"))
-  (define-key key-translation-map (kbd "s-'")        (kbd "C-t"))
-  (define-key key-translation-map (kbd "s-k")        (kbd "C-v"))
-  (define-key key-translation-map (kbd "s-e")        (kbd "C-d"))
-  (define-key key-translation-map (kbd "s-.")        (kbd "C-h"))
-  (define-key key-translation-map (kbd "s-m")        (kbd "C-,")) ; flyspell-goto-next-error
-  (define-key key-translation-map (kbd "s-f")        (kbd "C-.")) ; flyspell-auto-correct-word
-  (define-key key-translation-map (kbd "s-l")        (kbd "C-u"))
-  (define-key key-translation-map (kbd "s-b")        (kbd "C-q"))
-  (define-key key-translation-map (kbd "s-j")        (kbd "C-c"))
-
-  (global-set-key (kbd "s-<f7>")  'emms-seek-backward-or-previous)
-  (global-set-key (kbd "s-<f8>")  'emms-pause)
-  (global-set-key (kbd "s-<f9>")  'emms-seek-forward-or-next)
+  (define-key key-translation-map (kbd "s-a") (kbd "C-_")) ; insert mode leader key
+  (define-key key-translation-map (kbd "s-'") (kbd "C-t")) ; autocomplete
+  (define-key key-translation-map (kbd "s-k") (kbd "C-v")) ; minibuffer paste
+  (define-key key-translation-map (kbd "s-.") (kbd "C-h")) ; help prefix
+  (define-key key-translation-map (kbd "s-m") (kbd "C-,")) ; flyspell-goto-next-error
+  (define-key key-translation-map (kbd "s-f") (kbd "C-.")) ; flyspell-auto-correct-word
+  (define-key key-translation-map (kbd "s-e") (kbd "C-d")) ; dired cancel rename
+  (define-key key-translation-map (kbd "s-l") (kbd "C-u")) ; universal-argument
+  (define-key key-translation-map (kbd "s-b") (kbd "C-q")) ; quoted-insert
+  (define-key key-translation-map (kbd "s-j") (kbd "C-c")) ; org mode related
   ;;
   )
   #+end_src
@@ -160,7 +187,7 @@ Emacs in pocket with unicode support. Use [[https://apps.apple.com/us/app/termiu
   - Layout file: [[programmer-engram.xkeyboard]]
 
 *** Screen keyboard add-on Termius
-- 【^c】 【ctrl】 【^_】 【^g】 【↑】 【↓】 【←】 【→】
+- 【↑】 【↓】 【^_】 【esc】 【←】 【→】 【ctrl】 【^c】
 
 *** Preferences
 - Set terminal and keyboard coding system to utf-8:
@@ -204,11 +231,6 @@ Emacs in pocket with unicode support. Use [[https://apps.apple.com/us/app/termiu
 (setq flykeys-command-mode-indicator "🟢")
 (setq flykeys-insert-mode-indicator "🟠")
 #+end_src
-
-- Set word wrap
-- Global highlight current line
-- Don't show menu bar
-- Use visual line
 
 * Vimium bindings inspired by [[https://github.com/xegorka/flykeys][flykeys]]
 
@@ -338,14 +360,7 @@ map <backspace>g Vomnibar.activateEditUrl
 
 Highly recommend portable lightweight keyboard:
 - [[https://www.aliexpress.com/i/32837821853.html][AVATTO A20 Portable Leather Folding Mini Bluetooth]] weight 174 g
-  #+begin_src elisp
-  ;; bind C-p to capslock in termius for portable hardware keyboard
-  (global-set-key                 (kbd "C-p")        'flykeys-command-mode-activate)
-  (define-key key-translation-map (kbd "C-p")        (kbd "C-g"))
-  ;; use C-g as escape
-  (global-set-key                 (kbd "C-g")        'flykeys-command-mode-activate)
-  (add-hook 'flykeys-command-mode-activate-hook      'deactivate-mark)
-  #+end_src
+
 - Programmer Engram layout on Emacs level
   #+begin_src elisp
   (toggle-qwerty-to-programmer-engram)
