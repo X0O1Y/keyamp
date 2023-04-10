@@ -28,7 +28,8 @@ Thumb cluster for common keyboard, arrows on home row, number row by touch and m
 
 [[macbook.png]]
 
-- Hack 【Escape】
+- Hack 【[[http://xahlee.info/emacs/misc/xah-fly-keys_esc.html][Escape]]】
+Escape activates command mode in GUI and terminal. Escape activates command mode in minibuffer, second press quits minibuffer. Deactivates mark too.
 
 #+begin_src elisp
 ;; 1. <escape> set to flykeys-command-mode-activate in flykeys-shared-map
@@ -89,7 +90,7 @@ Thumb cluster for common keyboard, arrows on home row, number row by touch and m
   )
   #+end_src
 
-- «⌘ + ijkl → Arrows» karabiner complex modification OS wide: [[cmdijkl2arrows.json]]
+- «⌘ + ijkl → Arrows» [[https://karabiner-elements.pqrs.org/][karabiner]] complex modification OS wide: [[cmdijkl2arrows.json]]
 - 【Fn】 → 【Left Control ^】
 - 【Left Control ^】 → 【Left Option ⌥】
 - 【Left Option ⌥】 → 【Home】
@@ -97,7 +98,7 @@ Thumb cluster for common keyboard, arrows on home row, number row by touch and m
 - 【Right Command ⌘】 → 【Backspace ⌫】
 - 【Backspace ⌫】 → 【Delete ⌦】
 - 【Right Option】 → 【End】
-  - toggle Emacs
+  - toggle Emacs using [[https://qsapp.com/][Quicksilver]]
 - 【Shift】 to 【Shift Lock】
 - 【Caps Lock】 to 【Esc】
 - 【Esc】 to 【Fn】
@@ -129,7 +130,6 @@ Thumb cluster for common keyboard, arrows on home row, number row by touch and m
             (setq xph (concat "	" xph))) ;; note tab char
           xph)
 
-         ;; '(:eval global-mode-string)
          'battery-mode-line-string
          'display-time-string))
 
@@ -355,7 +355,9 @@ map <backspace>g Vomnibar.activateEditUrl
 Highly recommend portable lightweight keyboard:
 - [[https://www.aliexpress.com/i/32837821853.html][AVATTO A20 Portable Leather Folding Mini Bluetooth]] weight 174 g
 
-- Programmer Engram layout on Emacs level
+- Programmer Engram layout
+Toggle translate qwerty layout to programmer engram on Emacs level. Useful when programmer engram layout not available in a different way.
+
   #+begin_src elisp
   (toggle-qwerty-to-programmer-engram)
   #+end_src
