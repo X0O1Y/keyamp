@@ -1,6 +1,7 @@
 #+title: Emacs and Keyboards
 #+author: Egor Maltsev
 
+«Think efficient»
 Based on [[https://github.com/xegorka/flykeys][flykeys]] and Emacs Mac Port.
 
 #+begin_src bash
