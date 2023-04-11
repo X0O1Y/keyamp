@@ -361,3 +361,5 @@ Toggle translate qwerty layout to programmer engram on Emacs level. Useful when 
   #+begin_src elisp
   (toggle-qwerty-to-programmer-engram)
   #+end_src
+
+[[pocket.jpg]]
