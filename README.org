@@ -2,6 +2,7 @@
 #+author: Egor Maltsev
 
 «Think efficient»
+
 Based on [[https://github.com/xegorka/flykeys][flykeys]] and Emacs Mac Port.
 
 #+begin_src bash
@@ -72,41 +73,6 @@ Escape activates command mode in GUI and terminal. Escape activates command mode
 
   (define-key key-translation-map (kbd "ESC") (kbd "<escape>")))
 #+end_src
-
-- Translate command to control. Basically you need only *single* «control» key for GUI: 【Command ⌘】
-  #+begin_src elisp
-(when (string-equal system-type "darwin") ; translate command to control
-  (setq mac-command-modifier 'super)
-  (define-key key-translation-map (kbd "s-a") (kbd "C-_")) ; insert mode leader key
-  (define-key key-translation-map (kbd "s-'") (kbd "C-t")) ; autocomplete
-  (define-key key-translation-map (kbd "s-k") (kbd "C-v")) ; minibuffer paste
-  (define-key key-translation-map (kbd "s-.") (kbd "C-h")) ; help prefix
-  (define-key key-translation-map (kbd "s-m") (kbd "C-,")) ; flyspell-goto-next-error
-  (define-key key-translation-map (kbd "s-f") (kbd "C-.")) ; flyspell-auto-correct-word
-  (define-key key-translation-map (kbd "s-e") (kbd "C-d")) ; dired cancel rename
-  (define-key key-translation-map (kbd "s-l") (kbd "C-u")) ; universal-argument
-  (define-key key-translation-map (kbd "s-b") (kbd "C-q")) ; quoted-insert
-  (define-key key-translation-map (kbd "s-j") (kbd "C-c")) ; org mode related
-  ;;
-  )
-  #+end_src
-
-- «⌘ + ijkl → Arrows» [[https://karabiner-elements.pqrs.org/][karabiner]] complex modification OS wide: [[cmdijkl2arrows.json]]
-- 【Fn】 → 【Left Control ^】
-- 【Left Control ^】 → 【Left Option ⌥】
-- 【Left Option ⌥】 → 【Home】
-  - «Home → ⌘ + ⭾» karabiner complex modification OS wide: [[home2cmdtab.json]]
-- 【Right Command ⌘】 → 【Backspace ⌫】
-- 【Backspace ⌫】 → 【Delete ⌦】
-- 【Right Option】 → 【End】
-  - toggle Emacs using [[https://qsapp.com/][Quicksilver]]
-- 【Shift】 to 【Shift Lock】
-- 【Caps Lock】 to 【Esc】
-- 【Esc】 to 【Fn】
-- 【Left Command ⌘】 modifier instead of 【Fn】 for media keys: [[cmd2media.json]]
-
-- Replace 3 and 8 keycaps with additional F and J ones:
-  - easy to find ‘homing’ key by touch
 
 [[desktop.png]]
 
