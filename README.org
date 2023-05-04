@@ -26,6 +26,7 @@ Below some features how to use it.
 Thumb cluster for common keyboard, arrows on home row, number row by touch and more.
 
 - Karabiner config file: [[karabiner.json]]
+  karabiner - flykeys mode integration via variable!
 - [[http://www.keyboard-layout-editor.com/#/gists/106550cd49793787784ed1b9c9117c3d][Layout]] based on [[https://github.com/xegorka/engram][Engineer Engram]]:
 
 [[macbook.png]]
@@ -148,10 +149,10 @@ Escape activates command mode in GUI and terminal. Escape activates command mode
 Emacs in pocket with unicode support. Use [[https://apps.apple.com/us/app/termius-terminal-ssh-client/id549039908][Termius]] client. Custom keyboard.
 
 *** Custom iOS screen keyboard
-- ABC, Cyrillic and Programmer Engram layouts
+- ABC, Cyrillic and Engineer Engram layouts
   - App Store: [[https://apps.apple.com/us/app/xkeyboard-custom-keyboard/id1440245962][xKeyboard - Custom Keyboard]]
   - Layout file: [[ABC-АБВ.xkeyboard]]
-  - Layout file: [[programmer-engram.xkeyboard]]
+  - Layout file: [[engineer-engram.xkeyboard]]
 
 *** Screen keyboard add-on Termius
 - 【↑】 【↓】 【^_】 【esc】 【←】 【→】 【ctrl】 【^c】
@@ -196,7 +197,7 @@ Emacs in pocket with unicode support. Use [[https://apps.apple.com/us/app/termiu
 * Vimium bindings inspired by [[https://github.com/xegorka/flykeys][flykeys]]
 
 - Complete config file: [[vimium-options.json]]
-- Complete config file: [[vimium-options-programmer-engram.json]]
+- Complete config file: [[vimium-options-engineer-engram.json]]
 - [[http://www.keyboard-layout-editor.com/#/gists/5818428d1d8bcc4f7768d54720e9ef07][Bindings redesign]]:
 [[vimium.png]]
 #+begin_src
@@ -322,11 +323,11 @@ map <backspace>g Vomnibar.activateEditUrl
 Highly recommend portable lightweight keyboard:
 - [[https://www.aliexpress.com/i/32837821853.html][AVATTO A20 Portable Leather Folding Mini Bluetooth]] weight 174 g
 
-- Programmer Engram layout
+- Engineer Engram layout
 Toggle translate qwerty layout to programmer engram on Emacs level. Useful when programmer engram layout not available in a different way.
 
   #+begin_src elisp
-  (toggle-qwerty-to-programmer-engram)
+  (toggle-qwerty-to-engineer-engram)
   #+end_src
 
 [[pocket.jpg]]
