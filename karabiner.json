@@ -9,98 +9,13 @@
         {
             "complex_modifications": {
                 "parameters": {
-                    "basic.simultaneous_threshold_milliseconds": 50,
+                    "basic.simultaneous_threshold_milliseconds": 130,
                     "basic.to_delayed_action_delay_milliseconds": 500,
                     "basic.to_if_alone_timeout_milliseconds": 250,
                     "basic.to_if_held_down_threshold_milliseconds": 250,
                     "mouse_motion_to_scroll.speed": 100
                 },
                 "rules": [
-                    {
-                        "description": "q",
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Emacs$"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "insert mode activated",
-                                        "type": "variable_if",
-                                        "value": 0
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "q",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "parameters": {
-                                    "basic.to_if_alone_timeout_milliseconds": 250,
-                                    "basic.to_if_held_down_threshold_milliseconds": 250
-                                },
-                                "to_if_alone": [
-                                    {
-                                        "key_code": "q"
-                                    }
-                                ],
-                                "to_if_held_down": [
-                                    {
-                                        "key_code": "quote",
-                                        "modifiers": [
-                                            "left_control"
-                                        ],
-                                        "repeat": false
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "w",
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Emacs$"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "insert mode activated",
-                                        "type": "variable_if",
-                                        "value": 0
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "w",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "parameters": {
-                                    "basic.to_if_alone_timeout_milliseconds": 250,
-                                    "basic.to_if_held_down_threshold_milliseconds": 250
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "w"
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
                     {
                         "description": "e",
                         "manipulators": [
@@ -130,13 +45,20 @@
                                     "basic.to_if_alone_timeout_milliseconds": 250,
                                     "basic.to_if_held_down_threshold_milliseconds": 250
                                 },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "e"
+                                    }
+                                ],
                                 "to_if_alone": [
                                     {
+                                        "halt": true,
                                         "key_code": "e"
                                     }
                                 ],
                                 "to_if_held_down": [
                                     {
+                                        "halt": true,
                                         "key_code": "r",
                                         "modifiers": [
                                             "left_control"
@@ -177,8 +99,14 @@
                                     "basic.to_if_alone_timeout_milliseconds": 250,
                                     "basic.to_if_held_down_threshold_milliseconds": 250
                                 },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "r"
+                                    }
+                                ],
                                 "to_if_alone": [
                                     {
+                                        "halt": true,
                                         "key_code": "r"
                                     }
                                 ],
@@ -187,6 +115,7 @@
                                         "key_code": "spacebar"
                                     },
                                     {
+                                        "halt": true,
                                         "key_code": "r",
                                         "repeat": false
                                     }
@@ -224,8 +153,14 @@
                                     "basic.to_if_alone_timeout_milliseconds": 250,
                                     "basic.to_if_held_down_threshold_milliseconds": 250
                                 },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "t"
+                                    }
+                                ],
                                 "to_if_alone": [
                                     {
+                                        "halt": true,
                                         "key_code": "t"
                                     }
                                 ],
@@ -234,6 +169,7 @@
                                         "key_code": "spacebar"
                                     },
                                     {
+                                        "halt": true,
                                         "key_code": "t",
                                         "repeat": false
                                     }
@@ -271,8 +207,14 @@
                                     "basic.to_if_alone_timeout_milliseconds": 250,
                                     "basic.to_if_held_down_threshold_milliseconds": 250
                                 },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "y"
+                                    }
+                                ],
                                 "to_if_alone": [
                                     {
+                                        "halt": true,
                                         "key_code": "y"
                                     }
                                 ],
@@ -281,6 +223,7 @@
                                         "key_code": "spacebar"
                                     },
                                     {
+                                        "halt": true,
                                         "key_code": "y",
                                         "repeat": false
                                     }
@@ -318,8 +261,14 @@
                                     "basic.to_if_alone_timeout_milliseconds": 250,
                                     "basic.to_if_held_down_threshold_milliseconds": 250
                                 },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "u"
+                                    }
+                                ],
                                 "to_if_alone": [
                                     {
+                                        "halt": true,
                                         "key_code": "u"
                                     }
                                 ],
@@ -328,6 +277,7 @@
                                         "key_code": "spacebar"
                                     },
                                     {
+                                        "halt": true,
                                         "key_code": "u",
                                         "repeat": false
                                     }
@@ -365,13 +315,20 @@
                                     "basic.to_if_alone_timeout_milliseconds": 250,
                                     "basic.to_if_held_down_threshold_milliseconds": 250
                                 },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "i"
+                                    }
+                                ],
                                 "to_if_alone": [
                                     {
+                                        "halt": true,
                                         "key_code": "i"
                                     }
                                 ],
                                 "to_if_held_down": [
                                     {
+                                        "halt": true,
                                         "key_code": "up_arrow",
                                         "repeat": false
                                     }
@@ -409,8 +366,14 @@
                                     "basic.to_if_alone_timeout_milliseconds": 250,
                                     "basic.to_if_held_down_threshold_milliseconds": 250
                                 },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "o"
+                                    }
+                                ],
                                 "to_if_alone": [
                                     {
+                                        "halt": true,
                                         "key_code": "o"
                                     }
                                 ],
@@ -422,6 +385,7 @@
                                         "key_code": "o"
                                     },
                                     {
+                                        "halt": true,
                                         "key_code": "spacebar",
                                         "repeat": false
                                     }
@@ -459,8 +423,14 @@
                                     "basic.to_if_alone_timeout_milliseconds": 250,
                                     "basic.to_if_held_down_threshold_milliseconds": 250
                                 },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "p"
+                                    }
+                                ],
                                 "to_if_alone": [
                                     {
+                                        "halt": true,
                                         "key_code": "p"
                                     }
                                 ],
@@ -469,6 +439,7 @@
                                         "key_code": "spacebar"
                                     },
                                     {
+                                        "halt": true,
                                         "key_code": "p",
                                         "repeat": false
                                     }
@@ -506,8 +477,14 @@
                                     "basic.to_if_alone_timeout_milliseconds": 250,
                                     "basic.to_if_held_down_threshold_milliseconds": 250
                                 },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "a"
+                                    }
+                                ],
                                 "to_if_alone": [
                                     {
+                                        "halt": true,
                                         "key_code": "a"
                                     }
                                 ],
@@ -516,6 +493,7 @@
                                         "key_code": "spacebar"
                                     },
                                     {
+                                        "halt": true,
                                         "key_code": "a",
                                         "repeat": false
                                     }
@@ -553,8 +531,14 @@
                                     "basic.to_if_alone_timeout_milliseconds": 250,
                                     "basic.to_if_held_down_threshold_milliseconds": 250
                                 },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "s"
+                                    }
+                                ],
                                 "to_if_alone": [
                                     {
+                                        "halt": true,
                                         "key_code": "s"
                                     }
                                 ],
@@ -563,6 +547,7 @@
                                         "key_code": "spacebar"
                                     },
                                     {
+                                        "halt": true,
                                         "key_code": "s",
                                         "repeat": false
                                     }
@@ -600,13 +585,20 @@
                                     "basic.to_if_alone_timeout_milliseconds": 200,
                                     "basic.to_if_held_down_threshold_milliseconds": 200
                                 },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "d"
+                                    }
+                                ],
                                 "to_if_alone": [
                                     {
+                                        "halt": true,
                                         "key_code": "d"
                                     }
                                 ],
                                 "to_if_held_down": [
                                     {
+                                        "halt": true,
                                         "key_code": "j",
                                         "modifiers": [
                                             "left_control"
@@ -647,8 +639,14 @@
                                     "basic.to_if_alone_timeout_milliseconds": 250,
                                     "basic.to_if_held_down_threshold_milliseconds": 250
                                 },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "f"
+                                    }
+                                ],
                                 "to_if_alone": [
                                     {
+                                        "halt": true,
                                         "key_code": "f"
                                     }
                                 ],
@@ -657,6 +655,7 @@
                                         "key_code": "spacebar"
                                     },
                                     {
+                                        "halt": true,
                                         "key_code": "f",
                                         "repeat": false
                                     }
@@ -694,8 +693,14 @@
                                     "basic.to_if_alone_timeout_milliseconds": 250,
                                     "basic.to_if_held_down_threshold_milliseconds": 250
                                 },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "g"
+                                    }
+                                ],
                                 "to_if_alone": [
                                     {
+                                        "halt": true,
                                         "key_code": "g"
                                     }
                                 ],
@@ -704,6 +709,7 @@
                                         "key_code": "spacebar"
                                     },
                                     {
+                                        "halt": true,
                                         "key_code": "g",
                                         "repeat": false
                                     }
@@ -741,8 +747,14 @@
                                     "basic.to_if_alone_timeout_milliseconds": 250,
                                     "basic.to_if_held_down_threshold_milliseconds": 250
                                 },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "h"
+                                    }
+                                ],
                                 "to_if_alone": [
                                     {
+                                        "halt": true,
                                         "key_code": "h"
                                     }
                                 ],
@@ -751,6 +763,7 @@
                                         "key_code": "spacebar"
                                     },
                                     {
+                                        "halt": true,
                                         "key_code": "h",
                                         "repeat": false
                                     }
@@ -788,13 +801,20 @@
                                     "basic.to_if_alone_timeout_milliseconds": 200,
                                     "basic.to_if_held_down_threshold_milliseconds": 250
                                 },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "j"
+                                    }
+                                ],
                                 "to_if_alone": [
                                     {
+                                        "halt": true,
                                         "key_code": "j"
                                     }
                                 ],
                                 "to_if_held_down": [
                                     {
+                                        "halt": true,
                                         "key_code": "left_arrow",
                                         "repeat": false
                                     }
@@ -832,8 +852,14 @@
                                     "basic.to_if_alone_timeout_milliseconds": 200,
                                     "basic.to_if_held_down_threshold_milliseconds": 200
                                 },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "k"
+                                    }
+                                ],
                                 "to_if_alone": [
                                     {
+                                        "halt": true,
                                         "key_code": "k"
                                     }
                                 ],
@@ -849,6 +875,7 @@
                                         "key_code": "k"
                                     },
                                     {
+                                        "halt": true,
                                         "key_code": "k"
                                     }
                                 ],
@@ -885,13 +912,20 @@
                                     "basic.to_if_alone_timeout_milliseconds": 250,
                                     "basic.to_if_held_down_threshold_milliseconds": 250
                                 },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "l"
+                                    }
+                                ],
                                 "to_if_alone": [
                                     {
+                                        "halt": true,
                                         "key_code": "l"
                                     }
                                 ],
                                 "to_if_held_down": [
                                     {
+                                        "halt": true,
                                         "key_code": "right_arrow",
                                         "repeat": false
                                     }
@@ -929,8 +963,14 @@
                                     "basic.to_if_alone_timeout_milliseconds": 250,
                                     "basic.to_if_held_down_threshold_milliseconds": 250
                                 },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "semicolon"
+                                    }
+                                ],
                                 "to_if_alone": [
                                     {
+                                        "halt": true,
                                         "key_code": "semicolon"
                                     }
                                 ],
@@ -939,6 +979,7 @@
                                         "key_code": "spacebar"
                                     },
                                     {
+                                        "halt": true,
                                         "key_code": "semicolon",
                                         "repeat": false
                                     }
@@ -976,8 +1017,14 @@
                                     "basic.to_if_alone_timeout_milliseconds": 250,
                                     "basic.to_if_held_down_threshold_milliseconds": 250
                                 },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "quote"
+                                    }
+                                ],
                                 "to_if_alone": [
                                     {
+                                        "halt": true,
                                         "key_code": "quote"
                                     }
                                 ],
@@ -986,6 +1033,7 @@
                                         "key_code": "spacebar"
                                     },
                                     {
+                                        "halt": true,
                                         "key_code": "quote",
                                         "repeat": false
                                     }
@@ -1023,8 +1071,14 @@
                                     "basic.to_if_alone_timeout_milliseconds": 250,
                                     "basic.to_if_held_down_threshold_milliseconds": 250
                                 },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "z"
+                                    }
+                                ],
                                 "to_if_alone": [
                                     {
+                                        "halt": true,
                                         "key_code": "z"
                                     }
                                 ],
@@ -1036,6 +1090,7 @@
                                         ]
                                     },
                                     {
+                                        "halt": true,
                                         "key_code": "a",
                                         "modifiers": [
                                             "control"
@@ -1076,8 +1131,14 @@
                                     "basic.to_if_alone_timeout_milliseconds": 250,
                                     "basic.to_if_held_down_threshold_milliseconds": 250
                                 },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "x"
+                                    }
+                                ],
                                 "to_if_alone": [
                                     {
+                                        "halt": true,
                                         "key_code": "x"
                                     }
                                 ],
@@ -1086,6 +1147,7 @@
                                         "key_code": "spacebar"
                                     },
                                     {
+                                        "halt": true,
                                         "key_code": "x",
                                         "repeat": false
                                     }
@@ -1123,8 +1185,14 @@
                                     "basic.to_if_alone_timeout_milliseconds": 250,
                                     "basic.to_if_held_down_threshold_milliseconds": 250
                                 },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "c"
+                                    }
+                                ],
                                 "to_if_alone": [
                                     {
+                                        "halt": true,
                                         "key_code": "c"
                                     }
                                 ],
@@ -1133,6 +1201,7 @@
                                         "key_code": "spacebar"
                                     },
                                     {
+                                        "halt": true,
                                         "key_code": "c",
                                         "repeat": false
                                     }
@@ -1170,13 +1239,20 @@
                                     "basic.to_if_alone_timeout_milliseconds": 250,
                                     "basic.to_if_held_down_threshold_milliseconds": 250
                                 },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "v"
+                                    }
+                                ],
                                 "to_if_alone": [
                                     {
+                                        "halt": true,
                                         "key_code": "v"
                                     }
                                 ],
                                 "to_if_held_down": [
                                     {
+                                        "halt": true,
                                         "key_code": "p",
                                         "modifiers": [
                                             "control"
@@ -1217,8 +1293,14 @@
                                     "basic.to_if_alone_timeout_milliseconds": 250,
                                     "basic.to_if_held_down_threshold_milliseconds": 250
                                 },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "b"
+                                    }
+                                ],
                                 "to_if_alone": [
                                     {
+                                        "halt": true,
                                         "key_code": "b"
                                     }
                                 ],
@@ -1227,6 +1309,7 @@
                                         "key_code": "spacebar"
                                     },
                                     {
+                                        "halt": true,
                                         "key_code": "b",
                                         "repeat": false
                                     }
@@ -1264,8 +1347,14 @@
                                     "basic.to_if_alone_timeout_milliseconds": 250,
                                     "basic.to_if_held_down_threshold_milliseconds": 250
                                 },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "n"
+                                    }
+                                ],
                                 "to_if_alone": [
                                     {
+                                        "halt": true,
                                         "key_code": "n"
                                     }
                                 ],
@@ -1274,6 +1363,7 @@
                                         "key_code": "spacebar"
                                     },
                                     {
+                                        "halt": true,
                                         "key_code": "n",
                                         "repeat": false
                                     }
@@ -1311,8 +1401,14 @@
                                     "basic.to_if_alone_timeout_milliseconds": 250,
                                     "basic.to_if_held_down_threshold_milliseconds": 250
                                 },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "m"
+                                    }
+                                ],
                                 "to_if_alone": [
                                     {
+                                        "halt": true,
                                         "key_code": "m"
                                     }
                                 ],
@@ -1321,6 +1417,7 @@
                                         "key_code": "spacebar"
                                     },
                                     {
+                                        "halt": true,
                                         "key_code": "m",
                                         "repeat": false
                                     }
@@ -1358,8 +1455,14 @@
                                     "basic.to_if_alone_timeout_milliseconds": 250,
                                     "basic.to_if_held_down_threshold_milliseconds": 250
                                 },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "comma"
+                                    }
+                                ],
                                 "to_if_alone": [
                                     {
+                                        "halt": true,
                                         "key_code": "comma"
                                     }
                                 ],
@@ -1371,6 +1474,7 @@
                                         "key_code": "comma"
                                     },
                                     {
+                                        "halt": true,
                                         "key_code": "c",
                                         "repeat": false
                                     }
@@ -1408,8 +1512,14 @@
                                     "basic.to_if_alone_timeout_milliseconds": 250,
                                     "basic.to_if_held_down_threshold_milliseconds": 250
                                 },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "slash"
+                                    }
+                                ],
                                 "to_if_alone": [
                                     {
+                                        "halt": true,
                                         "key_code": "slash"
                                     }
                                 ],
@@ -1421,6 +1531,7 @@
                                         "key_code": "slash"
                                     },
                                     {
+                                        "halt": true,
                                         "key_code": "r",
                                         "repeat": false
                                     }
@@ -1458,8 +1569,14 @@
                                     "basic.to_if_alone_timeout_milliseconds": 250,
                                     "basic.to_if_held_down_threshold_milliseconds": 250
                                 },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "3"
+                                    }
+                                ],
                                 "to_if_alone": [
                                     {
+                                        "halt": true,
                                         "key_code": "3"
                                     }
                                 ],
@@ -1468,6 +1585,7 @@
                                         "key_code": "spacebar"
                                     },
                                     {
+                                        "halt": true,
                                         "key_code": "3",
                                         "repeat": false
                                     }
@@ -1505,8 +1623,14 @@
                                     "basic.to_if_alone_timeout_milliseconds": 250,
                                     "basic.to_if_held_down_threshold_milliseconds": 250
                                 },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "4"
+                                    }
+                                ],
                                 "to_if_alone": [
                                     {
+                                        "halt": true,
                                         "key_code": "4"
                                     }
                                 ],
@@ -1515,6 +1639,7 @@
                                         "key_code": "spacebar"
                                     },
                                     {
+                                        "halt": true,
                                         "key_code": "4",
                                         "repeat": false
                                     }
@@ -1552,8 +1677,14 @@
                                     "basic.to_if_alone_timeout_milliseconds": 250,
                                     "basic.to_if_held_down_threshold_milliseconds": 250
                                 },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "6"
+                                    }
+                                ],
                                 "to_if_alone": [
                                     {
+                                        "halt": true,
                                         "key_code": "6"
                                     }
                                 ],
@@ -1562,6 +1693,7 @@
                                         "key_code": "spacebar"
                                     },
                                     {
+                                        "halt": true,
                                         "key_code": "6",
                                         "repeat": false
                                     }
@@ -1599,8 +1731,14 @@
                                     "basic.to_if_alone_timeout_milliseconds": 250,
                                     "basic.to_if_held_down_threshold_milliseconds": 250
                                 },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "9"
+                                    }
+                                ],
                                 "to_if_alone": [
                                     {
+                                        "halt": true,
                                         "key_code": "9"
                                     }
                                 ],
@@ -1609,42 +1747,9 @@
                                         "key_code": "spacebar"
                                     },
                                     {
+                                        "halt": true,
                                         "key_code": "9",
                                         "repeat": false
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "spacebar",
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Emacs$"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "insert mode activated",
-                                        "type": "variable_if",
-                                        "value": 0
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "spacebar",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "spacebar"
                                     }
                                 ],
                                 "type": "basic"
@@ -1680,8 +1785,14 @@
                                     "basic.to_if_alone_timeout_milliseconds": 250,
                                     "basic.to_if_held_down_threshold_milliseconds": 250
                                 },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "backslash"
+                                    }
+                                ],
                                 "to_if_alone": [
                                     {
+                                        "halt": true,
                                         "key_code": "backslash"
                                     }
                                 ],
@@ -1690,6 +1801,7 @@
                                         "key_code": "spacebar"
                                     },
                                     {
+                                        "halt": true,
                                         "key code": "backslash",
                                         "repeat": false
                                     }
@@ -1723,13 +1835,20 @@
                                         ]
                                     }
                                 },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "return_or_enter"
+                                    }
+                                ],
                                 "to_if_alone": [
                                     {
+                                        "halt": true,
                                         "key_code": "return_or_enter"
                                     }
                                 ],
                                 "to_if_held_down": [
                                     {
+                                        "halt": true,
                                         "key_code": "return_or_enter",
                                         "modifiers": [
                                             "control"
@@ -1761,13 +1880,20 @@
                                         ]
                                     }
                                 },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "return_or_enter"
+                                    }
+                                ],
                                 "to_if_alone": [
                                     {
+                                        "halt": true,
                                         "key_code": "return_or_enter"
                                     }
                                 ],
                                 "to_if_held_down": [
                                     {
+                                        "halt": true,
                                         "key_code": "k",
                                         "modifiers": [
                                             "left_control"
@@ -1791,176 +1917,25 @@
                                         ]
                                     }
                                 },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "tab"
+                                    }
+                                ],
                                 "to_if_alone": [
                                     {
+                                        "halt": true,
                                         "key_code": "tab"
                                     }
                                 ],
                                 "to_if_held_down": [
                                     {
+                                        "halt": true,
                                         "key_code": "spacebar",
                                         "modifiers": [
                                             "command"
                                         ],
                                         "repeat": false
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "delete_or_backspace",
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Emacs$"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "insert mode activated",
-                                        "type": "variable_if",
-                                        "value": 0
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "left_command",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to_if_alone": [
-                                    {
-                                        "key_code": "delete_or_backspace"
-                                    }
-                                ],
-                                "to_if_held_down": [
-                                    {
-                                        "key_code": "delete_or_backspace",
-                                        "modifiers": [
-                                            "control"
-                                        ],
-                                        "repeat": false
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Emacs$"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "insert mode activated",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "left_command",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to_if_alone": [
-                                    {
-                                        "key_code": "delete_or_backspace"
-                                    }
-                                ],
-                                "to_if_held_down": [
-                                    {
-                                        "key_code": "b",
-                                        "modifiers": [
-                                            "left_shift",
-                                            "left_control"
-                                        ],
-                                        "repeat": false
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "left_command pressed",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "left_command",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "delete_or_backspace"
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Emacs$"
-                                        ],
-                                        "type": "frontmost_application_unless"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "left_command",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "set_variable": {
-                                            "name": "left_command pressed",
-                                            "value": 1
-                                        }
-                                    },
-                                    {
-                                        "key_code": "left_command"
-                                    }
-                                ],
-                                "to_delayed_action": {
-                                    "to_if_canceled": [
-                                        {
-                                            "set_variable": {
-                                                "name": "left_command pressed",
-                                                "value": 0
-                                            }
-                                        }
-                                    ],
-                                    "to_if_invoked": [
-                                        {
-                                            "set_variable": {
-                                                "name": "left_command pressed",
-                                                "value": 0
-                                            }
-                                        }
-                                    ]
-                                },
-                                "to_if_alone": [
-                                    {
-                                        "key_code": "delete_or_backspace"
                                     }
                                 ],
                                 "type": "basic"
@@ -2348,6 +2323,38 @@
                         ]
                     },
                     {
+                        "description": "f6",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "f6"
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "display_brightness_decrement"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "f7",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "f7"
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "display_brightness_increment"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
                         "description": "f8",
                         "manipulators": [
                             {
@@ -2551,7 +2558,7 @@
                         ]
                     },
                     {
-                        "description": "ijkl to arrows when command hold",
+                        "description": "arrows",
                         "manipulators": [
                             {
                                 "from": {
@@ -2628,12 +2635,7 @@
                                     }
                                 ],
                                 "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "ijkl to arrows when finger on trackpad",
-                        "manipulators": [
+                            },
                             {
                                 "conditions": [
                                     {
@@ -2729,9 +2731,207 @@
                         ]
                     },
                     {
-                        "description": "page_up & page_down. home & end if hold",
+                        "description": "q",
                         "manipulators": [
                             {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Emacs$"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 0
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "q",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "parameters": {
+                                    "basic.to_if_alone_timeout_milliseconds": 250,
+                                    "basic.to_if_held_down_threshold_milliseconds": 250
+                                },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "q"
+                                    }
+                                ],
+                                "to_if_alone": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "q"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "w",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Emacs$"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 0
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "w",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "parameters": {
+                                    "basic.to_if_alone_timeout_milliseconds": 250,
+                                    "basic.to_if_held_down_threshold_milliseconds": 250
+                                },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "w"
+                                    }
+                                ],
+                                "to_if_alone": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "w"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "page_up",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Emacs$"
+                                        ],
+                                        "type": "frontmost_application_unless"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "page_up",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to_if_alone": [
+                                    {
+                                        "key_code": "page_up"
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "key_code": "home"
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Emacs$"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 0
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "page_up",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to_if_alone": [
+                                    {
+                                        "key_code": "page_up"
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "key_code": "home"
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Emacs$"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "page_up",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to_if_alone": [
+                                    {
+                                        "key_code": "left_arrow"
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "key_code": "home"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "page_down",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Emacs$"
+                                        ],
+                                        "type": "frontmost_application_unless"
+                                    }
+                                ],
                                 "from": {
                                     "key_code": "page_down",
                                     "modifiers": {
@@ -2753,8 +2953,21 @@
                                 "type": "basic"
                             },
                             {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Emacs$"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 0
+                                    }
+                                ],
                                 "from": {
-                                    "key_code": "page_up",
+                                    "key_code": "page_down",
                                     "modifiers": {
                                         "optional": [
                                             "any"
@@ -2763,12 +2976,46 @@
                                 },
                                 "to_if_alone": [
                                     {
-                                        "key_code": "page_up"
+                                        "key_code": "page_down"
                                     }
                                 ],
                                 "to_if_held_down": [
                                     {
-                                        "key_code": "home"
+                                        "key_code": "end"
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Emacs$"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "page_down",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to_if_alone": [
+                                    {
+                                        "key_code": "right_arrow"
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "key_code": "end"
                                     }
                                 ],
                                 "type": "basic"
@@ -2776,15 +3023,171 @@
                         ]
                     },
                     {
-                        "description": "f6",
+                        "description": "delete_or_backspace",
                         "manipulators": [
                             {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Emacs$"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 0
+                                    }
+                                ],
                                 "from": {
-                                    "key_code": "f6"
+                                    "key_code": "left_command",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "delete_or_backspace"
+                                    }
+                                ],
+                                "to_if_alone": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "delete_or_backspace"
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "delete_or_backspace",
+                                        "modifiers": [
+                                            "control"
+                                        ],
+                                        "repeat": false
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Emacs$"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "left_command",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "delete_or_backspace"
+                                    }
+                                ],
+                                "to_if_alone": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "delete_or_backspace"
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "b",
+                                        "modifiers": [
+                                            "left_shift",
+                                            "left_control"
+                                        ],
+                                        "repeat": false
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "left_command pressed",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "left_command",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
                                 },
                                 "to": [
                                     {
-                                        "key_code": "display_brightness_decrement"
+                                        "key_code": "delete_or_backspace"
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Emacs$"
+                                        ],
+                                        "type": "frontmost_application_unless"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "left_command",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "set_variable": {
+                                            "name": "left_command pressed",
+                                            "value": 1
+                                        }
+                                    },
+                                    {
+                                        "key_code": "left_command"
+                                    }
+                                ],
+                                "to_delayed_action": {
+                                    "to_if_canceled": [
+                                        {
+                                            "set_variable": {
+                                                "name": "left_command pressed",
+                                                "value": 0
+                                            }
+                                        }
+                                    ],
+                                    "to_if_invoked": [
+                                        {
+                                            "set_variable": {
+                                                "name": "left_command pressed",
+                                                "value": 0
+                                            }
+                                        }
+                                    ]
+                                },
+                                "to_if_alone": [
+                                    {
+                                        "key_code": "delete_or_backspace"
                                     }
                                 ],
                                 "type": "basic"
@@ -2792,15 +3195,51 @@
                         ]
                     },
                     {
-                        "description": "f7",
+                        "description": "spacebar",
                         "manipulators": [
                             {
-                                "from": {
-                                    "key_code": "f7"
-                                },
-                                "to": [
+                                "conditions": [
                                     {
-                                        "key_code": "display_brightness_increment"
+                                        "file_paths": [
+                                            "/Emacs$"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 0
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "spacebar",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "spacebar"
+                                    }
+                                ],
+                                "to_if_alone": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "spacebar"
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "key_code": "spacebar"
+                                    },
+                                    {
+                                        "key_code": "spacebar"
+                                    },
+                                    {
+                                        "halt": true,
+                                        "key_code": "spacebar"
                                     }
                                 ],
                                 "type": "basic"
