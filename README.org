@@ -188,10 +188,15 @@ Emacs in pocket with unicode support. Use [[https://apps.apple.com/us/app/termiu
 
 - Nord theme for Emacs and Termius. Works worthy for GUI and terminal.
 - Color mode indicators
-  - Useful for terminal without i-beam cursor shape
+  - Useful for terminal without i-beam cursor shape and for remote machines
 #+begin_src elisp
 (setq flykeys-command-mode-indicator "🟢")
 (setq flykeys-insert-mode-indicator "🟠")
+
+(defun repeat-message-short (msg)
+  "Display short repeat message as a function name with blue indicator."
+  (message (concat "🔵 " (substring msg 18))))
+(setq repeat-message-function 'repeat-message-short)
 #+end_src
 
 * Vimium bindings inspired by [[https://github.com/xegorka/flykeys][flykeys]]
@@ -200,6 +205,7 @@ Emacs in pocket with unicode support. Use [[https://apps.apple.com/us/app/termiu
 - Complete config file: [[vimium-options-engineer-engram.json]]
 - [[http://www.keyboard-layout-editor.com/#/gists/5818428d1d8bcc4f7768d54720e9ef07][Bindings redesign]]:
 [[vimium.png]]
+
 #+begin_src
 # unmap defaults
 unmap W
@@ -244,38 +250,38 @@ unmap ]]
 unmap `
 
 # right hand mappings
-map i scrollPageUp
-map k scrollPageDown
-map j previousTab
-map l nextTab
-map h goBack
-map ; goForward
-map m scrollUp
-map , scrollDown
-map . toggleMuteTab
-map / showHelp
-map y Vomnibar.activateTabSelection
-map o Vomnibar.activateInNewTab
-map p visitPreviousTab
-map u Vomnibar.activateInNewTab keyword=d
-map n enterFindMode
-map b Vomnibar.activateBookmarksInNewTab
+map d scrollPageUp
+map t scrollPageDown
+map h previousTab
+map s nextTab
+map . goBack
+map n goForward
+map r scrollUp
+map m scrollDown
+map f toggleMuteTab
+map p showHelp
+map " Vomnibar.activateTabSelection
+map w Vomnibar.activateInNewTab
+map q visitPreviousTab
+map l Vomnibar.activateInNewTab keyword=b
+map ? enterFindMode
+map - Vomnibar.activateBookmarksInNewTab
 
 # left hand mappings
-map q togglePinTab
-map w reload hard
-map e scrollPageUp
-map r reload
-map t enterVisualMode
-map a focusInput
-map s LinkHints.activateModeToOpenInNewTab
-map d scrollPageDown
-map f LinkHints.activateMode
-map g createTab
-map z restoreTab
+map b togglePinTab
+map y reload hard
+map o scrollPageUp
+map u reload
+map ' enterVisualMode
+map c focusInput
+map i LinkHints.activateModeToOpenInNewTab
+map e scrollPageDown
+map a LinkHints.activateMode
+map , createTab
+map g restoreTab
 map x removeTab
-map c copyCurrentUrl
-map v duplicateTab
+map j copyCurrentUrl
+map k duplicateTab
 
 # scroll with arrows too
 map <up> scrollUp
@@ -286,34 +292,39 @@ map <right> performFind
 map <left> performBackwardsFind
 
 # navigate paginated site
-map [ goPrevious
-map ] goNext
+map z goPrevious
+map { goNext
 
-map 1 LinkHints.activateMode action=focus
-map 2 LinkHints.activateMode action=hover
-map 3 moveTabLeft
-map 4 moveTabRight
-map 7 firstTab
-map 8 lastTab
-map 9 scrollFullPageUp
-map 0 scrollFullPageDown
+map @ LinkHints.activateMode action=focus
+map & LinkHints.activateMode action=hover
+map / moveTabLeft
+map $ moveTabRight
+map * firstTab
+map = lastTab
+map # scrollFullPageUp
+map % scrollFullPageDown
 
-map <space><enter> focusInput
+map <space> scrollPageDown
+
+map <backspace><backspace> LinkHints.activateMode
 map <backspace><enter> focusInput
-map <space>h scrollToTop
-map <backspace>h scrollToTop
-map <space>n scrollToBottom
+map <backspace>. scrollToTop
 map <backspace>n scrollToBottom
-map <space>s LinkHints.activateModeToOpenInNewTab count=99
-map <backspace>s LinkHints.activateModeToOpenInNewTab count=99
-map <space>c LinkHints.activateModeToCopyLinkUrl
-map <backspace>c LinkHints.activateModeToCopyLinkUrl
-map <space>v LinkHints.activateModeToDownloadLink
-map <backspace>v LinkHints.activateModeToDownloadLik
-map <space>f LinkHints.activateModeToOpenInNewForegroundTab
-map <backspace>f LinkHints.activateModeToOpenInNewForegroundTab
-map <space>g Vomnibar.activateEditUrl
-map <backspace>g Vomnibar.activateEditUrl
+map <backspace>i LinkHints.activateModeToOpenInNewTab count=99
+map <backspace>j LinkHints.activateModeToCopyLinkUrl
+map <backspace>k LinkHints.activateModeToDownloadLik
+map <backspace>a LinkHints.activateModeToOpenInNewForegroundTab
+map <backspace>, Vomnibar.activateEditUrl
+
+map <enter><backspace> LinkHints.activateMode
+map <enter><enter> focusInput
+map <enter>. scrollToTop
+map <enter>n scrollToBottom
+map <enter>i LinkHints.activateModeToOpenInNewTab count=99
+map <enter>j LinkHints.activateModeToCopyLinkUrl
+map <enter>k LinkHints.activateModeToDownloadLik
+map <enter>a LinkHints.activateModeToOpenInNewForegroundTab
+map <enter>, Vomnibar.activateEditUrl
 #+end_src
 
 * More keyboards and options
@@ -324,7 +335,7 @@ Highly recommend portable lightweight keyboard:
 - [[https://www.aliexpress.com/i/32837821853.html][AVATTO A20 Portable Leather Folding Mini Bluetooth]] weight 174 g
 
 - Engineer Engram layout
-Toggle translate qwerty layout to programmer engram on Emacs level. Useful when programmer engram layout not available in a different way.
+Toggle translate qwerty layout to engineer engram on Emacs level. Useful when engineer engram layout not available in a different way.
 
   #+begin_src elisp
   (toggle-qwerty-to-engineer-engram)
