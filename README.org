@@ -155,7 +155,7 @@ Emacs in pocket with unicode support. Use [[https://apps.apple.com/us/app/termiu
   - Layout file: [[engineer-engram.xkeyboard]]
 
 *** Screen keyboard add-on Termius
-- 【↑】 【↓】 【^_】 【esc】 【←】 【→】 【ctrl】 【^c】
+- 【↑】 【↓】 【ctrl】 【esc】 【^_】 【←】 【→】 【^c】
 
 *** Preferences
 - Set terminal and keyboard coding system to utf-8:
@@ -170,6 +170,10 @@ Emacs in pocket with unicode support. Use [[https://apps.apple.com/us/app/termiu
 #+end_src
 
 [[mobile-s50.png]]
+
+- Use [[https://github.com/justbur/emacs-which-key][which-key]] for binding completion:
+
+[[mobile-s50-2.png]]
 
 - Emacs in tmux - instant remote access. Put in .bashrc:
 #+begin_src bash
