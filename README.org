@@ -326,7 +326,7 @@ map <enter>, Vomnibar.activateEditUrl
 [[advantage2.png]]
 
 Highly recommend portable lightweight keyboard:
-- [[https://www.aliexpress.com/i/32837821853.html][AVATTO A20 Portable Leather Folding Mini Bluetooth]] weight 174 g
+- [[https://www.aliexpress.com/i/32837821853.html][AVATTO A20 Portable Leather Folding Mini Bluetooth]] weight 139 g
 
 - Engineer Engram layout
 Toggle translate qwerty layout to engineer engram on Emacs level. Useful when engineer engram layout not available in a different way.
