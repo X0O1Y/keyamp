@@ -2712,99 +2712,6 @@
                         ]
                     },
                     {
-                        "description": "tab",
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "input source state",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "tab",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to_after_key_up": [
-                                    {
-                                        "key_code": "tab"
-                                    }
-                                ],
-                                "to_if_alone": [
-                                    {
-                                        "halt": true,
-                                        "key_code": "tab"
-                                    }
-                                ],
-                                "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "input source state",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "halt": true,
-                                        "repeat": false,
-                                        "select_input_source": {
-                                            "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.programmerengram–qwerty⌘"
-                                        }
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "input source state",
-                                        "type": "variable_if",
-                                        "value": 0
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "tab",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to_after_key_up": [
-                                    {
-                                        "key_code": "tab"
-                                    }
-                                ],
-                                "to_if_alone": [
-                                    {
-                                        "halt": true,
-                                        "key_code": "tab"
-                                    }
-                                ],
-                                "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "input source state",
-                                            "value": 1
-                                        }
-                                    },
-                                    {
-                                        "halt": true,
-                                        "repeat": false,
-                                        "select_input_source": {
-                                            "input_source_id": "com.apple.keylayout.RussianWin"
-                                        }
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
                         "description": "escape",
                         "manipulators": [
                             {
@@ -4169,6 +4076,93 @@
                                 "to_if_alone": [
                                     {
                                         "key_code": "delete_or_backspace"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "tab",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "input_sources": [
+                                            {
+                                                "input_source_id": "com.apple.keylayout.RussianWin"
+                                            }
+                                        ],
+                                        "type": "input_source_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "tab",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "tab"
+                                    }
+                                ],
+                                "to_if_alone": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "tab"
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "repeat": false,
+                                        "select_input_source": {
+                                            "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram–qwerty⌘"
+                                        }
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "input_sources": [
+                                            {
+                                                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram–qwerty⌘"
+                                            }
+                                        ],
+                                        "type": "input_source_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "tab",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "tab"
+                                    }
+                                ],
+                                "to_if_alone": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "tab"
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "repeat": false,
+                                        "select_input_source": {
+                                            "input_source_id": "com.apple.keylayout.RussianWin"
+                                        }
                                     }
                                 ],
                                 "type": "basic"
