@@ -13,7 +13,7 @@ defaults write org.gnu.Emacs TransparentTitleBar DARK
 defaults write org.gnu.Emacs HideDocumentIcon YES
 #+end_src
 
-Below some features how to use it.
+Below features how to use it.
 
 ** Features
 - Macbook efficient setup
@@ -30,6 +30,8 @@ Thumb cluster for common keyboard, arrows on home row, number row by touch and m
 - [[http://www.keyboard-layout-editor.com/#/gists/106550cd49793787784ed1b9c9117c3d][Layout]] based on [[https://github.com/xegorka/engram][Engineer Engram]]:
 
 [[macbook.png]]
+
+- Automatic Russian layout support for command bindings
 
 - Hack 【[[http://xahlee.info/emacs/misc/xah-fly-keys_esc.html][Escape]]】
 Escape activates command mode in GUI and terminal. Escape activates command mode in minibuffer, second press quits minibuffer. Deactivates mark too.
@@ -75,49 +77,49 @@ Escape activates command mode in GUI and terminal. Escape activates command mode
   (define-key key-translation-map (kbd "ESC") (kbd "<escape>")))
 #+end_src
 
-- Automatic Russian layout support for command bindings
-
 [[desktop.png]]
 
-*** Title bar
+*** Titlebar
 #+begin_src elisp
-(add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
+  (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
 
-(when (display-graphic-p)
-  (setq display-time-default-load-average nil)
-  (setq battery-mode-line-format "%b%p%%   ")
-  (setq display-time-format "%a %e %b %R")
-  (setq ns-use-proxy-icon nil)
+  (when (display-graphic-p)
+    (setq display-time-default-load-average nil
+          battery-mode-line-format "%b%p%%   "
+          display-time-format "%a %e %b %R"
+          ns-use-proxy-icon nil
+          frame-title-format
+          (list
+           ;; align rigth spacer
+           (let ((xph "") (xcount 110))
+             (dotimes (_ xcount) (setq xph (concat "	" xph))) xph)
 
-  (setq frame-title-format
-        (list
-         '(:eval (substring (mu4e--modeline-string) 0 2))
+           ;; new messages count
+           '(:eval (if (and (fboundp 'mu4e--modeline-string)
+                            (> (length (mu4e--modeline-string)) 1))
+                       (concat (substring (mu4e--modeline-string) 0 2) "			")
+                     "					"))
 
-         (let ((xph "")
-              (xmu4e (length '(:eval (mu4e--modeline-string))))
-              (xcount 120))
-           (dotimes (_ (- xcount xmu4e)) ;; placeholder
-            (setq xph (concat "	" xph))) ;; note tab char
-          xph)
+           ;; battery percentage and datetime
+           'battery-mode-line-string
+           'display-time-string
+           "			"
 
-         'battery-mode-line-string
-         'display-time-string))
-
-  (display-battery-mode 1)
-  (display-time-mode 1))
+           ;; mode indicator
+           'mode-line-front-space
+           ))
+    (display-battery-mode 1)
+    (display-time-mode    1))
 #+end_src
 
-*** Modeline
+*** Modeline on top
 #+begin_src elisp
-;; modeline
-(setq-default mode-line-format nil) ; on top
-(setq-default header-line-format
+(setq-default mode-line-format nil
+              header-line-format
               (list
                " "
-
-               ;; flykeys mode indicator
-               (when t
-                 '(:eval (propertize mode-line-front-space 'face '(:height 125))))
+               ;; mode indicator
+               (when terminal-p 'mode-line-front-space)
 
                ;; buffer name
                '(:eval (propertize " %b"
@@ -139,13 +141,14 @@ Escape activates command mode in GUI and terminal. Escape activates command mode
                '(:eval (propertize
                         " " 'display
                         `((space :align-to
-                                 (- (+ right right-fringe right-margin) ,
-                                    (+ (length (format-mode-line "%l:%c "))
-                                       ))))))
+                                 (- (+ right right-fringe right-margin)
+                                    ,(+ (length (format-mode-line "%l:%c "))))
+                                 ))))
 
-               ;; position
+               ;; position in buffer
                '(:eval (propertize "%l:%c "
                                    'face 'font-lock-builtin-face))))
+
 #+end_src
 
 * iOS setup
@@ -167,11 +170,9 @@ Emacs in pocket with unicode support. Use [[https://apps.apple.com/us/app/termiu
 (set-keyboard-coding-system 'utf-8)
 #+end_src
 
+- Use [[https://github.com/justbur/emacs-which-key][which-key]] for binding completion
+
 [[mobile-s50.png]]
-
-- Use [[https://github.com/justbur/emacs-which-key][which-key]] for binding completion:
-
-[[mobile-s50-2.png]]
 
 - Emacs in tmux over mosh - instant remote access
 #+begin_src bash
@@ -183,14 +184,24 @@ Emacs in pocket with unicode support. Use [[https://apps.apple.com/us/app/termiu
 - Nord theme for Emacs and Termius. Works worthy for GUI and terminal.
 
 - Color mode indicators
-  - Useful for terminal without i-beam cursor shape and for remote machines
 #+begin_src elisp
-(setq flykeys-command-mode-indicator "🟢")
-(setq flykeys-insert-mode-indicator "🟠")
+(defvar flykeys-command-mode-indicator   "🟢"
+  "Character indicating command mode is active.")
+(defvar flykeys-insert-mode-indicator    "🟠"
+  "Character indicating insert mode is active.")
+(defvar flykeys-repeat-command-indicator "🔵"
+  "Character indicating repeat command is active.")
 
-(defun repeat-message-short (msg)
-  "Display short repeat message as a function name with blue indicator."
-  (message (concat (propertize " 🔵 " 'face '(:height 125)) (substring msg 18))))
+(defun flykeys-mode-indicator-update ()
+  "Update mode indicator."
+  (if (eq real-this-command 'repeat)
+      (setq mode-line-front-space flykeys-repeat-command-indicator)
+    (progn
+      (if flykeys-insert-state-p
+          (setq mode-line-front-space flykeys-insert-mode-indicator)
+        (setq mode-line-front-space flykeys-command-mode-indicator)))))
+
+(add-hook 'post-command-hook 'flykeys-mode-indicator-update)
 #+end_src
 
 * Vimium bindings inspired by [[https://github.com/xegorka/flykeys][flykeys]]
@@ -213,6 +224,6 @@ Toggle translate qwerty layout to engineer engram on Emacs level. Useful when en
 
 [[pocket.jpg]]
 
-- Another pocket keyboard:
+- Another AVATTO pocket keyboard:
 
 [[pocket-2.jpg]]
