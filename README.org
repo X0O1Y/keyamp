@@ -155,12 +155,12 @@ Escape activates command mode in GUI and terminal. Escape activates command mode
 
 Emacs in pocket with unicode support. Use [[https://apps.apple.com/us/app/termius-terminal-ssh-client/id549039908][Termius]] client. Custom keyboard.
 
-*** Custom iOS screen keyboard
+*** Custom virtual keyboard
 - Engineer Engram and Russian layouts
   - App Store: [[https://apps.apple.com/us/app/xkeyboard-custom-keyboard/id1440245962][xKeyboard - Custom Keyboard]]
   - Layout file: [[engineer-engram.xkeyboard]]
 
-*** Screen keyboard add-on Termius
+*** Virtual keyboard add-on Termius
 - 【↑】 【↓】 【←】 【→】 【tab】 【del】 【pgUp】 【pgDn】
 
 *** Preferences
