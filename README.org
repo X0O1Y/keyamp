@@ -222,8 +222,5 @@ Toggle translate qwerty layout to engineer engram on Emacs level. Useful when en
   (toggle-qwerty-to-engineer-engram)
   #+end_src
 
-[[pocket.jpg]]
+[[pocket.jpg]] [[pocket-2.jpg]]
 
-- Another AVATTO pocket keyboard:
-
-[[pocket-2.jpg]]
