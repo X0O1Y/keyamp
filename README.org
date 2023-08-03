@@ -169,7 +169,7 @@ Emacs in pocket with unicode support. Use [[https://apps.apple.com/us/app/termiu
 
 - Use [[https://github.com/justbur/emacs-which-key][which-key]] for binding completion
 
-[[file:screenshots/virtual-keyboard.png][virtual-keyboard.png]]
+[[screenshots/virtual-keyboard.png]]
 
 - Emacs in tmux over mosh - instant remote access
 #+begin_src bash
@@ -208,7 +208,7 @@ Emacs in pocket with unicode support. Use [[https://apps.apple.com/us/app/termiu
 * More keyboards and options
 - Kinesis Advantage2 [[http://www.keyboard-layout-editor.com/#/gists/6a1a62133ab9f741589bd556cb946792][layout]] and [[file:layouts/qwerty2.txt][config]]:
 
-[[file:screenshots/advantage2.png][advantage2.png]]
+[[screenshots/advantage2.png]]
 
 Highly recommend portable lightweight keyboard:
 - [[https://www.aliexpress.com/i/32837821853.html][AVATTO A20 Portable Leather Folding Mini Bluetooth]] weight 139 g
