@@ -26,7 +26,7 @@ Thumb cluster for common keyboard, arrows on home row, number row by touch and m
 - [[file:karabiner/karabiner.json][Karabiner]] config file. Emacs mode integration via variable!
 - [[http://www.keyboard-layout-editor.com/#/gists/106550cd49793787784ed1b9c9117c3d][Layout]] based on [[file:layouts/Engram.bundle][Engineer Engram]]:
 
-[[file:screenshots/iso-keyboard.png][iso-keyboard]]
+[[.screenshots/iso-keyboard.png][iso-keyboard.png]]
 
 - Automatic Russian layout support for command bindings
 
