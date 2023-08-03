@@ -1,9 +1,7 @@
-#+title: Emacs and Keyboards
+#+title: Keymap
 #+author: Egor Maltsev
 
-«Think efficient»
-
-Based on [[https://github.com/xegorka/flykeys][flykeys]] and Emacs Mac Port.
+Think efficient based on [[file:packages/keymap.el][keymap]] for Emacs Mac Port.
 
 #+begin_src bash
 # emacs-mac
@@ -18,18 +16,17 @@ Below features how to use it.
 ** Features
 - Macbook efficient setup
 - iOS setup
-- [[https://github.com/philc/vimium][Vimium]] bindings inspired by [[https://github.com/xegorka/flykeys][flykeys]]
-- More keyboards and options
+- [[https://github.com/philc/vimium][Vimium]] bindings
+- More keyboards
 
 * Macbook efficient setup
 
 Thumb cluster for common keyboard, arrows on home row, number row by touch and more.
 
-- Karabiner config file: [[karabiner.json]]
-  karabiner - flykeys mode integration via variable!
-- [[http://www.keyboard-layout-editor.com/#/gists/106550cd49793787784ed1b9c9117c3d][Layout]] based on [[https://github.com/xegorka/engram][Engineer Engram]]:
+- [[file:karabiner/karabiner.json][Karabiner]] config file. Emacs mode integration via variable!
+- [[http://www.keyboard-layout-editor.com/#/gists/106550cd49793787784ed1b9c9117c3d][Layout]] based on [[file:layouts/Engram.bundle][Engineer Engram]]:
 
-[[macbook.png]]
+[[file:screenshots/iso-keyboard.png][iso-keyboard]]
 
 - Automatic Russian layout support for command bindings
 
@@ -37,12 +34,12 @@ Thumb cluster for common keyboard, arrows on home row, number row by touch and m
 Escape activates command mode in GUI and terminal. Escape activates command mode in minibuffer, second press quits minibuffer. Deactivates mark too.
 
 #+begin_src elisp
-;; 1. <escape> set to flykeys-command-mode-activate in flykeys-shared-map
-;; 2. <escape> set to flykeys-escape in flykeys-command-map
+;; 1. <escape> set to keymap-command-mode-activate in keymap-shared-map
+;; 2. <escape> set to keymap-escape in keymap-command-map
 ;; 3. catched tty ESC translates to <escape>
 
 (progn
-  (defun flykeys-escape ()
+  (defun keymap-escape ()
     "Hack escape."
     (interactive)
     (when (region-active-p)
@@ -50,34 +47,34 @@ Escape activates command mode in GUI and terminal. Escape activates command mode
     (when (active-minibuffer-window)
       (abort-recursive-edit)))
 
-  (define-key flykeys-command-map (kbd "<escape>") 'flykeys-escape))
+  (define-key keymap-command-map (kbd "<escape>") 'keymap-escape))
 
 (progn
-  (defvar flykeys-fast-keyseq-timeout 50)
+  (defvar keymap-fast-keyseq-timeout 50)
 
-  (defun flykeys-tty-ESC-filter (map)
+  (defun keymap-tty-ESC-filter (map)
     (if (and (equal (this-single-command-keys) [?\e])
-             (sit-for (/ flykeys-fast-keyseq-timeout 1000.0)))
+             (sit-for (/ keymap-fast-keyseq-timeout 1000.0)))
         [escape] map))
 
-  (defun flykeys-lookup-key (map key)
+  (defun keymap-lookup-key (map key)
     (catch 'found
       (map-keymap (lambda (k b) (if (equal key k) (throw 'found b))) map)))
 
-  (defun flykeys-catch-tty-ESC ()
+  (defun keymap-catch-tty-ESC ()
     "Setup key mappings of current terminal to turn a tty's ESC into
 `escape'."
     (when (memq (terminal-live-p (frame-terminal)) '(t pc))
-      (let ((esc-binding (flykeys-lookup-key input-decode-map ?\e)))
+      (let ((esc-binding (keymap-lookup-key input-decode-map ?\e)))
         (define-key input-decode-map
-          [?\e] `(menu-item "" ,esc-binding :filter flykeys-tty-ESC-filter)))))
+          [?\e] `(menu-item "" ,esc-binding :filter keymap-tty-ESC-filter)))))
 
-  (flykeys-catch-tty-ESC)
+  (keymap-catch-tty-ESC)
 
   (define-key key-translation-map (kbd "ESC") (kbd "<escape>")))
 #+end_src
 
-[[desktop.png]]
+[[file:screenshots/desktop.png][desktop]]
 
 *** Titlebar
 #+begin_src elisp
@@ -158,7 +155,7 @@ Emacs in pocket with unicode support. Use [[https://apps.apple.com/us/app/termiu
 *** Custom virtual keyboard
 - Engineer Engram and Russian layouts
   - App Store: [[https://apps.apple.com/us/app/xkeyboard-custom-keyboard/id1440245962][xKeyboard - Custom Keyboard]]
-  - Layout file: [[engineer-engram.xkeyboard]]
+  - Layout file: [[file:layouts/engineer-engram.xkeyboard][engineer-engram.xkeyboard]]
 
 *** Virtual keyboard add-on Termius
 - 【↑】 【↓】 【←】 【→】 【tab】 【del】 【pgUp】 【pgDn】
@@ -172,7 +169,7 @@ Emacs in pocket with unicode support. Use [[https://apps.apple.com/us/app/termiu
 
 - Use [[https://github.com/justbur/emacs-which-key][which-key]] for binding completion
 
-[[mobile-s50.png]]
+[[file:screenshots/virtual-keyboard.png][virtual-keyboard.png]]
 
 - Emacs in tmux over mosh - instant remote access
 #+begin_src bash
@@ -185,32 +182,33 @@ Emacs in pocket with unicode support. Use [[https://apps.apple.com/us/app/termiu
 
 - Color mode indicators
 #+begin_src elisp
-(defvar flykeys-command-mode-indicator   "🟢"
+(defvar keymap-command-mode-indicator   "🟢"
   "Character indicating command mode is active.")
-(defvar flykeys-insert-mode-indicator    "🟠"
+(defvar keymap-insert-mode-indicator    "🟠"
   "Character indicating insert mode is active.")
-(defvar flykeys-repeat-command-indicator "🔵"
+(defvar keymap-repeat-command-indicator "🔵"
   "Character indicating repeat command is active.")
 
-(defun flykeys-mode-indicator-update ()
+(defun keymap-mode-indicator-update ()
   "Update mode indicator."
   (if (eq real-this-command 'repeat)
-      (setq mode-line-front-space flykeys-repeat-command-indicator)
+      (setq mode-line-front-space keymap-repeat-command-indicator)
     (progn
-      (if flykeys-insert-state-p
-          (setq mode-line-front-space flykeys-insert-mode-indicator)
-        (setq mode-line-front-space flykeys-command-mode-indicator)))))
+      (if keymap-insert-state-p
+          (setq mode-line-front-space keymap-insert-mode-indicator)
+        (setq mode-line-front-space keymap-command-mode-indicator)))))
 
-(add-hook 'post-command-hook 'flykeys-mode-indicator-update)
+(add-hook 'post-command-hook 'keymap-mode-indicator-update)
 #+end_src
 
-* Vimium bindings inspired by [[https://github.com/xegorka/flykeys][flykeys]]
+* Vimium bindings
 
-- Complete config file: [[vimium-options-engineer-engram.json]]
+- Complete config file: [[file:layouts/virtual-keyboard.png][vimium-options-engineer-engram.json]]
 
 * More keyboards and options
-- Kinesis Advantage2 [[http://www.keyboard-layout-editor.com/#/gists/6a1a62133ab9f741589bd556cb946792][layout]] and [[qwerty2.txt][config]]:
-[[advantage2.png]]
+- Kinesis Advantage2 [[http://www.keyboard-layout-editor.com/#/gists/6a1a62133ab9f741589bd556cb946792][layout]] and [[file:layouts/qwerty2.txt][config]]:
+
+[[file:screenshots/advantage2.png][advantage2.png]]
 
 Highly recommend portable lightweight keyboard:
 - [[https://www.aliexpress.com/i/32837821853.html][AVATTO A20 Portable Leather Folding Mini Bluetooth]] weight 139 g
@@ -222,5 +220,4 @@ Toggle translate qwerty layout to engineer engram on Emacs level. Useful when en
   (toggle-qwerty-to-engineer-engram)
   #+end_src
 
-[[pocket.jpg]] [[pocket-2.jpg]]
-
+[[file:screenshots/pocket.jpg][pocket.jpg]] [[file:screenshots/pocket-2.jpg][pocket-2.jpg]]

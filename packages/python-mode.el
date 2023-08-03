@@ -1,7 +1,7 @@
-;;; python-mode.el --- Major mode for editing Python code. -*- coding: utf-8; lexical-binding: t; -*-
+;;; python-mode.el --- major mode for editing Python code -*- coding: utf-8; lexical-binding: t; -*-
 
 ;; Author: Egor Maltsev <x0o1@ya.ru>
-;; URL: https://github.com/xegorka/keyboard/
+;; URL: https://github.com/xEgorka/keymap/
 ;; Version: 0.7
 ;; Created: Mar 2023
 
@@ -9,10 +9,10 @@
 
 ;;; Commentary:
 
-;; Major mode for editing Python code. Based on GNU Emacs python and
+;; Major mode for editing Python code. Based on GNU Emacs Python and
 ;; xah-python-mode. Implements sane indentation and integration with
 ;; elpy. Installation:
-;; 
+;;
 ;; (require 'python-mode)
 
 
@@ -43,15 +43,15 @@ If buffer is a file, it is saved first."
           (cond
            ((string-equal python-formatter-tool "black")
             (shell-command
-             (format "%s %s -q" python-formatter-black-path xbuffFileName)))
+             (format "%s %s -q" python-formatter-black-path xbuffFileName))
+            (message ""))
            ((string-equal python-formatter-tool "yapf")
             (shell-command
              (format "%s -i %s" python-formatter-yapf-path xbuffFileName)))
            (t
             (user-error "`python-formatter-tool' should be “black” or “yapf”.")))
           (revert-buffer t t t))
-      (python-format-region (point-min) (point-max))))
-  )
+      (python-format-region (point-min) (point-max)))))
 
 (defun python-format-region (Begin End)
   "Format the current region file using `python-formatter-tool'.
@@ -320,6 +320,8 @@ Return true if found, else false."
     ("ll" "from typing import List, Optional\n▮"                   python--ahf)
     ("cc" "from collections import Counter\n▮"                     python--ahf)
 
+    ("ListNode" "ListNode(▮)"                                      python--ahf)
+
     ("float" "float('inf')")
     ("rr" "return")
     ("imp" "import")
@@ -346,10 +348,11 @@ Return true if found, else false."
         emacs-major-mode-leader-key
       (kbd "TAB"))
     python-leader-map)
-  (define-key python-leader-map (kbd "TAB")        'python-indent-or-complete)
-  (define-key python-mode-map   (kbd "<backtab>")  'python-de-indent)
-  (define-key python-leader-map (kbd "f")          'python-format-buffer)
-  (define-key python-mode-map   (kbd "<return>")   'python-return-and-indent))
+  (define-key python-mode-map (kbd "<backtab>") 'python-de-indent)
+  (define-key python-mode-map (kbd "<return>")  'python-return-and-indent)
+
+  (define-key python-leader-map (kbd "TAB")     'python-indent-or-complete)
+  (define-key python-leader-map (kbd "a")       'python-format-buffer))
 
 
 ;; flymake integration

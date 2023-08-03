@@ -245,6 +245,40 @@
                                         "type": "frontmost_application_if"
                                     },
                                     {
+                                        "name": "left_command pressed",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "left_command",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "delete_or_backspace"
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Emacs$"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
                                         "value": 1
@@ -261,8 +295,32 @@
                                 "to_after_key_up": [
                                     {
                                         "key_code": "delete_or_backspace"
+                                    },
+                                    {
+                                        "set_variable": {
+                                            "name": "left_command pressed",
+                                            "value": 1
+                                        }
                                     }
                                 ],
+                                "to_delayed_action": {
+                                    "to_if_canceled": [
+                                        {
+                                            "set_variable": {
+                                                "name": "left_command pressed",
+                                                "value": 0
+                                            }
+                                        }
+                                    ],
+                                    "to_if_invoked": [
+                                        {
+                                            "set_variable": {
+                                                "name": "left_command pressed",
+                                                "value": 0
+                                            }
+                                        }
+                                    ]
+                                },
                                 "to_if_held_down": [
                                     {
                                         "halt": true,
@@ -5812,6 +5870,43 @@
                                     }
                                 ],
                                 "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Emacs$"
+                                        ],
+                                        "type": "frontmost_application_unless"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "return_or_enter",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "return_or_enter"
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "key_code": "m",
+                                        "modifiers": [
+                                            "command"
+                                        ]
+                                    },
+                                    {
+                                        "halt": true,
+                                        "repeat": false,
+                                        "shell_command": "open -a /opt/homebrew/Cellar/emacs-mac/emacs-28.2-mac-9.1/Emacs.app"
+                                    }
+                                ],
+                                "type": "basic"
                             }
                         ]
                     },
@@ -5871,6 +5966,12 @@
                                     {
                                         "set_variable": {
                                             "name": "leader pressed",
+                                            "value": 0
+                                        }
+                                    },
+                                    {
+                                        "set_variable": {
+                                            "name": "left_command pressed",
                                             "value": 0
                                         }
                                     },
@@ -5955,6 +6056,12 @@
                                 "to": [
                                     {
                                         "key_code": "escape"
+                                    },
+                                    {
+                                        "set_variable": {
+                                            "name": "left_command pressed",
+                                            "value": 0
+                                        }
                                     }
                                 ],
                                 "type": "basic"
@@ -5981,7 +6088,7 @@
                                 ],
                                 "to_if_alone": [
                                     {
-                                        "shell_command": "open -a Terminal"
+                                        "shell_command": "open -a Termius"
                                     }
                                 ],
                                 "type": "basic"
@@ -6019,61 +6126,12 @@
                         "description": "f1",
                         "manipulators": [
                             {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Emacs$"
-                                        ],
-                                        "type": "frontmost_application_unless"
-                                    }
-                                ],
                                 "from": {
-                                    "key_code": "f1",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
+                                    "key_code": "f1"
                                 },
-                                "to_after_key_up": [
+                                "to": [
                                     {
-                                        "shell_command": "open -a /opt/homebrew/Cellar/emacs-mac/emacs-28.2-mac-9.1/Emacs.app && /opt/homebrew/Cellar/emacs-mac/emacs-28.2-mac-9.1/bin/emacsclient --no-wait --eval '(find-novel)'"
-                                    }
-                                ],
-                                "to_if_held_down": [
-                                    {
-                                        "halt": true,
-                                        "shell_command": "open -a VLC"
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Emacs$"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "f1",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to_after_key_up": [
-                                    {
-                                        "key_code": "f1"
-                                    }
-                                ],
-                                "to_if_held_down": [
-                                    {
-                                        "halt": true,
-                                        "shell_command": "open -a VLC"
+                                        "key_code": "display_brightness_decrement"
                                     }
                                 ],
                                 "type": "basic"
@@ -6084,91 +6142,12 @@
                         "description": "f2",
                         "manipulators": [
                             {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Emacs$"
-                                        ],
-                                        "type": "frontmost_application_unless"
-                                    }
-                                ],
                                 "from": {
-                                    "key_code": "f2",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
+                                    "key_code": "f2"
                                 },
-                                "to_after_key_up": [
+                                "to": [
                                     {
-                                        "shell_command": "open -a /opt/homebrew/Cellar/emacs-mac/emacs-28.2-mac-9.1/Emacs.app && /opt/homebrew/Cellar/emacs-mac/emacs-28.2-mac-9.1/bin/emacsclient --no-wait --eval '(mu4e-or-inbox)'"
-                                    }
-                                ],
-                                "to_if_held_down": [
-                                    {
-                                        "key_code": "x"
-                                    },
-                                    {
-                                        "key_code": "8"
-                                    },
-                                    {
-                                        "key_code": "e"
-                                    },
-                                    {
-                                        "key_code": "3"
-                                    },
-                                    {
-                                        "key_code": "1",
-                                        "modifiers": [
-                                            "left_shift"
-                                        ]
-                                    },
-                                    {
-                                        "key_code": "w"
-                                    },
-                                    {
-                                        "key_code": "f"
-                                    },
-                                    {
-                                        "key_code": "h"
-                                    },
-                                    {
-                                        "key_code": "m"
-                                    },
-                                    {
-                                        "halt": true,
-                                        "key_code": "r"
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Emacs$"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "f2",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to_after_key_up": [
-                                    {
-                                        "key_code": "f2"
-                                    }
-                                ],
-                                "to_if_held_down": [
-                                    {
-                                        "halt": true,
-                                        "shell_command": "echo x0o1@ya.ru | pbcopy"
+                                        "key_code": "display_brightness_increment"
                                     }
                                 ],
                                 "type": "basic"
@@ -6197,7 +6176,7 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "shell_command": "open -a /opt/homebrew/Cellar/emacs-mac/emacs-28.2-mac-9.1/Emacs.app && /opt/homebrew/Cellar/emacs-mac/emacs-28.2-mac-9.1/bin/emacsclient --no-wait --eval '(describe-pass)'"
+                                        "shell_command": "open -a /opt/homebrew/Cellar/emacs-mac/emacs-28.2-mac-9.1/Emacs.app && /opt/homebrew/Cellar/emacs-mac/emacs-28.2-mac-9.1/bin/emacsclient --no-wait --eval '(pass)'"
                                     }
                                 ],
                                 "to_if_held_down": [
@@ -6299,13 +6278,40 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "shell_command": "open -a /opt/homebrew/Cellar/emacs-mac/emacs-28.2-mac-9.1/Emacs.app && /opt/homebrew/Cellar/emacs-mac/emacs-28.2-mac-9.1/bin/emacsclient --no-wait --eval '(find-org-agenda-file)'"
+                                        "shell_command": "open -a /opt/homebrew/Cellar/emacs-mac/emacs-28.2-mac-9.1/Emacs.app && /opt/homebrew/Cellar/emacs-mac/emacs-28.2-mac-9.1/bin/emacsclient --no-wait --eval '(tasks)'"
                                     }
                                 ],
                                 "to_if_held_down": [
                                     {
                                         "halt": true,
-                                        "shell_command": "open -a /opt/homebrew/Cellar/emacs-mac/emacs-28.2-mac-9.1/Emacs.app && /opt/homebrew/Cellar/emacs-mac/emacs-28.2-mac-9.1/bin/emacsclient --no-wait --eval '(org-agenda-a)'"
+                                        "shell_command": "open -a /opt/homebrew/Cellar/emacs-mac/emacs-28.2-mac-9.1/Emacs.app && /opt/homebrew/Cellar/emacs-mac/emacs-28.2-mac-9.1/bin/emacsclient --no-wait --eval '(agenda)'"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "f5",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "f5",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "f5"
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "shell_command": "open -a Preview"
                                     }
                                 ],
                                 "type": "basic"
@@ -6316,12 +6322,61 @@
                         "description": "f6",
                         "manipulators": [
                             {
-                                "from": {
-                                    "key_code": "f6"
-                                },
-                                "to": [
+                                "conditions": [
                                     {
-                                        "key_code": "display_brightness_decrement"
+                                        "file_paths": [
+                                            "/Emacs$"
+                                        ],
+                                        "type": "frontmost_application_unless"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f6",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to_after_key_up": [
+                                    {
+                                        "shell_command": "open -a /opt/homebrew/Cellar/emacs-mac/emacs-28.2-mac-9.1/Emacs.app && /opt/homebrew/Cellar/emacs-mac/emacs-28.2-mac-9.1/bin/emacsclient --no-wait --eval '(books)'"
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "shell_command": "open -a VLC"
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Emacs$"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f6",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "f6"
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "shell_command": "open -a VLC"
                                     }
                                 ],
                                 "type": "basic"
@@ -6332,12 +6387,91 @@
                         "description": "f7",
                         "manipulators": [
                             {
-                                "from": {
-                                    "key_code": "f7"
-                                },
-                                "to": [
+                                "conditions": [
                                     {
-                                        "key_code": "display_brightness_increment"
+                                        "file_paths": [
+                                            "/Emacs$"
+                                        ],
+                                        "type": "frontmost_application_unless"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f7",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to_after_key_up": [
+                                    {
+                                        "shell_command": "open -a /opt/homebrew/Cellar/emacs-mac/emacs-28.2-mac-9.1/Emacs.app && /opt/homebrew/Cellar/emacs-mac/emacs-28.2-mac-9.1/bin/emacsclient --no-wait --eval '(email)'"
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "key_code": "x"
+                                    },
+                                    {
+                                        "key_code": "8"
+                                    },
+                                    {
+                                        "key_code": "e"
+                                    },
+                                    {
+                                        "key_code": "3"
+                                    },
+                                    {
+                                        "key_code": "1",
+                                        "modifiers": [
+                                            "left_shift"
+                                        ]
+                                    },
+                                    {
+                                        "key_code": "w"
+                                    },
+                                    {
+                                        "key_code": "f"
+                                    },
+                                    {
+                                        "key_code": "h"
+                                    },
+                                    {
+                                        "key_code": "m"
+                                    },
+                                    {
+                                        "halt": true,
+                                        "key_code": "r"
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Emacs$"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f7",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "f7"
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "shell_command": "echo x0o1@ya.ru | pbcopy"
                                     }
                                 ],
                                 "type": "basic"
@@ -6417,9 +6551,15 @@
                                         ]
                                     }
                                 },
-                                "to": [
+                                "to_after_key_up": [
                                     {
-                                        "shell_command": "open -a 'Brave Browser'"
+                                        "shell_command": "open -a Karabiner-Elements"
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "shell_command": "open -a Karabiner-EventViewer"
                                     }
                                 ],
                                 "type": "basic"
@@ -6438,15 +6578,9 @@
                                         ]
                                     }
                                 },
-                                "to_after_key_up": [
+                                "to": [
                                     {
-                                        "shell_command": "open -a Karabiner-Elements"
-                                    }
-                                ],
-                                "to_if_held_down": [
-                                    {
-                                        "halt": true,
-                                        "shell_command": "open -a Karabiner-EventViewer"
+                                        "shell_command": "open -a 'Brave Browser'"
                                     }
                                 ],
                                 "type": "basic"
