@@ -220,4 +220,5 @@ Toggle translate qwerty layout to engineer engram on Emacs level. Useful when en
   (toggle-qwerty-to-engineer-engram)
   #+end_src
 
-[[file:screenshots/pocket.jpg][pocket.jpg]] [[file:screenshots/pocket-2.jpg][pocket-2.jpg]]
+[[screenshots/pocket.jpg]] [[screenshots/pocket-2.jpg]]
+
