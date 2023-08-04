@@ -74,7 +74,7 @@ Escape activates command mode in GUI and terminal. Escape activates command mode
   (define-key key-translation-map (kbd "ESC") (kbd "<escape>")))
 #+end_src
 
-[[file:screenshots/desktop.png][desktop]]
+[[screenshots/desktop.png][desktop]]
 
 *** Titlebar
 #+begin_src elisp
