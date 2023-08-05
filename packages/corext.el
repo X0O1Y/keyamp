@@ -4,7 +4,7 @@
 
 (defun get-bounds-of-block ()
   "Return the boundary (START . END) of current block."
-  (let ( xp1 xp2 (xblankRegex "\n[ \t]*\n"))
+  (let (xp1 xp2 (xblankRegex "\n[ \t]*\n"))
     (save-excursion
       (setq xp1 (if (re-search-backward xblankRegex nil 1)
                     (goto-char (match-end 0))
@@ -12,7 +12,7 @@
       (setq xp2 (if (re-search-forward xblankRegex nil 1)
                     (match-beginning 0)
                   (point))))
-    (cons xp1 xp2 )))
+    (cons xp1 xp2)))
 
 (defun get-bounds-of-block-or-region ()
   "If region is active, return its boundary, else same as `get-bounds-of-block'."
@@ -209,7 +209,8 @@ Repeated call will find the next string."
 (defun copy-line-or-region ()
   "Copy current line or selection.
 When called repeatedly, append copy subsequent lines.
-When `universal-argument' is called first, copy whole buffer (respects `narrow-to-region')."
+When `universal-argument' is called first, copy whole buffer
+(respects `narrow-to-region')."
   (interactive)
   (let ((inhibit-field-text-motion nil))
     (if current-prefix-arg
@@ -220,7 +221,7 @@ When `universal-argument' is called first, copy whole buffer (respects `narrow-t
             (copy-region-as-kill (region-beginning) (region-end)))
         (if (eq last-command this-command)
             (if (eobp)
-                (progn )
+                (progn)
               (progn
                 (kill-append "\n" nil)
                 (kill-append
@@ -230,8 +231,8 @@ When `universal-argument' is called first, copy whole buffer (respects `narrow-t
                   (end-of-line)
                   (forward-char))))
           (if (eobp)
-              (if (eq (char-before) 10 )
-                  (progn )
+              (if (eq (char-before) 10)
+                  (progn)
                 (progn
                   (copy-region-as-kill (line-beginning-position) (line-end-position))
                   (end-of-line)))
@@ -307,7 +308,8 @@ When `universal-argument' is called first with a number arg, paste that many tim
           (yank-pop 1)
         (yank)))))
 
-(defconst show-kill-ring-separator "\n\n_____________________________________________________________________________\n\n"
+(defconst show-kill-ring-separator
+  "\n\n_____________________________________________________________________________\n\n"
   "A line divider for `show-kill-ring'.")
 
 (defun show-kill-ring ()
@@ -354,12 +356,8 @@ After this command is called, press <up> or <down> to move. Any other key to exi
     (goto-char xp1)
     (set-transient-map
      (let ((xkmap (make-sparse-keymap)))
-       (define-key xkmap (kbd "<up>")   'move-block-up)
-       (define-key xkmap (kbd "d")      'move-block-up)
-       (define-key xkmap (kbd "ш")      'move-block-up)
-       (define-key xkmap (kbd "<down>") 'move-block-down)
-       (define-key xkmap (kbd "t")      'move-block-down)
-       (define-key xkmap (kbd "л")      'move-block-down)
+       (define-key xkmap [remap previous-line] 'move-block-up)
+       (define-key xkmap [remap next-line]     'move-block-down)
        xkmap))))
 
 (defun move-block-down ()
@@ -391,14 +389,10 @@ After this command is called, press <up> or <down> to move. Any other key to exi
     (transpose-regions xc1 xc2 xn1 xn2)
     (goto-char xn2))
   (set-transient-map
-     (let ((xkmap (make-sparse-keymap)))
-       (define-key xkmap (kbd "<up>")   'move-block-up)
-       (define-key xkmap (kbd "d")      'move-block-up)
-       (define-key xkmap (kbd "ш")      'move-block-up)
-       (define-key xkmap (kbd "<down>") 'move-block-down)
-       (define-key xkmap (kbd "t")      'move-block-down)
-       (define-key xkmap (kbd "л")      'move-block-down)
-       xkmap)))
+   (let ((xkmap (make-sparse-keymap)))
+     (define-key xkmap [remap previous-line] 'move-block-up)
+     (define-key xkmap [remap next-line]     'move-block-down)
+     xkmap)))
 
 (defun move-row-up ()
   "Move row up."
@@ -412,10 +406,8 @@ After this command is called, press <up> or <down> to move. Any other key to exi
           (previous-line))))
   (set-transient-map
    (let ((xkmap (make-sparse-keymap)))
-     (define-key xkmap (kbd "d") 'move-row-up)
-     (define-key xkmap (kbd "ш") 'move-row-up)
-     (define-key xkmap (kbd "t") 'move-row-down)
-     (define-key xkmap (kbd "л") 'move-row-down)
+     (define-key xkmap [remap previous-line] 'move-row-up)
+     (define-key xkmap [remap next-line]     'move-row-down)
      xkmap)))
 
 (defun move-row-down ()
@@ -430,10 +422,8 @@ After this command is called, press <up> or <down> to move. Any other key to exi
           (previous-line))))
   (set-transient-map
    (let ((xkmap (make-sparse-keymap)))
-     (define-key xkmap (kbd "d") 'move-row-up)
-     (define-key xkmap (kbd "ш") 'move-row-up)
-     (define-key xkmap (kbd "t") 'move-row-down)
-     (define-key xkmap (kbd "л") 'move-row-down)
+     (define-key xkmap [remap previous-line] 'move-row-up)
+     (define-key xkmap [remap next-line]     'move-row-down)
      xkmap)))
 
 (defun delete-backward-smart ()
@@ -633,18 +623,21 @@ ToChars is similar, with a special value of \" none \", replace by empty string.
                     (re-search-forward
                      (format "%s\\([^%s]+?\\)%s" xx xx xx)
                      nil t)
-                  (overlay-put (make-overlay (match-beginning 0) (match-end 0)) 'face 'highlight)
+                  (overlay-put (make-overlay
+                                (match-beginning 0) (match-end 0)) 'face 'highlight)
                   (replace-match (concat xtoL "\\1" xtoR) t)))
             (progn
               (progn
                 (goto-char (point-min))
                 (while (search-forward xleft nil t)
-                  (overlay-put (make-overlay (match-beginning 0) (match-end 0)) 'face 'highlight)
+                  (overlay-put (make-overlay
+                                (match-beginning 0) (match-end 0)) 'face 'highlight)
                   (replace-match xtoL t t)))
               (progn
                 (goto-char (point-min))
                 (while (search-forward xright nil t)
-                  (overlay-put (make-overlay (match-beginning 0) (match-end 0)) 'face 'highlight)
+                  (overlay-put (make-overlay
+                                (match-beginning 0) (match-end 0)) 'face 'highlight)
                   (replace-match xtoR t t))))))))))
 
 (defun toggle-letter-case ()
@@ -699,12 +692,14 @@ Always cycle in this order: Init Caps, ALL CAPS, all lower."
         (goto-char (point-min))
         (while (re-search-forward "\\(\\.\\|\\?\\|!\\)[ \n]+ *\\([a-zа-я]\\)" nil 1)
           (upcase-region (match-beginning 2) (match-end 2))
-          (overlay-put (make-overlay (match-beginning 2) (match-end 2)) 'face 'highlight))
+          (overlay-put (make-overlay
+                        (match-beginning 2) (match-end 2)) 'face 'highlight))
         ;; after a blank line, after a bullet, or beginning of buffer
         (goto-char (point-min))
         (while (re-search-forward "\\(\\`\\|• \\|\n\n\\)\\([a-zа-я]\\)" nil 1)
           (upcase-region (match-beginning 2) (match-end 2))
-          (overlay-put (make-overlay (match-beginning 2) (match-end 2)) 'face 'highlight))
+          (overlay-put (make-overlay
+                        (match-beginning 2) (match-end 2)) 'face 'highlight))
         ;; for HTML. first letter after tag
         (when
             (or
@@ -718,7 +713,8 @@ Always cycle in this order: Init Caps, ALL CAPS, all lower."
           (while
               (re-search-forward "\\(<title>[ \n]?\\|<h[1-6]>[ \n]?\\|<p>[ \n]?\\|<li>[ \n]?\\|<dd>[ \n]?\\|<td>[ \n]?\\|<br ?/?>[ \n]?\\|<figcaption>[ \n]?\\)\\([a-zа-я]\\)" nil 1)
             (upcase-region (match-beginning 2) (match-end 2))
-            (overlay-put (make-overlay (match-beginning 2) (match-end 2)) 'face 'highlight))))
+            (overlay-put (make-overlay
+                          (match-beginning 2) (match-end 2)) 'face 'highlight))))
       (goto-char (point-max)))
     (skip-chars-forward " \n\t")))
 
@@ -871,10 +867,11 @@ one space or newline at each step, till no more white space."
 
 (defun toggle-read-novel-mode ()
   "Setup current frame to be suitable for reading long novel/article text.
-• Set frame width to 70
-• Line wrap at word boundaries.
-• Line spacing is increased.
+• Set frame width to 70;
+• Line wrap at word boundaries;
+• Line spacing is increased;
 • Proportional width font is used.
+
 Call again to toggle back."
   (interactive)
   (if (eq (frame-parameter (selected-frame) 'width) 80)
@@ -903,13 +900,14 @@ for short line length."
   ;; whether to compact or uncompact, when this command is called
   ;; again.
 
-  (let ( (xisLongline (if (eq last-command this-command) (get this-command 'longline-p) t))
-         (deactivate-mark nil)
-         xp1 xp2 )
+  (let ((xisLongline
+         (if (eq last-command this-command) (get this-command 'longline-p) t))
+        (deactivate-mark nil)
+        xp1 xp2)
     (let ((xbds (get-bounds-of-block-or-region))) (setq xp1 (car xbds) xp2 (cdr xbds)))
     (if xisLongline
         (fill-region xp1 xp2)
-      (let ((fill-column 99999 ))
+      (let ((fill-column 99999))
         (fill-region xp1 xp2)))
     (put this-command 'longline-p (not xisLongline))))
 
@@ -949,30 +947,37 @@ This command does the inverse of `fill-region'."
       (while (re-search-forward " +" nil 1) (replace-match " "))
       (goto-char (point-max))))
 
-(defun reformat-to-multi-lines ( &optional Begin End MinLength)
+(defun reformat-to-multi-lines (&optional Begin End MinLength)
   "Replace spaces by a newline at ~70 chars, on current block or selection.
 If `universal-argument' is called first, ask user for max width."
   (interactive)
-  (let ( xp1 xp2 xminlen )
-    (setq xminlen (if MinLength MinLength (if current-prefix-arg (prefix-numeric-value current-prefix-arg) fill-column)))
+  (let (xp1 xp2 xminlen)
+    (setq (if MinLength MinLength
+            (if current-prefix-arg
+                (prefix-numeric-value current-prefix-arg)
+              fill-column)))
     (if (and Begin End)
         (setq xp1 Begin xp2 End)
-      (let ((xbds (get-bounds-of-block-or-region))) (setq xp1 (car xbds) xp2 (cdr xbds))))
+      (let ((xbds (get-bounds-of-block-or-region)))
+        (setq xp1 (car xbds) xp2 (cdr xbds))))
     (save-excursion
       (save-restriction
         (narrow-to-region xp1 xp2)
         (goto-char (point-min))
         (while (re-search-forward " +" nil 1)
           (when (> (- (point) (line-beginning-position)) xminlen)
-            (replace-match "\n" )))))))
+            (replace-match "\n")))))))
 
 (defun reformat-lines (&optional Width)
   "Reformat current block or selection into short lines or 1 long line.
-When called for the first time, change to one line. Second call change it to multi-lines. Repeated call toggles.
-If `universal-argument' is called first, ask user to type max length of line. By default, it is 66.
+When called for the first time, change to one line. Second call change
+it to multi-lines. Repeated call toggles.
+If `universal-argument' is called first, ask user to type max length
+of line. By default, it is 66.
 
 Note: this command is different from emacs `fill-region' or `fill-paragraph'.
-This command never adds or delete non-whitespace chars. It only exchange whitespace sequence."
+This command never adds or delete non-whitespace chars. It only
+exchange whitespace sequence."
   (interactive)
 
   ;; This symbol has a property 'is-long-p, the possible values are t
@@ -980,9 +985,15 @@ This command never adds or delete non-whitespace chars. It only exchange whitesp
   ;; compact or uncompact, when this command is called again.
 
   (let (xisLong xwidth xp1 xp2)
-    (setq xwidth (if Width Width (if current-prefix-arg (prefix-numeric-value current-prefix-arg) 66)))
-    (setq xisLong (if (eq last-command this-command) (get this-command 'is-long-p) nil))
-    (let ((xbds (get-bounds-of-block-or-region))) (setq xp1 (car xbds) xp2 (cdr xbds)))
+    (setq xwidth (if Width Width
+                   (if current-prefix-arg
+                       (prefix-numeric-value current-prefix-arg)
+                     66)))
+    (setq xisLong (if (eq last-command this-command)
+                      (get this-command 'is-long-p)
+                    nil))
+    (let ((xbds (get-bounds-of-block-or-region)))
+      (setq xp1 (car xbds) xp2 (cdr xbds)))
     (if current-prefix-arg
         (reformat-to-multi-lines xp1 xp2 xwidth)
       (if xisLong
@@ -1247,10 +1258,13 @@ See also: `escape-quotes'."
         (replace-match "\"" t t)))))
 
 (defun cycle-hyphen-lowline-space (&optional Begin End)
-  "Cycle hyphen/lowline/space chars in selection or inside quote/bracket or line, in that order.
+  "Cycle hyphen/lowline/space chars in selection or inside
+quote/bracket or line, in that order.
+
 The region to work on is by this order:
- 1. If there is a selection, use that.
- 2. If cursor is string quote or any type of bracket, and is within current line, work on that region.
+ 1. If there is a selection, use that;
+ 2. If cursor is string quote or any type of bracket, and is within
+ current line, work on that region;
  3. Else, work on current line."
   (interactive)
   ;; This function sets a property 'state. Possible values are 0 to length of xcharArray.
@@ -1259,7 +1273,9 @@ The region to work on is by this order:
          (xcharArray ["-" "_" " "])
          (xn (length xcharArray))
          (xregionWasActive-p (region-active-p))
-         (xnowState (if (eq last-command this-command) (get 'cycle-hyphen-lowline-space 'state) 0))
+         (xnowState (if (eq last-command this-command)
+                        (get 'cycle-hyphen-lowline-space 'state)
+                      0))
          (xchangeTo (elt xcharArray xnowState)))
     (if (and Begin End)
         (setq xp1 Begin xp2 End)
@@ -1426,17 +1442,19 @@ If there is selection, delete it first."
 
 (defun insert-bracket-pair (LBracket RBracket &optional WrapMethod)
   "Insert brackets around selection, word, at point, and maybe move cursor in between.
+LBracket and RBracket are strings. WrapMethod must be either `line' or
+`block'. `block' means between empty lines.
 
- LBracket and RBracket are strings. WrapMethod must be either `line' or `block'. `block' means between empty lines.
-
-• If there is a an active region, add brackets around region.
-• If WrapMethod is `line', wrap around line.
-• If WrapMethod is `block', wrap around block.
-• if cursor is at beginning of line and its not empty line and contain at least 1 space, wrap around the line.
+• If there is a an active region, add brackets around region;
+• If WrapMethod is `line', wrap around line;
+• If WrapMethod is `block', wrap around block;
+• If cursor is at beginning of line and its not empty line and contain
+  at least 1 space, wrap around the line;
 • If cursor is at end of a word or buffer, one of the following will happen:
  xyz▮ → xyz(▮)
- xyz▮ → (xyz▮)       if in one of the lisp modes.
-• wrap brackets around word if any. e.g. xy▮z → (xyz▮). Or just (▮) "
+ xyz▮ → (xyz▮)
+if in one of the lisp modes;
+• Wrap brackets around word if any. e.g. xy▮z → (xyz▮). Or just (▮)."
   (if (region-active-p)
       (progn
         (let ( (xp1 (region-beginning)) (xp2 (region-end)))
@@ -1757,12 +1775,9 @@ You can override this function to get your idea of “user buffer”."
 “user buffer” is determined by `user-buffer-p'."
   (interactive)
   (next-buffer)
-  (set-transient-map
-   (let ((xkmap (make-sparse-keymap)))
-     (define-key xkmap (kbd "i") 'previous-user-buffer)
-     (define-key xkmap (kbd "ы") 'previous-user-buffer)
-     (define-key xkmap (kbd "a") 'next-user-buffer)
-     (define-key xkmap (kbd "а") 'next-user-buffer)
+  (set-transient-map (let ((xkmap (make-sparse-keymap)))
+     (define-key xkmap [remap open-line] 'previous-user-buffer)
+     (define-key xkmap [remap repeat]    'next-user-buffer)
      xkmap))
   (let ((i 0))
     (while (< i 20)
@@ -1780,10 +1795,8 @@ You can override this function to get your idea of “user buffer”."
   (previous-buffer)
   (set-transient-map
    (let ((xkmap (make-sparse-keymap)))
-     (define-key xkmap (kbd "i") 'previous-user-buffer)
-     (define-key xkmap (kbd "ы") 'previous-user-buffer)
-     (define-key xkmap (kbd "a") 'next-user-buffer)
-     (define-key xkmap (kbd "а") 'next-user-buffer)
+     (define-key xkmap [remap open-line] 'previous-user-buffer)
+     (define-key xkmap [remap repeat]    'next-user-buffer)
      xkmap))
   (let ((i 0))
     (while (< i 20)
@@ -1813,7 +1826,8 @@ It returns the buffer."
     xbuf))
 
 (defvar recently-closed-buffers nil
-  "A alist of recently closed buffers. Each element is (bufferName . filePath). The max number to track is controlled by the variable `recently-closed-buffers-max'.")
+  "A alist of recently closed buffers. Each element is (bufferName . filePath).
+The max number to track is controlled by the variable `recently-closed-buffers-max'.")
 
 (defcustom recently-closed-buffers-max 40
   "The maximum length for `recently-closed-buffers'."
@@ -2193,8 +2207,8 @@ Call `open-last-closed' to open the backup file."
 
 
 (defun search-current-word ()
-  "Call `isearch' on current word or selection.
-“word” here is A to Z, a to z, and hyphen [-] and lowline [_], independent of syntax table."
+  "Call `isearch' on current word or “word” here is A to Z, a to z, and
+hyphen [-] and lowline [_], independent of syntax table."
   (interactive)
   (let (xp1 xp2)
     (if (region-active-p)
@@ -2211,7 +2225,8 @@ Call `open-last-closed' to open the backup file."
     (isearch-mode t)
     (isearch-yank-string (buffer-substring-no-properties xp1 xp2))))
 
-(declare-function w32-shell-execute "w32fns.c" (operation document &optional parameters show-flag)) ; (w32-shell-execute "open" default-directory)
+(declare-function w32-shell-execute "w32fns.c"
+                  (operation document &optional parameters show-flag)) ; (w32-shell-execute "open" default-directory)
 
 (defun show-in-desktop ()
   "Show current file in desktop.
@@ -2225,8 +2240,8 @@ This command can be called when in a file buffer or in `dired'."
                  (if (buffer-file-name) (buffer-file-name) default-directory))))
     (cond
      ((string-equal system-type "windows-nt")
-      (shell-command (format "PowerShell -Command invoke-item '%s'" (expand-file-name default-directory )))
-      )
+      (shell-command (format "PowerShell -Command invoke-item '%s'"
+                             (expand-file-name default-directory ))))
      ((string-equal system-type "darwin")
       (shell-command
        (concat "open -R " (shell-quote-argument xpath))))
@@ -2255,10 +2270,12 @@ When called in Emacs Lisp, if Fname is given, open that."
        ((string-equal system-type "windows-nt")
         (mapc
          (lambda (xfpath)
-           (shell-command (concat "PowerShell -Command \"Invoke-Item -LiteralPath\" " "'" (shell-quote-argument (expand-file-name xfpath )) "'")))
+           (shell-command (concat "PowerShell -Command \"Invoke-Item -LiteralPath\" "
+                                  "'" (shell-quote-argument (expand-file-name xfpath )) "'")))
          xfileList))
        ((string-equal system-type "darwin")
-        (mapc (lambda (xfpath) (shell-command (concat "open " (shell-quote-argument xfpath)) " && echo")) xfileList)
+        (mapc (lambda (xfpath) (shell-command (concat "open " (shell-quote-argument xfpath))
+                                              " && echo")) xfileList)
         (message ""))
        ((string-equal system-type "gnu/linux")
         (mapc (lambda (xfpath)
@@ -2303,10 +2320,8 @@ If `universal-argument' is called first, do switch frame."
   "Start or stop macro if already started."
   (interactive)
   (if (or defining-kbd-macro executing-kbd-macro)
-      (progn
-        (kmacro-end-macro nil))
-    (progn
-      (kmacro-start-macro nil))))
+      (kmacro-end-macro nil)
+    (kmacro-start-macro nil)))
 
 (defun eshell-clear()
   "Clear screen eshell."
@@ -2328,7 +2343,191 @@ If `universal-argument' is called first, do switch frame."
   (when (string-equal system-type "darwin")
     (shell-command (concat "screencapture -W -U dummy"))))
 
+(defun wclock ()
+  "World clock."
+  (interactive)
+  (world-clock)
+  (other-window 1))
+
+(defun toggle-ibuffer ()
+  "Toggle ibuffer.
+Force switch to current buffer to update `other-buffer'."
+  (interactive)
+  (let ((xbuf (buffer-name)))
+    (if (string-equal major-mode "ibuffer-mode")
+        (switch-to-buffer (other-buffer))
+      (progn
+        (switch-to-buffer xbuf)
+        (ibuffer)
+        (unless (member (buffer-name (cadr (buffer-list)))
+                        ibuffer-never-show-predicates)
+          (ibuffer-jump-to-buffer xbuf))))))
+
+(defun previous-line-ibuffer ()
+  (interactive)
+  (previous-line)
+  (if (<= (line-number-at-pos) 2)
+      (goto-line (count-lines (point-min) (point-max)))))
+
+(defun next-line-ibuffer ()
+  (interactive)
+  (next-line)
+  (if (>= (line-number-at-pos) (+ 1 (count-lines (point-min) (point-max))))
+      (goto-line 3)))
+
+(require 'lunar)
+
+(defun sun-moon ()
+  "Show the Sun and the Moon info."
+  (interactive)
+  (lunar-phases)
+  (sunrise-sunset))
+
+(defun lunar-phase-list-current-month (month year)
+  "List of lunar phases for the Gregorian month."
+  (let* ((index (lunar-index (list month 1 year)))
+         (new-moon (lunar-phase index))
+         (end-date (let ((end-month month)
+                         (end-year year))
+                     (calendar-increment-month end-month end-year 1)
+                     (list (list end-month 1 end-year))))
+         (start-date (progn
+                       (calendar-increment-month month year -1)
+                       (list (list month
+                                   (calendar-last-day-of-month month year)
+                                   year))))
+         list)
+    (while (calendar-date-compare new-moon end-date)
+      (if (calendar-date-compare start-date new-moon)
+          (setq list (append list (list new-moon))))
+      (setq index (1+ index)
+            new-moon (lunar-phase index)))
+    list))
+
+(defun lunar ()
+  "Display lunar phases for the current month."
+  (interactive)
+  (let* ((month (calendar-extract-month (calendar-current-date)))
+         (year (calendar-extract-year (calendar-current-date)))
+         (display (mapconcat
+                  (lambda (x)
+                    (format "%s: %s %s" (calendar-date-string (car x))
+                            (lunar-phase-name (nth 2 x))
+                            (cadr x)))
+                  (lunar-phase-list-current-month month year)
+                  "\n")))
+    (message display)))
+
+(defun calculator ()
+  "Run calculator."
+  (interactive)
+  (find-file "~/.calc.py")
+  (rename-buffer "*calculator*"))
+
+(defun weather ()
+  "Show weather."
+  (interactive)
+  (browse-url (concat "https://www.windy.com/?"
+                      (number-to-string calendar-latitude) ","
+                      (number-to-string calendar-longitude) ",9"))
+  (unless (string-equal calendar-location-name "Home")
+    (browse-url (shell-command-to-string "python3 ~/.weather.py"))))
+
+(defun books ()
+  "Read book."
+  (interactive)
+  (if (string-equal (buffer-name) current-book)
+      (progn
+        (switch-to-buffer (other-buffer))
+        (toggle-theme))
+    (progn
+      (if (get-buffer current-book)
+          (progn
+            (switch-to-buffer current-book)
+            (toggle-theme))
+        (progn
+          (find-file (concat "~/Books/" current-book))
+          (toggle-theme))))))
+
+(defun shopping ()
+  "Toggle shopping list."
+  (interactive)
+  (find-file shopping-list-file))
+
+(defun downloads ()
+  "Go to Downloads."
+  (interactive)
+  (find-file downloads-dir))
+
+(defun org-up ()
+  "Act on current element according to context."
+  (interactive)
+  (org-shiftup)
+  (set-transient-map
+     (let ((xkmap (make-sparse-keymap)))
+       (define-key xkmap [remap previous-line] 'org-up)
+       (define-key xkmap [remap next-line]     'org-down)
+       xkmap)))
+
+(defun org-down ()
+  "Act on current element according to context."
+  (interactive)
+  (org-shiftdown)
+  (set-transient-map
+   (let ((xkmap (make-sparse-keymap)))
+     (define-key xkmap [remap previous-line] 'org-up)
+     (define-key xkmap [remap next-line]     'org-down)
+     xkmap)))
+
+(defun org-agenda-a (&optional arg)
+  "Modification of `org-agenda'.
+Show current agenda. Do not select other window, balance windows in GUI.
+Make agenda fullscreen in text terminal. Alternate buffer if agenda already."
+  (interactive "P")
+  (if (string-equal (buffer-name) "*Org Agenda*")
+      (alternate-buffer)
+    (progn
+      (org-agenda arg "a")
+      (if pc-p
+          (progn
+            (other-window 1)
+            (balance-windows))
+        (delete-other-windows)))))
+
+(defalias 'agenda 'org-agenda-a)
+
+(defun todo ()
+  "Modification of `org-todo'. Capitalize task title if not study."
+  (interactive)
+  (org-todo)
+  (unless (string-equal (buffer-name) "study")
+    (select-line)
+    (title-case-region-or-line)
+    (beginning-of-line)))
+
+(defun sudo ()
+  "Use Tramp to `sudo' current file."
+  (interactive)
+  (when buffer-file-name
+    (find-alternate-file (concat "/sudo::" buffer-file-name))))
+
+(defun sync (&optional Silent)
+  "Synchronize private cloud."
+  (interactive)
+  (if Silent
+      (call-process "~/.sync.sh" nil 0 nil)
+    (progn
+      (message "~/.sync.sh: started.")
+      (async-shell-command "~/.sync.sh" "*sync output*"))))
+
+(defun tmux-helper ()
+  "Tmux helper. Force update display resolution."
+  (call-process "~/.tmux.sh" nil 0 nil))
+
+(defun stow ()
+  (interactive)
+  (call-process "~/.stow.sh" nil 0 nil))
+
 (provide 'corext)
 
 ;;; corext.el ends here
-

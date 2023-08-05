@@ -5,9 +5,6 @@
 
 (require 'dired)
 (require 'dired-x)
-(require 'ido)
-
-
 
 (defgroup keymap nil
   "Modal keybinding minor mode."
@@ -19,40 +16,6 @@
 
 (defvar keymap-karabiner-cli "/Library/Application Support/org.pqrs/Karabiner-Elements/bin/karabiner_cli"
   "Karabiner-Elements CLI executable")
-
-(defun keymap-escape-key ()
-  "Escape key for command mode."
-  (interactive)
-  (if (active-minibuffer-window)
-      (abort-recursive-edit)
-    (if (region-active-p)
-        (deactivate-mark)
-      (toggle-ibuffer))))
-
-(progn
-  (defvar keymap-fast-keyseq-timeout 50)
-
-  (defun keymap-tty-ESC-filter (map)
-    (if (and (equal (this-single-command-keys) [?\e])
-             (sit-for (/ keymap-fast-keyseq-timeout 1000.0)))
-        [escape] map))
-
-  (defun keymap-lookup-key (map key)
-    (catch 'found
-      (map-keymap (lambda (k b) (if (equal key k) (throw 'found b))) map)))
-
-  (defun keymap-catch-tty-ESC ()
-    "Setup key mappings of current terminal to turn a tty's ESC into
-  `escape'."
-    (when (memq (terminal-live-p (frame-terminal)) '(t pc))
-      (let ((esc-binding (keymap-lookup-key input-decode-map ?\e)))
-        (define-key input-decode-map
-          [?\e] `(menu-item "" ,esc-binding :filter keymap-tty-ESC-filter)))))
-
-  (keymap-catch-tty-ESC)
-
-  ;; catched tty ESC translated to <escape>
-  (define-key key-translation-map (kbd "ESC") (kbd "<escape>")))
 
 
 ;; layout lookup tables for key conversion
@@ -88,7 +51,8 @@ When a char is not in this alist, they are assumed to be the same.")
   "The current keyboard layout. Value is a key in `keymap-layouts'.
 Do not set this variable manually. Use `keymap-set-layout' to set it.
 If the value is nil, it is automatically set to \"qwerty\".
-When this variable changes, suitable change must also be done to `keymap--convert-table'.")
+When this variable changes, suitable change must also be done to
+`keymap--convert-table'.")
 
 (if keymap-current-layout nil (setq keymap-current-layout "qwerty"))
 
@@ -103,8 +67,9 @@ Do not manually set this variable.")
 
 (defun keymap--convert-kbd-str (Charstr)
   "Return the corresponding char Charstr according to
-`keymap--convert-table'. Charstr must be a string that is the argument to `kbd'. e.g. \"a\" and \"a b c\"
-Each space separated token is converted according to `keymap--convert-table'."
+`keymap--convert-table'. Charstr must be a string that is the argument
+to `kbd'. E.g. \"a\" and \"a b c\". Each space separated token is
+converted according to `keymap--convert-table'."
   (interactive)
   (mapconcat
    'identity
@@ -117,15 +82,17 @@ Each space separated token is converted according to `keymap--convert-table'."
 
 (defmacro keymap--define-keys (KeymapName KeyCmdAlist &optional Direct-p)
   "Map `define-key' over a alist KeyCmdAlist, with key layout remap.
-The key is remapped from Dvorak to the current keyboard layout by `keymap--convert-kbd-str'.
+The key is remapped from Dvorak to the current keyboard layout by
+`keymap--convert-kbd-str'.
 If Direct-p is t, do not remap key to current keyboard layout.
 Example usage:
-;; (keymap--define-keys
-;;  (define-prefix-command \\='xyz-map)
-;;  \\='(
-;;    (\"h\" . highlight-symbol-at-point)
-;;    (\".\" . isearch-forward-symbol-at-point)
-;;    (\"w\" . isearch-forward-word)))"
+
+(keymap--define-keys
+ (define-prefix-command \\='xyz-map)
+ \\='(
+   (\"h\" . highlight-symbol-at-point)
+   (\".\" . isearch-forward-symbol-at-point)
+   (\"w\" . isearch-forward-word)))"
   (let ((xkeymapName (make-symbol "keymap-name")))
     `(let ((,xkeymapName , KeymapName))
        ,@(mapcar
@@ -163,25 +130,12 @@ If State-p is nil, remove the mapping."
 
 ;; keymaps
 
-(defvar keymap-map (make-sparse-keymap)
-  "Backward-compatibility map for `keymap' minor mode. If
-`keymap-insert-state-p' is true, point to `keymap-insert-map', else,
-point to points to `keymap-command-map'.")
-
-(make-obsolete-variable
- 'keymap-map
- "Put bindings for command mode in `keymap-command-map', bindings for
-insert mode in `keymap-insert-map' and bindings that are common to both
-command and insert modes in `keymap-shared-map'." "2020-04-16")
-
 (defvar keymap-shared-map (make-sparse-keymap)
   "Parent keymap of `keymap-command-map' and `keymap-insert-map'.
 
 Define keys that are available in both command and insert modes here, like
 `keymap-mode-toggle'.")
 
-;; (cons 'keymap keymap-shared-map) makes a new keymap with `keymap-shared-map'
-;; as its parent. See info node (elisp)Inheritance and Keymaps
 (defvar keymap-command-map (cons 'keymap keymap-shared-map)
   "Keymap that takes precedence over all other keymaps in command mode.
 
@@ -219,24 +173,59 @@ minor modes loaded later may override bindings in this map.")
 
 ;; setting keys
 
+(defun keymap-escape-key ()
+  "Escape key for command mode."
+  (interactive)
+  (if (active-minibuffer-window)
+      (abort-recursive-edit)
+    (if (region-active-p)
+        (deactivate-mark)
+      (toggle-ibuffer))))
+
+(progn
+  (defvar keymap-fast-keyseq-timeout 50)
+
+  (defun keymap-tty-ESC-filter (map)
+    (if (and (equal (this-single-command-keys) [?\e])
+             (sit-for (/ keymap-fast-keyseq-timeout 1000.0)))
+        [escape] map))
+
+  (defun keymap-lookup-key (map key)
+    (catch 'found
+      (map-keymap (lambda (k b) (if (equal key k) (throw 'found b))) map)))
+
+  (defun keymap-catch-tty-ESC ()
+    "Setup key mappings of current terminal to turn a tty's ESC into
+  `escape'."
+    (when (memq (terminal-live-p (frame-terminal)) '(t pc))
+      (let ((esc-binding (keymap-lookup-key input-decode-map ?\e)))
+        (define-key input-decode-map
+          [?\e] `(menu-item "" ,esc-binding :filter keymap-tty-ESC-filter)))))
+
+  (keymap-catch-tty-ESC)
+
+  ;; catched tty ESC translated to <escape>
+  (define-key key-translation-map (kbd "ESC") (kbd "<escape>")))
+
+
+
 (defun keymap-define-keys ()
   "Define the keys for keymap.
 Used by `keymap-set-layout' for changing layout."
   (let ()
-
     (keymap--define-keys
      keymap-shared-map
      '(("<escape>" . keymap-command-mode-activate)
        ("C-_"      . keymap-leader-key-map)
        ("C-И"      . keymap-leader-key-map)
-       ("C-t"      . autocomplete))
-     :direct)
+       ("C-t"      . autocomplete)) :direct)
 
     (keymap--define-keys
      keymap-command-map
-     '(("<escape>" . keymap-escape-key)
-       ("SPC"      . keymap-leader-key-map)
-       ("DEL"      . keymap-insert-mode-activate)
+     '(("<escape>"    . keymap-escape-key)
+       ("SPC"         . keymap-leader-key-map)
+       ("DEL"         . keymap-insert-mode-activate)
+       ("<backspace>" . keymap-insert-mode-activate)
 
        ("a" . shrink-whitespaces)         ("ф" . shrink-whitespaces)
        ("b" . toggle-letter-case)         ("и" . toggle-letter-case)
@@ -274,6 +263,11 @@ Used by `keymap-set-layout' for changing layout."
        ("/" . goto-matching-bracket)      ("=" . goto-matching-bracket) ; remap 「.」
        ("\\" . kmacro)
 
+       ("<up>"    . beginning-of-line-or-block)
+       ("<down>"  . end-of-line-or-block)
+       ("<left>"  . backward-left-bracket)
+       ("<right>" . forward-right-bracket)
+
        ("1" . previous-user-buffer)
        ("2" . next-user-buffer)
        ("3" . delete-other-windows)
@@ -285,23 +279,18 @@ Used by `keymap-set-layout' for changing layout."
        ("9" . select-text-in-quote)
        ("0" . exchange-point-and-mark)
 
-       ("<f3>"  . pass)
-       ("<f4>"  . tasks)
-       ("<f5>"  . rss)
-       ("<f6>"  . books)
-       ("<f7>"  . email)
-
-       ;;
-       ))
+       ("<f3>" . pass)
+       ("<f4>" . tasks)
+       ("<f5>" . rss)
+       ("<f6>" . books)
+       ("<f7>" . email)))
 
     (keymap--define-keys
      (define-prefix-command 'keymap-leader-key-map)
-     '(("<escape>" . keyboard-quit)
-       ("ESC"      . keyboard-quit)
-       ("SPC"      . repeat)
-       ("DEL"      . keymap-insert-mode-activate-ru)
-       ("RET"      . execute-extended-command)
-       ("TAB"      . indent-for-tab-command)
+     '(("SPC" . repeat)
+       ("DEL" . repeat)
+       ("RET" . execute-extended-command)
+       ("TAB" . indent-for-tab-command)
 
        ("a" . mark-whole-buffer)
        ("b" . toggle-previous-letter-case)
@@ -329,8 +318,6 @@ Used by `keymap-set-layout' for changing layout."
        ("d u" . insert-ascii-double-quote)
        ("d v" . insert-markdown-quote)
        ("d y" . insert-emacs-quote)
-       ("d <escape>" . keyboard-quit)
-       ("d ESC"      . keyboard-quit)
 
        ("e d" . todo)
        ("e e" . agenda)
@@ -339,8 +326,6 @@ Used by `keymap-set-layout' for changing layout."
        ("e r" . tasks)
        ("e s" . backlog)
        ("e w" . rss)
-       ("e <escape>" . keyboard-quit)
-       ("e ESC"      . keyboard-quit)
 
        ("f" . previous-user-buffer)
        ("g" . kill-line)
@@ -364,8 +349,6 @@ Used by `keymap-set-layout' for changing layout."
        ("i u" . open-in-terminal)
        ("i w" . open-in-external-app)
        ("i y" . open-recently-closed)
-       ("i <escape>" . keyboard-quit)
-       ("i ESC"      . keyboard-quit)
 
        ("j a" . apropos-command)
        ("j b" . describe-bindings)
@@ -389,11 +372,7 @@ Used by `keymap-set-layout' for changing layout."
        ("j v" . apropos-value)
        ("j x" . describe-command)
        ("j z" . describe-coding-system)
-       ("j <escape>" . keyboard-quit)
-       ("j ESC"      . keyboard-quit)
 
-       ("k <up>"   . move-block-up)
-       ("k <down>" . move-block-down)
        ("k '" . reformat-to-sentence-lines)
        ("k ," . sort-numeric-fields)
        ("k ." . sort-lines-block-or-region)
@@ -428,8 +407,6 @@ Used by `keymap-set-layout' for changing layout."
        ("k x" . insert-column-a-z)
        ("k y" . goto-line)
        ("k z" . insert-kbd-macro)
-       ("k <escape>" . keyboard-quit)
-       ("k ESC"      . keyboard-quit)
 
        ("l ," . eww)
        ("l ." . visual-line-mode)
@@ -468,8 +445,6 @@ Used by `keymap-set-layout' for changing layout."
        ("l u" . widen)
        ("l v" . menu-bar-open)
        ("l w" . abbrev-mode)
-       ("l <escape>" . keyboard-quit)
-       ("l ESC"      . keyboard-quit)
 
        ("m" . dired-jump)
        ("n" . save-buffer)
@@ -491,16 +466,24 @@ Used by `keymap-set-layout' for changing layout."
        (", e" . eval-buffer)
        (", f" . eval-region)
        (", h" . delete-current-file-make-backup)
+       (", i" . move-block-up)
        (", m" . eval-last-sexp)
        (", r" . eval-expression)
-       (", <escape>" . keyboard-quit)
-       (", ESC"      . keyboard-quit)
 
-       ("." . toggle-eshell)
-       ("'" . cycle-hyphen-lowline-space)
-       (";" . last-line-of-buffer)
-       ("/" . sync) ("*" . sync) ; remap 「.」 russian-computer
+       ("."  . toggle-eshell)
+       ("'"  . cycle-hyphen-lowline-space)
+       (";"  . last-line-of-buffer)
+       ("/"  . sync)   ("*" . sync) ; remap 「.」
        ("\\" . call-last-kbd-macro)
+
+       (  "<escape>" . keyboard-quit) (  "ESC" . keyboard-quit)
+       ("d <escape>" . keyboard-quit) ("d ESC" . keyboard-quit)
+       ("e <escape>" . keyboard-quit) ("e ESC" . keyboard-quit)
+       ("i <escape>" . keyboard-quit) ("i ESC" . keyboard-quit)
+       ("j <escape>" . keyboard-quit) ("j ESC" . keyboard-quit)
+       ("k <escape>" . keyboard-quit) ("k ESC" . keyboard-quit)
+       ("l <escape>" . keyboard-quit) ("l ESC" . keyboard-quit)
+       (", <escape>" . keyboard-quit) (", ESC" . keyboard-quit)
 
        ("3" . delete-window)
        ("4" . split-window-right)
@@ -511,7 +494,6 @@ Used by `keymap-set-layout' for changing layout."
        ("<f4>" . agenda)
        ("<f8>" . player)
 
-       ;; leader and hold down
        ("C-_ c"   . copy-to-register-1)          ("C-И c"   . copy-to-register-1)
        ("C-_ d d" . delete-other-windows)        ("C-И d d" . delete-other-windows)
        ("C-_ e e" . split-window-below)          ("C-И e e" . split-window-below)
@@ -535,38 +517,34 @@ Used by `keymap-set-layout' for changing layout."
     (keymap--define-keys
      query-replace-map
      '(("C-h" . skip)
-       ("C-r" . act))
-     :direct)
+       ("C-r" . act)) :direct)
 
     (keymap--define-keys
      global-map
-     '(("C-r" . info))
-     :direct)
+     '(("C-r" . info)) :direct)
 
     (keymap--define-keys
      isearch-mode-map
      '(("<escape>" . isearch-abort)
        ("<up>"     . isearch-ring-retreat)
-       ("C-_ i i"  . isearch-ring-retreat)    ("C-И i i"  . isearch-ring-retreat)
        ("<left>"   . isearch-repeat-backward)
-       ("C-_ j j"  . isearch-repeat-backward) ("C-И j j"  . isearch-repeat-backward)
        ("<down>"   . isearch-ring-advance)
-       ("C-_ k k"  . isearch-ring-advance)    ("C-И k k"  . isearch-ring-advance)
        ("<right>"  . isearch-repeat-forward)
+       ("C-_ i i"  . isearch-ring-retreat)    ("C-И i i"  . isearch-ring-retreat)
+       ("C-_ j j"  . isearch-repeat-backward) ("C-И j j"  . isearch-repeat-backward)
+       ("C-_ k k"  . isearch-ring-advance)    ("C-И k k"  . isearch-ring-advance)
        ("C-_ l l"  . isearch-repeat-forward)  ("C-И l l"  . isearch-repeat-forward)
        ("C-_ v"    . isearch-yank-kill)       ("C-И v"    . isearch-yank-kill)))
 
     (keymap--define-keys
      minibuffer-local-isearch-map
      '(("<left>"  . isearch-reverse-exit-minibuffer)
-       ("<right>" . isearch-forward-exit-minibuffer))
-     :direct)
+       ("<right>" . isearch-forward-exit-minibuffer)) :direct)
 
     (with-eval-after-load 'ibuf-ext
       (keymap--define-keys
        ibuffer-mode-map
-       '(("C-h" . ibuffer-do-delete))
-       :direct)
+       '(("C-h" . ibuffer-do-delete)) :direct)
 
       (keymap--define-keys-remap
        ibuffer-mode-map
@@ -578,8 +556,7 @@ Used by `keymap-set-layout' for changing layout."
     (with-eval-after-load 'icomplete
       (keymap--define-keys
        icomplete-fido-mode-map
-       '(("C-r" . icomplete-fido-delete-char))
-       :direct)
+       '(("C-r" . icomplete-fido-delete-char)) :direct)
 
       (keymap--define-keys-remap
        icomplete-fido-mode-map
@@ -597,8 +574,7 @@ Used by `keymap-set-layout' for changing layout."
       (keymap--define-keys
        dired-mode-map
        '(("C-r" . open-in-external-app)
-         ("C-h" . dired-do-delete))
-       :direct)
+         ("C-h" . dired-do-delete)) :direct)
 
       (keymap--define-keys-remap
        dired-mode-map
@@ -615,8 +591,7 @@ Used by `keymap-set-layout' for changing layout."
       (keymap--define-keys
        wdired-mode-map
        '(("C-r" . wdired-finish-edit)
-         ("C-h" . wdired-abort-changes))
-       :direct))
+         ("C-h" . wdired-abort-changes)) :direct))
 
     (with-eval-after-load 'doc-view
       (keymap--define-keys-remap
@@ -631,15 +606,14 @@ Used by `keymap-set-layout' for changing layout."
     (with-eval-after-load 'mu4e-update
       (keymap--define-keys
        mu4e-update-minor-mode-map
-       '(("C-r" . mu4e-update-mail-and-index))
-       :direct)
+       '(("C-r" . mu4e-update-mail-and-index)) :direct)
 
       (keymap--define-keys-remap
        mu4e-update-minor-mode-map
        '((cut-line-or-region    . mu4e-mark-execute-all)
          (delete-backward-smart . mu4e-headers-mark-for-trash)
          (open-line             . mu4e-view-mark-for-read)
-         (backward-left-bracket . mu4e-headers-mark-for-move)
+         (kill-word             . mu4e-headers-mark-for-move)
          (backward-kill-word    . mu4e-headers-mark-for-refile))))
 
     (with-eval-after-load 'mu4e-view
@@ -662,8 +636,7 @@ Used by `keymap-set-layout' for changing layout."
     (with-eval-after-load 'esh-mode
       (keymap--define-keys
        eshell-mode-map
-       '(("C-h" . eshell-interrupt-process))
-       :direct)
+       '(("C-h" . eshell-interrupt-process)) :direct)
 
       (keymap--define-keys-remap
        eshell-mode-map
@@ -674,15 +647,15 @@ Used by `keymap-set-layout' for changing layout."
     (with-eval-after-load 'rect
       (keymap--define-keys-remap
        rectangle-mark-mode-map
-       '((copy-line-or-region          . copy-rectangle-as-kill)
-         (delete-backward-smart        . kill-rectangle)
+       '((copy-line-or-region         . copy-rectangle-as-kill)
+         (delete-backward-smart       . kill-rectangle)
          (keymap-insert-mode-activate . replace-rectangle)
-         (paste-or-paste-previous      . yank-rectangle)
-         (copy-to-register             . copy-rectangle-to-register)
-         (toggle-comment               . rectangle-number-lines)
-         (cut-line-or-region           . clear-rectangle)
-         (insert-space-before          . open-rectangle)
-         (clean-whitespace             . delete-whitespace-rectangle))))
+         (paste-or-paste-previous     . yank-rectangle)
+         (copy-to-register            . copy-rectangle-to-register)
+         (toggle-comment              . rectangle-number-lines)
+         (cut-line-or-region          . clear-rectangle)
+         (insert-space-before         . open-rectangle)
+         (clean-whitespace            . delete-whitespace-rectangle))))
 
     (with-eval-after-load 'info
       (keymap--define-keys-remap
@@ -690,7 +663,7 @@ Used by `keymap-set-layout' for changing layout."
        '((backward-left-bracket . Info-backward-node)
          (forward-right-bracket . Info-forward-node)
          (delete-backward-smart . Info-next-reference)
-         (backward-kill-word    . Info-up))))
+         (undo                  . Info-up))))
 
     (with-eval-after-load 'help-mode
       (keymap--define-keys-remap
@@ -704,8 +677,7 @@ Used by `keymap-set-layout' for changing layout."
       (keymap--define-keys
        newsticker--url-keymap
        '(("C-r" . newsticker-browse-url)
-         ("RET" . newsticker-show-entry))
-       :direct)
+         ("RET" . newsticker-show-entry)) :direct)
 
       (keymap--define-keys-remap
        newsticker-mode-map
@@ -725,8 +697,7 @@ Used by `keymap-set-layout' for changing layout."
     (with-eval-after-load 'org-agenda
       (keymap--define-keys
        org-agenda-mode-map
-       '(("<backspace>" . nil))
-       :direct))
+       '(("<backspace>" . nil)) :direct))
 
     (with-eval-after-load 'tetris
       (keymap--define-keys-remap
@@ -738,10 +709,7 @@ Used by `keymap-set-layout' for changing layout."
          (next-line      . tetris-move-down)
          (backward-char  . tetris-move-left)
          (forward-char   . tetris-move-right)
-         (previous-line  . tetris-rotate-prev))))
-
-    ;;
-    ))
+         (previous-line  . tetris-rotate-prev))))))
 
 (keymap-define-keys)
 
@@ -866,13 +834,6 @@ Useful when Engineer Engram layout not available on OS or keyboard level."
           (setq mode-line-front-space keymap-insert-mode-indicator)
         (setq mode-line-front-space keymap-command-mode-indicator)))))
 
-(add-hook 'post-command-hook 'keymap-mode-indicator-update)
-
-(defun keymap--update-key-map ()
-  (setq keymap-map (if keymap-insert-state-p
-                            keymap-insert-map
-                          keymap-command-map)))
-
 (defun keymap-set-layout (Layout)
   "Set a keyboard layout.
 Argument must be one of the key name in `keymap-layouts'."
@@ -894,7 +855,6 @@ Argument must be one of the key name in `keymap-layouts'."
   "Set command mode keys."
   (interactive)
   (setq keymap-insert-state-p nil)
-  (keymap--update-key-map)
   (when keymap--deactivate-command-mode-func
     (funcall keymap--deactivate-command-mode-func))
   (setq keymap--deactivate-command-mode-func
@@ -909,7 +869,6 @@ Argument must be one of the key name in `keymap-layouts'."
   "Enter insertion mode."
   (interactive)
   (setq keymap-insert-state-p t)
-  (keymap--update-key-map)
   (funcall keymap--deactivate-command-mode-func)
   (unless no-indication
     (modify-all-frames-parameters '((cursor-type . bar)))
@@ -929,45 +888,17 @@ Init insert mode with `keymap-insert-mode-activate-hook'."
   (call-process keymap-karabiner-cli nil 0 nil
                 "--set-variables" "{\"insert mode activated\":1}"))
 
-(when (and (string-equal system-type "darwin")
-           (file-exists-p keymap-karabiner-cli))
-  (add-hook 'keymap-insert-mode-activate-hook  'keymap-insert-mode-init-karabiner)
-  (add-hook 'keymap-command-mode-activate-hook 'keymap-command-mode-init-karabiner))
-
 (defun keymap-command-mode-activate ()
   "Activate command mode and run `keymap-command-mode-activate-hook'."
   (interactive)
   (keymap-command-mode-init)
   (run-hooks 'keymap-command-mode-activate-hook))
 
-(when terminal-p
-  (setq keymap-timer-idle-timer
-        (run-with-idle-timer 120 t 'keymap-command-mode-activate)))
-
-(defun keymap-command-mode-activate-no-hook ()
-  "Activate command mode. Does not run `keymap-command-mode-activate-hook'."
-  (interactive)
-  (keymap-command-mode-init))
-
 (defun keymap-insert-mode-activate ()
   "Activate insertion mode."
   (interactive)
   (keymap-insert-mode-init)
   (run-hooks 'keymap-insert-mode-activate-hook))
-
-(defun keymap-insert-mode-activate-ru ()
-  "Activate insertion mode, set russian input method."
-  (interactive)
-  (keymap-insert-mode-init)
-  (run-hooks 'keymap-insert-mode-activate-hook)
-  (set-input-method 'russian-computer))
-
-(defun keymap-insert-mode-activate-minibuffer ()
-  "Activate insertion mode, unless ido active."
-  (interactive)
-  (unless (ido-active)
-    (keymap-insert-mode-init)
-    (run-hooks 'keymap-insert-mode-activate-hook)))
 
 
 
@@ -977,32 +908,16 @@ Init insert mode with `keymap-insert-mode-activate-hook'."
   :global t
   :lighter "Keymap"
   :keymap keymap-insert-map
-  (delete-selection-mode 1)
-  (setq shift-select-mode nil)
 
-  (if keymap
-      ;; Construction:
-      (progn
-        (add-hook 'minibuffer-setup-hook           'keymap-insert-mode-activate-minibuffer)
-        (add-hook 'icomplete-minibuffer-setup-hook 'keymap-command-mode-activate)
-        (add-hook 'minibuffer-exit-hook            'keymap-command-mode-activate)
-        (add-hook 'isearch-mode-end-hook           'keymap-command-mode-activate)
-        (when (and (keymapp keymap-map)
-                   (not (memq keymap-map (list keymap-command-map keymap-insert-map))))
-          (set-keymap-parent keymap-map keymap-shared-map)
-          (setq keymap-shared-map keymap-map))
-        (keymap-command-mode-activate))
-    (progn
-      ;; Teardown:
-      (remove-hook 'minibuffer-setup-hook           'keymap-insert-mode-activate-minibuffer)
-      (remove-hook 'icomplete-minibuffer-setup-hook 'keymap-command-mode-activate)
-      (remove-hook 'minibuffer-exit-hook            'keymap-command-mode-activate)
-      (remove-hook 'isearch-mode-end-hook           'keymap-command-mode-activate)
-      (keymap-insert-mode-init :no-indication)
-      (setq mode-line-front-space '(:eval (if (display-graphic-p) " " "-")))
-
-      ;;
-      )))
+  (when keymap
+    (add-hook 'minibuffer-setup-hook 'keymap-command-mode-activate)
+    (add-hook 'minibuffer-exit-hook  'keymap-command-mode-activate)
+    (add-hook 'isearch-mode-end-hook 'keymap-command-mode-activate)
+    (add-hook 'post-command-hook     'keymap-mode-indicator-update)
+    (when (file-exists-p keymap-karabiner-cli)
+      (add-hook 'keymap-insert-mode-activate-hook  'keymap-insert-mode-init-karabiner)
+      (add-hook 'keymap-command-mode-activate-hook 'keymap-command-mode-init-karabiner))
+    (keymap-command-mode-activate)))
 
 (provide 'keymap)
 

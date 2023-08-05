@@ -44,7 +44,7 @@ If buffer is a file, it is saved first."
            ((string-equal python-formatter-tool "black")
             (shell-command
              (format "%s %s -q" python-formatter-black-path xbuffFileName))
-            (message ""))
+            (message "Format complete."))
            ((string-equal python-formatter-tool "yapf")
             (shell-command
              (format "%s -i %s" python-formatter-yapf-path xbuffFileName)))
