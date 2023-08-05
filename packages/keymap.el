@@ -3,18 +3,10 @@
 
 ;;; Code:
 
-(require 'dired)
-(require 'dired-x)
-
-(defgroup keymap nil
-  "Modal keybinding minor mode."
-  :group 'keyboard)
-
 (defvar keymap-command-mode-activate-hook nil "Hook for `keymap-command-mode-activate'")
+(defvar keymap-insert-mode-activate-hook  nil "Hook for `keymap-insert-mode-activate'")
 
-(defvar keymap-insert-mode-activate-hook nil "Hook for `keymap-insert-mode-activate'")
-
-(defvar keymap-karabiner-cli "/Library/Application Support/org.pqrs/Karabiner-Elements/bin/karabiner_cli"
+(defconst keymap-karabiner-cli "/Library/Application Support/org.pqrs/Karabiner-Elements/bin/karabiner_cli"
   "Karabiner-Elements CLI executable")
 
 
@@ -22,7 +14,7 @@
 
 (defvar keymap-layouts nil "A alist. Key is layout name, string type.
 Value is a alist, each element is of the form (\"e\" . \"d\").
-First char is Qwerty, second is corresponding char of the destination layout.
+First char is qwerty, second is corresponding char of the destination layout.
 When a char is not in this alist, they are assumed to be the same.")
 
 (push '("qwerty" . nil) keymap-layouts)
@@ -44,17 +36,10 @@ When a char is not in this alist, they are assumed to be the same.")
     (">" . "F") ("?" . "P") ("1" . "9")  ("2" . "7") ("3" . "1") ("4" . "3")
     ("5" . "5") ("6" . "4") ("7" . "2")  ("8" . "0") ("9" . "6") ("0" . "8")
     ("!" . "@") ("@" . "&") ("#" . "/")  ("$" . "$") ("%" . "<") ("^" . ">")
-    ("&" . "*") ("*" . "=") ("(" . "+")  (")" . "\\")))
- keymap-layouts)
+    ("&" . "*") ("*" . "=") ("(" . "+")  (")" . "\\"))) keymap-layouts)
 
-(defvar keymap-current-layout nil
-  "The current keyboard layout. Value is a key in `keymap-layouts'.
-Do not set this variable manually. Use `keymap-set-layout' to set it.
-If the value is nil, it is automatically set to \"qwerty\".
-When this variable changes, suitable change must also be done to
-`keymap--convert-table'.")
-
-(if keymap-current-layout nil (setq keymap-current-layout "qwerty"))
+(defvar keymap-current-layout "engineer-engram"
+  "The current keyboard layout. Value is a key in `keymap-layouts'.")
 
 (defvar keymap--convert-table nil
   "A alist that's the conversion table from qwerty to current layout.
@@ -82,11 +67,11 @@ converted according to `keymap--convert-table'."
 
 (defmacro keymap--define-keys (KeymapName KeyCmdAlist &optional Direct-p)
   "Map `define-key' over a alist KeyCmdAlist, with key layout remap.
-The key is remapped from Dvorak to the current keyboard layout by
+The key is remapped from qwerty to the current keyboard layout by
 `keymap--convert-kbd-str'.
 If Direct-p is t, do not remap key to current keyboard layout.
-Example usage:
 
+Example usage:
 (keymap--define-keys
  (define-prefix-command \\='xyz-map)
  \\='(
@@ -128,17 +113,109 @@ If State-p is nil, remove the mapping."
           (cadr CmdCmdAlist)))))
 
 
+
+(defconst keymap-engineer-engram-to-russian-computer
+  '(("a" . "а") ("b" . "й") ("c" . "ф") ("d" . "ш") ("e" . "в")
+    ("f" . "ю") ("g" . "я") ("h" . "о") ("i" . "ы") ("j" . "с")
+    ("k" . "м") ("l" . "г") ("m" . "б") ("n" . "ж") ("o" . "у")
+    ("q" . "э") ("r" . "ь") ("s" . "д") ("t" . "л") ("u" . "к")
+    ("v" . "з") ("w" . "щ") ("x" . "ч") ("y" . "ц") ("z" . "х")
+    ("." . "р") ("?" . "т") ("-" . "и") ("," . "п") ("'" . "е")
+    ("`" . "ё") ("{" . "ъ") ("\"" . "н"))
+  "Mapping for `keymap-define-input-source'")
+
+(defun keymap-quail-get-translation (from)
+  "Get translation Engineer Engram to russian-computer.
+From symbol to character code."
+  (interactive)
+  (let ((to (alist-get from keymap-engineer-engram-to-russian-computer
+             nil nil 'string-equal)))
+    (when (stringp to)
+      (string-to-char to))))
+
+(defun keymap-define-input-source (input-method)
+  "Build reverse mapping for `input-method'.
+Use Russian input source for command mode. Respects Engineer Engram layout."
+  (interactive
+   (list (read-input-method-name "Use input method (default current): ")))
+  (if (and input-method (symbolp input-method))
+      (setq input-method (symbol-name input-method)))
+  (let ((current current-input-method)
+        (modifiers '(nil (control))))
+    (when input-method
+      (activate-input-method input-method))
+    (when (and current-input-method quail-keyboard-layout)
+      (dolist (map (cdr (quail-map)))
+        (let* ((to (car map))
+               (from (if (string-equal keymap-current-layout "engineer-engram")
+                         (keymap-quail-get-translation (char-to-string to))
+                       (quail-get-translation (cadr map) (char-to-string to) 1))))
+          (when (and (characterp from) (characterp to))
+            (dolist (mod modifiers)
+              (define-key local-function-key-map
+                (vector (append mod (list from)))
+                (vector (append mod (list to)))))))))
+    (when input-method
+      (activate-input-method current))))
+
+
+
+(defconst quail-keyboard-layout-engineer-engram
+  "\
+                              \
+  9@7&1/3$5<4>2*0=6+8\\#|%^`~  \
+  bByYoOuU'(\")lLdDwWvVzZ{[    \
+  cCiIeEaA,;.:hHtTsSnNqQ}]    \
+  gGxXjJkK-_?!rRmMfFpP        \
+                              "
+  "Engineer Engram keyboard layout for Quail, e.g. for input method.")
+
+(require 'quail)
+(push (cons "engineer-engram" quail-keyboard-layout-engineer-engram)
+      quail-keyboard-layout-alist)
+
+(defun keymap-qwerty-to-engineer-engram ()
+  "Toggle translate qwerty layout to engineer engram on Emacs level.
+Useful when Engineer Engram layout not available on OS or keyboard level."
+  (interactive)
+  (if (get 'keymap-qwerty-to-engineer-engram 'state)
+      (progn
+        (put 'keymap-qwerty-to-engineer-engram 'state nil)
+        (quail-set-keyboard-layout "standard")
+        (message "Translation qwerty to engineer engram deactivated"))
+    (progn
+      (put 'keymap-qwerty-to-engineer-engram 'state t)
+      (quail-set-keyboard-layout "engineer-engram")
+      (message "Translation qwerty to engineer engram activated")))
+  (let ()
+    (keymap--define-keys-translation
+     '(("-" . "#") ("=" . "%") ("`" . "`")  ("q" . "b") ("w" . "y") ("e" . "o")
+       ("r" . "u") ("t" . "'") ("y" . "\"") ("u" . "l") ("i" . "d") ("o" . "w")
+       ("p" . "v") ("[" . "z") ("]" . "{")  ("a" . "c") ("s" . "i") ("d" . "e")
+       ("f" . "a") ("g" . ",") ("h" . ".")  ("j" . "h") ("k" . "t") ("l" . "s")
+       (";" . "n") ("'" . "q") ("\\" . "}") ("z" . "g") ("x" . "x") ("c" . "j")
+       ("v" . "k") ("b" . "-") ("n" . "?")  ("m" . "r") ("," . "m") ("." . "f")
+       ("/" . "p") ("_" . "|") ("+" . "^")  ("~" . "~") ("Q" . "B") ("W" . "Y")
+       ("E" . "O") ("R" . "U") ("T" . "(")  ("Y" . ")") ("U" . "L") ("I" . "D")
+       ("O" . "W") ("P" . "V") ("{" . "Z")  ("}" . "[") ("A" . "C") ("S" . "I")
+       ("D" . "E") ("F" . "A") ("G" . ";")  ("H" . ":") ("J" . "H") ("K" . "T")
+       ("L" . "S") (":" . "N") ("\"" . "Q") ("|" . "]") ("Z" . "G") ("X" . "X")
+       ("C" . "J") ("V" . "K") ("B" . "_")  ("N" . "!") ("M" . "R") ("<" . "M")
+       (">" . "F") ("?" . "P") ("1" . "9")  ("2" . "7") ("3" . "1") ("4" . "3")
+       ("5" . "5") ("6" . "4") ("7" . "2")  ("8" . "0") ("9" . "6") ("0" . "8")
+       ("!" . "@") ("@" . "&") ("#" . "/")  ("$" . "$") ("%" . "<") ("^" . ">")
+       ("&" . "*") ("*" . "=") ("(" . "+")  (")" . "\\"))
+     (get 'keymap-qwerty-to-engineer-engram 'state))))
+
+
 ;; keymaps
 
 (defvar keymap-shared-map (make-sparse-keymap)
   "Parent keymap of `keymap-command-map' and `keymap-insert-map'.
-
-Define keys that are available in both command and insert modes here, like
-`keymap-mode-toggle'.")
+Define keys that are available in both command and insert modes here.")
 
 (defvar keymap-command-map (cons 'keymap keymap-shared-map)
   "Keymap that takes precedence over all other keymaps in command mode.
-
 Inherits bindings from `keymap-shared-map'.
 
 In command mode, if no binding is found in this map
@@ -149,7 +226,6 @@ explicitly bound to nil in this map, it will not be looked up in
 active maps.
 
 In this way, bindings in `keymap-shared-map' can be disabled by this map.
-
 Effectively, this map takes precedence over all others when command mode
 is enabled.")
 
@@ -183,7 +259,8 @@ minor modes loaded later may override bindings in this map.")
       (toggle-ibuffer))))
 
 (progn
-  (defvar keymap-fast-keyseq-timeout 50)
+  (defconst keymap-fast-keyseq-timeout 30
+    "Timeout in ms to wait key sequence after escape pressed in tty.")
 
   (defun keymap-tty-ESC-filter (map)
     (if (and (equal (this-single-command-keys) [?\e])
@@ -195,16 +272,12 @@ minor modes loaded later may override bindings in this map.")
       (map-keymap (lambda (k b) (if (equal key k) (throw 'found b))) map)))
 
   (defun keymap-catch-tty-ESC ()
-    "Setup key mappings of current terminal to turn a tty's ESC into
-  `escape'."
+    "Setup key mappings of current terminal to turn a tty's ESC into <escape>."
     (when (memq (terminal-live-p (frame-terminal)) '(t pc))
       (let ((esc-binding (keymap-lookup-key input-decode-map ?\e)))
         (define-key input-decode-map
           [?\e] `(menu-item "" ,esc-binding :filter keymap-tty-ESC-filter)))))
 
-  (keymap-catch-tty-ESC)
-
-  ;; catched tty ESC translated to <escape>
   (define-key key-translation-map (kbd "ESC") (kbd "<escape>")))
 
 
@@ -213,11 +286,13 @@ minor modes loaded later may override bindings in this map.")
   "Define the keys for keymap.
 Used by `keymap-set-layout' for changing layout."
   (let ()
+
     (keymap--define-keys
      keymap-shared-map
      '(("<escape>" . keymap-command-mode-activate)
        ("C-_"      . keymap-leader-key-map)
        ("C-И"      . keymap-leader-key-map)
+       ("C-f"      . keymap-qwerty-to-engineer-engram)
        ("C-t"      . autocomplete)) :direct)
 
     (keymap--define-keys
@@ -711,109 +786,6 @@ Used by `keymap-set-layout' for changing layout."
          (forward-char   . tetris-move-right)
          (previous-line  . tetris-rotate-prev))))))
 
-(keymap-define-keys)
-
-
-
-(require 'quail)
-
-(defconst quail-keyboard-layout-engineer-engram
-  "\
-                              \
-  9@7&1/3$5<4>2*0=6+8\\#|%^`~  \
-  bByYoOuU'(\")lLdDwWvVzZ{[    \
-  cCiIeEaA,;.:hHtTsSnNqQ}]    \
-  gGxXjJkK-_?!rRmMfFpP        \
-                              "
-  "Engineer Engram keyboard layout for Quail, e.g. for input method.")
-
-(push (cons "engineer-engram" quail-keyboard-layout-engineer-engram)
-      quail-keyboard-layout-alist)
-
-(quail-set-keyboard-layout "engineer-engram")
-
-
-;; russian-computer
-
-(setq keymap-engineer-engram-to-russian-computer
-      '(("a" . "а") ("b" . "й")  ("c" . "ф") ("d" . "ш") ("e" . "в")
-        ("f" . "ю") ("g" . "я")  ("h" . "о") ("i" . "ы") ("j" . "с")
-        ("k" . "м") ("l" . "г")  ("m" . "б") ("n" . "ж") ("o" . "у")
-        ("q" . "э") ("r" . "ь")  ("s" . "д") ("t" . "л") ("u" . "к")
-        ("v" . "з") ("w" . "щ")  ("x" . "ч") ("y" . "ц") ("z" . "х")
-        ("." . "р") ("\"" . "н") ("?" . "т") ("-" . "и") ("," . "п")
-        ("'" . "е") ("`" . "ё")  ("{" . "ъ")))
-
-(defun keymap-quail-get-translation (from)
-  "Get translation Engineer Engram to russian-computer.
-From symbol to character code."
-  (interactive)
-  (let ((to (alist-get from keymap-engineer-engram-to-russian-computer
-             nil nil 'string-equal)))
-    (when (stringp to)
-      (string-to-char to))))
-
-(defun keymap-define-input-source (input-method)
-  "Build reverse mapping for `input-method'.
-Use Russian input source for command mode. Respects Engineer Engram layout."
-  (interactive
-   (list (read-input-method-name "Use input method (default current): ")))
-  (if (and input-method (symbolp input-method))
-      (setq input-method (symbol-name input-method)))
-  (let ((current current-input-method)
-        (modifiers '(nil (control))))
-    (when input-method
-      (activate-input-method input-method))
-    (when (and current-input-method quail-keyboard-layout)
-      (dolist (map (cdr (quail-map)))
-        (let* ((to (car map))
-               (from (if (string-equal keymap-current-layout "engineer-engram")
-                         (keymap-quail-get-translation (char-to-string to))
-                       (quail-get-translation (cadr map) (char-to-string to) 1))))
-          (when (and (characterp from) (characterp to))
-            (dolist (mod modifiers)
-              (define-key local-function-key-map
-                (vector (append mod (list from)))
-                (vector (append mod (list to)))))))))
-    (when input-method
-      (activate-input-method current))))
-
-
-;; pocket qwerty keyboard
-
-(defun toggle-qwerty-to-engineer-engram ()
-  "Toggle translate Qwerty layout to Engineer Engram on Emacs level.
-Useful when Engineer Engram layout not available on OS or keyboard level."
-  (interactive)
-  (if (get 'toggle-qwerty-to-engineer-engram 'state)
-      (progn
-        (put 'toggle-qwerty-to-engineer-engram 'state nil)
-        (message "Translation Qwerty to Engineer Engram deactivated"))
-    (progn
-      (put 'toggle-qwerty-to-engineer-engram 'state t)
-      (message "Translation Qwerty to Engineer Engram activated")))
-  (let ()
-    (keymap--define-keys-translation
-     '(("-" . "#") ("=" . "%") ("`" . "`")  ("q" . "b") ("w" . "y") ("e" . "o")
-       ("r" . "u") ("t" . "'") ("y" . "\"") ("u" . "l") ("i" . "d") ("o" . "w")
-       ("p" . "v") ("[" . "z") ("]" . "{")  ("a" . "c") ("s" . "i") ("d" . "e")
-       ("f" . "a") ("g" . ",") ("h" . ".")  ("j" . "h") ("k" . "t") ("l" . "s")
-       (";" . "n") ("'" . "q") ("\\" . "}") ("z" . "g") ("x" . "x") ("c" . "j")
-       ("v" . "k") ("b" . "-") ("n" . "?")  ("m" . "r") ("," . "m") ("." . "f")
-       ("/" . "p") ("_" . "|") ("+" . "^")  ("~" . "~") ("Q" . "B") ("W" . "Y")
-       ("E" . "O") ("R" . "U") ("T" . "(")  ("Y" . ")") ("U" . "L") ("I" . "D")
-       ("O" . "W") ("P" . "V") ("{" . "Z")  ("}" . "[") ("A" . "C") ("S" . "I")
-       ("D" . "E") ("F" . "A") ("G" . ";")  ("H" . ":") ("J" . "H") ("K" . "T")
-       ("L" . "S") (":" . "N") ("\"" . "Q") ("|" . "]") ("Z" . "G") ("X" . "X")
-       ("C" . "J") ("V" . "K") ("B" . "_")  ("N" . "!") ("M" . "R") ("<" . "M")
-       (">" . "F") ("?" . "P") ("1" . "9")  ("2" . "7") ("3" . "1") ("4" . "3")
-       ("5" . "5") ("6" . "4") ("7" . "2")  ("8" . "0") ("9" . "6") ("0" . "8")
-       ("!" . "@") ("@" . "&") ("#" . "/")  ("$" . "$") ("%" . "<") ("^" . ">")
-       ("&" . "*") ("*" . "=") ("(" . "+")  (")" . "\\"))
-     (get 'toggle-qwerty-to-engineer-engram 'state))))
-
-(global-set-key (kbd "C-f") 'toggle-qwerty-to-engineer-engram)
-
 
 
 (defvar keymap-insert-state-p t "Non-nil means insertion mode is on.")
@@ -825,8 +797,8 @@ Useful when Engineer Engram layout not available on OS or keyboard level."
 (defvar keymap-repeat-command-indicator "🔵"
   "Character indicating repeat command is active.")
 
-(defun keymap-mode-indicator-update ()
-  "Update mode indicator."
+(defun keymap-set-mode-indicator ()
+  "Set mode indicator."
   (if (eq real-this-command 'repeat)
       (setq mode-line-front-space keymap-repeat-command-indicator)
     (progn
@@ -837,7 +809,6 @@ Useful when Engineer Engram layout not available on OS or keyboard level."
 (defun keymap-set-layout (Layout)
   "Set a keyboard layout.
 Argument must be one of the key name in `keymap-layouts'."
-  (interactive "sType a layout: ")
   (let ((xnewlout
          (cond
           ((stringp Layout) Layout)
@@ -853,7 +824,6 @@ Argument must be one of the key name in `keymap-layouts'."
 
 (defun keymap-command-mode-init ()
   "Set command mode keys."
-  (interactive)
   (setq keymap-insert-state-p nil)
   (when keymap--deactivate-command-mode-func
     (funcall keymap--deactivate-command-mode-func))
@@ -867,7 +837,6 @@ Argument must be one of the key name in `keymap-layouts'."
 
 (defun keymap-insert-mode-init (&optional no-indication)
   "Enter insertion mode."
-  (interactive)
   (setq keymap-insert-state-p t)
   (funcall keymap--deactivate-command-mode-func)
   (unless no-indication
@@ -913,10 +882,13 @@ Init insert mode with `keymap-insert-mode-activate-hook'."
     (add-hook 'minibuffer-setup-hook 'keymap-command-mode-activate)
     (add-hook 'minibuffer-exit-hook  'keymap-command-mode-activate)
     (add-hook 'isearch-mode-end-hook 'keymap-command-mode-activate)
-    (add-hook 'post-command-hook     'keymap-mode-indicator-update)
+    (add-hook 'post-command-hook     'keymap-set-mode-indicator)
     (when (file-exists-p keymap-karabiner-cli)
       (add-hook 'keymap-insert-mode-activate-hook  'keymap-insert-mode-init-karabiner)
       (add-hook 'keymap-command-mode-activate-hook 'keymap-command-mode-init-karabiner))
+    (keymap-catch-tty-ESC)
+    (keymap-define-keys)
+    (keymap-define-input-source 'russian-computer)
     (keymap-command-mode-activate)))
 
 (provide 'keymap)
