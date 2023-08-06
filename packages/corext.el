@@ -1,5 +1,8 @@
 ;;; corext.el --- core extensions -*- coding: utf-8; lexical-binding: t; -*-
 
+(require 'dired)
+(require 'dired-x)
+
 (defalias 'autocomplete 'hippie-expand)
 
 (defun get-bounds-of-block ()
