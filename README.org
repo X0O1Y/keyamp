@@ -1,7 +1,7 @@
-#+title: Keymap
+#+title: Keyamp
 #+author: Egor Maltsev
 
-Think efficient based on [[file:packages/keymap.el][keymap]] for Emacs Mac Port.
+Efficient input model based on [[file:packages/keyamp.el][keyamp]] for Emacs.
 
 #+begin_src bash
 # emacs-mac
@@ -14,19 +14,19 @@ defaults write org.gnu.Emacs HideDocumentIcon YES
 Below features how to use it.
 
 ** Features
-- Macbook efficient setup
-- iOS setup
+- ANSI keyboard efficient setup
+- Virtual keyboard for touch screen
 - [[https://github.com/philc/vimium][Vimium]] bindings
 - More keyboards
 
-* Macbook efficient setup
+* ANSI keyboard efficient setup
 
 Thumb cluster for common keyboard, arrows on home row, number row by touch and more.
 
 - [[file:karabiner/karabiner.json][Karabiner]] config file. Emacs mode integration via variable!
 - [[http://www.keyboard-layout-editor.com/#/gists/106550cd49793787784ed1b9c9117c3d][Layout]] based on [[file:layouts/Engram.bundle][Engineer Engram]]:
 
-[[screenshots/iso-keyboard.png]]
+[[screenshots/ansi-keyboard.png]]
 
 - Automatic Russian layout support for command bindings
 
@@ -148,17 +148,17 @@ Escape activates command mode in GUI and terminal. Escape activates command mode
 
 #+end_src
 
-* iOS setup
+* Virtual keyboard for touch screen
 
 Emacs in pocket with unicode support. Use [[https://apps.apple.com/us/app/termius-terminal-ssh-client/id549039908][Termius]] client. Custom keyboard.
 
 *** Custom virtual keyboard
 - Engineer Engram and Russian layouts
   - App Store: [[https://apps.apple.com/us/app/xkeyboard-custom-keyboard/id1440245962][xKeyboard - Custom Keyboard]]
-  - Layout file: [[file:layouts/engineer-engram.xkeyboard][engineer-engram.xkeyboard]]
+  - Layout file: [[file:layouts/Engineer-Engram.xkeyboard][Engineer-Engram.xkeyboard]]
 
 *** Virtual keyboard add-on Termius
-- 【↑】 【↓】 【←】 【→】 【tab】 【del】 【pgUp】 【pgDn】
+- 【↑】 【↓】 【←】 【→】 【ctrl】 【pgUp】 【pgDn】 【del】
 
 *** Preferences
 - Set terminal and keyboard coding system to utf-8:
@@ -181,29 +181,10 @@ Emacs in pocket with unicode support. Use [[https://apps.apple.com/us/app/termiu
 - Nord theme for Emacs and Termius. Works worthy for GUI and terminal.
 
 - Color mode indicators
-#+begin_src elisp
-(defvar keymap-command-mode-indicator   "🟢"
-  "Character indicating command mode is active.")
-(defvar keymap-insert-mode-indicator    "🟠"
-  "Character indicating insert mode is active.")
-(defvar keymap-repeat-command-indicator "🔵"
-  "Character indicating repeat command is active.")
-
-(defun keymap-mode-indicator-update ()
-  "Update mode indicator."
-  (if (eq real-this-command 'repeat)
-      (setq mode-line-front-space keymap-repeat-command-indicator)
-    (progn
-      (if keymap-insert-state-p
-          (setq mode-line-front-space keymap-insert-mode-indicator)
-        (setq mode-line-front-space keymap-command-mode-indicator)))))
-
-(add-hook 'post-command-hook 'keymap-mode-indicator-update)
-#+end_src
 
 * Vimium bindings
 
-- Complete config file: [[file:layouts/virtual-keyboard.png][vimium-options-engineer-engram.json]]
+- Complete config file: [[file:layouts/vimium-options.json][vimium-options.json]]
 
 * More keyboards and options
 - Kinesis Advantage2 [[http://www.keyboard-layout-editor.com/#/gists/6a1a62133ab9f741589bd556cb946792][layout]] and [[file:layouts/qwerty2.txt][config]]:
@@ -217,8 +198,8 @@ Highly recommend portable lightweight keyboard:
 Toggle translate qwerty layout to engineer engram on Emacs level. Useful when engineer engram layout not available in a different way.
 
   #+begin_src elisp
-  (toggle-qwerty-to-engineer-engram)
+  (keyamp-qwerty-to-engineer-engram)
   #+end_src
 
-[[screenshots/pocket.jpg]] [[screenshots/pocket-2.jpg]]
+[[screenshots/pocket.jpg]]
 

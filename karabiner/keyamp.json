@@ -1,6 +1,7 @@
 {
-  "title": "keymap",
+  "title": "Keyamp",
   "rules": [
+
     {
       "description": "spacebar",
       "manipulators": [
@@ -21,7 +22,7 @@
           ],
           "to_if_held_down": [
             {
-              "shell_command": "open -a /opt/homebrew/Cellar/emacs-mac/emacs-28.2-mac-9.1/Emacs.app",
+              "shell_command": "open -a Emacs.app",
               "halt": true
             }
           ],
@@ -29,7 +30,7 @@
             {
               "type": "frontmost_application_unless",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             }
           ]
@@ -48,7 +49,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -82,7 +83,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -135,9 +136,108 @@
               "halt": true
             }
           ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "spacebar",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "spacebar pressed",
+              "value": 1
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 1
+            }
+          ],
+          "to": [
+            {
+              "key_code": "spacebar"
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "spacebar",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 1
+            }
+          ],
+            "to_after_key_up": [
+            {
+              "set_variable": {
+                "name": "spacebar pressed",
+                "value": 1
+              }
+            },
+            {
+              "key_code": "spacebar"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "b",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ],
+              "repeat": false,
+              "halt": true
+            }
+          ],
+          "to_delayed_action": {
+            "to_if_invoked": [
+              {
+                "set_variable": {
+                  "name": "spacebar pressed",
+                  "value": 0
+                }
+              }
+            ],
+            "to_if_canceled": [
+              {
+                "set_variable": {
+                  "name": "spacebar pressed",
+                  "value": 0
+                }
+              }
+            ]
+          }
         }
       ]
     },
+
     {
       "description": "left_command",
       "manipulators": [
@@ -155,55 +255,16 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
               "type": "variable_if",
               "name": "insert mode activated",
               "value": 0
-            },
-            {
-              "type": "variable_if",
-              "name": "leader pressed",
-              "value": 1
             }
           ],
           "to": [
-            {
-              "key_code": "spacebar"
-            }
-          ]
-        },
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "left_command",
-            "modifiers": {
-              "optional": [
-                "any"
-              ]
-            }
-          },
-          "conditions": [
-            {
-              "type": "frontmost_application_if",
-              "file_paths": [
-                "/Emacs$"
-              ]
-            },
-            {
-              "type": "variable_if",
-              "name": "insert mode activated",
-              "value": 0
-            }
-          ],
-          "to_after_key_up": [
-            {
-              "key_code": "delete_or_backspace"
-            }
-          ],
-          "to_if_held_down": [
             {
               "set_variable": {
                 "name": "leader pressed",
@@ -211,13 +272,31 @@
               }
             },
             {
-              "key_code": "b",
-              "modifiers": [
-                "left_shift",
-                "left_control"
-              ],
-              "repeat": false,
-              "halt": true
+              "set_variable": {
+                "name": "i pressed",
+                "value": 0
+              }
+            },
+            {
+              "set_variable": {
+                "name": "j pressed",
+                "value": 0
+              }
+            },
+            {
+              "set_variable": {
+                "name": "k pressed",
+                "value": 0
+              }
+            },
+            {
+              "set_variable": {
+                "name": "l pressed",
+                "value": 0
+              }
+            },
+            {
+              "key_code": "delete_or_backspace"
             }
           ]
         },
@@ -235,7 +314,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -269,7 +348,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -291,7 +370,7 @@
           ],
           "to_if_held_down": [
             {
-              "key_code": "b",
+              "key_code": "equal_sign",
               "modifiers": [
                 "left_shift",
                 "left_control"
@@ -333,7 +412,7 @@
             {
               "type": "frontmost_application_unless",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             }
           ],
@@ -364,7 +443,7 @@
             {
               "type": "frontmost_application_unless",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             }
           ],
@@ -406,6 +485,7 @@
         }
       ]
     },
+
     {
       "description": "q",
       "manipulators": [
@@ -423,7 +503,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -451,7 +531,7 @@
               }
             },
             {
-              "key_code": "b",
+              "key_code": "equal_sign",
               "modifiers": [
                 "left_shift",
                 "left_control"
@@ -463,9 +543,39 @@
               "halt": true
             }
           ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "q",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "q"
+            }
+          ]
         }
       ]
     },
+
     {
       "description": "w",
       "manipulators": [
@@ -483,7 +593,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -525,9 +635,39 @@
               "halt": true
             }
           ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "w",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "w"
+            }
+          ]
         }
       ]
     },
+
     {
       "description": "e",
       "manipulators": [
@@ -545,7 +685,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -573,14 +713,11 @@
               }
             },
             {
-              "key_code": "b",
+              "key_code": "equal_sign",
               "modifiers": [
                 "left_shift",
                 "left_control"
               ]
-            },
-            {
-              "key_code": "e"
             },
             {
               "key_code": "e",
@@ -588,9 +725,39 @@
               "halt": true
             }
           ]
-        }
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "e",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "e"
+            }
+          ]
+        }          
       ]
     },
+
     {
       "description": "r",
       "manipulators": [
@@ -608,7 +775,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -636,7 +803,7 @@
               }
             },
             {
-              "key_code": "b",
+              "key_code": "equal_sign",
               "modifiers": [
                 "left_shift",
                 "left_control"
@@ -648,9 +815,39 @@
               "halt": true
             }
           ]
-        }
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "r",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "r"
+            }
+          ]
+        }          
       ]
     },
+
     {
       "description": "t",
       "manipulators": [
@@ -668,7 +865,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -696,7 +893,7 @@
               }
             },
             {
-              "key_code": "b",
+              "key_code": "equal_sign",
               "modifiers": [
                 "left_shift",
                 "left_control"
@@ -708,9 +905,39 @@
               "halt": true
             }
           ]
-        }
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "t",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "t"
+            }
+          ]
+        }          
       ]
     },
+
     {
       "description": "y",
       "manipulators": [
@@ -728,7 +955,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -768,9 +995,39 @@
               "halt": true
             }
           ]
-        }
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "y",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "y"
+            }
+          ]
+        }          
       ]
     },
+
     {
       "description": "u",
       "manipulators": [
@@ -788,7 +1045,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -828,9 +1085,39 @@
               "halt": true
             }
           ]
-        }
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "u",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "u"
+            }
+          ]
+        }          
       ]
     },
+
     {
       "description": "i",
       "manipulators": [
@@ -848,7 +1135,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -882,7 +1169,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -941,17 +1228,44 @@
               ]
             },
             {
-              "key_code": "i"
-            },
-            {
               "key_code": "i",
               "repeat": false,
               "halt": true
             }
           ]
-        }
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "i",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "i"
+            }
+          ]
+        }          
       ]
     },
+
     {
       "description": "o",
       "manipulators": [
@@ -969,7 +1283,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -1009,9 +1323,39 @@
               "halt": true
             }
           ]
-        }
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "o",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "o"
+            }
+          ]
+        }          
       ]
     },
+
     {
       "description": "p",
       "manipulators": [
@@ -1029,7 +1373,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -1069,9 +1413,219 @@
               "halt": true
             }
           ]
-        }
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "p",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "p"
+            }
+          ]
+        }          
       ]
     },
+
+    {
+      "description": "open_bracket",
+      "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "open_bracket",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 0
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "set_variable": {
+                "name": "leader pressed",
+                "value": 0
+              }
+            },
+            {
+              "key_code": "open_bracket"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "set_variable": {
+                "name": "leader pressed",
+                "value": 0
+              }
+            },
+            {
+              "key_code": "b",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "open_bracket",
+              "repeat": false,
+              "halt": true
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "open_bracket",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "open_bracket"
+            }
+          ]
+        }          
+      ]
+    },
+
+    {
+      "description": "close_bracket",
+      "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "close_bracket",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 0
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "set_variable": {
+                "name": "leader pressed",
+                "value": 0
+              }
+            },
+            {
+              "key_code": "close_bracket"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "set_variable": {
+                "name": "leader pressed",
+                "value": 0
+              }
+            },
+            {
+              "key_code": "b",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "close_bracket",
+              "repeat": false,
+              "halt": true
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "close_bracket",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "close_bracket"
+            }
+          ]
+        }          
+      ]
+    },
+
     {
       "description": "a",
       "manipulators": [
@@ -1089,7 +1643,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -1117,7 +1671,7 @@
               }
             },
             {
-              "key_code": "b",
+              "key_code": "equal_sign",
               "modifiers": [
                 "left_shift",
                 "left_control"
@@ -1129,9 +1683,39 @@
               "halt": true
             }
           ]
-        }
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "a",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "a"
+            }
+          ]
+        }          
       ]
     },
+
     {
       "description": "s",
       "manipulators": [
@@ -1149,7 +1733,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -1177,7 +1761,7 @@
               }
             },
             {
-              "key_code": "b",
+              "key_code": "equal_sign",
               "modifiers": [
                 "left_shift",
                 "left_control"
@@ -1189,9 +1773,39 @@
               "halt": true
             }
           ]
-        }
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "s",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "s"
+            }
+          ]
+        }          
       ]
     },
+
     {
       "description": "d",
       "manipulators": [
@@ -1209,7 +1823,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -1237,14 +1851,11 @@
               }
             },
             {
-              "key_code": "b",
+              "key_code": "equal_sign",
               "modifiers": [
                 "left_shift",
                 "left_control"
               ]
-            },
-            {
-              "key_code": "d"
             },
             {
               "key_code": "d",
@@ -1252,9 +1863,39 @@
               "halt": true
             }
           ]
-        }
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "d",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "d"
+            }
+          ]
+        }          
       ]
     },
+
     {
       "description": "f",
       "manipulators": [
@@ -1272,7 +1913,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -1294,7 +1935,7 @@
               }
             },
             {
-              "key_code": "b",
+              "key_code": "equal_sign",
               "modifiers": [
                 "left_shift",
                 "left_control"
@@ -1306,9 +1947,39 @@
               "halt": true
             }
           ]
-        }
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "f",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "f"
+            }
+          ]
+        }          
       ]
     },
+
     {
       "description": "g",
       "manipulators": [
@@ -1326,7 +1997,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -1354,7 +2025,7 @@
               }
             },
             {
-              "key_code": "b",
+              "key_code": "equal_sign",
               "modifiers": [
                 "left_shift",
                 "left_control"
@@ -1366,9 +2037,39 @@
               "halt": true
             }
           ]
-        }
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "g",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "g"
+            }
+          ]
+        }          
       ]
     },
+
     {
       "description": "h",
       "manipulators": [
@@ -1386,7 +2087,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -1426,9 +2127,39 @@
               "halt": true
             }
           ]
-        }
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "h",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "h"
+            }
+          ]
+        }          
       ]
     },
+
     {
       "description": "j",
       "manipulators": [
@@ -1446,7 +2177,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -1480,7 +2211,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -1539,17 +2270,44 @@
               ]
             },
             {
-              "key_code": "j"
-            },
-            {
               "key_code": "j",
               "repeat": false,
               "halt": true
             }
           ]
-        }
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "j",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "j"
+            }
+          ]
+        }          
       ]
     },
+
     {
       "description": "k",
       "manipulators": [
@@ -1567,7 +2325,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -1601,7 +2359,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -1660,17 +2418,44 @@
               ]
             },
             {
-              "key_code": "k"
-            },
-            {
               "key_code": "k",
               "repeat": false,
               "halt": true
             }
           ]
-        }
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "k",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "k"
+            }
+          ]
+        }          
       ]
     },
+
     {
       "description": "l",
       "manipulators": [
@@ -1688,7 +2473,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -1722,7 +2507,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -1781,17 +2566,44 @@
               ]
             },
             {
-              "key_code": "l"
-            },
-            {
               "key_code": "l",
               "repeat": false,
               "halt": true
             }
           ]
-        }
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "l",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "l"
+            }
+          ]
+        }          
       ]
     },
+
     {
       "description": ";",
       "manipulators": [
@@ -1809,7 +2621,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -1849,9 +2661,39 @@
               "halt": true
             }
           ]
-        }
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "semicolon",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "semicolon"
+            }
+          ]
+        }          
       ]
     },
+
     {
       "description": "'",
       "manipulators": [
@@ -1869,7 +2711,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -1909,9 +2751,39 @@
               "halt": true
             }
           ]
-        }
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "quote",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "quote"
+            }
+          ]
+        }          
       ]
     },
+
     {
       "description": "z",
       "manipulators": [
@@ -1929,7 +2801,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -1957,7 +2829,7 @@
               }
             },
             {
-              "key_code": "b",
+              "key_code": "equal_sign",
               "modifiers": [
                 "left_shift",
                 "left_control"
@@ -1969,9 +2841,39 @@
               "halt": true
             }
           ]
-        }
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "z",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "z"
+            }
+          ]
+        }          
       ]
     },
+
     {
       "description": "x",
       "manipulators": [
@@ -1989,7 +2891,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -2017,7 +2919,7 @@
               }
             },
             {
-              "key_code": "b",
+              "key_code": "equal_sign",
               "modifiers": [
                 "left_shift",
                 "left_control"
@@ -2029,9 +2931,39 @@
               "halt": true
             }
           ]
-        }
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "x",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "x"
+            }
+          ]
+        }          
       ]
     },
+
     {
       "description": "c",
       "manipulators": [
@@ -2049,7 +2981,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -2077,7 +3009,7 @@
               }
             },
             {
-              "key_code": "b",
+              "key_code": "equal_sign",
               "modifiers": [
                 "left_shift",
                 "left_control"
@@ -2089,9 +3021,39 @@
               "halt": true
             }
           ]
-        }
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "c",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "c"
+            }
+          ]
+        }          
       ]
     },
+
     {
       "description": "v",
       "manipulators": [
@@ -2109,7 +3071,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -2137,7 +3099,7 @@
               }
             },
             {
-              "key_code": "b",
+              "key_code": "equal_sign",
               "modifiers": [
                 "left_shift",
                 "left_control"
@@ -2149,9 +3111,39 @@
               "halt": true
             }
           ]
-        }
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "v",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "v"
+            }
+          ]
+        }          
       ]
     },
+
     {
       "description": "b",
       "manipulators": [
@@ -2169,7 +3161,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -2197,7 +3189,7 @@
               }
             },
             {
-              "key_code": "b",
+              "key_code": "equal_sign",
               "modifiers": [
                 "left_shift",
                 "left_control"
@@ -2209,9 +3201,39 @@
               "halt": true
             }
           ]
-        }
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "b",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "b"
+            }
+          ]
+        }          
       ]
     },
+
     {
       "description": "n",
       "manipulators": [
@@ -2229,7 +3251,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -2269,9 +3291,39 @@
               "halt": true
             }
           ]
-        }
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "n",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "n"
+            }
+          ]
+        }          
       ]
     },
+
     {
       "description": "m",
       "manipulators": [
@@ -2289,7 +3341,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -2329,9 +3381,39 @@
               "halt": true
             }
           ]
-        }
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "m",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "m"
+            }
+          ]
+        }          
       ]
     },
+
     {
       "description": ",",
       "manipulators": [
@@ -2349,7 +3431,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -2384,17 +3466,44 @@
               ]
             },
             {
-              "key_code": "comma"
-            },
-            {
               "key_code": "comma",
               "repeat": false,
               "halt": true
             }
           ]
-        }
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "comma",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "comma"
+            }
+          ]
+        }          
       ]
     },
+
     {
       "description": ".",
       "manipulators": [
@@ -2412,7 +3521,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -2452,9 +3561,39 @@
               "halt": true
             }
           ]
-        }
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "period",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "period"
+            }
+          ]
+        }          
       ]
     },
+
     {
       "description": "/",
       "manipulators": [
@@ -2480,7 +3619,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -2543,7 +3682,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -2582,9 +3721,137 @@
               "halt": true
             }
           ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "slash",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "input_sources": [
+                {
+                  "input_source_id": "com.apple.keylayout.RussianWin"
+                }
+              ],
+              "type": "input_source_if"
+            },
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 1
+            }
+          ],
+          "to": [
+            {
+              "key_code": "slash"
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "slash",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "slash"
+            }
+          ]
+        }          
+      ]
+    },
+
+    {
+      "description": "`",
+      "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "grave_accent_and_tilde",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 0
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "set_variable": {
+                "name": "leader pressed",
+                "value": 0
+              }
+            },
+            {
+              "key_code": "grave_accent_and_tilde"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "set_variable": {
+                "name": "leader pressed",
+                "value": 0
+              }
+            },
+            {
+              "key_code": "equal_sign",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "grave_accent_and_tilde",
+              "repeat": false,
+              "halt": true
+            }
+          ]
         }
       ]
     },
+
     {
       "description": "1",
       "manipulators": [
@@ -2610,7 +3877,7 @@
             {
               "type": "frontmost_application_unless",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             }
           ],
@@ -2652,7 +3919,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -2680,7 +3947,7 @@
               }
             },
             {
-              "key_code": "b",
+              "key_code": "equal_sign",
               "modifiers": [
                 "left_shift",
                 "left_control"
@@ -2715,7 +3982,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -2762,13 +4029,13 @@
             {
               "type": "frontmost_application_unless",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             }
           ],
           "to_after_key_up": [
             {
-              "key_code": "9"
+              "key_code": "1"
             }
           ],
           "to_if_held_down": [
@@ -2804,7 +4071,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -2821,7 +4088,7 @@
               }
             },
             {
-              "key_code": "9"
+              "key_code": "7"
             }
           ],
           "to_if_held_down": [
@@ -2832,14 +4099,14 @@
               }
             },
             {
-              "key_code": "b",
+              "key_code": "equal_sign",
               "modifiers": [
                 "left_shift",
                 "left_control"
               ]
             },
             {
-              "key_code": "9",
+              "key_code": "7",
               "repeat": false,
               "halt": true
             }
@@ -2867,7 +4134,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -2878,7 +4145,7 @@
           ],
           "to_after_key_up": [
             {
-              "key_code": "9"
+              "key_code": "1"
             }
           ],
           "to_if_held_down": [
@@ -2894,6 +4161,7 @@
         }
       ]
     },
+
     {
       "description": "2",
       "manipulators": [
@@ -2919,7 +4187,7 @@
             {
               "type": "frontmost_application_unless",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             }
           ],
@@ -2961,7 +4229,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -2989,7 +4257,7 @@
               }
             },
             {
-              "key_code": "b",
+              "key_code": "equal_sign",
               "modifiers": [
                 "left_shift",
                 "left_control"
@@ -3024,7 +4292,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -3071,13 +4339,13 @@
             {
               "type": "frontmost_application_unless",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             }
           ],
           "to_after_key_up": [
             {
-              "key_code": "7"
+              "key_code": "2"
             }
           ],
           "to_if_held_down": [
@@ -3113,7 +4381,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -3130,7 +4398,7 @@
               }
             },
             {
-              "key_code": "7"
+              "key_code": "5"
             }
           ],
           "to_if_held_down": [
@@ -3141,14 +4409,14 @@
               }
             },
             {
-              "key_code": "b",
+              "key_code": "equal_sign",
               "modifiers": [
                 "left_shift",
                 "left_control"
               ]
             },
             {
-              "key_code": "7",
+              "key_code": "5",
               "repeat": false,
               "halt": true
             }
@@ -3176,7 +4444,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -3187,7 +4455,7 @@
           ],
           "to_after_key_up": [
             {
-              "key_code": "7"
+              "key_code": "2"
             }
           ],
           "to_if_held_down": [
@@ -3203,6 +4471,7 @@
         }
       ]
     },
+
     {
       "description": "3",
       "manipulators": [
@@ -3228,7 +4497,7 @@
             {
               "type": "frontmost_application_unless",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             }
           ],
@@ -3270,7 +4539,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -3298,7 +4567,7 @@
               }
             },
             {
-              "key_code": "b",
+              "key_code": "equal_sign",
               "modifiers": [
                 "left_shift",
                 "left_control"
@@ -3333,7 +4602,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -3380,13 +4649,13 @@
             {
               "type": "frontmost_application_unless",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             }
           ],
           "to_after_key_up": [
             {
-              "key_code": "1"
+              "key_code": "3"
             }
           ],
           "to_if_held_down": [
@@ -3422,7 +4691,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -3450,7 +4719,7 @@
               }
             },
             {
-              "key_code": "b",
+              "key_code": "equal_sign",
               "modifiers": [
                 "left_shift",
                 "left_control"
@@ -3485,7 +4754,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -3496,7 +4765,7 @@
           ],
           "to_after_key_up": [
             {
-              "key_code": "1"
+              "key_code": "3"
             }
           ],
           "to_if_held_down": [
@@ -3512,6 +4781,7 @@
         }
       ]
     },
+
     {
       "description": "4",
       "manipulators": [
@@ -3537,7 +4807,7 @@
             {
               "type": "frontmost_application_unless",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             }
           ],
@@ -3579,7 +4849,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -3607,7 +4877,7 @@
               }
             },
             {
-              "key_code": "b",
+              "key_code": "equal_sign",
               "modifiers": [
                 "left_shift",
                 "left_control"
@@ -3642,7 +4912,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -3689,13 +4959,13 @@
             {
               "type": "frontmost_application_unless",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             }
           ],
           "to_after_key_up": [
             {
-              "key_code": "3"
+              "key_code": "4"
             }
           ],
           "to_if_held_down": [
@@ -3731,7 +5001,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -3747,7 +5017,7 @@
           ],
           "to_if_held_down": [
             {
-              "key_code": "b",
+              "key_code": "equal_sign",
               "modifiers": [
                 "left_shift",
                 "left_control"
@@ -3782,7 +5052,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -3793,7 +5063,7 @@
           ],
           "to_after_key_up": [
             {
-              "key_code": "3"
+              "key_code": "4"
             }
           ],
           "to_if_held_down": [
@@ -3809,6 +5079,7 @@
         }
       ]
     },
+
     {
       "description": "5",
       "manipulators": [
@@ -3834,7 +5105,7 @@
             {
               "type": "frontmost_application_unless",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             }
           ],
@@ -3876,7 +5147,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -3904,7 +5175,7 @@
               }
             },
             {
-              "key_code": "b",
+              "key_code": "equal_sign",
               "modifiers": [
                 "left_shift",
                 "left_control"
@@ -3939,7 +5210,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -3986,7 +5257,7 @@
             {
               "type": "frontmost_application_unless",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             }
           ],
@@ -4028,7 +5299,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -4045,7 +5316,7 @@
               }
             },
             {
-              "key_code": "5"
+              "key_code": "9"
             }
           ],
           "to_if_held_down": [
@@ -4056,14 +5327,14 @@
               }
             },
             {
-              "key_code": "b",
+              "key_code": "equal_sign",
               "modifiers": [
                 "left_shift",
                 "left_control"
               ]
             },
             {
-              "key_code": "5",
+              "key_code": "9",
               "repeat": false,
               "halt": true
             }
@@ -4091,7 +5362,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -4118,6 +5389,7 @@
         }
       ]
     },
+
     {
       "description": "6",
       "manipulators": [
@@ -4143,7 +5415,7 @@
             {
               "type": "frontmost_application_unless",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             }
           ],
@@ -4185,7 +5457,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -4248,7 +5520,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -4295,13 +5567,13 @@
             {
               "type": "frontmost_application_unless",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             }
           ],
           "to_after_key_up": [
             {
-              "key_code": "4"
+              "key_code": "6"
             }
           ],
           "to_if_held_down": [
@@ -4337,7 +5609,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -4354,7 +5626,7 @@
               }
             },
             {
-              "key_code": "4"
+              "key_code": "8"
             }
           ],
           "to_if_held_down": [
@@ -4372,7 +5644,7 @@
               ]
             },
             {
-              "key_code": "4",
+              "key_code": "8",
               "repeat": false,
               "halt": true
             }
@@ -4400,7 +5672,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -4411,7 +5683,7 @@
           ],
           "to_after_key_up": [
             {
-              "key_code": "4"
+              "key_code": "6"
             }
           ],
           "to_if_held_down": [
@@ -4427,6 +5699,7 @@
         }
       ]
     },
+
     {
       "description": "7",
       "manipulators": [
@@ -4452,7 +5725,7 @@
             {
               "type": "frontmost_application_unless",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             }
           ],
@@ -4494,7 +5767,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -4557,7 +5830,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -4604,13 +5877,13 @@
             {
               "type": "frontmost_application_unless",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             }
           ],
           "to_after_key_up": [
             {
-              "key_code": "2"
+              "key_code": "7"
             }
           ],
           "to_if_held_down": [
@@ -4646,7 +5919,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -4709,7 +5982,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -4720,7 +5993,7 @@
           ],
           "to_after_key_up": [
             {
-              "key_code": "2"
+              "key_code": "7"
             }
           ],
           "to_if_held_down": [
@@ -4736,6 +6009,7 @@
         }
       ]
     },
+
     {
       "description": "8",
       "manipulators": [
@@ -4761,7 +6035,7 @@
             {
               "type": "frontmost_application_unless",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             }
           ],
@@ -4803,7 +6077,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -4866,7 +6140,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -4913,13 +6187,13 @@
             {
               "type": "frontmost_application_unless",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             }
           ],
           "to_after_key_up": [
             {
-              "key_code": "0"
+              "key_code": "8"
             }
           ],
           "to_if_held_down": [
@@ -4955,7 +6229,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -5006,7 +6280,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -5017,7 +6291,7 @@
           ],
           "to_after_key_up": [
             {
-              "key_code": "0"
+              "key_code": "8"
             }
           ],
           "to_if_held_down": [
@@ -5033,6 +6307,7 @@
         }
       ]
     },
+
     {
       "description": "9",
       "manipulators": [
@@ -5058,7 +6333,7 @@
             {
               "type": "frontmost_application_unless",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             }
           ],
@@ -5100,7 +6375,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -5163,7 +6438,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -5210,13 +6485,13 @@
             {
               "type": "frontmost_application_unless",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             }
           ],
           "to_after_key_up": [
             {
-              "key_code": "6"
+              "key_code": "9"
             }
           ],
           "to_if_held_down": [
@@ -5252,7 +6527,317 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 0
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "set_variable": {
+                "name": "leader pressed",
+                "value": 0
+              }
+            },
+            {
+              "key_code": "4"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "set_variable": {
+                "name": "leader pressed",
+                "value": 0
+              }
+            },
+            {
+              "key_code": "b",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "4",
+              "repeat": false,
+              "halt": true
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "9",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "input_sources": [
+                {
+                  "input_source_id": "com.apple.keylayout.RussianWin"
+                }
+              ],
+              "type": "input_source_if"
+            },
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "9"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "9",
+              "modifiers": [
+                "left_shift"
+              ],
+              "repeat": false,
+              "halt": true
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "description": "0",
+      "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "0",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "input_sources": [
+                {
+                  "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+                }
+              ],
+              "type": "input_source_if"
+            },
+            {
+              "type": "frontmost_application_unless",
+              "file_paths": [
+                "/Emacs"
+              ]
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "0"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "0",
+              "modifiers": [
+                "left_shift"
+              ],
+              "repeat": false,
+              "halt": true
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "0",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "input_sources": [
+                {
+                  "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+                }
+              ],
+              "type": "input_source_if"
+            },
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 0
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "set_variable": {
+                "name": "leader pressed",
+                "value": 0
+              }
+            },
+            {
+              "key_code": "0"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "set_variable": {
+                "name": "leader pressed",
+                "value": 0
+              }
+            },
+            {
+              "key_code": "b",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "0",
+              "repeat": false,
+              "halt": true
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "0",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "input_sources": [
+                {
+                  "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+                }
+              ],
+              "type": "input_source_if"
+            },
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "0"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "0",
+              "modifiers": [
+                "left_shift"
+              ],
+              "repeat": false,
+              "halt": true
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "0",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "input_sources": [
+                {
+                  "input_source_id": "com.apple.keylayout.RussianWin"
+                }
+              ],
+              "type": "input_source_if"
+            },
+            {
+              "type": "frontmost_application_unless",
+              "file_paths": [
+                "/Emacs"
+              ]
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "0"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "0",
+              "modifiers": [
+                "left_shift"
+              ],
+              "repeat": false,
+              "halt": true
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "0",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "input_sources": [
+                {
+                  "input_source_id": "com.apple.keylayout.RussianWin"
+                }
+              ],
+              "type": "input_source_if"
+            },
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
               ]
             },
             {
@@ -5296,7 +6881,7 @@
         {
           "type": "basic",
           "from": {
-            "key_code": "9",
+            "key_code": "0",
             "modifiers": {
               "optional": [
                 "any"
@@ -5315,164 +6900,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
-              ]
-            },
-            {
-              "type": "variable_if",
-              "name": "insert mode activated",
-              "value": 1
-            }
-          ],
-          "to_after_key_up": [
-            {
-              "key_code": "6"
-            }
-          ],
-          "to_if_held_down": [
-            {
-              "key_code": "9",
-              "modifiers": [
-                "left_shift"
-              ],
-              "repeat": false,
-              "halt": true
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "description": "0",
-      "manipulators": [
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "0",
-            "modifiers": {
-              "optional": [
-                "any"
-              ]
-            }
-          },
-          "conditions": [
-            {
-              "input_sources": [
-                {
-                  "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
-                }
-              ],
-              "type": "input_source_if"
-            },
-            {
-              "type": "frontmost_application_unless",
-              "file_paths": [
-                "/Emacs$"
-              ]
-            }
-          ],
-          "to_after_key_up": [
-            {
-              "key_code": "0"
-            }
-          ],
-          "to_if_held_down": [
-            {
-              "key_code": "0",
-              "modifiers": [
-                "left_shift"
-              ],
-              "repeat": false,
-              "halt": true
-            }
-          ]
-        },
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "0",
-            "modifiers": {
-              "optional": [
-                "any"
-              ]
-            }
-          },
-          "conditions": [
-            {
-              "input_sources": [
-                {
-                  "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
-                }
-              ],
-              "type": "input_source_if"
-            },
-            {
-              "type": "frontmost_application_if",
-              "file_paths": [
-                "/Emacs$"
-              ]
-            },
-            {
-              "type": "variable_if",
-              "name": "insert mode activated",
-              "value": 0
-            }
-          ],
-          "to_after_key_up": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
-              "key_code": "0"
-            }
-          ],
-          "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
-              "key_code": "b",
-              "modifiers": [
-                "left_shift",
-                "left_control"
-              ]
-            },
-            {
-              "key_code": "0",
-              "repeat": false,
-              "halt": true
-            }
-          ]
-        },
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "0",
-            "modifiers": {
-              "optional": [
-                "any"
-              ]
-            }
-          },
-          "conditions": [
-            {
-              "input_sources": [
-                {
-                  "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
-                }
-              ],
-              "type": "input_source_if"
-            },
-            {
-              "type": "frontmost_application_if",
-              "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -5484,158 +6912,6 @@
           "to_after_key_up": [
             {
               "key_code": "0"
-            }
-          ],
-          "to_if_held_down": [
-            {
-              "key_code": "0",
-              "modifiers": [
-                "left_shift"
-              ],
-              "repeat": false,
-              "halt": true
-            }
-          ]
-        },
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "0",
-            "modifiers": {
-              "optional": [
-                "any"
-              ]
-            }
-          },
-          "conditions": [
-            {
-              "input_sources": [
-                {
-                  "input_source_id": "com.apple.keylayout.RussianWin"
-                }
-              ],
-              "type": "input_source_if"
-            },
-            {
-              "type": "frontmost_application_unless",
-              "file_paths": [
-                "/Emacs$"
-              ]
-            }
-          ],
-          "to_after_key_up": [
-            {
-              "key_code": "8"
-            }
-          ],
-          "to_if_held_down": [
-            {
-              "key_code": "0",
-              "modifiers": [
-                "left_shift"
-              ],
-              "repeat": false,
-              "halt": true
-            }
-          ]
-        },
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "0",
-            "modifiers": {
-              "optional": [
-                "any"
-              ]
-            }
-          },
-          "conditions": [
-            {
-              "input_sources": [
-                {
-                  "input_source_id": "com.apple.keylayout.RussianWin"
-                }
-              ],
-              "type": "input_source_if"
-            },
-            {
-              "type": "frontmost_application_if",
-              "file_paths": [
-                "/Emacs$"
-              ]
-            },
-            {
-              "type": "variable_if",
-              "name": "insert mode activated",
-              "value": 0
-            }
-          ],
-          "to_after_key_up": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
-              "key_code": "8"
-            }
-          ],
-          "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
-              "key_code": "b",
-              "modifiers": [
-                "left_shift",
-                "left_control"
-              ]
-            },
-            {
-              "key_code": "8",
-              "repeat": false,
-              "halt": true
-            }
-          ]
-        },
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "0",
-            "modifiers": {
-              "optional": [
-                "any"
-              ]
-            }
-          },
-          "conditions": [
-            {
-              "input_sources": [
-                {
-                  "input_source_id": "com.apple.keylayout.RussianWin"
-                }
-              ],
-              "type": "input_source_if"
-            },
-            {
-              "type": "frontmost_application_if",
-              "file_paths": [
-                "/Emacs$"
-              ]
-            },
-            {
-              "type": "variable_if",
-              "name": "insert mode activated",
-              "value": 1
-            }
-          ],
-          "to_after_key_up": [
-            {
-              "key_code": "8"
             }
           ],
           "to_if_held_down": [
@@ -5651,6 +6927,7 @@
         }
       ]
     },
+
     {
       "description": "hyphen",
       "manipulators": [
@@ -5668,7 +6945,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -5711,6 +6988,68 @@
         }
       ]
     },
+
+{
+      "description": "equal_sign",
+      "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "equal_sign",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 0
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "set_variable": {
+                "name": "leader pressed",
+                "value": 0
+              }
+            },
+            {
+              "key_code": "equal_sign"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "set_variable": {
+                "name": "leader pressed",
+                "value": 0
+              }
+            },
+            {
+              "key_code": "b",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "equal_sign",
+              "repeat": false,
+              "halt": true
+            }
+          ]
+        }
+      ]
+    },
+
     {
       "description": "backslash",
       "manipulators": [
@@ -5728,7 +7067,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -5771,6 +7110,7 @@
         }
       ]
     },
+
     {
       "description": "return_or_enter",
       "manipulators": [
@@ -5788,7 +7128,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -5839,7 +7179,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -5878,7 +7218,7 @@
             {
               "type": "frontmost_application_unless",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             }
           ],
@@ -5895,7 +7235,7 @@
               ]
             },
             {
-              "shell_command": "open -a /opt/homebrew/Cellar/emacs-mac/emacs-28.2-mac-9.1/Emacs.app",
+              "shell_command": "open -a Emacs.app",
               "repeat": false,
               "halt": true
             }
@@ -5903,6 +7243,7 @@
         }
       ]
     },
+
     {
       "description": "tab",
       "manipulators": [
@@ -5930,6 +7271,7 @@
         }
       ]
     },
+
     {
       "description": "escape",
       "manipulators": [
@@ -5957,6 +7299,36 @@
               }
             },
             {
+              "set_variable": {
+                "name": "spacebar pressed",
+                "value": 0
+              }
+            },
+            {
+              "set_variable": {
+                "name": "i pressed",
+                "value": 0
+              }
+            },
+            {
+              "set_variable": {
+                "name": "j pressed",
+                "value": 0
+              }
+            },
+            {
+              "set_variable": {
+                "name": "k pressed",
+                "value": 0
+              }
+            },
+            {
+              "set_variable": {
+                "name": "l pressed",
+                "value": 0
+              }
+            },
+            {
               "key_code": "escape"
             }
           ],
@@ -5980,7 +7352,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -6019,7 +7391,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -6054,13 +7426,14 @@
             {
               "type": "frontmost_application_unless",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             }
           ]
         }
       ]
     },
+
     {
       "description": "left_control",
       "manipulators": [
@@ -6088,6 +7461,7 @@
         }
       ]
     },
+
     {
       "description": "left_option",
       "manipulators": [
@@ -6115,6 +7489,7 @@
         }
       ]
     },
+
     {
       "description": "f1",
       "manipulators": [
@@ -6131,6 +7506,7 @@
         }
       ]
     },
+
     {
       "description": "f2",
       "manipulators": [
@@ -6147,6 +7523,7 @@
         }
       ]
     },
+
     {
       "description": "f3",
       "manipulators": [
@@ -6162,14 +7539,14 @@
           },
           "to_after_key_up": [
             {
-              "shell_command": "open -a /opt/homebrew/Cellar/emacs-mac/emacs-28.2-mac-9.1/Emacs.app && /opt/homebrew/Cellar/emacs-mac/emacs-28.2-mac-9.1/bin/emacsclient --no-wait --eval '(pass)'"
+              "shell_command": "open -a Emacs.app && /Applications/emacsclient --no-wait --eval '(pass)'"
             }
           ],
           "conditions": [
             {
               "type": "frontmost_application_unless",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             }
           ],
@@ -6199,7 +7576,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             }
           ],
@@ -6212,6 +7589,7 @@
         }
       ]
     },
+
     {
       "description": "f4",
       "manipulators": [
@@ -6225,65 +7603,19 @@
               ]
             }
           },
-          "to_after_key_up": [
+          "to": [
             {
-              "key_code": "f4"
-            }
-          ],
-          "conditions": [
-            {
-              "type": "frontmost_application_if",
-              "file_paths": [
-                "/Emacs$"
-              ]
-            }
-          ],
-          "to_if_held_down": [
-            {
-              "key_code": "b",
+              "key_code": "tab",
               "modifiers": [
-                "left_shift",
-                "left_control"
-              ]
-            },
-            {
-              "key_code": "f4",
-              "halt": true
-            }
-          ]
-        },
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "f4",
-            "modifiers": {
-              "optional": [
-                "any"
-              ]
-            }
-          },
-          "to_after_key_up": [
-            {
-              "shell_command": "open -a /opt/homebrew/Cellar/emacs-mac/emacs-28.2-mac-9.1/Emacs.app && /opt/homebrew/Cellar/emacs-mac/emacs-28.2-mac-9.1/bin/emacsclient --no-wait --eval '(tasks)'"
-            }
-          ],
-          "conditions": [
-            {
-              "type": "frontmost_application_unless",
-              "file_paths": [
-                "/Emacs$"
-              ]
-            }
-          ],
-          "to_if_held_down": [
-            {
-              "shell_command": "open -a /opt/homebrew/Cellar/emacs-mac/emacs-28.2-mac-9.1/Emacs.app && /opt/homebrew/Cellar/emacs-mac/emacs-28.2-mac-9.1/bin/emacsclient --no-wait --eval '(agenda)'",
+                "command"
+              ],
               "halt": true
             }
           ]
         }
       ]
     },
+
     {
       "description": "f5",
       "manipulators": [
@@ -6311,6 +7643,7 @@
         }
       ]
     },
+
     {
       "description": "f6",
       "manipulators": [
@@ -6326,7 +7659,7 @@
           },
           "to_after_key_up": [
             {
-              "shell_command": "open -a /opt/homebrew/Cellar/emacs-mac/emacs-28.2-mac-9.1/Emacs.app && /opt/homebrew/Cellar/emacs-mac/emacs-28.2-mac-9.1/bin/emacsclient --no-wait --eval '(books)'"
+              "shell_command": "open -a Emacs.app && /Applications/emacsclient --no-wait --eval '(books)'"
             }
           ],
           "to_if_held_down": [
@@ -6339,7 +7672,7 @@
             {
               "type": "frontmost_application_unless",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             }
           ]
@@ -6369,13 +7702,14 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             }
           ]
         }
       ]
     },
+
     {
       "description": "f7",
       "manipulators": [
@@ -6391,14 +7725,14 @@
           },
           "to_after_key_up": [
             {
-              "shell_command": "open -a /opt/homebrew/Cellar/emacs-mac/emacs-28.2-mac-9.1/Emacs.app && /opt/homebrew/Cellar/emacs-mac/emacs-28.2-mac-9.1/bin/emacsclient --no-wait --eval '(email)'"
+              "shell_command": "open -a Emacs.app && /Applications/emacsclient --no-wait --eval '(email)'"
             }
           ],
           "conditions": [
             {
               "type": "frontmost_application_unless",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             }
           ],
@@ -6458,7 +7792,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             }
           ],
@@ -6471,6 +7805,7 @@
         }
       ]
     },
+
     {
       "description": "f8",
       "manipulators": [
@@ -6486,7 +7821,7 @@
           },
           "to_after_key_up": [
             {
-              "shell_command": "/opt/homebrew/Cellar/emacs-mac/emacs-28.2-mac-9.1/bin/emacsclient --no-wait --eval '(emms-pause)'"
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(emms-pause)'"
             }
           ],
           "to_if_held_down": [
@@ -6505,6 +7840,7 @@
         }
       ]
     },
+
     {
       "description": "f9",
       "manipulators": [
@@ -6520,18 +7856,19 @@
           },
           "to_after_key_up": [
             {
-              "shell_command": "/opt/homebrew/Cellar/emacs-mac/emacs-28.2-mac-9.1/bin/emacsclient --no-wait --eval '(emms-seek-forward-or-next)'"
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(emms-seek-forward-or-next)'"
             }
           ],
           "to_if_held_down": [
             {
-              "shell_command": "/opt/homebrew/Cellar/emacs-mac/emacs-28.2-mac-9.1/bin/emacsclient --no-wait --eval '(emms-seek-backward-or-previous)'",
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(emms-seek-backward-or-previous)'",
               "halt": true
             }
           ]
         }
       ]
     },
+
     {
       "description": "f10",
       "manipulators": [
@@ -6559,6 +7896,7 @@
         }
       ]
     },
+
     {
       "description": "f13",
       "manipulators": [
@@ -6580,6 +7918,7 @@
         }
       ]
     },
+
     {
       "description": "f14",
       "manipulators": [
@@ -6672,6 +8011,7 @@
         }
       ]
     },
+
     {
       "description": "arrows",
       "manipulators": [
@@ -6845,6 +8185,7 @@
         }
       ]
     },
+
     {
       "description": "page_up",
       "manipulators": [
@@ -6862,7 +8203,7 @@
             {
               "type": "frontmost_application_unless",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             }
           ],
@@ -6892,7 +8233,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -6939,7 +8280,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -6955,13 +8296,14 @@
           ],
           "to_if_held_down": [
             {
-              "key_code": "home",
+              "key_code": "up_arrow",
               "halt": true
             }
           ]
         }
       ]
     },
+
     {
       "description": "page_down",
       "manipulators": [
@@ -6979,7 +8321,7 @@
             {
               "type": "frontmost_application_unless",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             }
           ],
@@ -7009,7 +8351,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -7056,7 +8398,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs$"
+                "/Emacs"
               ]
             },
             {
@@ -7072,13 +8414,14 @@
           ],
           "to_if_held_down": [
             {
-              "key_code": "end",
+              "key_code": "down_arrow",
               "halt": true
             }
           ]
         }
       ]
     },
+
     {
       "description": "pause",
       "manipulators": [
@@ -7104,5 +8447,6 @@
         }
       ]
     }
+
   ]
 }
