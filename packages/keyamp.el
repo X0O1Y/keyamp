@@ -1,31 +1,45 @@
-;;; keyamp.el --- keyboard «amplifier» -*- coding: utf-8; lexical-binding: t; -*-
+;;; keyamp.el --- Keyboard «amplifier» -*- coding: utf-8; lexical-binding: t; -*-
 
 ;; Author: Egor Maltsev <x0o1@ya.ru>
+;; Version: 1.0 2023-09-13
 
-;; This package is a part of efficient input model
-
-;; See the link:
-;; https://github.com/xEgorka/keyamp
+;; This package is part of input model.
+;; Follow the link: https://github.com/xEgorka/keyamp
 
 ;;; Commentary:
 
 ;; Keyamp provides 3 modes based on transient keymaps: insert, command
 ;; and «ampable».
 
-;; Ampable mode adds transient remap keymaps over command mode for
-;; easy repeat during screen or cursor positioning and editing. Cursor
-;; color indicates transient remap is active. ESDF and IJKL keys are
-;; mostly used, DEL ESC and RET SPC control EVERYTHING.
+;; Command and insert modes are persistent transient keymaps.
+
+;; Ampable mode pushes transient remaps to keymap stack on top of
+;; command mode for easy repeat of commands chains during screen
+;; positioning, cursor move and editing. Point color indicates
+;; transient remap is active. ESDF and IJKL are mostly used, DEL/ESC
+;; and RET/SPC control EVERYTHING. Home row and thumb cluster only.
 
 ;; DEL and SPC are two leader keys, RET activates insert mode, ESC for
-;; command mode. Keboard has SYMMETRIC layout.
+;; command one. Holding down each of the keys posts control sequence
+;; depending on mode. Keyboard has SYMMETRIC layout: left side for
+;; editing, «No» and «Escape» while right side for moving, «Yes» and
+;; «Enter». Any Emacs major or minor mode could be remaped to fit the
+;; model, find examples in the package.
 
-;; Karabiner integration allows to enter control or leader sequences
-;; by key hold down. NO need to have any modifier keys. The same
-;; symmetric layout might be configured on ANSI keyboard, ergonomic
-;; split and virtual keyboards.
+;; Karabiner integration allows to post control or leader sequences by
+;; holding down a key. NO need to have any modifier or arrows keys at
+;; ALL. Holding down posts leader layer. The same symmetric layout
+;; might be configured on ANSI keyboard, ergonomic split and virtual
+;; keyboards. See the link for layouts and karabiner config.
 
 ;;; Code:
+
+
+
+(defgroup keyamp nil
+  "Customization options for keyamp"
+  :group 'help
+  :prefix "keyamp-")
 
 (defvar keyamp-command-mode-activate-hook nil "Hook for `keyamp-command-mode-activate'")
 (defvar keyamp-insert-mode-activate-hook  nil "Hook for `keyamp-insert-mode-activate'")
@@ -355,13 +369,13 @@ so-called “ampable” commands.")
    ("w" . backward-kill-word)         ("ц" . backward-kill-word)         ("W" . ignore) ("Ц" . ignore)
    ("e" . undo)                       ("у" . undo)                       ("E" . ignore) ("У" . ignore)
    ("r" . kill-word)                  ("к" . kill-word)                  ("R" . ignore) ("К" . ignore)
-   ("t" . set-mark-command)           ("е" . set-mark-command)           ("T" . ignore) ("Е" . ignore)
+   ("t" . cut-text-block)             ("е" . cut-text-block)             ("T" . ignore) ("Е" . ignore)
 
    ("a" . shrink-whitespaces)         ("ф" . shrink-whitespaces)         ("A" . ignore) ("Ф" . ignore)
    ("s" . open-line)                  ("ы" . open-line)                  ("S" . ignore) ("Ы" . ignore)
    ("d" . cut-bracket-or-delete)      ("в" . cut-bracket-or-delete)      ("D" . ignore) ("В" . ignore)
    ("f" . newline)                    ("а" . newline)                    ("F" . ignore) ("А" . ignore)
-   ("g" . cut-text-block)             ("п" . cut-text-block)             ("G" . ignore) ("П" . ignore)
+   ("g" . set-mark-command)           ("п" . set-mark-command)           ("G" . ignore) ("П" . ignore)
 
    ("z" . toggle-comment)             ("я" . toggle-comment)             ("Z" . ignore) ("Я" . ignore)
    ("x" . cut-line-or-selection)      ("ч" . cut-line-or-selection)      ("X" . ignore) ("Ч" . ignore)
@@ -439,13 +453,13 @@ so-called “ampable” commands.")
    ("q" . reformat-lines)
    ("e" . split-window-below)
    ("r" . query-replace)
-   ("t" . rectangle-mark-mode)
+   ("t" . kill-line)
 
    ("a" . delete-window)
    ("s" . previous-user-buffer)
    ("d" . delete-other-windows)
    ("f" . next-user-buffer)
-   ("g" . kill-line)
+   ("g" . rectangle-mark-mode)
 
    ("z" . universal-argument)
    ("x" . save-buffers-kill-terminal)
@@ -471,7 +485,7 @@ so-called “ampable” commands.")
    ("i t" . list-recently-closed)          ("i o" . bookmark-bmenu-list)
    ("i b" . set-buffer-file-coding-system) ("i n" . revert-buffer-with-coding-system)
                                            ("i p" . bookmark-set)
-                                           ("i u" . open-in-terminal)
+   ("i r" . rename-visited-file)           ("i u" . open-in-terminal)
 
    ("o"  . bookmark-jump)
    ("p"  . view-echo-area-messages)
@@ -678,12 +692,12 @@ so-called “ampable” commands.")
      (backward-kill-word      . rss)                     ; w
      (undo                    . split-window-below)      ; e
      (kill-word               . make-frame-command)      ; r
-     (set-mark-command        . toggle-eshell)           ; t
+     (cut-text-block          . toggle-eshell)           ; t
      (shrink-whitespaces      . delete-window)           ; a
      (open-line               . previous-user-buffer)    ; s
      (cut-bracket-or-delete   . delete-other-windows)    ; d
      (newline                 . next-user-buffer)        ; f
-     (cut-text-block          . new-empty-buffer)        ; g
+     (set-mark-command        . new-empty-buffer)        ; g
      (copy-line-or-selection  . agenda)                  ; c
      (paste-or-paste-previous . tasks)                   ; v
      (backward-word           . switch-to-buffer)        ; u
@@ -721,11 +735,12 @@ so-called “ampable” commands.")
             (lambda () "Screen positioning." (set-transient-map xk))))
 
 (let ((xk (make-sparse-keymap)))
-  (keyamp--define-keys-remap xk '((next-line . dired-jump)))
-  (advice-add 'dired-jump :after (lambda (&rest r) "Repeat." (set-transient-map xk))))
+  (keyamp--define-keys-remap xk '((backward-left-bracket . dired-jump)))
+  (advice-add 'dired-jump :after (lambda (&rest r) "Repeat." (set-transient-map xk)))
+  (advice-add 'downloads  :after (lambda (&rest r) "Repeat." (set-transient-map xk))))
 
 (let ((xk (make-sparse-keymap)))
-  (keyamp--define-keys-remap xk '((next-line . save-close-current-buffer)))
+  (keyamp--define-keys-remap xk '((next-window-or-frame . save-close-current-buffer)))
   (advice-add 'save-close-current-buffer :after (lambda (&rest r) "Repeat." (set-transient-map xk))))
 
 (let ((xk (make-sparse-keymap)))
@@ -1070,7 +1085,7 @@ so-called “ampable” commands.")
    rectangle-mark-mode-map
    '((copy-line-or-selection      . copy-rectangle-as-kill)
      (cut-bracket-or-delete       . kill-rectangle)
-     (keyamp-insert-mode-activate . replace-rectangle)
+     (keyamp-insert-mode-activate . string-rectangle)
      (paste-or-paste-previous     . yank-rectangle)
      (copy-to-register            . copy-rectangle-to-register)
      (toggle-comment              . rectangle-number-lines)
