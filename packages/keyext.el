@@ -1,4 +1,4 @@
-;;; keyext.el --- keyboard extensions -*- coding: utf-8; lexical-binding: t; -*-
+;;; keyext.el --- Keyboard extensions -*- coding: utf-8; lexical-binding: t; -*-
 
 (require 'dired)
 (require 'dired-x)
@@ -25,6 +25,16 @@
 
 
 ;; cursor movement
+
+(defun up-line ()
+  "Same as `previous-line' for remap key <up>."
+  (interactive)
+  (previous-line))
+
+(defun down-line ()
+  "Same as `forward-line' for remap key <down>."
+  (interactive)
+  (forward-line))
 
 (defun pop-local-mark-ring ()
   "Move cursor to last mark position of current buffer.
@@ -1696,12 +1706,12 @@ You can override this function to get your idea of “user buffer”."
    ((string-equal major-mode "eww-mode") nil)
    ((string-equal major-mode "help-mode") nil)
    ((string-equal major-mode "nov-mode") nil)
-   ((string-equal major-mode "mu4e-main-mode") nil)
    ((string-equal major-mode "doc-view-mode") nil)
    ((string-equal major-mode "diary-mode") nil)
    ((string-equal buffer-file-truename org-agenda-file-1) nil)
    ((string-equal buffer-file-truename org-agenda-file-2) nil)
    ((string-equal buffer-file-truename org-agenda-file-3) nil)
+   ((string-equal (buffer-name) ".newsrc.eld") nil)
    (t t)))
 
 (defun previous-user-buffer ()
@@ -2044,7 +2054,7 @@ Works on whole buffer or selection, respects `narrow-to-region'."
         (while (re-search-forward "\n\n\n+" nil 1) (replace-match "\n\n"))
         (goto-char (point-max))
         (while (eq (char-before) 32) (delete-char -1)))))
-  (message "Trailing whitespace"))
+  (message "Clean trailing whitespace"))
 
 (defun make-backup ()
   "Make a backup copy of current file or dired marked files.
@@ -2300,19 +2310,19 @@ Force switch to current buffer to update `other-buffer'."
                         ibuffer-never-show-predicates)
           (ibuffer-jump-to-buffer xbuf))))))
 
-(defun previous-line-ibuffer ()
+(defun ibuffer-previous-line ()
   "Previous line for ibuffer."
   (interactive)
-  (previous-line)
-  (if (<= (line-number-at-pos) 2)
-      (goto-line (count-lines (point-min) (point-max)))))
+  (if (= (line-number-at-pos) 1)
+      (goto-line (count-lines (point-min) (point-max)))
+    (previous-line)))
 
-(defun next-line-ibuffer ()
+(defun ibuffer-next-line ()
   "Next line for ibuffer."
   (interactive)
   (next-line)
   (if (>= (line-number-at-pos) (+ 1 (count-lines (point-min) (point-max))))
-      (goto-line 3)))
+      (goto-line 1)))
 
 (defun icomplete-exit-or-force-complete-and-exit ()
   "Exit if file completion. Else force complete and exit."
@@ -2339,7 +2349,7 @@ Force switch to current buffer to update `other-buffer'."
   (browse-url (concat "https://www.windy.com/?"
                       (number-to-string calendar-latitude) ","
                       (number-to-string calendar-longitude) ",9"))
-  (unless (string-equal calendar-location-name "Home")
+  (when (string-equal calendar-location-name "K")
     (browse-url (shell-command-to-string "python3 ~/.weather.py"))))
 
 (defun books ()
@@ -2400,7 +2410,7 @@ Make agenda fullscreen in text terminal."
     (find-alternate-file (concat "/sudo::" buffer-file-name))))
 
 (defun sync (&optional Silent)
-  "Synchronize private cloud."
+  "Sync private cloud."
   (interactive)
   (if Silent
       (call-process "~/.sync.sh" nil 0 nil)
@@ -2411,6 +2421,11 @@ Make agenda fullscreen in text terminal."
 (defun gpg-agent-helper ()
   "GPG agent helper. Force restart."
   (call-process "~/.gpg-agent.sh" nil 0 nil))
+
+(defun mu-sync ()
+  "Mu sync."
+  (interactive)
+  (call-process "~/.mbsync.sh" nil 0 nil))
 
 (defun tmux-helper ()
   "Tmux helper. Force update display resolution."
@@ -2424,6 +2439,13 @@ Make agenda fullscreen in text terminal."
 (defun screensaver ()
   "Start screensaver in tmux."
   (shell-command "tmux clock-mode && echo"))
+
+(defun news ()
+  "Show news."
+  (interactive)
+  (if (get-buffer "*Group*")
+      (switch-to-buffer "*Group*")
+    (gnus)))
 
 (defun who-called-defun (oldfun format &rest args)
   "Backtrace. For example, to find out who called `message':
@@ -2442,6 +2464,14 @@ Make agenda fullscreen in text terminal."
     (unwind-protect
          (apply oldfun args)
       (advice-remove 'message #'silence))))
+
+(defun terminal ()
+  "Run terminal emulator for OS specific default shell."
+  (interactive)
+  (if (string-equal system-type "darwin")
+      (term "/bin/zsh")
+    (term "/bin/bash"))
+  (term-line-mode))
 
 (provide 'keyext)
 

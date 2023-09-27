@@ -670,7 +670,31 @@
 
     {
       "description": "e",
-      "manipulators": [
+        "manipulators": [
+            {
+          "type": "basic",
+          "from": {
+            "key_code": "e",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/VLC"
+              ]
+            }
+          ],
+          "to": [
+            {
+              "key_code": "i"
+            }
+          ]
+        },
         {
           "type": "basic",
           "from": {
@@ -1718,7 +1742,32 @@
 
     {
       "description": "s",
-      "manipulators": [
+        "manipulators": [
+            {
+          "type": "basic",
+          "from": {
+            "key_code": "s",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/VLC"
+              ]
+            }
+          ],
+          "to": [
+            {
+              "key_code": "j"
+            }
+          ]
+        },
+
         {
           "type": "basic",
           "from": {
@@ -1808,7 +1857,65 @@
 
     {
       "description": "d",
-      "manipulators": [
+        "manipulators": [
+            {
+          "type": "basic",
+          "from": {
+            "key_code": "d",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/VLC"
+              ]
+            }
+          ],
+          "to": [
+            {
+              "key_code": "k"
+            }
+          ]
+        },
+      {
+          "type": "basic",
+          "from": {
+            "key_code": "d",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 0
+            },
+            {
+              "type": "variable_if",
+              "name": "leader pressed",
+              "value": 1
+            }
+          ],
+          "to": [
+            {
+              "key_code": "d"
+            }
+          ]
+        },
         {
           "type": "basic",
           "from": {
@@ -1864,6 +1971,7 @@
             }
           ]
         },
+        
         {
           "type": "basic",
           "from": {
@@ -1898,7 +2006,31 @@
 
     {
       "description": "f",
-      "manipulators": [
+        "manipulators": [
+            {
+          "type": "basic",
+          "from": {
+            "key_code": "f",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/VLC"
+              ]
+            }
+          ],
+          "to": [
+            {
+              "key_code": "l"
+            }
+          ]
+        },
         {
           "type": "basic",
           "from": {
@@ -2829,14 +2961,10 @@
               }
             },
             {
-              "key_code": "equal_sign",
+              "key_code": "r",
               "modifiers": [
-                "left_shift",
-                "left_control"
-              ]
-            },
-            {
-              "key_code": "z",
+              "left_control"
+              ],
               "repeat": false,
               "halt": true
             }
