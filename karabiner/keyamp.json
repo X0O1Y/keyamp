@@ -1,7 +1,7 @@
 {
   "title": "Keyamp",
-  "rules": [
-
+    "rules": [
+        
     {
       "description": "spacebar",
       "manipulators": [
@@ -15,15 +15,9 @@
               ]
             }
           },
-          "to_after_key_up": [
+          "to": [
             {
               "key_code": "spacebar"
-            }
-          ],
-          "to_if_held_down": [
-            {
-              "shell_command": "open -a Emacs.app",
-              "halt": true
             }
           ],
           "conditions": [
@@ -56,43 +50,9 @@
               "type": "variable_if",
               "name": "insert mode activated",
               "value": 0
-            },
-            {
-              "type": "variable_if",
-              "name": "leader pressed",
-              "value": 1
             }
           ],
           "to": [
-            {
-              "key_code": "spacebar"
-            }
-          ]
-        },
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "spacebar",
-            "modifiers": {
-              "optional": [
-                "any"
-              ]
-            }
-          },
-          "conditions": [
-            {
-              "type": "frontmost_application_if",
-              "file_paths": [
-                "/Emacs"
-              ]
-            },
-            {
-              "type": "variable_if",
-              "name": "insert mode activated",
-              "value": 0
-            }
-          ],
-          "to_after_key_up": [
             {
               "set_variable": {
                 "name": "leader pressed",
@@ -100,40 +60,7 @@
               }
             },
             {
-              "set_variable": {
-                "name": "i pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "j pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "k pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "l pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "spacebar"
-            }
-          ],
-          "to_if_held_down": [
-            {
-              "key_code": "tab",
-              "modifiers": [
-                "command"
-              ],
-              "halt": true
             }
           ]
         },
@@ -194,7 +121,7 @@
               "value": 1
             }
           ],
-            "to_after_key_up": [
+          "to_after_key_up": [
             {
               "set_variable": {
                 "name": "spacebar pressed",
@@ -269,30 +196,6 @@
               "set_variable": {
                 "name": "leader pressed",
                 "value": 1
-              }
-            },
-            {
-              "set_variable": {
-                "name": "i pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "j pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "k pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "l pressed",
-                "value": 0
               }
             },
             {
@@ -670,8 +573,8 @@
 
     {
       "description": "e",
-        "manipulators": [
-            {
+      "manipulators": [
+        {
           "type": "basic",
           "from": {
             "key_code": "e",
@@ -778,7 +681,7 @@
               "key_code": "e"
             }
           ]
-        }          
+        }
       ]
     },
 
@@ -868,7 +771,7 @@
               "key_code": "r"
             }
           ]
-        }          
+        }
       ]
     },
 
@@ -958,7 +861,7 @@
               "key_code": "t"
             }
           ]
-        }          
+        }
       ]
     },
 
@@ -1048,7 +951,7 @@
               "key_code": "y"
             }
           ]
-        }          
+        }
       ]
     },
 
@@ -1086,6 +989,30 @@
               }
             },
             {
+              "set_variable": {
+                "name": "i pressed",
+                "value": 0
+              }
+            },
+            {
+              "set_variable": {
+                "name": "j pressed",
+                "value": 1
+              }
+            },
+            {
+              "set_variable": {
+                "name": "k pressed",
+                "value": 0
+              }
+            },
+            {
+              "set_variable": {
+                "name": "l pressed",
+                "value": 0
+              }
+            },
+            {
               "key_code": "u"
             }
           ],
@@ -1093,6 +1020,30 @@
             {
               "set_variable": {
                 "name": "leader pressed",
+                "value": 0
+              }
+            },
+            {
+              "set_variable": {
+                "name": "i pressed",
+                "value": 0
+              }
+            },
+            {
+              "set_variable": {
+                "name": "j pressed",
+                "value": 1
+              }
+            },
+            {
+              "set_variable": {
+                "name": "k pressed",
+                "value": 0
+              }
+            },
+            {
+              "set_variable": {
+                "name": "l pressed",
                 "value": 0
               }
             },
@@ -1138,7 +1089,7 @@
               "key_code": "u"
             }
           ]
-        }          
+        }
       ]
     },
 
@@ -1227,7 +1178,7 @@
             {
               "set_variable": {
                 "name": "k pressed",
-                "value": 0
+                "value": 1
               }
             },
             {
@@ -1286,7 +1237,7 @@
               "key_code": "i"
             }
           ]
-        }          
+        }
       ]
     },
 
@@ -1324,6 +1275,30 @@
               }
             },
             {
+              "set_variable": {
+                "name": "i pressed",
+                "value": 0
+              }
+            },
+            {
+              "set_variable": {
+                "name": "j pressed",
+                "value": 0
+              }
+            },
+            {
+              "set_variable": {
+                "name": "k pressed",
+                "value": 0
+              }
+            },
+            {
+              "set_variable": {
+                "name": "l pressed",
+                "value": 1
+              }
+            },
+            {
               "key_code": "o"
             }
           ],
@@ -1332,6 +1307,30 @@
               "set_variable": {
                 "name": "leader pressed",
                 "value": 0
+              }
+            },
+            {
+              "set_variable": {
+                "name": "i pressed",
+                "value": 0
+              }
+            },
+            {
+              "set_variable": {
+                "name": "j pressed",
+                "value": 0
+              }
+            },
+            {
+              "set_variable": {
+                "name": "k pressed",
+                "value": 0
+              }
+            },
+            {
+              "set_variable": {
+                "name": "l pressed",
+                "value": 1
               }
             },
             {
@@ -1376,7 +1375,7 @@
               "key_code": "o"
             }
           ]
-        }          
+        }
       ]
     },
 
@@ -1466,7 +1465,7 @@
               "key_code": "p"
             }
           ]
-        }          
+        }
       ]
     },
 
@@ -1556,7 +1555,7 @@
               "key_code": "open_bracket"
             }
           ]
-        }          
+        }
       ]
     },
 
@@ -1646,7 +1645,7 @@
               "key_code": "close_bracket"
             }
           ]
-        }          
+        }
       ]
     },
 
@@ -1736,14 +1735,14 @@
               "key_code": "a"
             }
           ]
-        }          
+        }
       ]
     },
 
     {
       "description": "s",
-        "manipulators": [
-            {
+      "manipulators": [
+        {
           "type": "basic",
           "from": {
             "key_code": "s",
@@ -1767,7 +1766,6 @@
             }
           ]
         },
-
         {
           "type": "basic",
           "from": {
@@ -1851,14 +1849,14 @@
               "key_code": "s"
             }
           ]
-        }          
+        }
       ]
     },
 
     {
       "description": "d",
-        "manipulators": [
-            {
+      "manipulators": [
+        {
           "type": "basic",
           "from": {
             "key_code": "d",
@@ -1882,7 +1880,7 @@
             }
           ]
         },
-      {
+        {
           "type": "basic",
           "from": {
             "key_code": "d",
@@ -1971,7 +1969,6 @@
             }
           ]
         },
-        
         {
           "type": "basic",
           "from": {
@@ -2000,14 +1997,14 @@
               "key_code": "d"
             }
           ]
-        }          
+        }
       ]
     },
 
     {
       "description": "f",
-        "manipulators": [
-            {
+      "manipulators": [
+        {
           "type": "basic",
           "from": {
             "key_code": "f",
@@ -2108,7 +2105,7 @@
               "key_code": "f"
             }
           ]
-        }          
+        }
       ]
     },
 
@@ -2198,7 +2195,7 @@
               "key_code": "g"
             }
           ]
-        }          
+        }
       ]
     },
 
@@ -2236,6 +2233,30 @@
               }
             },
             {
+              "set_variable": {
+                "name": "i pressed",
+                "value": 0
+              }
+            },
+            {
+              "set_variable": {
+                "name": "j pressed",
+                "value": 1
+              }
+            },
+            {
+              "set_variable": {
+                "name": "k pressed",
+                "value": 0
+              }
+            },
+            {
+              "set_variable": {
+                "name": "l pressed",
+                "value": 0
+              }
+            },
+            {
               "key_code": "h"
             }
           ],
@@ -2243,6 +2264,30 @@
             {
               "set_variable": {
                 "name": "leader pressed",
+                "value": 0
+              }
+            },
+            {
+              "set_variable": {
+                "name": "i pressed",
+                "value": 0
+              }
+            },
+            {
+              "set_variable": {
+                "name": "j pressed",
+                "value": 1
+              }
+            },
+            {
+              "set_variable": {
+                "name": "k pressed",
+                "value": 0
+              }
+            },
+            {
+              "set_variable": {
+                "name": "l pressed",
                 "value": 0
               }
             },
@@ -2288,7 +2333,7 @@
               "key_code": "h"
             }
           ]
-        }          
+        }
       ]
     },
 
@@ -2436,7 +2481,7 @@
               "key_code": "j"
             }
           ]
-        }          
+        }
       ]
     },
 
@@ -2513,7 +2558,7 @@
             {
               "set_variable": {
                 "name": "i pressed",
-                "value": 0
+                "value": 1
               }
             },
             {
@@ -2584,7 +2629,7 @@
               "key_code": "k"
             }
           ]
-        }          
+        }
       ]
     },
 
@@ -2732,7 +2777,7 @@
               "key_code": "l"
             }
           ]
-        }          
+        }
       ]
     },
 
@@ -2770,6 +2815,30 @@
               }
             },
             {
+              "set_variable": {
+                "name": "i pressed",
+                "value": 0
+              }
+            },
+            {
+              "set_variable": {
+                "name": "j pressed",
+                "value": 0
+              }
+            },
+            {
+              "set_variable": {
+                "name": "k pressed",
+                "value": 0
+              }
+            },
+            {
+              "set_variable": {
+                "name": "l pressed",
+                "value": 1
+              }
+            },
+            {
               "key_code": "semicolon"
             }
           ],
@@ -2778,6 +2847,30 @@
               "set_variable": {
                 "name": "leader pressed",
                 "value": 0
+              }
+            },
+            {
+              "set_variable": {
+                "name": "i pressed",
+                "value": 0
+              }
+            },
+            {
+              "set_variable": {
+                "name": "j pressed",
+                "value": 0
+              }
+            },
+            {
+              "set_variable": {
+                "name": "k pressed",
+                "value": 0
+              }
+            },
+            {
+              "set_variable": {
+                "name": "l pressed",
+                "value": 1
               }
             },
             {
@@ -2822,7 +2915,7 @@
               "key_code": "semicolon"
             }
           ]
-        }          
+        }
       ]
     },
 
@@ -2912,7 +3005,7 @@
               "key_code": "quote"
             }
           ]
-        }          
+        }
       ]
     },
 
@@ -2963,7 +3056,7 @@
             {
               "key_code": "r",
               "modifiers": [
-              "left_control"
+                "left_control"
               ],
               "repeat": false,
               "halt": true
@@ -2998,7 +3091,7 @@
               "key_code": "z"
             }
           ]
-        }          
+        }
       ]
     },
 
@@ -3088,7 +3181,7 @@
               "key_code": "x"
             }
           ]
-        }          
+        }
       ]
     },
 
@@ -3178,7 +3271,7 @@
               "key_code": "c"
             }
           ]
-        }          
+        }
       ]
     },
 
@@ -3268,7 +3361,7 @@
               "key_code": "v"
             }
           ]
-        }          
+        }
       ]
     },
 
@@ -3358,7 +3451,7 @@
               "key_code": "b"
             }
           ]
-        }          
+        }
       ]
     },
 
@@ -3448,7 +3541,7 @@
               "key_code": "n"
             }
           ]
-        }          
+        }
       ]
     },
 
@@ -3538,7 +3631,7 @@
               "key_code": "m"
             }
           ]
-        }          
+        }
       ]
     },
 
@@ -3628,7 +3721,7 @@
               "key_code": "comma"
             }
           ]
-        }          
+        }
       ]
     },
 
@@ -3718,7 +3811,7 @@
               "key_code": "period"
             }
           ]
-        }          
+        }
       ]
     },
 
@@ -3915,7 +4008,7 @@
               "key_code": "slash"
             }
           ]
-        }          
+        }
       ]
     },
 
@@ -7117,7 +7210,7 @@
       ]
     },
 
-{
+    {
       "description": "equal_sign",
       "manipulators": [
         {
@@ -7539,7 +7632,7 @@
               ]
             }
           },
-          "to": [
+          "to_after_key_up": [
             {
               "key_code": "escape"
             },
@@ -7548,6 +7641,13 @@
                 "name": "left_command pressed",
                 "value": 0
               }
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "shell_command": "open -a Emacs.app",
+              "repeat": false,
+              "halt": true
             }
           ],
           "conditions": [
@@ -7667,49 +7767,6 @@
           },
           "to_after_key_up": [
             {
-              "shell_command": "open -a Emacs.app && /Applications/emacsclient --no-wait --eval '(pass)'"
-            }
-          ],
-          "conditions": [
-            {
-              "type": "frontmost_application_unless",
-              "file_paths": [
-                "/Emacs"
-              ]
-            }
-          ],
-          "to_if_held_down": [
-            {
-              "shell_command": "open -a GuruPro",
-              "halt": true
-            }
-          ]
-        },
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "f3",
-            "modifiers": {
-              "optional": [
-                "any"
-              ]
-            }
-          },
-          "to_after_key_up": [
-            {
-              "key_code": "f3"
-            }
-          ],
-          "conditions": [
-            {
-              "type": "frontmost_application_if",
-              "file_paths": [
-                "/Emacs"
-              ]
-            }
-          ],
-          "to_if_held_down": [
-            {
               "shell_command": "open -a GuruPro",
               "halt": true
             }
@@ -7733,10 +7790,7 @@
           },
           "to": [
             {
-              "key_code": "tab",
-              "modifiers": [
-                "command"
-              ],
+              "shell_command": "open -a Books",
               "halt": true
             }
           ]
@@ -7758,11 +7812,6 @@
             }
           },
           "to_after_key_up": [
-            {
-              "key_code": "f5"
-            }
-          ],
-          "to_if_held_down": [
             {
               "shell_command": "open -a Preview",
               "halt": true
@@ -7787,51 +7836,8 @@
           },
           "to_after_key_up": [
             {
-              "shell_command": "open -a Emacs.app && /Applications/emacsclient --no-wait --eval '(books)'"
-            }
-          ],
-          "to_if_held_down": [
-            {
               "shell_command": "open -a VLC",
               "halt": true
-            }
-          ],
-          "conditions": [
-            {
-              "type": "frontmost_application_unless",
-              "file_paths": [
-                "/Emacs"
-              ]
-            }
-          ]
-        },
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "f6",
-            "modifiers": {
-              "optional": [
-                "any"
-              ]
-            }
-          },
-          "to_after_key_up": [
-            {
-              "key_code": "f6"
-            }
-          ],
-          "to_if_held_down": [
-            {
-              "shell_command": "open -a VLC",
-              "halt": true
-            }
-          ],
-          "conditions": [
-            {
-              "type": "frontmost_application_if",
-              "file_paths": [
-                "/Emacs"
-              ]
             }
           ]
         }
@@ -7852,79 +7858,6 @@
             }
           },
           "to_after_key_up": [
-            {
-              "shell_command": "open -a Emacs.app && /Applications/emacsclient --no-wait --eval '(email)'"
-            }
-          ],
-          "conditions": [
-            {
-              "type": "frontmost_application_unless",
-              "file_paths": [
-                "/Emacs"
-              ]
-            }
-          ],
-          "to_if_held_down": [
-            {
-              "key_code": "x"
-            },
-            {
-              "key_code": "8"
-            },
-            {
-              "key_code": "e"
-            },
-            {
-              "key_code": "3"
-            },
-            {
-              "key_code": "1",
-              "modifiers": [
-                "left_shift"
-              ]
-            },
-            {
-              "key_code": "w"
-            },
-            {
-              "key_code": "f"
-            },
-            {
-              "key_code": "h"
-            },
-            {
-              "key_code": "m"
-            },
-            {
-              "key_code": "r",
-              "halt": true
-            }
-          ]
-        },
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "f7",
-            "modifiers": {
-              "optional": [
-                "any"
-              ]
-            }
-          },
-          "to_after_key_up": [
-            {
-              "key_code": "f7"
-            }
-          ],
-          "conditions": [
-            {
-              "type": "frontmost_application_if",
-              "file_paths": [
-                "/Emacs"
-              ]
-            }
-          ],
-          "to_if_held_down": [
             {
               "shell_command": "echo x0o1@ya.ru | pbcopy",
               "halt": true
@@ -8134,6 +8067,32 @@
                 "input_source_id": "com.apple.keylayout.RussianWin"
               },
               "repeat": false
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "description": "f15",
+      "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "f15",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "to": [
+            {
+              "key_code": "tab",
+              "modifiers": [
+                "command"
+              ],
+              "halt": true
             }
           ]
         }
@@ -8575,6 +8534,5 @@
         }
       ]
     }
-
   ]
 }

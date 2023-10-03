@@ -3,8 +3,6 @@
 (require 'dired)
 (require 'dired-x)
 
-(defalias 'autocomplete 'hippie-expand)
-
 (defun get-bounds-of-block ()
   "Return the boundary (START . END) of current block."
   (let (xp1 xp2 (xblankRegex "\n[ \t]*\n"))
@@ -87,7 +85,7 @@ Call this repeatedly will cycle all positions in `mark-ring'."
           (eq last-command this-command))
       (progn
         (re-search-forward "\n[\t\n ]*\n+" nil 1)
-        (recenter-top-bottom (/ (window-body-height) 2)))
+        (recenter))
     (if visual-line-mode
         (end-of-visual-line)
       (end-of-line))))
@@ -1711,7 +1709,6 @@ You can override this function to get your idea of “user buffer”."
    ((string-equal buffer-file-truename org-agenda-file-1) nil)
    ((string-equal buffer-file-truename org-agenda-file-2) nil)
    ((string-equal buffer-file-truename org-agenda-file-3) nil)
-   ((string-equal (buffer-name) ".newsrc.eld") nil)
    (t t)))
 
 (defun previous-user-buffer ()
@@ -2191,7 +2188,7 @@ This command can be called when in a file buffer or in `dired'."
   "Open the current file or dired marked files in external app.
 When called in Emacs Lisp, if Fname is given, open that."
   (interactive)
-  (let (xfileList xdoIt )
+  (let (xfileList xdoIt)
     (setq xfileList
           (if Fname
               (list Fname)
@@ -2205,8 +2202,11 @@ When called in Emacs Lisp, if Fname is given, open that."
         (mapc
          (lambda (xfpath)
            (shell-command (concat "PowerShell -Command \"Invoke-Item -LiteralPath\" "
-                                  "'" (shell-quote-argument (expand-file-name xfpath )) "'")))
+                                  "'" (shell-quote-argument (expand-file-name xfpath)) "'")))
          xfileList))
+       ((and (string-equal major-mode 'dired-mode)
+             (string-match "Sound" (dired-get-filename)))
+        (emms-play-dired))
        ((string-equal system-type "darwin")
         (mapc (lambda (xfpath) (shell-command (concat "open " (shell-quote-argument xfpath))
                                               " && echo")) xfileList)
@@ -2472,6 +2472,11 @@ Make agenda fullscreen in text terminal."
       (term "/bin/zsh")
     (term "/bin/bash"))
   (term-line-mode))
+
+(defun hippie-expand-undo ()
+  "Undo the expansion."
+  (interactive)
+  (hippie-expand -1))
 
 (provide 'keyext)
 

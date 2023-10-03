@@ -37,46 +37,6 @@
                                         ]
                                     }
                                 },
-                                "to_after_key_up": [
-                                    {
-                                        "key_code": "spacebar"
-                                    }
-                                ],
-                                "to_if_held_down": [
-                                    {
-                                        "halt": true,
-                                        "shell_command": "open -a Emacs.app"
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Emacs"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "insert mode activated",
-                                        "type": "variable_if",
-                                        "value": 0
-                                    },
-                                    {
-                                        "name": "leader pressed",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "spacebar",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
                                 "to": [
                                     {
                                         "key_code": "spacebar"
@@ -106,7 +66,7 @@
                                         ]
                                     }
                                 },
-                                "to_after_key_up": [
+                                "to": [
                                     {
                                         "set_variable": {
                                             "name": "leader pressed",
@@ -114,40 +74,7 @@
                                         }
                                     },
                                     {
-                                        "set_variable": {
-                                            "name": "i pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "j pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "k pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "l pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "spacebar"
-                                    }
-                                ],
-                                "to_if_held_down": [
-                                    {
-                                        "halt": true,
-                                        "key_code": "tab",
-                                        "modifiers": [
-                                            "command"
-                                        ]
                                     }
                                 ],
                                 "type": "basic"
@@ -282,30 +209,6 @@
                                         "set_variable": {
                                             "name": "leader pressed",
                                             "value": 1
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "i pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "j pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "k pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "l pressed",
-                                            "value": 0
                                         }
                                     },
                                     {
@@ -1084,6 +987,30 @@
                                         }
                                     },
                                     {
+                                        "set_variable": {
+                                            "name": "i pressed",
+                                            "value": 0
+                                        }
+                                    },
+                                    {
+                                        "set_variable": {
+                                            "name": "j pressed",
+                                            "value": 1
+                                        }
+                                    },
+                                    {
+                                        "set_variable": {
+                                            "name": "k pressed",
+                                            "value": 0
+                                        }
+                                    },
+                                    {
+                                        "set_variable": {
+                                            "name": "l pressed",
+                                            "value": 0
+                                        }
+                                    },
+                                    {
                                         "key_code": "u"
                                     }
                                 ],
@@ -1091,6 +1018,30 @@
                                     {
                                         "set_variable": {
                                             "name": "leader pressed",
+                                            "value": 0
+                                        }
+                                    },
+                                    {
+                                        "set_variable": {
+                                            "name": "i pressed",
+                                            "value": 0
+                                        }
+                                    },
+                                    {
+                                        "set_variable": {
+                                            "name": "j pressed",
+                                            "value": 1
+                                        }
+                                    },
+                                    {
+                                        "set_variable": {
+                                            "name": "k pressed",
+                                            "value": 0
+                                        }
+                                    },
+                                    {
+                                        "set_variable": {
+                                            "name": "l pressed",
                                             "value": 0
                                         }
                                     },
@@ -1224,7 +1175,7 @@
                                     {
                                         "set_variable": {
                                             "name": "k pressed",
-                                            "value": 0
+                                            "value": 1
                                         }
                                     },
                                     {
@@ -1320,6 +1271,30 @@
                                         }
                                     },
                                     {
+                                        "set_variable": {
+                                            "name": "i pressed",
+                                            "value": 0
+                                        }
+                                    },
+                                    {
+                                        "set_variable": {
+                                            "name": "j pressed",
+                                            "value": 0
+                                        }
+                                    },
+                                    {
+                                        "set_variable": {
+                                            "name": "k pressed",
+                                            "value": 0
+                                        }
+                                    },
+                                    {
+                                        "set_variable": {
+                                            "name": "l pressed",
+                                            "value": 1
+                                        }
+                                    },
+                                    {
                                         "key_code": "o"
                                     }
                                 ],
@@ -1328,6 +1303,30 @@
                                         "set_variable": {
                                             "name": "leader pressed",
                                             "value": 0
+                                        }
+                                    },
+                                    {
+                                        "set_variable": {
+                                            "name": "i pressed",
+                                            "value": 0
+                                        }
+                                    },
+                                    {
+                                        "set_variable": {
+                                            "name": "j pressed",
+                                            "value": 0
+                                        }
+                                    },
+                                    {
+                                        "set_variable": {
+                                            "name": "k pressed",
+                                            "value": 0
+                                        }
+                                    },
+                                    {
+                                        "set_variable": {
+                                            "name": "l pressed",
+                                            "value": 1
                                         }
                                     },
                                     {
@@ -2221,6 +2220,30 @@
                                         }
                                     },
                                     {
+                                        "set_variable": {
+                                            "name": "i pressed",
+                                            "value": 0
+                                        }
+                                    },
+                                    {
+                                        "set_variable": {
+                                            "name": "j pressed",
+                                            "value": 1
+                                        }
+                                    },
+                                    {
+                                        "set_variable": {
+                                            "name": "k pressed",
+                                            "value": 0
+                                        }
+                                    },
+                                    {
+                                        "set_variable": {
+                                            "name": "l pressed",
+                                            "value": 0
+                                        }
+                                    },
+                                    {
                                         "key_code": "h"
                                     }
                                 ],
@@ -2228,6 +2251,30 @@
                                     {
                                         "set_variable": {
                                             "name": "leader pressed",
+                                            "value": 0
+                                        }
+                                    },
+                                    {
+                                        "set_variable": {
+                                            "name": "i pressed",
+                                            "value": 0
+                                        }
+                                    },
+                                    {
+                                        "set_variable": {
+                                            "name": "j pressed",
+                                            "value": 1
+                                        }
+                                    },
+                                    {
+                                        "set_variable": {
+                                            "name": "k pressed",
+                                            "value": 0
+                                        }
+                                    },
+                                    {
+                                        "set_variable": {
+                                            "name": "l pressed",
                                             "value": 0
                                         }
                                     },
@@ -2496,7 +2543,7 @@
                                     {
                                         "set_variable": {
                                             "name": "i pressed",
-                                            "value": 0
+                                            "value": 1
                                         }
                                     },
                                     {
@@ -2751,6 +2798,30 @@
                                         }
                                     },
                                     {
+                                        "set_variable": {
+                                            "name": "i pressed",
+                                            "value": 0
+                                        }
+                                    },
+                                    {
+                                        "set_variable": {
+                                            "name": "j pressed",
+                                            "value": 0
+                                        }
+                                    },
+                                    {
+                                        "set_variable": {
+                                            "name": "k pressed",
+                                            "value": 0
+                                        }
+                                    },
+                                    {
+                                        "set_variable": {
+                                            "name": "l pressed",
+                                            "value": 1
+                                        }
+                                    },
+                                    {
                                         "key_code": "semicolon"
                                     }
                                 ],
@@ -2759,6 +2830,30 @@
                                         "set_variable": {
                                             "name": "leader pressed",
                                             "value": 0
+                                        }
+                                    },
+                                    {
+                                        "set_variable": {
+                                            "name": "i pressed",
+                                            "value": 0
+                                        }
+                                    },
+                                    {
+                                        "set_variable": {
+                                            "name": "j pressed",
+                                            "value": 0
+                                        }
+                                    },
+                                    {
+                                        "set_variable": {
+                                            "name": "k pressed",
+                                            "value": 0
+                                        }
+                                    },
+                                    {
+                                        "set_variable": {
+                                            "name": "l pressed",
+                                            "value": 1
                                         }
                                     },
                                     {
@@ -7500,7 +7595,7 @@
                                         ]
                                     }
                                 },
-                                "to": [
+                                "to_after_key_up": [
                                     {
                                         "key_code": "escape"
                                     },
@@ -7509,6 +7604,13 @@
                                             "name": "left_command pressed",
                                             "value": 0
                                         }
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "repeat": false,
+                                        "shell_command": "open -a Emacs.app"
                                     }
                                 ],
                                 "type": "basic"
@@ -7605,14 +7707,6 @@
                         "description": "f3",
                         "manipulators": [
                             {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Emacs"
-                                        ],
-                                        "type": "frontmost_application_unless"
-                                    }
-                                ],
                                 "from": {
                                     "key_code": "f3",
                                     "modifiers": {
@@ -7622,41 +7716,6 @@
                                     }
                                 },
                                 "to_after_key_up": [
-                                    {
-                                        "shell_command": "open -a Emacs.app && /Applications/emacsclient --no-wait --eval '(pass)'"
-                                    }
-                                ],
-                                "to_if_held_down": [
-                                    {
-                                        "halt": true,
-                                        "shell_command": "open -a GuruPro"
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Emacs"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "f3",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to_after_key_up": [
-                                    {
-                                        "key_code": "f3"
-                                    }
-                                ],
-                                "to_if_held_down": [
                                     {
                                         "halt": true,
                                         "shell_command": "open -a GuruPro"
@@ -7681,10 +7740,7 @@
                                 "to": [
                                     {
                                         "halt": true,
-                                        "key_code": "tab",
-                                        "modifiers": [
-                                            "command"
-                                        ]
+                                        "shell_command": "open -a Books"
                                     }
                                 ],
                                 "type": "basic"
@@ -7705,11 +7761,6 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "key_code": "f5"
-                                    }
-                                ],
-                                "to_if_held_down": [
-                                    {
                                         "halt": true,
                                         "shell_command": "open -a Preview"
                                     }
@@ -7722,14 +7773,6 @@
                         "description": "f6",
                         "manipulators": [
                             {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Emacs"
-                                        ],
-                                        "type": "frontmost_application_unless"
-                                    }
-                                ],
                                 "from": {
                                     "key_code": "f6",
                                     "modifiers": {
@@ -7739,41 +7782,6 @@
                                     }
                                 },
                                 "to_after_key_up": [
-                                    {
-                                        "shell_command": "open -a Emacs.app && /Applications/emacsclient --no-wait --eval '(books)'"
-                                    }
-                                ],
-                                "to_if_held_down": [
-                                    {
-                                        "halt": true,
-                                        "shell_command": "open -a VLC"
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Emacs"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "f6",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to_after_key_up": [
-                                    {
-                                        "key_code": "f6"
-                                    }
-                                ],
-                                "to_if_held_down": [
                                     {
                                         "halt": true,
                                         "shell_command": "open -a VLC"
@@ -7787,14 +7795,6 @@
                         "description": "f7",
                         "manipulators": [
                             {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Emacs"
-                                        ],
-                                        "type": "frontmost_application_unless"
-                                    }
-                                ],
                                 "from": {
                                     "key_code": "f7",
                                     "modifiers": {
@@ -7804,71 +7804,6 @@
                                     }
                                 },
                                 "to_after_key_up": [
-                                    {
-                                        "shell_command": "open -a Emacs.app && /Applications/emacsclient --no-wait --eval '(email)'"
-                                    }
-                                ],
-                                "to_if_held_down": [
-                                    {
-                                        "key_code": "x"
-                                    },
-                                    {
-                                        "key_code": "8"
-                                    },
-                                    {
-                                        "key_code": "e"
-                                    },
-                                    {
-                                        "key_code": "3"
-                                    },
-                                    {
-                                        "key_code": "1",
-                                        "modifiers": [
-                                            "left_shift"
-                                        ]
-                                    },
-                                    {
-                                        "key_code": "w"
-                                    },
-                                    {
-                                        "key_code": "f"
-                                    },
-                                    {
-                                        "key_code": "h"
-                                    },
-                                    {
-                                        "key_code": "m"
-                                    },
-                                    {
-                                        "halt": true,
-                                        "key_code": "r"
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Emacs"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "f7",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to_after_key_up": [
-                                    {
-                                        "key_code": "f7"
-                                    }
-                                ],
-                                "to_if_held_down": [
                                     {
                                         "halt": true,
                                         "shell_command": "echo x0o1@ya.ru | pbcopy"
@@ -8073,6 +8008,31 @@
                                         "select_input_source": {
                                             "input_source_id": "com.apple.keylayout.RussianWin"
                                         }
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "f15",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "f15",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "tab",
+                                        "modifiers": [
+                                            "command"
+                                        ]
                                     }
                                 ],
                                 "type": "basic"
@@ -8562,7 +8522,7 @@
                             },
                             "to": [
                                 {
-                                    "key_code": "delete_forward"
+                                    "key_code": "f15"
                                 }
                             ]
                         },
