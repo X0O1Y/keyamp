@@ -1,7 +1,7 @@
 {
     "global": {
         "ask_for_confirmation_before_quitting": true,
-        "check_for_updates_on_startup": false,
+        "check_for_updates_on_startup": true,
         "show_in_menu_bar": true,
         "show_profile_name_in_menu_bar": false,
         "unsafe_ui": false
@@ -74,6 +74,12 @@
                                         }
                                     },
                                     {
+                                        "set_variable": {
+                                            "name": "j pressed",
+                                            "value": 0
+                                        }
+                                    },
+                                    {
                                         "key_code": "spacebar"
                                     }
                                 ],
@@ -137,13 +143,13 @@
                                 },
                                 "to_after_key_up": [
                                     {
+                                        "key_code": "spacebar"
+                                    },
+                                    {
                                         "set_variable": {
                                             "name": "spacebar pressed",
                                             "value": 1
                                         }
-                                    },
-                                    {
-                                        "key_code": "spacebar"
                                     }
                                 ],
                                 "to_delayed_action": {
@@ -209,6 +215,12 @@
                                         "set_variable": {
                                             "name": "leader pressed",
                                             "value": 1
+                                        }
+                                    },
+                                    {
+                                        "set_variable": {
+                                            "name": "l pressed",
+                                            "value": 0
                                         }
                                     },
                                     {

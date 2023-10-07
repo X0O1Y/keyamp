@@ -1,7 +1,7 @@
 #+title: Keyamp
 #+author: Egor Maltsev
 
-Efficient input model based on [[file:packages/keyamp.el][keyamp]] for Emacs.
+Input model based on [[file:packages/keyamp.el][keyamp]] for Emacs.
 
 #+begin_src bash
 # emacs-mac
@@ -78,35 +78,16 @@ Escape activates command mode in GUI and terminal. Escape activates command mode
 
 *** Titlebar
 #+begin_src elisp
-  (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
-
-  (when (display-graphic-p)
-    (setq display-time-default-load-average nil
-          battery-mode-line-format "%b%p%%   "
-          display-time-format "%a %e %b %R"
-          ns-use-proxy-icon nil
-          frame-title-format
-          (list
-           ;; align rigth spacer
-           (let ((xph "") (xcount 110))
-             (dotimes (_ xcount) (setq xph (concat "	" xph))) xph)
-
-           ;; new messages count
-           '(:eval (if (and (fboundp 'mu4e--modeline-string)
-                            (> (length (mu4e--modeline-string)) 1))
-                       (concat (substring (mu4e--modeline-string) 0 2) "			")
-                     "					"))
-
-           ;; battery percentage and datetime
-           'battery-mode-line-string
-           'display-time-string
-           "			"
-
-           ;; mode indicator
-           'mode-line-front-space
-           ))
-    (display-battery-mode 1)
-    (display-time-mode    1))
+(when (display-graphic-p)
+  (setq display-time-default-load-average nil
+        battery-mode-line-format "%b%p%%   "
+        display-time-format "%a %e %b %R"
+        ns-use-proxy-icon nil
+        icon-title-format t)
+  (setq frame-title-format
+        (list (make-string 200 ?\t) 'battery-mode-line-string 'display-time-string))
+  (display-battery-mode)
+  (display-time-mode))
 #+end_src
 
 *** Modeline on top
@@ -117,11 +98,10 @@ Escape activates command mode in GUI and terminal. Escape activates command mode
                " "
                ;; mode indicator
                (when terminal-p 'mode-line-front-space)
-
                ;; buffer name
                '(:eval (propertize " %b"
                                    'face
-                                   (if (buffer-modified-p)
+                                   (if (and (buffer-modified-p) (buffer-file-name))
                                        'font-lock-string-face
                                      'font-lock-builtin-face)
                                    'help-echo
@@ -133,7 +113,6 @@ Escape activates command mode in GUI and terminal. Escape activates command mode
                                 (not (or (string-equal (substring vc-mode 5) "master")
                                          (string-equal (substring vc-mode 5) "main"))))
                          (list " @" (substring vc-mode 5))))
-
                ;; align right spacer
                '(:eval (propertize
                         " " 'display
@@ -141,20 +120,17 @@ Escape activates command mode in GUI and terminal. Escape activates command mode
                                  (- (+ right right-fringe right-margin)
                                     ,(+ (length (format-mode-line "%l:%c "))))
                                  ))))
-
                ;; position in buffer
-               '(:eval (propertize "%l:%c "
-                                   'face 'font-lock-builtin-face))))
-
+               '(:eval (propertize "%l:%c " 'face 'font-lock-builtin-face))))
 #+end_src
 
 * Virtual keyboard for touch screen
 
-Emacs in pocket with unicode support. Use [[https://apps.apple.com/us/app/termius-terminal-ssh-client/id549039908][Termius]] client. Custom keyboard.
+Emacs in pocket with unicode support. [[https://apps.apple.com/us/app/termius-terminal-ssh-client/id549039908][Termius]] client. Custom keyboard.
 
 *** Custom virtual keyboard
 - Engineer Engram and Russian layouts
-  - App Store: [[https://apps.apple.com/us/app/xkeyboard-custom-keyboard/id1440245962][xKeyboard - Custom Keyboard]]
+  - [[https://apps.apple.com/us/app/xkeyboard-custom-keyboard/id1440245962][xKeyboard - Custom Keyboard]]
   - Layout file: [[file:layouts/Engineer-Engram.xkeyboard][Engineer-Engram.xkeyboard]]
 
 *** Preferences
@@ -187,13 +163,4 @@ Emacs in pocket with unicode support. Use [[https://apps.apple.com/us/app/termiu
 - Kinesis Advantage2 [[http://www.keyboard-layout-editor.com/#/gists/6a1a62133ab9f741589bd556cb946792][layout]] and [[file:layouts/qwerty2.txt][config]]:
 
 [[screenshots/advantage2.png]]
-
-- Engineer Engram layout
-Toggle translate qwerty layout to engineer engram on Emacs level. Useful when engineer engram layout not available in a different way.
-
-  #+begin_src elisp
-  (keyamp-qwerty-to-engineer-engram)
-  #+end_src
-
-[[screenshots/pocket.jpg]]
 

@@ -1,8 +1,5 @@
 ;;; keyext.el --- Keyboard extensions -*- coding: utf-8; lexical-binding: t; -*-
 
-(require 'dired)
-(require 'dired-x)
-
 (defun get-bounds-of-block ()
   "Return the boundary (START . END) of current block."
   (let (xp1 xp2 (xblankRegex "\n[ \t]*\n"))
@@ -57,7 +54,9 @@ Call this repeatedly will cycle all positions in `mark-ring'."
   (interactive)
   (let ((xp (point)))
     (if (or (equal (point) (line-beginning-position))
-            (eq last-command this-command))
+            (eq last-command this-command)
+            (equal [backspace] (this-command-keys))
+            (= 127 (aref (this-command-keys) 0))) ; DEL repeat
         (when
             (re-search-backward "\n[\t\n ]*\n+" nil 1)
           (skip-chars-backward "\n\t ")
@@ -82,7 +81,8 @@ Call this repeatedly will cycle all positions in `mark-ring'."
 • If `visual-line-mode' is on, end of line means visual line."
   (interactive)
   (if (or (equal (point) (line-end-position))
-          (eq last-command this-command))
+          (eq last-command this-command)
+          (equal " " (this-command-keys))) ; SPC repeat
       (progn
         (re-search-forward "\n[\t\n ]*\n+" nil 1)
         (recenter))
@@ -134,7 +134,7 @@ and others.")
   (mapcar (lambda (x) (substring x 1 2)) brackets)
   "List of right bracket chars. Each element is a string.")
 
-(defconst punctuation-regex "[!?\".,`'#$%&*+:;=@^|~-]+"
+(defconst punctuation-regex "[!?\".,`'#$%&*+:;=@^|~]+"
   "A regex string for the purpose of moving cursor to a punctuation.")
 
 (defun backward-punct (&optional n)
@@ -2051,7 +2051,9 @@ Works on whole buffer or selection, respects `narrow-to-region'."
         (while (re-search-forward "\n\n\n+" nil 1) (replace-match "\n\n"))
         (goto-char (point-max))
         (while (eq (char-before) 32) (delete-char -1)))))
-  (message "Clean trailing whitespace"))
+  (if (buffer-modified-p)
+      (message "%s" "Cleanup trailing whitespace")
+    (message "%s" "No trailing whitespace")))
 
 (defun make-backup ()
   "Make a backup copy of current file or dired marked files.
@@ -2302,7 +2304,7 @@ Force switch to current buffer to update `other-buffer'."
   (interactive)
   (let ((xbuf (buffer-name)))
     (if (string-equal major-mode "ibuffer-mode")
-        (switch-to-buffer (other-buffer))
+        (news)
       (progn
         (switch-to-buffer xbuf)
         (ibuffer)
@@ -2382,15 +2384,11 @@ Force switch to current buffer to update `other-buffer'."
 
 (defun org-agenda-a (&optional arg)
   "Modification of `org-agenda'.
-Show current agenda. Do not select other window, balance windows in GUI.
-Make agenda fullscreen in text terminal."
+Show current agenda. Do not select other window, balance windows."
   (interactive "P")
   (org-agenda arg "a")
-  (if pc-p
-      (progn
-        (other-window 1)
-        (balance-windows))
-    (delete-other-windows)))
+  (other-window 1)
+  (balance-windows))
 
 (defalias 'agenda 'org-agenda-a)
 
