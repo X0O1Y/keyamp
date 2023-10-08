@@ -16,8 +16,8 @@ Below features how to use it.
 ** Features
 - ANSI keyboard layout
 - Virtual keyboard
-- [[https://github.com/philc/vimium][Vimium]] mappings
 - Split keyboard layout
+- [[https://github.com/philc/vimium][Vimium]] mappings
 
 * ANSI keyboard layout
 
@@ -128,7 +128,7 @@ Escape activates command mode in GUI and terminal. Escape activates command mode
 
 Emacs in pocket with unicode support. [[https://apps.apple.com/us/app/termius-terminal-ssh-client/id549039908][Termius]] client. Custom keyboard.
 
-*** Custom 
+*** Custom
 - Engineer Engram and Russian layouts
   - [[https://apps.apple.com/us/app/xkeyboard-custom-keyboard/id1440245962][xKeyboard - Custom Keyboard]]
   - Layout file: [[file:layouts/Engineer-Engram.xkeyboard][Engineer-Engram.xkeyboard]]
@@ -155,12 +155,11 @@ Emacs in pocket with unicode support. [[https://apps.apple.com/us/app/termius-te
 
 - Color mode indicators
 
-* Vimium mappings
-
-- Complete config file: [[file:layouts/vimium-options.json][vimium-options.json]]
-
 * Split keyboard layout
 - Kinesis Advantage2 [[http://www.keyboard-layout-editor.com/#/gists/6a1a62133ab9f741589bd556cb946792][layout]] and [[file:layouts/qwerty2.txt][config]]:
 
 [[screenshots/advantage2.png]]
 
+* Vimium mappings
+
+- Complete config file: [[file:layouts/vimium-options.json][vimium-options.json]]
