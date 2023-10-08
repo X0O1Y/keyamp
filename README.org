@@ -14,12 +14,12 @@ defaults write org.gnu.Emacs HideDocumentIcon YES
 Below features how to use it.
 
 ** Features
-- ANSI keyboard efficient setup
-- Virtual keyboard for touch screen
-- [[https://github.com/philc/vimium][Vimium]] bindings
-- More keyboards
+- ANSI keyboard layout
+- Virtual keyboard
+- [[https://github.com/philc/vimium][Vimium]] mappings
+- Split keyboard layout
 
-* ANSI keyboard efficient setup
+* ANSI keyboard layout
 
 Thumb cluster for common keyboard, arrows on home row, number row by touch and more.
 
@@ -39,7 +39,7 @@ Escape activates command mode in GUI and terminal. Escape activates command mode
 ;; 3. catched tty ESC translates to <escape>
 
 (progn
-  (defun keymap-escape ()
+  (defun keyamp-escape ()
     "Hack escape."
     (interactive)
     (when (region-active-p)
@@ -47,29 +47,29 @@ Escape activates command mode in GUI and terminal. Escape activates command mode
     (when (active-minibuffer-window)
       (abort-recursive-edit)))
 
-  (define-key keymap-command-map (kbd "<escape>") 'keymap-escape))
+  (define-key keyamp-command-map (kbd "<escape>") 'keyamp-escape))
 
 (progn
-  (defvar keymap-fast-keyseq-timeout 50)
+  (defvar keyamp-fast-keyseq-timeout 50)
 
-  (defun keymap-tty-ESC-filter (map)
+  (defun keyamp-tty-ESC-filter (map)
     (if (and (equal (this-single-command-keys) [?\e])
-             (sit-for (/ keymap-fast-keyseq-timeout 1000.0)))
+             (sit-for (/ keyamp-fast-keyseq-timeout 1000.0)))
         [escape] map))
 
-  (defun keymap-lookup-key (map key)
+  (defun keyamp-lookup-key (map key)
     (catch 'found
-      (map-keymap (lambda (k b) (if (equal key k) (throw 'found b))) map)))
+      (map-keyamp (lambda (k b) (if (equal key k) (throw 'found b))) map)))
 
-  (defun keymap-catch-tty-ESC ()
+  (defun keyamp-catch-tty-ESC ()
     "Setup key mappings of current terminal to turn a tty's ESC into
 `escape'."
     (when (memq (terminal-live-p (frame-terminal)) '(t pc))
-      (let ((esc-binding (keymap-lookup-key input-decode-map ?\e)))
+      (let ((esc-binding (keyamp-lookup-key input-decode-map ?\e)))
         (define-key input-decode-map
-          [?\e] `(menu-item "" ,esc-binding :filter keymap-tty-ESC-filter)))))
+          [?\e] `(menu-item "" ,esc-binding :filter keyamp-tty-ESC-filter)))))
 
-  (keymap-catch-tty-ESC)
+  (keyamp-catch-tty-ESC)
 
   (define-key key-translation-map (kbd "ESC") (kbd "<escape>")))
 #+end_src
@@ -124,11 +124,11 @@ Escape activates command mode in GUI and terminal. Escape activates command mode
                '(:eval (propertize "%l:%c " 'face 'font-lock-builtin-face))))
 #+end_src
 
-* Virtual keyboard for touch screen
+* Virtual keyboard
 
 Emacs in pocket with unicode support. [[https://apps.apple.com/us/app/termius-terminal-ssh-client/id549039908][Termius]] client. Custom keyboard.
 
-*** Custom virtual keyboard
+*** Custom 
 - Engineer Engram and Russian layouts
   - [[https://apps.apple.com/us/app/xkeyboard-custom-keyboard/id1440245962][xKeyboard - Custom Keyboard]]
   - Layout file: [[file:layouts/Engineer-Engram.xkeyboard][Engineer-Engram.xkeyboard]]
@@ -155,11 +155,11 @@ Emacs in pocket with unicode support. [[https://apps.apple.com/us/app/termius-te
 
 - Color mode indicators
 
-* Vimium bindings
+* Vimium mappings
 
 - Complete config file: [[file:layouts/vimium-options.json][vimium-options.json]]
 
-* More keyboards and options
+* Split keyboard layout
 - Kinesis Advantage2 [[http://www.keyboard-layout-editor.com/#/gists/6a1a62133ab9f741589bd556cb946792][layout]] and [[file:layouts/qwerty2.txt][config]]:
 
 [[screenshots/advantage2.png]]
