@@ -7804,28 +7804,6 @@
                         ]
                     },
                     {
-                        "description": "f7",
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "f7",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to_after_key_up": [
-                                    {
-                                        "halt": true,
-                                        "shell_command": "echo x0o1@ya.ru | pbcopy"
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
                         "description": "f8",
                         "manipulators": [
                             {
@@ -8477,6 +8455,28 @@
                                                 "delay_milliseconds": 500
                                             }
                                         }
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "f7",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "f7",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to_after_key_up": [
+                                    {
+                                        "halt": true,
+                                        "shell_command": "echo x0o1@ya.ru|pbcopy"
                                     }
                                 ],
                                 "type": "basic"

@@ -2015,17 +2015,16 @@ If the file is modified or not saved, save it automatically before run."
                   (error "%s: Unknown file extension: %s" real-this-command xfExt))))
              ((string-equal xfExt "java")
               (progn
-                ;; FIXME: Better use `call-process', or else at least use
-                ;; `shell-quote-argument'.
                 (shell-command (format "javac %s" xfname) xoutBuffer)
                 (shell-command (format "java %s" (file-name-sans-extension
                                                   (file-name-nondirectory xfname)))
                                xoutBuffer)))
              (t (if xappCmdStr
                     (progn
-                      (message "Running 「%s」" xcmdStr)
+                      (message "Running %s" xcmdStr)
                       (shell-command xcmdStr xoutBuffer))
                   (error "%s: Unknown file extension: %s" real-this-command xfExt))))
+
             (run-hooks 'run-current-file-after-hook))
           (setenv "NO_COLOR")
           (throw 'confirm t))
@@ -2275,6 +2274,8 @@ If current frame has only one window, switch to next frame."
   "Clear input eshell."
   (interactive)
   (beginning-of-line-or-block)
+  (forward-word)
+  (forward-char)
   (kill-line))
 
 (defun toggle-eshell (&optional arg)
@@ -2312,15 +2313,15 @@ Force switch to current buffer to update `other-buffer'."
                         ibuffer-never-show-predicates)
           (ibuffer-jump-to-buffer xbuf))))))
 
-(defun ibuffer-previous-line ()
-  "Previous line for ibuffer."
+(defun previous-line-cycle ()
+  "Previous line. On the first line go to the last line of buffer."
   (interactive)
   (if (= (line-number-at-pos) 1)
       (goto-line (count-lines (point-min) (point-max)))
     (previous-line)))
 
-(defun ibuffer-next-line ()
-  "Next line for ibuffer."
+(defun next-line-cycle ()
+  "Next line. On the last line go to the first line of buffer."
   (interactive)
   (next-line)
   (if (>= (line-number-at-pos) (+ 1 (count-lines (point-min) (point-max))))
@@ -2348,11 +2349,14 @@ Force switch to current buffer to update `other-buffer'."
 (defun weather ()
   "Show weather."
   (interactive)
-  (browse-url (concat "https://www.windy.com/?"
-                      (number-to-string calendar-latitude) ","
-                      (number-to-string calendar-longitude) ",9"))
-  (when (string-equal calendar-location-name "K")
-    (browse-url (shell-command-to-string "python3 ~/.weather.py"))))
+  (let ((url "https://www.windy.com")
+        (lat (number-to-string calendar-latitude))
+        (lon (number-to-string calendar-longitude)))
+    (browse-url (concat url "/?" lat "," lon ",9"))))
+
+(defun weather-helper ()
+  "Send weather forecast."
+  (call-process "~/.weather/run.sh" nil 0 nil))
 
 (defun books ()
   "Read book."
@@ -2382,15 +2386,13 @@ Force switch to current buffer to update `other-buffer'."
       (find-file downloads-dir)
     (message "Downloads not found")))
 
-(defun org-agenda-a (&optional arg)
+(defun agenda (&optional arg)
   "Modification of `org-agenda'.
 Show current agenda. Do not select other window, balance windows."
   (interactive "P")
   (org-agenda arg "a")
   (other-window 1)
   (balance-windows))
-
-(defalias 'agenda 'org-agenda-a)
 
 (defun todo ()
   "Modification of `org-todo'. Capitalize task title if not study."
@@ -2422,7 +2424,6 @@ Show current agenda. Do not select other window, balance windows."
 
 (defun mu-sync ()
   "Mu sync."
-  (interactive)
   (call-process "~/.mbsync.sh" nil 0 nil))
 
 (defun tmux-helper ()
@@ -2475,6 +2476,31 @@ Show current agenda. Do not select other window, balance windows."
   "Undo the expansion."
   (interactive)
   (hippie-expand -1))
+
+(defun describe-foo-at-point ()
+  "Show the documentation of the Elisp function and variable near point.
+This checks in turn:
+• for a function name where point is;
+• for a variable name where point is;
+• for a surrounding function call."
+  (interactive)
+  (let (sym)
+    ;; sigh, function-at-point is too clever, we want only the first half
+    (cond ((setq sym (ignore-errors
+                       (with-syntax-table emacs-lisp-mode-syntax-table
+                         (save-excursion
+                           (or (not (zerop (skip-syntax-backward "_w")))
+                               (eq (char-syntax (char-after (point))) ?w)
+                               (eq (char-syntax (char-after (point))) ?_)
+                               (forward-sexp -1))
+                           (skip-chars-forward "`'")
+                           (let ((obj (read (current-buffer))))
+                             (and (symbolp obj) (fboundp obj) obj))))))
+           (describe-function sym))
+          ((setq sym (variable-at-point)) (describe-variable sym))
+          ;; now let it operate fully -- i.e. also check the
+          ;; surrounding sexp for a function call.
+          ((setq sym (function-at-point)) (describe-function sym)))))
 
 (provide 'keyext)
 

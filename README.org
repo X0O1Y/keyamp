@@ -3,14 +3,6 @@
 
 Input model based on [[file:packages/keyamp.el][keyamp]] for Emacs.
 
-#+begin_src bash
-# emacs-mac
-brew tap railwaycat/emacsmacport
-brew install emacs-mac --with-natural-title-bar
-defaults write org.gnu.Emacs TransparentTitleBar DARK
-defaults write org.gnu.Emacs HideDocumentIcon YES
-#+end_src
-
 Below features how to use it.
 
 ** Features
@@ -72,6 +64,14 @@ Escape activates command mode in GUI and terminal. Escape activates command mode
   (keyamp-catch-tty-ESC)
 
   (define-key key-translation-map (kbd "ESC") (kbd "<escape>")))
+#+end_src
+
+#+begin_src bash
+# emacs-mac
+brew tap railwaycat/emacsmacport
+brew install emacs-mac --with-natural-title-bar
+defaults write org.gnu.Emacs TransparentTitleBar DARK
+defaults write org.gnu.Emacs HideDocumentIcon YES
 #+end_src
 
 [[screenshots/desktop.png]]

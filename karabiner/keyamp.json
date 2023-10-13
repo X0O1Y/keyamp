@@ -7871,7 +7871,7 @@
           },
           "to_after_key_up": [
             {
-              "shell_command": "echo x0o1@ya.ru | pbcopy",
+              "shell_command": "echo x0o1@ya.ru|pbcopy",
               "halt": true
             }
           ]
