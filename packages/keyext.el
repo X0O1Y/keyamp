@@ -22,14 +22,18 @@
 ;; cursor movement
 
 (defun up-line ()
-  "Same as `previous-line' for remap key <up>."
+  "Previous line. On the first line go to the last line of buffer."
   (interactive)
-  (previous-line))
+  (if (= (line-number-at-pos) 1)
+      (goto-line (count-lines (point-min) (point-max)))
+    (previous-line)))
 
 (defun down-line ()
-  "Same as `forward-line' for remap key <down>."
+  "Next line. On the last line go to the first line of buffer."
   (interactive)
-  (forward-line))
+  (next-line)
+  (if (>= (line-number-at-pos) (+ 1 (count-lines (point-min) (point-max))))
+      (goto-line 1)))
 
 (defun pop-local-mark-ring ()
   "Move cursor to last mark position of current buffer.
@@ -710,6 +714,7 @@ When called in a Elisp program, Begin End are region boundaries."
                      ["'S " "'s "]
                      ["'T " "'t "]
 
+                     [" К " " к "]
                      [" С " " с "]
                      [" По " " по "]
                      [" В " " в "]
@@ -1706,6 +1711,7 @@ You can override this function to get your idea of “user buffer”."
    ((string-equal major-mode "nov-mode") nil)
    ((string-equal major-mode "doc-view-mode") nil)
    ((string-equal major-mode "diary-mode") nil)
+   ((string-equal (buffer-name) "tetris-scores") nil)
    ((string-equal buffer-file-truename org-agenda-file-1) nil)
    ((string-equal buffer-file-truename org-agenda-file-2) nil)
    ((string-equal buffer-file-truename org-agenda-file-3) nil)
@@ -2313,20 +2319,6 @@ Force switch to current buffer to update `other-buffer'."
                         ibuffer-never-show-predicates)
           (ibuffer-jump-to-buffer xbuf))))))
 
-(defun previous-line-cycle ()
-  "Previous line. On the first line go to the last line of buffer."
-  (interactive)
-  (if (= (line-number-at-pos) 1)
-      (goto-line (count-lines (point-min) (point-max)))
-    (previous-line)))
-
-(defun next-line-cycle ()
-  "Next line. On the last line go to the first line of buffer."
-  (interactive)
-  (next-line)
-  (if (>= (line-number-at-pos) (+ 1 (count-lines (point-min) (point-max))))
-      (goto-line 1)))
-
 (defun icomplete-exit-or-force-complete-and-exit ()
   "Exit if file completion. Else force complete and exit."
   (interactive)
@@ -2501,6 +2493,12 @@ This checks in turn:
           ;; now let it operate fully -- i.e. also check the
           ;; surrounding sexp for a function call.
           ((setq sym (function-at-point)) (describe-function sym)))))
+
+(advice-add 'scroll-down-command     :after (lambda (&rest r) "Recenter." (recenter)))
+(advice-add 'scroll-up-command       :after (lambda (&rest r) "Recenter." (recenter)))
+(advice-add 'isearch-repeat-backward :after (lambda (&rest r) "Recenter." (recenter)))
+(advice-add 'isearch-repeat-forward  :after (lambda (&rest r) "Recenter." (recenter)))
+(advice-add 'pop-local-mark-ring     :after (lambda (&rest r) "Recenter." (recenter)))
 
 (provide 'keyext)
 
