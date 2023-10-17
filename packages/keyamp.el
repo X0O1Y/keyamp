@@ -138,7 +138,7 @@ Example usage:
    (\".\" . isearch-forward-symbol-at-point)
    (\"w\" . isearch-forward-word)))"
   (let ((xkeymapName (make-symbol "keymap-name")))
-    `(let ((,xkeymapName , KeymapName))
+    `(let ((,xkeymapName ,KeymapName))
        ,@(mapcar
           (lambda (xpair)
             `(define-key
@@ -151,7 +151,7 @@ Example usage:
   "Map `define-key' for `key-translation-map' over a alist KeyKeyAlist.
 If State-p is nil, remove the mapping."
   (let ((xstate (make-symbol "keyboard-state")))
-    `(let ((,xstate , State-p))
+    `(let ((,xstate ,State-p))
        ,@(mapcar
           (lambda (xpair)
             `(define-key key-translation-map
@@ -162,7 +162,7 @@ If State-p is nil, remove the mapping."
 (defmacro keyamp--define-keys-remap (KeymapName CmdCmdAlist)
   "Map `define-key' remap over a alist CmdCmdAlist."
   (let ((xkeymapName (make-symbol "keymap-name")))
-    `(let ((,xkeymapName , KeymapName))
+    `(let ((,xkeymapName ,KeymapName))
        ,@(mapcar
           (lambda (xpair)
             `(define-key
@@ -174,13 +174,25 @@ If State-p is nil, remove the mapping."
 (defmacro keyamp--set-transient-map (KeymapName DocString CmdList)
   "Map `set-transient-map' using `advice-add' over a list CmdList."
   (let ((xkeymapName (make-symbol "keymap-name")))
-    `(let ((,xkeymapName , KeymapName))
+    `(let ((,xkeymapName ,KeymapName))
        ,@(mapcar
           (lambda (xcmd)
             `(advice-add ,(list 'quote xcmd) :after
                          (lambda (&rest r) ,DocString
                            (set-transient-map ,xkeymapName))))
           (cadr CmdList)))))
+
+(defmacro keyamp--hook-set-transient-map (KeymapName DocString HookList)
+  "Map `set-transient-map' using `add-hook' over a list HookList."
+  (let ((xkeymapName (make-symbol "keymap-name")))
+    `(let ((,xkeymapName ,KeymapName))
+       ,@(mapcar
+          (lambda (xhook)
+            `(add-hook ,(list 'quote xhook)
+                         (lambda () ,DocString
+                           (set-transient-map ,xkeymapName)
+                           (setq this-command 'next-line))))
+          (cadr HookList)))))
 
 
 
@@ -682,8 +694,7 @@ so-called “ampable” commands.")
    '(delete-other-windows next-user-buffer previous-user-buffer
      save-close-current-buffer split-window-below
      ibuffer-forward-filter-group ibuffer-backward-filter-group))
-  (add-hook 'help-mode-hook (lambda () "Screen positioning." (set-transient-map x) (setq this-command 'split-window-below)))
-  (add-hook 'ibuffer-hook   (lambda () "Screen positioning." (set-transient-map x) (setq this-command 'ibuffer-forward-filter-group))))
+  (keyamp--hook-set-transient-map x "Screen positioning." '(help-mode-hook ibuffer-hook)))
 
 (let ((x (make-sparse-keymap)))
   (keyamp--define-keys-remap x '((backward-left-bracket . dired-jump)))
@@ -926,7 +937,7 @@ so-called “ampable” commands.")
      x
      '((previous-line . previous-line-or-history-element)
        (next-line     . next-line-or-history-element)))
-    (add-hook 'icomplete-minibuffer-setup-hook (lambda () "History search." (set-transient-map x) (setq this-command 'previous-line-or-history-element))))
+    (keyamp--hook-set-transient-map x "History search." '(icomplete-minibuffer-setup-hook)))
 
   (let ((x (make-sparse-keymap)))
     (keyamp--define-keys-remap
@@ -1002,6 +1013,7 @@ so-called “ampable” commands.")
        (beginning-of-line-or-block  . ibuffer-backward-filter-group)
        (previous-line               . up-line)
        (next-line                   . down-line)))
+    (keyamp--define-keys ibuffer-mode-filter-group-map '(("C-h" . help-command)))
     (keyamp--define-keys-remap ibuffer-mode-filter-group-map '((keyamp-insert-mode-activate . ibuffer-toggle-filter-group)))
 
     (let ((x (make-sparse-keymap)))
@@ -1106,7 +1118,7 @@ so-called “ampable” commands.")
     (keyamp--define-keys-remap x '((previous-line . term-send-up) (next-line . term-send-down)))
     (keyamp--define-keys x '(("DEL" . previous-line) ("<backspace>" . previous-line) ("SPC" . next-line)))
     (keyamp--set-transient-map x "Repeat." '(term-send-up term-send-down))
-    (add-hook 'term-mode-hook (lambda () "History search." (set-transient-map x) (setq this-command 'term-send-up)))
+    (keyamp--hook-set-transient-map x "History search." '(term-mode-hook))
     (add-hook 'term-input-filter-functions (lambda (&rest r) "History search."
                                              (set-transient-map x)
                                              (keyamp-command-mode-activate)
@@ -1200,7 +1212,7 @@ so-called “ampable” commands.")
          (left-char             . gnus-summary-next-group)))
       (keyamp--define-keys x '(("DEL" . gnus-summary-prev-group) ("<backspace>" . gnus-summary-prev-group) ("SPC" . gnus-summary-next-group)))
       (keyamp--set-transient-map x "Repeat." '(gnus-summary-prev-group gnus-summary-next-group))
-      (add-hook 'gnus-summary-prepared-hook (lambda () "Repeat." (set-transient-map x))))
+      (keyamp--hook-set-transient-map x "Repeat." '(gnus-summary-prepared-hook)))
 
     (let ((x (make-sparse-keymap)))
       (keyamp--define-keys x '(("DEL" . gnus-summary-prev-article) ("<backspace>" . gnus-summary-prev-article) ("SPC" . gnus-summary-next-article)))
@@ -1231,7 +1243,7 @@ so-called “ampable” commands.")
      x "Remap."
      '(snake-start-game snake-pause-game snake-move-left
        snake-move-right snake-move-down snake-move-up))
-    (add-hook 'snake-mode-hook (lambda () (set-transient-map x)))))
+    (keyamp--hook-set-transient-map x "History search." '(snake-mode-hook))))
 
 (with-eval-after-load 'tetris
   (keyamp--define-keys-remap
