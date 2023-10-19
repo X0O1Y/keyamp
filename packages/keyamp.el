@@ -147,6 +147,8 @@ Example usage:
                ,(list 'quote (cdr xpair))))
           (cadr KeyCmdAlist)))))
 
+(defalias 'keyamp--dfk 'keyamp--define-keys)
+
 (defmacro keyamp--define-keys-translation (KeyKeyAlist State-p)
   "Map `define-key' for `key-translation-map' over a alist KeyKeyAlist.
 If State-p is nil, remove the mapping."
@@ -171,28 +173,45 @@ If State-p is nil, remove the mapping."
                ,(list 'quote (cdr xpair))))
           (cadr CmdCmdAlist)))))
 
-(defmacro keyamp--set-transient-map (KeymapName DocString CmdList)
+(defalias 'keyamp--dkr 'keyamp--define-keys-remap)
+
+(defmacro keyamp--set-transient-map (KeymapName CmdList)
   "Map `set-transient-map' using `advice-add' over a list CmdList."
   (let ((xkeymapName (make-symbol "keymap-name")))
     `(let ((,xkeymapName ,KeymapName))
        ,@(mapcar
           (lambda (xcmd)
             `(advice-add ,(list 'quote xcmd) :after
-                         (lambda (&rest r) ,DocString
+                         (lambda (&rest r) "Repeat."
                            (set-transient-map ,xkeymapName))))
           (cadr CmdList)))))
 
-(defmacro keyamp--hook-set-transient-map (KeymapName DocString HookList)
+(defalias 'keyamp--stm 'keyamp--set-transient-map)
+
+(defmacro keyamp--set-transient-map-hook (KeymapName HookList)
   "Map `set-transient-map' using `add-hook' over a list HookList."
   (let ((xkeymapName (make-symbol "keymap-name")))
     `(let ((,xkeymapName ,KeymapName))
        ,@(mapcar
           (lambda (xhook)
             `(add-hook ,(list 'quote xhook)
-                         (lambda () ,DocString
+                         (lambda () "Repeat."
                            (set-transient-map ,xkeymapName)
                            (setq this-command 'next-line))))
           (cadr HookList)))))
+
+(defalias 'keyamp--sth 'keyamp--set-transient-map-hook)
+
+(defmacro keyamp--define-leader-keys (KeymapName CmdCons)
+  "Map leader keys using `keyamp--define-keys'."
+  (let ((xkeymapName (make-symbol "keymap-name")))
+    `(let ((,xkeymapName ,KeymapName))
+       (keyamp--define-keys
+        ,xkeymapName
+        '(("DEL" . ,(car (cadr CmdCons))) ("<backspace>" . ,(car (cadr CmdCons)))
+          ("SPC" . ,(cdr (cadr CmdCons))))))))
+
+(defalias 'keyamp--dlk 'keyamp--define-leader-keys)
 
 
 
@@ -370,14 +389,14 @@ so-called “ampable” commands.")
 
 
 
-(keyamp--define-keys
+(keyamp--dfk
  keyamp-shared-map
  '(("<escape>"   . keyamp-command-mode-activate)
    ("C-<escape>" . keyamp-ampable-mode-indicate)
    ("C-^" . keyamp-leader-left-key-map)  ("C-+" . keyamp-leader-left-key-map)
    ("C-_" . keyamp-leader-right-key-map) ("C-И" . keyamp-leader-right-key-map)))
 
-(keyamp--define-keys
+(keyamp--dfk
  keyamp-command-map
  '(("<escape>" . keyamp-escape)                                                        ("S-<escape>"    . ignore)
    ("RET" . keyamp-insert-mode-activate) ("<return>"    . keyamp-insert-mode-activate) ("S-<return>"    . ignore)
@@ -444,7 +463,7 @@ so-called “ampable” commands.")
    ("<up>"   . up-line)   ("<down>"  . down-line)
    ("<left>" . left-char) ("<right>" . right-char)))
 
-(keyamp--define-keys
+(keyamp--dfk
  (define-prefix-command 'keyamp-leader-left-key-map)
  '(("SPC" . repeat)
    ("DEL" . repeat)                   ("<backspace>" . repeat)
@@ -537,7 +556,7 @@ so-called “ampable” commands.")
    ("j ESC" . ignore) ("j <escape>" . ignore)
    ("k ESC" . ignore) ("k <escape>" . ignore)))
 
-(keyamp--define-keys
+(keyamp--dfk
  (define-prefix-command 'keyamp-leader-right-key-map)
  '(("SPC" . repeat)
    ("DEL" . repeat)                   ("<backspace>" . repeat)
@@ -623,7 +642,7 @@ so-called “ampable” commands.")
    ("d ESC" . ignore) ("d <escape>" . ignore)
    ("f ESC" . ignore) ("f <escape>" . ignore)))
 
-(keyamp--define-keys
+(keyamp--dfk
  help-map
  '(("DEL" . lookup-word-definition) ("SPC" . lookup-google-translate)
    ("ESC" . ignore)                 ("RET" . lookup-web)
@@ -649,26 +668,26 @@ so-called “ampable” commands.")
 
 
 
-(keyamp--define-keys query-replace-map '(("C-h" . skip) ("C-r" . act)))
-(keyamp--define-keys global-map '(("C-r" . open-file-at-cursor) ("C-t" . hippie-expand)))
+(keyamp--dfk query-replace-map '(("C-h" . skip) ("C-r" . act)))
+(keyamp--dfk global-map '(("C-r" . open-file-at-cursor) ("C-t" . hippie-expand)))
 
 (let ((x (make-sparse-keymap)))
-  (keyamp--define-keys-remap x '((cut-bracket-or-delete . repeat)))
-  (keyamp--define-keys x '(("DEL" . repeat) ("<backspace>" . repeat) ("SPC" . repeat)))
-  (keyamp--set-transient-map x "Repeat." '(repeat)))
+  (keyamp--dkr x '((cut-bracket-or-delete . repeat)))
+  (keyamp--dlk x '(repeat . repeat))
+  (keyamp--stm x '(repeat)))
 
 (let ((x (make-sparse-keymap)))
-  (keyamp--define-keys
+  (keyamp--dfk
    x
    '(("RET" . hippie-expand)      ("<return>"    . hippie-expand)
      ("DEL" . hippie-expand-undo) ("<backspace>" . hippie-expand-undo)))
-  (keyamp--set-transient-map x "Repeat." '(hippie-expand)))
+  (keyamp--stm x '(hippie-expand)))
 
 
 ;; screen
 
 (let ((x (make-sparse-keymap)))
-  (keyamp--define-keys-remap
+  (keyamp--dkr
    x
    '((insert-space-before         . sun-moon)                ; q
      (undo                        . split-window-below)      ; e
@@ -684,191 +703,197 @@ so-called “ampable” commands.")
      (exchange-point-and-mark     . view-echo-area-messages) ; p
      (backward-left-bracket       . dired-jump)              ; m
      (forward-right-bracket       . player)))                ; .
-  (keyamp--define-keys
+  (keyamp--dfk
    x
    '(("TAB" . toggle-ibuffer)       ("<tab>"       . toggle-ibuffer)
      ("DEL" . previous-user-buffer) ("<backspace>" . previous-user-buffer)
      ("SPC" . next-user-buffer)))
-  (keyamp--set-transient-map
-   x "Screen positioning."
+  (keyamp--stm
+   x
    '(delete-other-windows next-user-buffer previous-user-buffer
-     save-close-current-buffer split-window-below
+     save-close-current-buffer split-window-below alternate-buffer
      ibuffer-forward-filter-group ibuffer-backward-filter-group))
-  (keyamp--hook-set-transient-map x "Screen positioning." '(help-mode-hook ibuffer-hook)))
+  (keyamp--sth x '(help-mode-hook ibuffer-hook)))
 
 (let ((x (make-sparse-keymap)))
-  (keyamp--define-keys-remap x '((backward-left-bracket . dired-jump)))
-  (keyamp--define-keys x '(("DEL" . dired-jump) ("<backspace>" . dired-jump) ("SPC" . dired-jump)))
-  (keyamp--set-transient-map x "Repeat." '(dired-jump downloads player)))
+  (keyamp--dkr x '((backward-left-bracket . dired-jump)))
+  (keyamp--dlk x '(dired-jump . dired-jump))
+  (keyamp--stm x '(dired-jump downloads player)))
 
 (let ((x (make-sparse-keymap)))
-  (keyamp--define-keys-remap x '((next-window-or-frame . save-close-current-buffer)))
-  (keyamp--set-transient-map x "Repeat." '(save-close-current-buffer)))
+  (keyamp--dkr x '((next-window-or-frame . save-close-current-buffer)))
+  (keyamp--stm x '(save-close-current-buffer)))
 
 (let ((x (make-sparse-keymap)))
-  (keyamp--define-keys-remap x '((cut-bracket-or-delete . tasks)))
-  (keyamp--define-keys x '(("DEL" . previous-user-buffer) ("<backspace>" . previous-user-buffer) ("SPC" . tasks)))
-  (keyamp--set-transient-map x "Repeat." '(tasks)))
+  (keyamp--dkr x '((cut-bracket-or-delete . tasks)))
+  (keyamp--dlk x '(previous-user-buffer . tasks))
+  (keyamp--stm x '(tasks)))
 
 (let ((x (make-sparse-keymap)))
-  (keyamp--define-keys-remap x '((cut-bracket-or-delete . works) (cut-line-or-selection . works)))
-  (keyamp--define-keys x '(("DEL" . previous-user-buffer) ("<backspace>" . previous-user-buffer) ("SPC" . works)))
-  (keyamp--set-transient-map x "Repeat." '(works)))
+  (keyamp--dkr x '((cut-bracket-or-delete . works) (cut-line-or-selection . works)))
+  (keyamp--dlk x '(previous-user-buffer . works))
+  (keyamp--stm x '(works)))
 
 
 ;; edit
 
 (let ((x (make-sparse-keymap))) ; q d
-  (keyamp--define-keys x '(("DEL" . cut-bracket-or-delete) ("<backspace>" . cut-bracket-or-delete) ("SPC" . insert-space-before)))
-  (keyamp--set-transient-map x "Repeat." '(insert-space-before cut-bracket-or-delete)))
+  (keyamp--dlk x '(cut-bracket-or-delete . insert-space-before))
+  (keyamp--stm x '(insert-space-before cut-bracket-or-delete)))
 
 (let ((x (make-sparse-keymap)))
-  (keyamp--define-keys x '(("DEL" . delete-forward-char) ("<backspace>" . delete-forward-char) ("SPC" . delete-forward-char)))
-  (keyamp--set-transient-map x "Repeat." '(delete-forward-char)))
+  (keyamp--dlk x '(delete-forward-char . delete-forward-char))
+  (keyamp--stm x '(delete-forward-char)))
 
 (let ((x (make-sparse-keymap))) ; w r
-  (keyamp--define-keys-remap x '((open-line . backward-kill-word) (newline . kill-word)))
-  (keyamp--define-keys x '(("DEL" . open-line) ("<backspace>" . open-line) ("SPC" . newline)))
-  (keyamp--set-transient-map x "Repeat." '(backward-kill-word kill-word)))
+  (keyamp--dkr x '((open-line . backward-kill-word) (newline . kill-word)))
+  (keyamp--dlk x '(open-line . newline))
+  (keyamp--stm x '(backward-kill-word kill-word)))
 
 (let ((x (make-sparse-keymap))) ; e d
-  (keyamp--define-keys-remap x '((cut-bracket-or-delete . undo-redo)))
-  (keyamp--define-keys x '(("DEL" . undo) ("<backspace>" . undo) ("SPC" . undo-redo)))
-  (keyamp--set-transient-map x "Repeat." '(undo undo-redo)))
+  (keyamp--dkr x '((cut-bracket-or-delete . undo-redo)))
+  (keyamp--dlk x '(undo . undo-redo))
+  (keyamp--stm x '(undo undo-redo)))
 
 (let ((x (make-sparse-keymap))) ; t
-  (keyamp--define-keys-remap x '((cut-bracket-or-delete . cut-text-block)))
-  (keyamp--set-transient-map x "Repeat." '(cut-text-block)))
+  (keyamp--dkr x '((cut-bracket-or-delete . cut-text-block)))
+  (keyamp--stm x '(cut-text-block)))
 
 (let ((x (make-sparse-keymap))) ; a
-  (keyamp--define-keys-remap x '((cut-bracket-or-delete . shrink-whitespaces)))
-  (keyamp--define-keys x '(("DEL" . shrink-whitespaces) ("<backspace>" . shrink-whitespaces) ("SPC" . shrink-whitespaces)))
-  (keyamp--set-transient-map x "Repeat." '(shrink-whitespaces)))
+  (keyamp--dkr x '((cut-bracket-or-delete . shrink-whitespaces)))
+  (keyamp--dlk x '(shrink-whitespaces . shrink-whitespaces))
+  (keyamp--stm x '(shrink-whitespaces)))
 
 (let ((x (make-sparse-keymap))) ; g
-  (keyamp--define-keys-remap x '((cut-bracket-or-delete . rectangle-mark-mode)))
-  (keyamp--set-transient-map x "Repeat." '(set-mark-command)))
+  (keyamp--dkr x '((cut-bracket-or-delete . rectangle-mark-mode)))
+  (keyamp--stm x '(set-mark-command)))
 
 (let ((x (make-sparse-keymap))) ; z
-  (keyamp--define-keys-remap x '((cut-bracket-or-delete . toggle-comment)))
-  (keyamp--define-keys x '(("DEL" . toggle-comment) ("<backspace>" . toggle-comment) ("SPC" . toggle-comment)))
-  (keyamp--set-transient-map x "Repeat." '(toggle-comment)))
+  (keyamp--dkr x '((cut-bracket-or-delete . toggle-comment)))
+  (keyamp--dlk x '(toggle-comment . toggle-comment))
+  (keyamp--stm x '(toggle-comment)))
 
 (let ((x (make-sparse-keymap))) ; x
-  (keyamp--define-keys-remap x '((cut-bracket-or-delete . cut-line-or-selection)))
-  (keyamp--define-keys x '(("DEL" . cut-line-or-selection) ("<backspace>" . cut-line-or-selection) ("SPC" . cut-line-or-selection)))
-  (keyamp--set-transient-map x "Repeat." '(cut-line-or-selection)))
+  (keyamp--dkr x '((cut-bracket-or-delete . cut-line-or-selection)))
+  (keyamp--dlk x '(cut-line-or-selection . cut-line-or-selection))
+  (keyamp--stm x '(cut-line-or-selection)))
 
 (let ((x (make-sparse-keymap))) ; c
-  (keyamp--define-keys-remap x '((cut-bracket-or-delete . copy-line-or-selection)))
-  (keyamp--define-keys x '(("DEL" . copy-line-or-selection) ("<backspace>" . copy-line-or-selection) ("SPC" . copy-line-or-selection)))
-  (keyamp--set-transient-map x "Repeat." '(copy-line-or-selection)))
+  (keyamp--dkr x '((cut-bracket-or-delete . copy-line-or-selection)))
+  (keyamp--dlk x '(copy-line-or-selection . copy-line-or-selection))
+  (keyamp--stm x '(copy-line-or-selection)))
 
 (let ((x (make-sparse-keymap))) ; v
-  (keyamp--define-keys-remap x '((cut-bracket-or-delete . paste-or-paste-previous)))
-  (keyamp--define-keys x '(("DEL" . undo) ("<backspace>" . undo) ("SPC" . paste-or-paste-previous)))
-  (keyamp--set-transient-map x "Repeat." '(paste-or-paste-previous)))
+  (keyamp--dkr x '((cut-bracket-or-delete . paste-or-paste-previous)))
+  (keyamp--dlk x '(undo . paste-or-paste-previous))
+  (keyamp--stm x '(paste-or-paste-previous)))
 
 (let ((x (make-sparse-keymap))) ; b
-  (keyamp--define-keys-remap x '((cut-bracket-or-delete . toggle-letter-case)))
-  (keyamp--define-keys x '(("DEL" . toggle-letter-case) ("<backspace>" . toggle-letter-case) ("SPC" . toggle-letter-case)))
-  (keyamp--set-transient-map x "Repeat." '(toggle-letter-case)))
+  (keyamp--dkr x '((cut-bracket-or-delete . toggle-letter-case)))
+  (keyamp--dlk x '(toggle-letter-case . toggle-letter-case))
+  (keyamp--stm x '(toggle-letter-case)))
 
 (let ((x (make-sparse-keymap)))
-  (keyamp--define-keys-remap x '((undo . move-row-up) (cut-bracket-or-delete . move-row-down)))
-  (keyamp--define-keys x '(("DEL" . move-row-up) ("<backspace>" . move-row-up) ("SPC" . move-row-down)))
-  (keyamp--set-transient-map x "Repeat." '(move-row-up move-row-down)))
+  (keyamp--dkr x '((undo . move-row-up) (cut-bracket-or-delete . move-row-down)))
+  (keyamp--dlk x '(move-row-up . move-row-down))
+  (keyamp--stm x '(move-row-up move-row-down)))
 
 (let ((x (make-sparse-keymap)))
-  (keyamp--define-keys-remap x '((undo . org-shiftup) (cut-bracket-or-delete  . org-shiftdown) (copy-line-or-selection . agenda)))
-  (keyamp--define-keys x '(("DEL" . org-shiftup) ("<backspace>" . org-shiftup) ("SPC" . org-shiftdown)))
-  (keyamp--set-transient-map x "Repeat." '(org-shiftup org-shiftdown)))
+  (keyamp--dkr x '((undo . org-shiftup) (cut-bracket-or-delete  . org-shiftdown) (copy-line-or-selection . agenda)))
+  (keyamp--dlk x '(org-shiftup . org-shiftdown))
+  (keyamp--stm x '(org-shiftup org-shiftdown)))
 
 (let ((x (make-sparse-keymap)))
-  (keyamp--define-keys-remap x '((undo . todo) (copy-line-or-selection . agenda)))
-  (keyamp--set-transient-map x "Repeat." '(todo insert-date)))
+  (keyamp--dkr x '((undo . todo) (copy-line-or-selection . agenda)))
+  (keyamp--stm x '(todo insert-date)))
 
 (let ((x (make-sparse-keymap)))
-  (keyamp--define-keys-remap x '((cut-bracket-or-delete . cycle-hyphen-lowline-space)))
-  (keyamp--set-transient-map x "Repeat." '(cycle-hyphen-lowline-space)))
+  (keyamp--dkr x '((cut-bracket-or-delete . cycle-hyphen-lowline-space)))
+  (keyamp--stm x '(cycle-hyphen-lowline-space)))
 
 
 ;; move
 
 (let ((x (make-sparse-keymap)))
-  (keyamp--define-keys x '(("DEL" . previous-line) ("<backspace>" . previous-line) ("SPC" . next-line)))
-  (keyamp--set-transient-map x "Repeat." '(previous-line next-line)))
+  (keyamp--dlk x '(previous-line . next-line))
+  (keyamp--stm x '(previous-line next-line)))
 
 (let ((x (make-sparse-keymap)))
-  (keyamp--define-keys x '(("DEL" . up-line) ("<backspace>" . up-line) ("SPC" . down-line)))
-  (keyamp--set-transient-map x "Repeat." '(up-line down-line)))
+  (keyamp--dlk x '(up-line . down-line))
+  (keyamp--stm x '(up-line down-line)))
 
 (let ((x (make-sparse-keymap)))
-  (keyamp--define-keys x '(("DEL" . backward-left-bracket) ("<backspace>" . backward-left-bracket) ("SPC" . forward-right-bracket)))
-  (keyamp--set-transient-map x "Repeat." '(backward-left-bracket forward-right-bracket)))
+  (keyamp--dlk x '(backward-left-bracket . forward-right-bracket))
+  (keyamp--stm x '(backward-left-bracket forward-right-bracket)))
 
 (let ((x (make-sparse-keymap)))
-  (keyamp--define-keys-remap
+  (keyamp--dkr
    x
    '((previous-line              . beginning-of-line-or-block)
      (next-line                  . end-of-line-or-block)
      (beginning-of-line-or-block . beginning-of-line-or-buffer)
      (end-of-line-or-block       . end-of-line-or-buffer)))
-  (keyamp--define-keys x '(("DEL" . previous-line) ("<backspace>" . previous-line) ("SPC" . next-line)))
-  (keyamp--set-transient-map x "Cursor positioning." '(beginning-of-line-or-block end-of-line-or-block beginning-of-line-or-buffer end-of-line-or-buffer)))
+  (keyamp--dlk x '(previous-line . next-line))
+  (keyamp--stm
+   x
+   '(beginning-of-line-or-block end-of-line-or-block
+     beginning-of-line-or-buffer end-of-line-or-buffer)))
 
 (let ((x (make-sparse-keymap)))
-  (keyamp--define-keys-remap
+  (keyamp--dkr
    x
    '((backward-char . backward-word)  (forward-char . forward-word)
      (backward-word . backward-punct) (forward-word . forward-punct)))
-  (keyamp--define-keys x '(("DEL" . backward-char) ("<backspace>" . backward-char) ("SPC" . forward-char)))
-  (keyamp--set-transient-map x "Cursor positioning." '(backward-word forward-word backward-punct forward-punct set-mark-command exchange-point-and-mark rectangle-mark-mode)))
+  (keyamp--dlk x '(backward-char . forward-char))
+  (keyamp--stm
+   x
+   '(backward-word forward-word backward-punct forward-punct
+     set-mark-command exchange-point-and-mark rectangle-mark-mode)))
 
 (let ((x (make-sparse-keymap)))
-  (keyamp--define-keys-remap x '((previous-line . scroll-down-line) (next-line . scroll-up-line)))
-  (keyamp--define-keys x '(("DEL" . scroll-down-line) ("<backspace>" . scroll-down-line) ("SPC" . scroll-up-line)))
-  (keyamp--set-transient-map x "Repeat." '(scroll-down-line scroll-up-line)))
+  (keyamp--dkr x '((previous-line . scroll-down-line) (next-line . scroll-up-line)))
+  (keyamp--dlk x '(scroll-down-line . scroll-up-line))
+  (keyamp--stm x '(scroll-down-line scroll-up-line)))
 
 (let ((x (make-sparse-keymap)))
-  (keyamp--define-keys-remap x '((previous-line . scroll-down-command) (next-line . scroll-up-command)))
-  (keyamp--define-keys x '(("DEL" . scroll-down-command) ("<backspace>" . scroll-down-command) ("SPC" . scroll-up-command)))
-  (keyamp--set-transient-map x "Repeat." '(scroll-down-command scroll-up-command)))
+  (keyamp--dkr x '((previous-line . scroll-down-command) (next-line . scroll-up-command)))
+  (keyamp--dlk x '(scroll-down-command . scroll-up-command))
+  (keyamp--stm x '(scroll-down-command scroll-up-command)))
 
 (let ((x (make-sparse-keymap)))
-  (keyamp--define-keys-remap x '((next-line . pop-local-mark-ring)))
-  (keyamp--define-keys x '(("DEL" . pop-local-mark-ring) ("<backspace>" . pop-local-mark-ring) ("SPC" . pop-local-mark-ring)))
-  (keyamp--set-transient-map x "Repeat." '(pop-local-mark-ring)))
+  (keyamp--dkr x '((next-line . pop-local-mark-ring)))
+  (keyamp--dlk x '(pop-local-mark-ring . pop-local-mark-ring))
+  (keyamp--stm x '(pop-local-mark-ring)))
 
 (let ((x (make-sparse-keymap)))
-  (keyamp--define-keys-remap x '((next-line . recenter-top-bottom)))
-  (keyamp--define-keys x '(("DEL" . recenter-top-bottom) ("<backspace>" . recenter-top-bottom) ("SPC" . recenter-top-bottom)))
-  (keyamp--set-transient-map x "Repeat." '(recenter-top-bottom)))
+  (keyamp--dkr x '((next-line . recenter-top-bottom)))
+  (keyamp--dlk x '(recenter-top-bottom . recenter-top-bottom))
+  (keyamp--stm x '(recenter-top-bottom)))
 
 (let ((x (make-sparse-keymap)))
-  (keyamp--define-keys-remap x '((previous-line . beginning-of-line-or-block) (next-line . select-block)))
-  (keyamp--define-keys x '(("DEL" . previous-line) ("<backspace>" . previous-line) ("SPC" . next-line)))
-  (keyamp--set-transient-map x "Repeat." '(select-block)))
+  (keyamp--dkr x '((previous-line . beginning-of-line-or-block) (next-line . select-block)))
+  (keyamp--dlk x '(previous-line . next-line))
+  (keyamp--stm x '(select-block)))
 
 (let ((x (make-sparse-keymap)))
-  (keyamp--define-keys-remap
+  (keyamp--dkr
    x
    '((next-line     . extend-selection)
      (backward-char . backward-word)  (forward-char  . forward-word)
      (backward-word . backward-punct) (forward-word  . forward-punct)))
-  (keyamp--define-keys x '(("DEL" . backward-char) ("<backspace>" . backward-char) ("SPC" . forward-char)))
-  (keyamp--set-transient-map x "Repeat." '(extend-selection)))
+  (keyamp--dlk x '(backward-char . forward-char))
+  (keyamp--stm x '(extend-selection)))
 
 (let ((x (make-sparse-keymap)))
-  (keyamp--define-keys-remap x '((next-line . select-line)))
-  (keyamp--define-keys x '(("DEL" . previous-line) ("<backspace>" . previous-line) ("SPC" . next-line)))
-  (keyamp--set-transient-map x "Repeat." '(select-line)))
+  (keyamp--dkr x '((next-line . select-line)))
+  (keyamp--dlk x '(previous-line . next-line))
+  (keyamp--stm x '(select-line)))
 
 (let ((x (make-sparse-keymap)))
-  (keyamp--define-keys-remap x '((next-line . select-text-in-quote)))
-  (keyamp--set-transient-map x "Repeat." '(select-text-in-quote)))
+  (keyamp--dkr x '((next-line . select-text-in-quote)))
+  (keyamp--stm x '(select-text-in-quote)))
 
-(keyamp--define-keys
+(keyamp--dfk
  isearch-mode-map
  '(("<escape>" . isearch-abort)           ("C-h"   . isearch-repeat-backward) ("C-r"   . isearch-repeat-forward)
    ("<up>"     . isearch-ring-retreat)    ("C-_ i" . isearch-ring-retreat)    ("C-И i" . isearch-ring-retreat)
@@ -878,7 +903,7 @@ so-called “ampable” commands.")
    ("C-^"      . ignore)                  ("C-_ n" . isearch-yank-kill)       ("C-И n" . isearch-yank-kill)))
 
 (let ((x (make-sparse-keymap)))
-  (keyamp--define-keys
+  (keyamp--dfk
    x
    '(("i"   . isearch-ring-retreat)    ("ш"   . isearch-ring-retreat)
      ("j"   . isearch-repeat-backward) ("о"   . isearch-repeat-backward)
@@ -886,24 +911,22 @@ so-called “ampable” commands.")
      ("l"   . isearch-repeat-forward)  ("д"   . isearch-repeat-forward)
      ("d"   . repeat)                  ("в"   . repeat)
      ("DEL" . isearch-repeat-backward) ("SPC" . isearch-repeat-forward)))
-  (keyamp--set-transient-map x "Repeat." '(isearch-ring-retreat isearch-repeat-backward isearch-ring-advance isearch-repeat-forward search-current-word isearch-yank-kill)))
+  (keyamp--stm x '(isearch-ring-retreat isearch-repeat-backward isearch-ring-advance isearch-repeat-forward search-current-word isearch-yank-kill)))
 
 
 ;; modes
 
 (setq keyamp-minibuffer-map (make-sparse-keymap))
-(keyamp--define-keys
- keyamp-minibuffer-map
- '(("DEL" . previous-line-or-history-element) ("<backspace>" . previous-line-or-history-element)
-   ("SPC" . next-line-or-history-element)))
+(keyamp--dlk
+ keyamp-minibuffer-map '(previous-line-or-history-element . next-line-or-history-element))
 
 (with-eval-after-load 'minibuffer
-  (keyamp--define-keys-remap
+  (keyamp--dkr
    minibuffer-local-map
    '((previous-line . previous-line-or-history-element)
      (next-line     . next-line-or-history-element)
      (select-block  . previous-line-or-history-element)))
-  (keyamp--define-keys-remap
+  (keyamp--dkr
    minibuffer-mode-map
    '((previous-line       . previous-line-or-history-element)
      (next-line           . next-line-or-history-element)
@@ -911,12 +934,12 @@ so-called “ampable” commands.")
      (select-block        . previous-line-or-history-element))))
 
 (with-eval-after-load 'icomplete
-  (keyamp--define-keys
+  (keyamp--dfk
    icomplete-minibuffer-map
    '(("C-r" . icomplete-force-complete-and-exit)
      ("RET" . icomplete-exit-or-force-complete-and-exit) ("<return>" . icomplete-exit-or-force-complete-and-exit)))
 
-  (keyamp--define-keys-remap
+  (keyamp--dkr
    icomplete-minibuffer-map
    '((previous-line    . icomplete-backward-completions)
      (next-line        . icomplete-forward-completions)
@@ -924,46 +947,44 @@ so-called “ampable” commands.")
      (extend-selection . next-line-or-history-element)))
 
   (let ((x (make-sparse-keymap)))
-    (keyamp--define-keys-remap
+    (keyamp--dkr
      x
      '((previous-line               . previous-line-or-history-element)
        (next-line                   . next-line-or-history-element)
        (keyamp-insert-mode-activate . exit-minibuffer)))
-    (keyamp--define-keys x '(("DEL" . previous-line) ("<backspace>" . previous-line) ("SPC" . next-line)))
-    (keyamp--set-transient-map x "History search." '(previous-line-or-history-element next-line-or-history-element))))
+    (keyamp--dlk x '(previous-line . next-line))
+    (keyamp--stm x '(previous-line-or-history-element next-line-or-history-element))))
 
   (let ((x (make-sparse-keymap)))
-    (keyamp--define-keys-remap
+    (keyamp--dkr
      x
      '((previous-line . previous-line-or-history-element)
        (next-line     . next-line-or-history-element)))
-    (keyamp--hook-set-transient-map x "History search." '(icomplete-minibuffer-setup-hook)))
+    (keyamp--sth x '(icomplete-minibuffer-setup-hook)))
 
   (let ((x (make-sparse-keymap)))
-    (keyamp--define-keys-remap
+    (keyamp--dkr
      x
      '((previous-line . icomplete-backward-completions)
        (next-line     . icomplete-forward-completions)))
-    (keyamp--define-keys x '(("DEL" . previous-line) ("<backspace>" . previous-line) ("SPC" . next-line)))
-    (keyamp--set-transient-map x "Repeat." '(icomplete-backward-completions icomplete-forward-completions)))
+    (keyamp--dlk x '(previous-line . next-line))
+    (keyamp--stm x '(icomplete-backward-completions icomplete-forward-completions)))
 
 (add-hook 'ido-setup-hook
           (lambda ()
-            (keyamp--define-keys ido-completion-map '(("C-r" . ido-exit-minibuffer)))
-            (keyamp--define-keys-remap
+            (keyamp--dfk ido-completion-map '(("C-r" . ido-exit-minibuffer)))
+            (keyamp--dkr
              ido-completion-map
              '((previous-line . ido-prev-match)
                (next-line     . ido-next-match)))
             (let ((x (make-sparse-keymap)))
-              (keyamp--define-keys
-               x
-               '(("DEL" . previous-line) ("<backspace>" . previous-line) ("SPC" . next-line)))
-              (keyamp--set-transient-map x "Repeat." '(ido-prev-match ido-next-match)))))
+              (keyamp--dlk x '(previous-line . next-line))
+              (keyamp--stm x '(ido-prev-match ido-next-match)))))
 
 (progn ; dired
   (with-eval-after-load 'dired
-    (keyamp--define-keys dired-mode-map '(("C-h" . dired-do-delete) ("C-r" . open-in-external-app)))
-    (keyamp--define-keys-remap
+    (keyamp--dfk dired-mode-map '(("C-h" . dired-do-delete) ("C-r" . open-in-external-app)))
+    (keyamp--dkr
      dired-mode-map
      '((keyamp-insert-mode-activate . dired-find-file)
        (backward-left-bracket       . dired-mark)
@@ -976,18 +997,18 @@ so-called “ampable” commands.")
        (insert-space-before         . dired-hide-details-mode)))
 
     (let ((x (make-sparse-keymap)))
-      (keyamp--define-keys x '(("DEL" . dired-previous-line) ("<backspace>" . dired-previous-line) ("SPC" . dired-next-line)))
-      (keyamp--set-transient-map x "Repeat." '(dired-previous-line dired-next-line)))
+      (keyamp--dlk x '(dired-previous-line . dired-next-line))
+      (keyamp--stm x '(dired-previous-line dired-next-line)))
 
     (let ((x (make-sparse-keymap)))
-      (keyamp--define-keys x '(("DEL" . dired-unmark) ("<backspace>" . dired-unmark) ("SPC" . dired-mark)))
-      (keyamp--set-transient-map x "Repeat." '(dired-unmark dired-mark))))
+      (keyamp--dlk x '(dired-unmark . dired-mark))
+      (keyamp--stm x '(dired-unmark dired-mark))))
 
   (with-eval-after-load 'wdired
-    (keyamp--define-keys wdired-mode-map '(("C-h" . wdired-abort-changes) ("C-r" . wdired-finish-edit)))))
+    (keyamp--dfk wdired-mode-map '(("C-h" . wdired-abort-changes) ("C-r" . wdired-finish-edit)))))
 
 (with-eval-after-load 'rect
-  (keyamp--define-keys-remap
+  (keyamp--dkr
    rectangle-mark-mode-map
    '((copy-line-or-selection      . copy-rectangle-as-kill)
      (cut-bracket-or-delete       . kill-rectangle)
@@ -1001,53 +1022,53 @@ so-called “ampable” commands.")
 
 (progn ; ibuffer
   (with-eval-after-load 'ibuf-ext
-    (keyamp--define-keys
+    (keyamp--dfk
      ibuffer-mode-map
      '(("C-h" . ibuffer-do-delete) ("C-r" . ibuffer-diff-with-file)
        ("TAB" . news)              ("<tab>" . news)))
 
-    (keyamp--define-keys-remap
+    (keyamp--dkr
      ibuffer-mode-map
      '((keyamp-insert-mode-activate . ibuffer-visit-buffer)
        (end-of-line-or-block        . ibuffer-forward-filter-group)
        (beginning-of-line-or-block  . ibuffer-backward-filter-group)
        (previous-line               . up-line)
        (next-line                   . down-line)))
-    (keyamp--define-keys ibuffer-mode-filter-group-map '(("C-h" . help-command)))
-    (keyamp--define-keys-remap ibuffer-mode-filter-group-map '((keyamp-insert-mode-activate . ibuffer-toggle-filter-group)))
+    (keyamp--dfk ibuffer-mode-filter-group-map '(("C-h" . help-command)))
+    (keyamp--dkr ibuffer-mode-filter-group-map '((keyamp-insert-mode-activate . ibuffer-toggle-filter-group)))
 
     (let ((x (make-sparse-keymap)))
-      (keyamp--define-keys-remap
+      (keyamp--dkr
        x
        '((previous-line              . ibuffer-backward-filter-group)
          (next-line                  . ibuffer-forward-filter-group)
          (beginning-of-line-or-block . beginning-of-line-or-buffer)
          (end-of-line-or-block       . end-of-line-or-buffer)))
-      (keyamp--set-transient-map x "Cursor positioning." '(ibuffer-backward-filter-group ibuffer-forward-filter-group ibuffer-toggle-filter-group))))
+      (keyamp--stm x '(ibuffer-backward-filter-group ibuffer-forward-filter-group ibuffer-toggle-filter-group))))
 
   (let ((x (make-sparse-keymap)))
-    (keyamp--define-keys-remap x '((cut-bracket-or-delete . ibuffer-do-delete)))
-    (keyamp--define-keys x       '(("DEL" . ibuffer-do-delete) ("<backspace>" . ibuffer-do-delete) ("SPC" . ibuffer-do-delete)))
-    (keyamp--set-transient-map x "Repeat." '(ibuffer-do-delete))))
+    (keyamp--dkr x '((cut-bracket-or-delete . ibuffer-do-delete)))
+    (keyamp--dlk x '(ibuffer-do-delete . ibuffer-do-delete))
+    (keyamp--stm x '(ibuffer-do-delete))))
 
 (with-eval-after-load 'transient
-  (keyamp--define-keys transient-base-map '(("<escape>" . transient-quit-one))))
+  (keyamp--dfk transient-base-map '(("<escape>" . transient-quit-one))))
 
 (progn ; remap RET
-  (with-eval-after-load 'arc-mode (keyamp--define-keys-remap archive-mode-map '((keyamp-insert-mode-activate . archive-extract))))
-  (with-eval-after-load 'bookmark (keyamp--define-keys-remap bookmark-bmenu-mode-map '((keyamp-insert-mode-activate . bookmark-bmenu-this-window))))
-  (with-eval-after-load 'button (keyamp--define-keys-remap button-map '((keyamp-insert-mode-activate . push-button))))
-  (with-eval-after-load 'compile (keyamp--define-keys-remap compilation-button-map '((keyamp-insert-mode-activate . compile-goto-error))))
-  (with-eval-after-load 'gnus-art (keyamp--define-keys-remap gnus-mime-button-map '((keyamp-insert-mode-activate . gnus-article-press-button))))
-  (with-eval-after-load 'emms-playlist-mode (keyamp--define-keys-remap emms-playlist-mode-map '((keyamp-insert-mode-activate . emms-playlist-mode-play-smart))))
-  (with-eval-after-load 'org-agenda (keyamp--define-keys-remap org-agenda-mode-map '((keyamp-insert-mode-activate . org-agenda-switch-to))))
-  (with-eval-after-load 'replace (keyamp--define-keys-remap occur-mode-map '((keyamp-insert-mode-activate . occur-mode-goto-occurrence))))
-  (with-eval-after-load 'shr (keyamp--define-keys-remap shr-map '((keyamp-insert-mode-activate . shr-browse-url))))
-  (with-eval-after-load 'simple (keyamp--define-keys-remap completion-list-mode-map '((keyamp-insert-mode-activate . choose-completion))))
-  (with-eval-after-load 'wid-edit (keyamp--define-keys-remap widget-link-keymap '((keyamp-insert-mode-activate . widget-button-press)))))
+  (with-eval-after-load 'arc-mode (keyamp--dkr archive-mode-map '((keyamp-insert-mode-activate . archive-extract))))
+  (with-eval-after-load 'bookmark (keyamp--dkr bookmark-bmenu-mode-map '((keyamp-insert-mode-activate . bookmark-bmenu-this-window))))
+  (with-eval-after-load 'button (keyamp--dkr button-map '((keyamp-insert-mode-activate . push-button))))
+  (with-eval-after-load 'compile (keyamp--dkr compilation-button-map '((keyamp-insert-mode-activate . compile-goto-error))))
+  (with-eval-after-load 'gnus-art (keyamp--dkr gnus-mime-button-map '((keyamp-insert-mode-activate . gnus-article-press-button))))
+  (with-eval-after-load 'emms-playlist-mode (keyamp--dkr emms-playlist-mode-map '((keyamp-insert-mode-activate . emms-playlist-mode-play-smart))))
+  (with-eval-after-load 'org-agenda (keyamp--dkr org-agenda-mode-map '((keyamp-insert-mode-activate . org-agenda-switch-to))))
+  (with-eval-after-load 'replace (keyamp--dkr occur-mode-map '((keyamp-insert-mode-activate . occur-mode-goto-occurrence))))
+  (with-eval-after-load 'shr (keyamp--dkr shr-map '((keyamp-insert-mode-activate . shr-browse-url))))
+  (with-eval-after-load 'simple (keyamp--dkr completion-list-mode-map '((keyamp-insert-mode-activate . choose-completion))))
+  (with-eval-after-load 'wid-edit (keyamp--dkr widget-link-keymap '((keyamp-insert-mode-activate . widget-button-press)))))
 
 (with-eval-after-load 'doc-view
-  (keyamp--define-keys-remap
+  (keyamp--dkr
    doc-view-mode-map
    '((previous-line              . doc-view-previous-line-or-previous-page)
      (next-line                  . doc-view-next-line-or-next-page)
@@ -1059,73 +1080,73 @@ so-called “ampable” commands.")
      (end-of-line-or-block       . doc-view-scroll-up-or-next-page)))
 
   (let ((x (make-sparse-keymap)))
-    (keyamp--define-keys-remap
+    (keyamp--dkr
      x
      '((previous-line . doc-view-scroll-down-or-previous-page)
        (next-line     . doc-view-scroll-up-or-next-page)))
-    (keyamp--define-keys x '(("DEL" . doc-view-scroll-down-or-previous-page) ("<backspace>" . doc-view-scroll-down-or-previous-page) ("SPC" . doc-view-scroll-up-or-next-page)))
-    (keyamp--set-transient-map x "Repeat." '(doc-view-scroll-down-or-previous-page doc-view-scroll-up-or-next-page))))
+    (keyamp--dlk x '(doc-view-scroll-down-or-previous-page . doc-view-scroll-up-or-next-page))
+    (keyamp--stm x '(doc-view-scroll-down-or-previous-page doc-view-scroll-up-or-next-page))))
 
 (with-eval-after-load 'image-mode
-  (keyamp--define-keys-remap image-mode-map '((backward-char . image-previous-file) (forward-char . image-next-file)))
+  (keyamp--dkr image-mode-map '((backward-char . image-previous-file) (forward-char . image-next-file)))
   (let ((x (make-sparse-keymap)))
-    (keyamp--define-keys x '(("DEL" . backward-char) ("<backspace>" . backward-char) ("SPC" . forward-char)))
-    (keyamp--set-transient-map x "Repeat." '(image-previous-file image-next-file))))
+    (keyamp--dlk x '(backward-char . forward-char))
+    (keyamp--stm x '(image-previous-file image-next-file))))
 
 (with-eval-after-load 'esh-mode
-  (keyamp--define-keys eshell-mode-map '(("C-h" . eshell-interrupt-process) ("C-r" . eshell-send-input)))
-  (keyamp--define-keys-remap
+  (keyamp--dfk eshell-mode-map '(("C-h" . eshell-interrupt-process) ("C-r" . eshell-send-input)))
+  (keyamp--dkr
    eshell-mode-map
    '((cut-line-or-selection . eshell-clear-input)
      (cut-all               . eshell-clear)
      (select-block          . eshell-previous-input)))
   (let ((x (make-sparse-keymap)))
-    (keyamp--define-keys-remap
+    (keyamp--dkr
      x
      '((previous-line . eshell-previous-input)
        (next-line     . eshell-next-input)))
-    (keyamp--define-keys x '(("DEL" . previous-line) ("<backspace>" . previous-line) ("SPC" . next-line)))
-    (keyamp--set-transient-map x "Repeat." '(eshell-previous-input eshell-next-input))
+    (keyamp--dlk x '(previous-line . next-line))
+    (keyamp--stm x '(eshell-previous-input eshell-next-input))
     (add-hook 'eshell-post-command-hook (lambda () "History search."
                                           (set-transient-map x)
                                           (setq this-command 'eshell-previous-input)
                                           (set-face-background 'cursor keyamp-ampable-mode-cursor)))))
 
 (with-eval-after-load 'shell
-  (keyamp--define-keys shell-mode-map '(("C-h" . comint-interrupt-subjob) ("C-r" . comint-send-input)))
-  (keyamp--define-keys-remap
+  (keyamp--dfk shell-mode-map '(("C-h" . comint-interrupt-subjob) ("C-r" . comint-send-input)))
+  (keyamp--dkr
    shell-mode-map
    '((cut-all      . comint-clear-buffer)
      (select-block . comint-previous-input)))
   (let ((x (make-sparse-keymap)))
-    (keyamp--define-keys-remap x '((previous-line . comint-previous-input) (next-line . comint-next-input)))
-    (keyamp--define-keys x '(("DEL" . previous-line) ("<backspace>" . previous-line) ("SPC" . next-line)))
-    (keyamp--set-transient-map x "Repeat." '(comint-previous-input comint-next-input))
+    (keyamp--dkr x '((previous-line . comint-previous-input) (next-line . comint-next-input)))
+    (keyamp--dlk x '(previous-line . next-line))
+    (keyamp--stm x '(comint-previous-input comint-next-input))
     (add-hook 'comint-output-filter-functions (lambda (&rest r) "History search."
                                                 (set-transient-map x)
                                                 (keyamp-command-mode-activate)
                                                 (setq this-command 'comint-previous-input)))))
 
 (with-eval-after-load 'term
-  (keyamp--define-keys
+  (keyamp--dfk
    term-raw-map
    '(("C-h" . term-interrupt-subjob) ("C-r" . term-send-input) ("C-c C-c" . term-line-mode)))
-  (keyamp--define-keys
+  (keyamp--dfk
    term-mode-map
    '(("C-h" . term-interrupt-subjob) ("C-r" . term-send-input) ("C-c C-c" . term-char-mode)))
-  (keyamp--define-keys-remap term-mode-map '((select-block . term-send-up)))
+  (keyamp--dkr term-mode-map '((select-block . term-send-up)))
   (let ((x (make-sparse-keymap)))
-    (keyamp--define-keys-remap x '((previous-line . term-send-up) (next-line . term-send-down)))
-    (keyamp--define-keys x '(("DEL" . previous-line) ("<backspace>" . previous-line) ("SPC" . next-line)))
-    (keyamp--set-transient-map x "Repeat." '(term-send-up term-send-down))
-    (keyamp--hook-set-transient-map x "History search." '(term-mode-hook))
+    (keyamp--dkr x '((previous-line . term-send-up) (next-line . term-send-down)))
+    (keyamp--dlk x '(previous-line . next-line))
+    (keyamp--stm x '(term-send-up term-send-down))
+    (keyamp--sth x '(term-mode-hook))
     (add-hook 'term-input-filter-functions (lambda (&rest r) "History search."
                                              (set-transient-map x)
                                              (keyamp-command-mode-activate)
                                              (setq this-command 'term-send-up)))))
 
 (with-eval-after-load 'info
-  (keyamp--define-keys-remap
+  (keyamp--dkr
    Info-mode-map
    '((open-line                   . Info-backward-node)
      (newline                     . Info-forward-node)
@@ -1136,13 +1157,13 @@ so-called “ampable” commands.")
      (up-line                     . scroll-up-line)
      (right-char                  . Info-backward-node)
      (left-char                   . Info-forward-node)))
-  (keyamp--define-keys Info-mode-map '(("TAB" . scroll-up-command) ("<tab>" . scroll-up-command)))
+  (keyamp--dfk Info-mode-map '(("TAB" . scroll-up-command) ("<tab>" . scroll-up-command)))
   (let ((x (make-sparse-keymap)))
-    (keyamp--define-keys x '(("DEL" . open-line) ("<backspace>" . open-line) ("SPC" . newline)))
-    (keyamp--set-transient-map x "Screen positioning." '(Info-backward-node Info-forward-node))))
+    (keyamp--dlk x '(open-line . newline))
+    (keyamp--stm x '(Info-backward-node Info-forward-node))))
 
 (with-eval-after-load 'help-mode
-  (keyamp--define-keys-remap
+  (keyamp--dkr
    help-mode-map
    '((cut-bracket-or-delete . forward-button)
      (undo                  . backward-button)
@@ -1151,8 +1172,8 @@ so-called “ampable” commands.")
 
 (progn ; gnus
   (with-eval-after-load 'gnus-topic
-    (keyamp--define-keys gnus-topic-mode-map '(("TAB" . toggle-ibuffer) ("<tab>" . toggle-ibuffer)))
-    (keyamp--define-keys-remap
+    (keyamp--dfk gnus-topic-mode-map '(("TAB" . toggle-ibuffer) ("<tab>" . toggle-ibuffer)))
+    (keyamp--dkr
      gnus-topic-mode-map
      '((keyamp-insert-mode-activate . gnus-topic-select-group)
        (beginning-of-line-or-block  . gnus-topic-goto-previous-topic-line)
@@ -1160,32 +1181,32 @@ so-called “ampable” commands.")
        (previous-line               . up-line)
        (next-line                   . down-line)))
     (let ((x (make-sparse-keymap)))
-      (keyamp--define-keys-remap
+      (keyamp--dkr
        x
        '((previous-line              . gnus-topic-goto-previous-topic-line)
          (next-line                  . gnus-topic-goto-next-topic-line)
          (beginning-of-line-or-block . gnus-beginning-of-line-or-buffer)
          (end-of-line-or-block       . gnus-end-of-line-or-buffer)))
-      (keyamp--define-keys x '(("DEL" . previous-line) ("<backspace>" . previous-line) ("SPC" . next-line)))
-      (keyamp--set-transient-map
-       x "Cursor positioning."
+      (keyamp--dlk x '(previous-line . next-line))
+      (keyamp--stm
+       x
        '(gnus-topic-goto-previous-topic-line
          gnus-topic-goto-next-topic-line
          gnus-beginning-of-line-or-buffer
          gnus-end-of-line-or-buffer))))
 
   (with-eval-after-load 'gnus-group
-    (keyamp--define-keys-remap
+    (keyamp--dkr
      gnus-group-mode-map
      '((undo                  . gnus-group-enter-server-mode)
        (cut-bracket-or-delete . gnus-group-get-new-news))))
 
   (with-eval-after-load 'gnus-sum
-    (keyamp--define-keys
+    (keyamp--dfk
      gnus-summary-mode-map
      '(("C-h" . gnus-summary-delete-article)
        ("TAB" . scroll-up-command) ("<tab>" . scroll-up-command)))
-    (keyamp--define-keys-remap
+    (keyamp--dkr
      gnus-summary-mode-map
      '((keyamp-insert-mode-activate . gnus-summary-scroll-up)
        (open-file-at-cursor         . keyamp-insert-mode-activate)
@@ -1200,7 +1221,7 @@ so-called “ampable” commands.")
        (left-char                   . gnus-summary-next-group)))
 
     (let ((x (make-sparse-keymap)))
-      (keyamp--define-keys-remap
+      (keyamp--dkr
        x
        '((undo                  . gnus-summary-prev-article)
          (cut-bracket-or-delete . gnus-summary-next-article)
@@ -1210,27 +1231,27 @@ so-called “ampable” commands.")
          (up-line               . scroll-up-line)
          (right-char            . gnus-summary-prev-group)
          (left-char             . gnus-summary-next-group)))
-      (keyamp--define-keys x '(("DEL" . gnus-summary-prev-group) ("<backspace>" . gnus-summary-prev-group) ("SPC" . gnus-summary-next-group)))
-      (keyamp--set-transient-map x "Repeat." '(gnus-summary-prev-group gnus-summary-next-group))
-      (keyamp--hook-set-transient-map x "Repeat." '(gnus-summary-prepared-hook)))
+      (keyamp--dlk x '(gnus-summary-prev-group . gnus-summary-next-group))
+      (keyamp--stm x '(gnus-summary-prev-group gnus-summary-next-group))
+      (keyamp--sth x '(gnus-summary-prepared-hook)))
 
     (let ((x (make-sparse-keymap)))
-      (keyamp--define-keys x '(("DEL" . gnus-summary-prev-article) ("<backspace>" . gnus-summary-prev-article) ("SPC" . gnus-summary-next-article)))
-      (keyamp--set-transient-map x "Repeat." '(gnus-summary-prev-article gnus-summary-next-article))))
+      (keyamp--dlk x '(gnus-summary-prev-article . gnus-summary-next-article))
+      (keyamp--stm x '(gnus-summary-prev-article gnus-summary-next-article))))
 
   (with-eval-after-load 'gnus-srvr
-    (keyamp--define-keys-remap
+    (keyamp--dkr
      gnus-server-mode-map
      '((keyamp-insert-mode-activate . gnus-server-read-server)
        (open-file-at-cursor         . keyamp-insert-mode-activate)
        (cut-bracket-or-delete       . gnus-server-exit)))
-    (keyamp--define-keys-remap
+    (keyamp--dkr
      gnus-browse-mode-map
      '((keyamp-insert-mode-activate . gnus-browse-select-group)
        (open-file-at-cursor         . keyamp-insert-mode-activate)))))
 
 (with-eval-after-load 'snake
-  (keyamp--define-keys-remap
+  (keyamp--dkr
    snake-mode-map
    '((keyamp-insert-mode-activate . snake-start-game)
      (keyamp-escape               . snake-pause-game)
@@ -1238,15 +1259,15 @@ so-called “ampable” commands.")
      (cut-bracket-or-delete       . snake-move-up)   (delete-other-windows . snake-rotate-up)))
 
   (let ((x (make-sparse-keymap)))
-    (keyamp--define-keys x '(("DEL" . snake-move-left) ("<backspace>" . snake-move-left) ("SPC" . snake-move-right)))
-    (keyamp--set-transient-map
-     x "Remap."
+    (keyamp--dlk x '(snake-move-left . snake-move-right))
+    (keyamp--stm
+     x
      '(snake-start-game snake-pause-game snake-move-left
        snake-move-right snake-move-down snake-move-up))
-    (keyamp--hook-set-transient-map x "History search." '(snake-mode-hook))))
+    (keyamp--sth x '(snake-mode-hook))))
 
 (with-eval-after-load 'tetris
-  (keyamp--define-keys-remap
+  (keyamp--dkr
    tetris-mode-map
    '((keyamp-escape               . tetris-pause-game)
      (keyamp-insert-mode-activate . tetris-start-game)
@@ -1254,14 +1275,14 @@ so-called “ampable” commands.")
      (next-line                   . tetris-move-bottom) (extend-selection     . tetris-move-bottom)))
 
   (let ((x (make-sparse-keymap)))
-    (keyamp--define-keys x '(("DEL" . tetris-move-left) ("<backspace>" . tetris-move-left) ("SPC" . tetris-move-right)))
-    (keyamp--set-transient-map
-     x "Remap."
+    (keyamp--dlk x '(tetris-move-left . tetris-move-right))
+    (keyamp--stm
+     x
      '(tetris-start-game tetris-pause-game tetris-move-left
        tetris-move-right tetris-rotate-prev tetris-move-bottom))))
 
 (with-eval-after-load 'nov
-  (keyamp--define-keys-remap
+  (keyamp--dkr
    nov-mode-map
    '((undo                        . nov-goto-toc)
      (open-line                   . nov-previous-document)
@@ -1277,6 +1298,7 @@ so-called “ampable” commands.")
          data (Info-backward-node                        t
                Info-forward-node                         t
                agenda                                    t
+               alternate-buffer                          t
                backward-punct                            t
                backward-word                             t
                beginning-of-line-or-block                t
@@ -1437,8 +1459,7 @@ Also run by `keyamp-clear-transient-map' as non-ampable command."
 (defun keyamp-clear-transient-map ()
   "Emulate keyboard press to run non-ampable command that clears
 transient keymaps. Run with `keyamp-ampable-mode-idle-timer'."
-  (unless (string-equal major-mode "ibuffer-mode")
-    (execute-kbd-macro (kbd "C-<escape>"))))
+  (execute-kbd-macro (kbd "C-<escape>")))
 
 
 
