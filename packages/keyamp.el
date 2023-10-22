@@ -1,17 +1,22 @@
-;;; keyamp.el --- Keyboard «Amplifier» -*- coding: utf-8; lexical-binding: t; -*-
+;;; keyamp.el --- Key «Amplifier» -*- coding: utf-8; lexical-binding: t; -*-
 
 ;; Author: Egor Maltsev <x0o1@ya.ru>
 ;; Version: 1.0 2023-09-13
+
+;;      _     				          _
+;;    _|_|_   				        _|_|_
+;;   |_|_|_|  				       |_|_|_|
+;;           _ _ 	   _ _
+;;          | | |	  | | |
+;;          |_|_|	  |_|_|
 
 ;; This package is part of input model.
 ;; Follow the link: https://github.com/xEgorka/keyamp
 
 ;;; Commentary:
 
-;; Keyamp provides 3 modes based on transient keymaps: insert, command
-;; and «ampable».
-
-;; Command and insert modes are persistent transient keymaps.
+;; Keyamp provides 3 modes: insert, command and «ampable». Command and
+;; insert modes are persistent transient keymaps.
 
 ;; Ampable mode pushes transient remaps to keymap stack on top of
 ;; command mode for easy repeat of commands chains during screen
@@ -31,13 +36,6 @@
 ;; ALL. Holding down posts leader layer. The same symmetric layout
 ;; might be configured on ANSI keyboard, ergonomic split and virtual
 ;; keyboards. See the link for layouts and karabiner config.
-
-;;                          _             _
-;;                        _|_|_         _|_|_
-;;                       |_|_|_|       |_|_|_|
-;;                            _ _     _ _
-;;                           | | |   | | |
-;;                           |_|_|   |_|_|
 
 ;;; Code:
 
@@ -357,13 +355,19 @@ so-called “ampable” commands.")
 (defun keyamp-escape ()
   "Return to command mode. Escape everything."
   (interactive)
-  (if (or (eq last-repeatable-command 'repeat)
-          (gethash last-command keyamp-ampable-commands-hash))
-      (message "")
+  (if (region-active-p)
+      (progn
+        (deactivate-mark)
+        (when (eq last-command 'select-block)
+          (set-mark-command t)
+          (set-mark-command t)))
     (progn
-      (if (active-minibuffer-window)
-          (abort-recursive-edit)
-        (when (region-active-p) (deactivate-mark))))))
+      (if (or (eq last-repeatable-command 'repeat)
+              (gethash last-command keyamp-ampable-commands-hash))
+          (message "")
+        (progn
+          (if (active-minibuffer-window)
+              (abort-recursive-edit)))))))
 
 (progn
   (defconst keyamp-tty-seq-timeout 30
@@ -391,8 +395,7 @@ so-called “ampable” commands.")
 
 (keyamp--dfk
  keyamp-shared-map
- '(("<escape>"   . keyamp-command-mode-activate)
-   ("C-<escape>" . keyamp-ampable-mode-indicate)
+ '(("<escape>" . keyamp-command-mode-activate)
    ("C-^" . keyamp-leader-left-key-map)  ("C-+" . keyamp-leader-left-key-map)
    ("C-_" . keyamp-leader-right-key-map) ("C-И" . keyamp-leader-right-key-map)))
 
@@ -404,12 +407,12 @@ so-called “ampable” commands.")
    ("SPC" . keyamp-leader-right-key-map)
 
    ;; left half
-   ("`" . other-frame)                  ("ё" . other-frame)                ("~" . keyamp-qwerty-to-engineer-engram) ("Ë" . keyamp-qwerty-to-engineer-engram)
+   ("`" . delete-forward-char)          ("ё" . delete-forward-char)        ("~" . keyamp-qwerty-to-engineer-engram) ("Ë" . keyamp-qwerty-to-engineer-engram)
    ("1" . kmacro-play)                                                     ("!" . ignore)
    ("2" . kmacro-helper)                                                   ("@" . ignore)
    ("3" . kmacro-record)                                                   ("#" . ignore) ("№" . ignore)
    ("4" . append-to-register-1)                                            ("$" . ignore)
-   ("5" . delete-forward-char)                                             ("%" . ignore)
+   ("5" . repeat)                                                          ("%" . ignore)
 
    ("q" . insert-space-before)          ("й" . insert-space-before)        ("Q" . ignore) ("Й" . ignore)
    ("w" . backward-kill-word)           ("ц" . backward-kill-word)         ("W" . ignore) ("Ц" . ignore)
@@ -421,7 +424,7 @@ so-called “ampable” commands.")
    ("s" . open-line)                    ("ы" . open-line)                  ("S" . ignore) ("Ы" . ignore)
    ("d" . cut-bracket-or-delete)        ("в" . cut-bracket-or-delete)      ("D" . ignore) ("В" . ignore)
    ("f" . newline)                      ("а" . newline)                    ("F" . ignore) ("А" . ignore)
-   ("g" . set-mark-command)             ("п" . set-mark-command)           ("G" . ignore) ("П" . ignore)
+   ("g" . mark-mode)                    ("п" . mark-mode)                  ("G" . ignore) ("П" . ignore)
 
    ("z" . toggle-comment)               ("я" . toggle-comment)             ("Z" . ignore) ("Я" . ignore)
    ("x" . cut-line-or-selection)        ("ч" . cut-line-or-selection)      ("X" . ignore) ("Ч" . ignore)
@@ -435,17 +438,17 @@ so-called “ampable” commands.")
    ("8" . copy-to-register)                                                ("*" . goto-matching-bracket) ; qwerty「*」→「=」engram, qwerty「/」→「=」ru pc karabiner
    ("9" . eperiodic)                                                       ("(" . ignore)
    ("0" . terminal)                                                        (")" . ignore)
-   ("-" . ignore)                                                          ("_" . ignore)
-   ("=" . ignore)                                                          ("+" . ignore)
+   ("-" . tetris)                                                          ("_" . ignore)
+   ("=" . goto-matching-bracket)                                           ("+" . ignore)
 
    ("y"  . search-current-word)         ("н" . search-current-word)        ("Y" . ignore) ("Н" . ignore)
    ("u"  . backward-word)               ("г" . backward-word)              ("U" . ignore) ("Г" . ignore)
    ("i"  . previous-line)               ("ш" . previous-line)              ("I" . ignore) ("Ш" . ignore)
    ("o"  . forward-word)                ("щ" . forward-word)               ("O" . ignore) ("Щ" . ignore)
    ("p"  . exchange-point-and-mark)     ("з" . exchange-point-and-mark)    ("P" . ignore) ("З" . ignore)
-   ("["  . alternate-buffer)            ("х" . alternate-buffer)           ("{" . ignore) ("Х" . ignore)
-   ("]"  . keyamp-leader-left-key-map)  ("ъ" . keyamp-leader-left-key-map) ("}" . ignore) ("Ъ" . ignore)
-   ("\\" . keyamp-leader-right-key-map)                                    ("|" . ignore)
+   ("["  . other-frame)                 ("х" . other-frame)                ("{" . ignore) ("Х" . ignore)
+   ("]"  . find-file)                   ("ъ" . find-file)                  ("}" . ignore) ("Ъ" . ignore)
+   ("\\" . bookmark-set)                                                   ("|" . ignore)
 
    ("h" . beginning-of-line-or-block)   ("р" . beginning-of-line-or-block) ("H"  . ignore) ("Р" . ignore)
    ("j" . backward-char)                ("о" . backward-char)              ("J"  . ignore) ("О" . ignore)
@@ -465,14 +468,14 @@ so-called “ampable” commands.")
 
 (keyamp--dfk
  (define-prefix-command 'keyamp-leader-left-key-map)
- '(("SPC" . repeat)
-   ("DEL" . repeat)                   ("<backspace>" . repeat)
+ '(("SPC" . select-text-in-quote)
+   ("DEL" . select-block)             ("<backspace>" . select-block)
    ("RET" . execute-extended-command) ("<return>"    . execute-extended-command)
    ("TAB" . toggle-ibuffer)           ("<tab>"       . toggle-ibuffer)
    ("ESC" . ignore)                   ("<escape>"    . ignore)
 
    ;; left leader left half
-   ("`" . screenshot)
+   ("`" . ignore)
    ("1" . apply-macro-to-region-lines)
    ("2" . kmacro-name-last-macro)
    ("3" . ignore)
@@ -480,7 +483,7 @@ so-called “ampable” commands.")
    ("5" . ignore)
 
    ("q" . reformat-lines)
-   ("w" . ignore) ; C-c C-c
+   ("w" . org-ctrl-c-ctrl-c)
    ("e" . split-window-below)
    ("r" . query-replace)
    ("t" . kill-line)
@@ -491,7 +494,7 @@ so-called “ampable” commands.")
    ("f" . next-user-buffer)
    ("g" . rectangle-mark-mode)
 
-   ("z" . universal-argument) ; C-u
+   ("z" . universal-argument)
    ("x" . save-buffers-kill-terminal)
    ("c" . copy-to-register-1)
    ("v" . paste-from-register-1)
@@ -508,23 +511,21 @@ so-called “ampable” commands.")
    ("y" . find-name-dired)
    ("u" . switch-to-buffer)
 
-   ("i e" . open-recently-closed)          ("i i" . copy-file-path)
-   ("i d" . show-in-desktop)               ("i k" . write-file)
-   ("i f" . find-file)                     ("i j" . rename-visited-file)
-   ("i s" . list-recently-closed)          ("i l" . bookmark-set)
-   ("i b" . set-buffer-file-coding-system) ("i n" . revert-buffer-with-coding-system)
+                                           ("i i" . show-in-desktop)
+                                           ("i j" . set-buffer-file-coding-system)
+                                           ("i l" . revert-buffer-with-coding-system)
 
    ("o"  . bookmark-jump)
    ("p"  . view-echo-area-messages)
-   ("["  . ignore)
-   ("]"  . ignore)
-   ("\\" . ignore)
+   ("["  . screenshot)
+   ("]"  . rename-visited-file)
+   ("\\" . bookmark-rename)
    ("h"  . recentf-open-files)
 
-   ("j e" . global-hl-line-mode)           ("j i" . widen)
+   ("j e" . global-hl-line-mode)
    ("j s" . display-line-numbers-mode)     ("j l" . narrow-to-region-or-block)
    ("j d" . whitespace-mode)               ("j k" . narrow-to-defun)
-   ("j f" . toggle-case-fold-search)       ("j j" . read-only-mode)
+   ("j f" . toggle-case-fold-search)       ("j j" . widen)
    ("j g" . toggle-word-wrap)              ("j h" . narrow-to-page)
    ("j a" . text-scale-adjust)             ("j ;" . count-matches)
    ("j t" . toggle-truncate-lines)         ("j y" . visual-line-mode)
@@ -532,8 +533,8 @@ so-called “ampable” commands.")
    ("j w" . abbrev-mode)                   ("j o" . count-words)
 
    ("k e" . json-pretty-print-buffer)      ("k i" . move-to-column)
-   ("k s" . space-to-newline)              ("k l" . make-backup-and-save)
-   ("k d" . list-matching-lines)           ("k k" . ispell-word)
+   ("k s" . space-to-newline)              ("k l" . list-recently-closed)
+   ("k d" . ispell-word)                   ("k k" . list-matching-lines)
    ("k f" . delete-matching-lines)         ("k j" . repeat-complex-command)
    ("k g" . delete-non-matching-lines)     ("k h" . reformat-to-sentence-lines)
    ("k r" . quote-lines)                   ("k u" . escape-quotes)
@@ -558,14 +559,14 @@ so-called “ampable” commands.")
 
 (keyamp--dfk
  (define-prefix-command 'keyamp-leader-right-key-map)
- '(("SPC" . repeat)
-   ("DEL" . repeat)                   ("<backspace>" . repeat)
+ '(("SPC" . extend-selection)
+   ("DEL" . select-line)              ("<backspace>" . select-line)
    ("RET" . execute-extended-command) ("<return>"    . execute-extended-command)
    ("TAB" . toggle-ibuffer)           ("<tab>"       . toggle-ibuffer)
    ("ESC" . ignore)                   ("<escape>"    . ignore)
 
    ;; right leader left half
-   ("`" . toggle-frame-maximized)
+   ("`" . ignore)
    ("1" . ignore)
    ("2" . insert-kbd-macro)
    ("3" . ignore)
@@ -573,15 +574,14 @@ so-called “ampable” commands.")
    ("5" . ignore)
 
    ("q" . fill-or-unfill)
-   ("w" . ignore)
+   ("w" . sun-moon)
 
-   ("e e" . todo)                        ("e i" . calculator)
+   ("e e" . todo)                        ("e i" . shopping)
    ("e d" . calendar)                    ("e k" . weather)
    ("e f" . org-time-stamp)              ("e j" . clock)
-   ("e s" . ignore)                      ("e l" . shopping)
 
    ("r" . query-replace-regexp)
-   ("t" . toggle-eshell)
+   ("t" . calculator)
    ("a" . mark-whole-buffer)
    ("s" . clean-whitespace)
 
@@ -613,30 +613,30 @@ so-called “ampable” commands.")
    ("8" . insert-register)
    ("9" . ignore)
    ("0" . ignore)
-   ("-" . ignore)
+   ("-" . snake)
    ("=" . ignore)
 
    ("y"  . find-text)
    ("u"  . pop-local-mark-ring)
-   ("i"  . select-block)
+   ("i"  . copy-file-path)
    ("o"  . set-mark-deactivate-mark)
    ("p"  . show-kill-ring)
-   ("["  . ignore)
-   ("]"  . ignore)
-   ("\\" . ignore)
+   ("["  . toggle-frame-maximized)
+   ("]"  . write-file)
+   ("\\" . bookmark-delete)
 
    ("h" . scroll-down-command)
-   ("j" . select-bracket)
-   ("k" . extend-selection)
-   ("l" . select-text-in-quote)
+   ("j" . read-only-mode)
+   ("k" . make-backup-and-save)
+   ("l" . describe-key)
    (";" . scroll-up-command)
    ("'" . sync)
 
    ("n" . save-buffer)
    ("m" . dired-jump)
    ("," . save-close-current-buffer)
-   ("." . select-line)
-   ("/" . recenter-top-bottom) ("*" . recenter-top-bottom)
+   ("." . recenter-top-bottom)
+   ("/" . ignore)     ("*" . ignore)
 
    ("e ESC" . ignore) ("e <escape>" . ignore)
    ("d ESC" . ignore) ("d <escape>" . ignore)
@@ -644,29 +644,21 @@ so-called “ampable” commands.")
 
 (keyamp--dfk
  help-map
- '(("DEL" . lookup-word-definition) ("SPC" . lookup-google-translate)
-   ("ESC" . ignore)                 ("RET" . lookup-web)
+ '(("DEL" . lookup-word-definition) ("SPC" . lookup-google-translate) ("<backspace>" . lookup-word-definition)
+   ("ESC" . ignore)                 ("RET" . lookup-web)              ("<escape>" . ignore) ("<return>" . lookup-web)
    ("e" . describe-char)            ("i" . info)
    ("s" . info-lookup-symbol)       ("j" . describe-function)
    ("d" . man)                      ("k" . describe-key)
    ("f" . elisp-index-search)       ("l" . describe-variable)
 
-   ("q" . describe-syntax)          ("p" . apropos-documentation)
-   ("w" . describe-bindings)        ("o" . lookup-all-dictionaries)
-   ("r" . describe-mode)            ("u" . lookup-all-synonyms)
-   ("a" . describe-face)            (";" . lookup-wiktionary)
-   ("g" . apropos-command)          ("h" . view-lossage)
+   ("q" . describe-syntax)          ("p" . apropos-documentation)                           ("<f1>" . ignore) ("<help>" . ignore) ("C-w" . ignore) ("C-c" . ignore)
+   ("w" . describe-bindings)        ("o" . lookup-all-dictionaries)                         ("C-o"  . ignore) ("C-\\"   . ignore) ("C-n" . ignore) ("C-f" . ignore)
+   ("r" . describe-mode)            ("u" . lookup-all-synonyms)                             ("C-s"  . ignore) ("C-e"    . ignore) ("'"   . ignore) ("6"   . ignore)
+   ("a" . describe-face)            (";" . lookup-wiktionary)                               ("9"    . ignore) ("L"      . ignore) ("n"   . ignore) ("p"   . ignore)
+   ("g" . apropos-command)          ("h" . view-lossage)                                    ("?"    . ignore) ("A"      . ignore) ("U"   . ignore) ("S"   . ignore)
    ("z" . apropos-variable)         ("." . lookup-wikipedia)
    ("x" . apropos-value)            ("," . lookup-etymology)
-   ("c" . describe-coding-system)   ("m" . lookup-word-dict-org)
-
-   ("<f1>" . ignore) ("<help>" . ignore) ("C-w" . ignore) ("C-c" . ignore)
-   ("C-o"  . ignore) ("C-\\"   . ignore) ("C-n" . ignore) ("C-f" . ignore)
-   ("C-s"  . ignore) ("C-e"    . ignore) ("'"   . ignore) ("6"   . ignore)
-   ("9"    . ignore) ("L"      . ignore) ("n"   . ignore) ("p"   . ignore)
-   ("?"    . ignore) ("A"      . ignore) ("U"   . ignore) ("S"   . ignore)))
-
-
+   ("c" . describe-coding-system)   ("m" . lookup-word-dict-org)))
 
 (keyamp--dfk query-replace-map '(("C-h" . skip) ("C-r" . act)))
 (keyamp--dfk global-map '(("C-r" . open-file-at-cursor) ("C-t" . hippie-expand)))
@@ -683,20 +675,37 @@ so-called “ampable” commands.")
      ("DEL" . hippie-expand-undo) ("<backspace>" . hippie-expand-undo)))
   (keyamp--stm x '(hippie-expand)))
 
+(keyamp--dfk
+ isearch-mode-map
+ '(("<escape>" . isearch-abort)
+   ("C-h"   . isearch-repeat-backward) ("C-r"   . isearch-repeat-forward)
+   ("C-_ n" . isearch-yank-kill)       ("C-И n" . isearch-yank-kill)))
+
+(let ((x (make-sparse-keymap)))
+  (keyamp--dfk
+   x
+   '(("i"   . isearch-ring-retreat)    ("ш"   . isearch-ring-retreat)
+     ("j"   . isearch-repeat-backward) ("о"   . isearch-repeat-backward)
+     ("k"   . isearch-ring-advance)    ("л"   . isearch-ring-advance)
+     ("l"   . isearch-repeat-forward)  ("д"   . isearch-repeat-forward)
+     ("d"   . repeat)                  ("в"   . repeat)
+     ("DEL" . isearch-repeat-backward) ("SPC" . isearch-repeat-forward)))
+  (keyamp--stm x '(isearch-ring-retreat isearch-repeat-backward isearch-ring-advance isearch-repeat-forward search-current-word isearch-yank-kill)))
+
 
 ;; screen
 
 (let ((x (make-sparse-keymap)))
   (keyamp--dkr
    x
-   '((insert-space-before         . sun-moon)                ; q
+   '((backward-kill-word          . sun-moon)                ; w
      (undo                        . split-window-below)      ; e
      (kill-word                   . make-frame-command)      ; r
-     (cut-text-block              . toggle-eshell)           ; t
+     (cut-text-block              . calculator)              ; t
      (open-line                   . previous-user-buffer)    ; s
      (cut-bracket-or-delete       . delete-other-windows)    ; d
      (newline                     . next-user-buffer)        ; f
-     (set-mark-command            . new-empty-buffer)        ; g
+     (mark-mode                   . new-empty-buffer)        ; g
      (cut-line-or-selection       . works)                   ; x
      (copy-line-or-selection      . agenda)                  ; c
      (paste-or-paste-previous     . tasks)                   ; v
@@ -710,10 +719,10 @@ so-called “ampable” commands.")
      ("SPC" . next-user-buffer)))
   (keyamp--stm
    x
-   '(delete-other-windows next-user-buffer previous-user-buffer
-     save-close-current-buffer split-window-below alternate-buffer
+   '(delete-other-windows         next-user-buffer     previous-user-buffer
+     save-close-current-buffer    split-window-below   alternate-buffer
      ibuffer-forward-filter-group ibuffer-backward-filter-group))
-  (keyamp--sth x '(help-mode-hook ibuffer-hook)))
+  (keyamp--sth x '(ibuffer-hook)))
 
 (let ((x (make-sparse-keymap)))
   (keyamp--dkr x '((backward-left-bracket . dired-jump)))
@@ -725,7 +734,7 @@ so-called “ampable” commands.")
   (keyamp--stm x '(save-close-current-buffer)))
 
 (let ((x (make-sparse-keymap)))
-  (keyamp--dkr x '((cut-bracket-or-delete . tasks)))
+  (keyamp--dkr x '((cut-bracket-or-delete . tasks) (paste-or-paste-previous . tasks)))
   (keyamp--dlk x '(previous-user-buffer . tasks))
   (keyamp--stm x '(tasks)))
 
@@ -766,7 +775,7 @@ so-called “ampable” commands.")
 
 (let ((x (make-sparse-keymap))) ; g
   (keyamp--dkr x '((cut-bracket-or-delete . rectangle-mark-mode)))
-  (keyamp--stm x '(set-mark-command)))
+  (keyamp--stm x '(mark-mode)))
 
 (let ((x (make-sparse-keymap))) ; z
   (keyamp--dkr x '((cut-bracket-or-delete . toggle-comment)))
@@ -794,12 +803,7 @@ so-called “ampable” commands.")
   (keyamp--stm x '(toggle-letter-case)))
 
 (let ((x (make-sparse-keymap)))
-  (keyamp--dkr x '((undo . move-row-up) (cut-bracket-or-delete . move-row-down)))
-  (keyamp--dlk x '(move-row-up . move-row-down))
-  (keyamp--stm x '(move-row-up move-row-down)))
-
-(let ((x (make-sparse-keymap)))
-  (keyamp--dkr x '((undo . org-shiftup) (cut-bracket-or-delete  . org-shiftdown) (copy-line-or-selection . agenda)))
+  (keyamp--dkr x '((undo . org-shiftup) (cut-bracket-or-delete . org-shiftdown) (copy-line-or-selection . agenda)))
   (keyamp--dlk x '(org-shiftup . org-shiftdown))
   (keyamp--stm x '(org-shiftup org-shiftdown)))
 
@@ -848,7 +852,7 @@ so-called “ampable” commands.")
   (keyamp--stm
    x
    '(backward-word forward-word backward-punct forward-punct
-     set-mark-command exchange-point-and-mark rectangle-mark-mode)))
+     mark-mode exchange-point-and-mark rectangle-mark-mode)))
 
 (let ((x (make-sparse-keymap)))
   (keyamp--dkr x '((previous-line . scroll-down-line) (next-line . scroll-up-line)))
@@ -892,26 +896,6 @@ so-called “ampable” commands.")
 (let ((x (make-sparse-keymap)))
   (keyamp--dkr x '((next-line . select-text-in-quote)))
   (keyamp--stm x '(select-text-in-quote)))
-
-(keyamp--dfk
- isearch-mode-map
- '(("<escape>" . isearch-abort)           ("C-h"   . isearch-repeat-backward) ("C-r"   . isearch-repeat-forward)
-   ("<up>"     . isearch-ring-retreat)    ("C-_ i" . isearch-ring-retreat)    ("C-И i" . isearch-ring-retreat)
-   ("<left>"   . isearch-repeat-backward) ("C-_ j" . isearch-repeat-backward) ("C-И j" . isearch-repeat-backward)
-   ("<down>"   . isearch-ring-advance)    ("C-_ k" . isearch-ring-advance)    ("C-И k" . isearch-ring-advance)
-   ("<right>"  . isearch-repeat-forward)  ("C-_ l" . isearch-repeat-forward)  ("C-И l" . isearch-repeat-forward)
-   ("C-^"      . ignore)                  ("C-_ n" . isearch-yank-kill)       ("C-И n" . isearch-yank-kill)))
-
-(let ((x (make-sparse-keymap)))
-  (keyamp--dfk
-   x
-   '(("i"   . isearch-ring-retreat)    ("ш"   . isearch-ring-retreat)
-     ("j"   . isearch-repeat-backward) ("о"   . isearch-repeat-backward)
-     ("k"   . isearch-ring-advance)    ("л"   . isearch-ring-advance)
-     ("l"   . isearch-repeat-forward)  ("д"   . isearch-repeat-forward)
-     ("d"   . repeat)                  ("в"   . repeat)
-     ("DEL" . isearch-repeat-backward) ("SPC" . isearch-repeat-forward)))
-  (keyamp--stm x '(isearch-ring-retreat isearch-repeat-backward isearch-ring-advance isearch-repeat-forward search-current-word isearch-yank-kill)))
 
 
 ;; modes
@@ -1024,7 +1008,7 @@ so-called “ampable” commands.")
   (with-eval-after-load 'ibuf-ext
     (keyamp--dfk
      ibuffer-mode-map
-     '(("C-h" . ibuffer-do-delete) ("C-r" . ibuffer-diff-with-file)
+     '(("C-h" . ibuffer-do-delete)
        ("TAB" . news)              ("<tab>" . news)))
 
     (keyamp--dkr
@@ -1255,8 +1239,9 @@ so-called “ampable” commands.")
    snake-mode-map
    '((keyamp-insert-mode-activate . snake-start-game)
      (keyamp-escape               . snake-pause-game)
-     (next-line                   . snake-move-down) (extend-selection     . snake-move-down)
-     (cut-bracket-or-delete       . snake-move-up)   (delete-other-windows . snake-rotate-up)))
+     (next-line                   . snake-move-down)
+     (cut-bracket-or-delete       . snake-move-up)
+     (delete-other-windows        . snake-rotate-up)))
 
   (let ((x (make-sparse-keymap)))
     (keyamp--dlk x '(snake-move-left . snake-move-right))
@@ -1271,8 +1256,9 @@ so-called “ampable” commands.")
    tetris-mode-map
    '((keyamp-escape               . tetris-pause-game)
      (keyamp-insert-mode-activate . tetris-start-game)
-     (cut-bracket-or-delete       . tetris-rotate-prev) (delete-other-windows . tetris-rotate-prev)
-     (next-line                   . tetris-move-bottom) (extend-selection     . tetris-move-bottom)))
+     (cut-bracket-or-delete       . tetris-rotate-prev)
+     (delete-other-windows        . tetris-rotate-prev)
+     (next-line                   . tetris-move-bottom)))
 
   (let ((x (make-sparse-keymap)))
     (keyamp--dlk x '(tetris-move-left . tetris-move-right))
@@ -1349,6 +1335,7 @@ so-called “ampable” commands.")
                isearch-ring-retreat                      t
                isearch-yank-kill                         t
                kill-region                               t
+               mark-mode                                 t
                move-row-down                             t
                move-row-up                               t
                next-line                                 t
@@ -1368,9 +1355,9 @@ so-called “ampable” commands.")
                search-current-word                       t
                select-line                               t
                select-text-in-quote                      t
-               set-mark-command                          t
                shrink-whitespaces                        t
                split-window-below                        t
+               sun-moon                                  t
                tasks                                     t
                term-send-down                            t
                term-send-up                              t
@@ -1380,6 +1367,7 @@ so-called “ampable” commands.")
                undo                                      t
                undo-redo                                 t
                up-line                                   t
+               view-echo-area-messages                   t
                works                                     t
                yank                                      t
                yank-pop                                  t)))
@@ -1442,8 +1430,7 @@ Init insert mode with `keyamp-insert-mode-activate-hook'."
   (run-hooks 'keyamp-insert-mode-activate-hook))
 
 (defun keyamp-ampable-mode-indicate ()
-  "Indicate ampable mode. Run with `post-command-hook'.
-Also run by `keyamp-clear-transient-map' as non-ampable command."
+  "Indicate ampable mode. Run with `post-command-hook'."
   (interactive)
   (unless keyamp-insert-state-p
     (if (or (eq real-this-command 'repeat)
@@ -1457,9 +1444,9 @@ Also run by `keyamp-clear-transient-map' as non-ampable command."
       (force-mode-line-update))))
 
 (defun keyamp-clear-transient-map ()
-  "Emulate keyboard press to run non-ampable command that clears
-transient keymaps. Run with `keyamp-ampable-mode-idle-timer'."
-  (execute-kbd-macro (kbd "C-<escape>")))
+  "Emulate keyboard press to clear transient keymaps.
+Run with `keyamp-ampable-mode-idle-timer'."
+  (execute-kbd-macro (kbd "<escape>")))
 
 
 

@@ -1,4 +1,4 @@
-;;; keyext.el --- Keyboard extensions -*- coding: utf-8; lexical-binding: t; -*-
+;;; keyext.el --- Key extensions -*- coding: utf-8; lexical-binding: t; -*-
 
 (defun get-bounds-of-block ()
   "Return the boundary (START . END) of current block."
@@ -39,7 +39,8 @@
   "Move cursor to last mark position of current buffer.
 Call this repeatedly will cycle all positions in `mark-ring'."
   (interactive)
-  (set-mark-command t))
+  (set-mark-command t)
+  (setq this-command 'pop-local-mark-ring))
 
 (defun set-mark-deactivate-mark ()
   "Set the mark where point is, and deactivate it."
@@ -222,7 +223,10 @@ When `universal-argument' is called first, copy whole buffer
           (copy-region-as-kill (point-min) (point-max)))
       (if (region-active-p)
           (progn
-            (copy-region-as-kill (region-beginning) (region-end)))
+            (copy-region-as-kill (region-beginning) (region-end))
+            (when (eq last-command 'select-block)
+              (pop-local-mark-ring)
+              (pop-local-mark-ring)))
         (if (eq last-command this-command)
             (if (eobp)
                 (progn)
@@ -1551,12 +1555,6 @@ If `visual-line-mode' is on, consider line as visual line."
         (push-mark (line-beginning-position) t t)
         (end-of-line)))))
 
-(defun select-bracket ()
-  "Select bracket pair."
-  (interactive)
-  (set-mark-command nil)
-  (goto-matching-bracket))
-
 (defun extend-selection ()
   "Select the current word, bracket/quote expression, or expand selection.
 Subsequent calls expands the selection.
@@ -1926,11 +1924,12 @@ This command is similar to `find-file-at-point' but without prompting for confir
                     (if (and (string-equal xext "js")
                              (file-exists-p (concat xfnamecore ".ts")))
                         (find-file (concat xfnamecore ".ts"))
-                      (find-file xpath))))
+                      (if (> (length xpath) 0)
+                          (find-file xpath)
+                        (toggle-eshell)))))
               (if (file-exists-p (concat xpath ".el"))
                   (find-file (concat xpath ".el"))
-                (when (y-or-n-p (format "No file %s. Create?" xpath))
-                  (find-file xpath))))))))))
+                (toggle-eshell)))))))))
 
 
 
@@ -2336,7 +2335,7 @@ Force switch to current buffer to update `other-buffer'."
   "Run calculator."
   (interactive)
   (find-file "~/.calc.py")
-  (rename-buffer "*calc*"))
+  (rename-buffer "calculator"))
 
 (defun weather ()
   "Show weather."
@@ -2492,13 +2491,19 @@ This checks in turn:
           ((setq sym (variable-at-point)) (describe-variable sym))
           ;; now let it operate fully -- i.e. also check the
           ;; surrounding sexp for a function call.
-          ((setq sym (function-at-point)) (describe-function sym)))))
+          ((setq sym (function-at-point)) (describe-function sym))))
+  (setq this-command 'split-window-below))
+
+(defun mark-mode ()
+  "Same as `set-mark-command' for key binding."
+  (interactive)
+  (set-mark-command nil))
 
 (advice-add 'scroll-down-command     :after (lambda (&rest r) "Recenter." (recenter)))
 (advice-add 'scroll-up-command       :after (lambda (&rest r) "Recenter." (recenter)))
 (advice-add 'isearch-repeat-backward :after (lambda (&rest r) "Recenter." (recenter)))
 (advice-add 'isearch-repeat-forward  :after (lambda (&rest r) "Recenter." (recenter)))
-(advice-add 'pop-local-mark-ring     :after (lambda (&rest r) "Recenter." (recenter)))
+(advice-add 'json-pretty-print-buffer :after (lambda (&rest r) "Message." (message "%s" "Json pretty print.")))
 
 (provide 'keyext)
 

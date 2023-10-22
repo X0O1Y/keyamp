@@ -68,18 +68,6 @@
                                 },
                                 "to": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 1
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "j pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "spacebar"
                                     }
                                 ],
@@ -211,18 +199,6 @@
                                     }
                                 },
                                 "to": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 1
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "l pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "delete_or_backspace"
                                     }
@@ -433,22 +409,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "q"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "equal_sign",
                                         "modifiers": [
@@ -522,22 +486,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "w"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "a",
                                         "modifiers": [
@@ -637,22 +589,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "e"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "equal_sign",
                                         "modifiers": [
@@ -726,22 +666,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "r"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "equal_sign",
                                         "modifiers": [
@@ -815,22 +743,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "t"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "equal_sign",
                                         "modifiers": [
@@ -904,22 +820,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "y"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "b",
                                         "modifiers": [
@@ -993,70 +897,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "i pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "j pressed",
-                                            "value": 1
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "k pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "l pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "u"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "i pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "j pressed",
-                                            "value": 1
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "k pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "l pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "b",
                                         "modifiers": [
@@ -1104,153 +948,6 @@
                         ]
                     },
                     {
-                        "description": "i",
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Emacs"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "insert mode activated",
-                                        "type": "variable_if",
-                                        "value": 0
-                                    },
-                                    {
-                                        "name": "i pressed",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "i",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "i"
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Emacs"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "insert mode activated",
-                                        "type": "variable_if",
-                                        "value": 0
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "i",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to_after_key_up": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "key_code": "i"
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "i pressed",
-                                            "value": 1
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "j pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "k pressed",
-                                            "value": 1
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "l pressed",
-                                            "value": 0
-                                        }
-                                    }
-                                ],
-                                "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "key_code": "b",
-                                        "modifiers": [
-                                            "left_shift",
-                                            "left_control"
-                                        ]
-                                    },
-                                    {
-                                        "halt": true,
-                                        "key_code": "i",
-                                        "repeat": false
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Emacs"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "insert mode activated",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "i",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to_after_key_up": [
-                                    {
-                                        "key_code": "i"
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
                         "description": "o",
                         "manipulators": [
                             {
@@ -1277,70 +974,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "i pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "j pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "k pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "l pressed",
-                                            "value": 1
-                                        }
-                                    },
-                                    {
                                         "key_code": "o"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "i pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "j pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "k pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "l pressed",
-                                            "value": 1
-                                        }
-                                    },
                                     {
                                         "key_code": "b",
                                         "modifiers": [
@@ -1414,22 +1051,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "p"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "b",
                                         "modifiers": [
@@ -1503,22 +1128,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "open_bracket"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "b",
                                         "modifiers": [
@@ -1592,22 +1205,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "close_bracket"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "b",
                                         "modifiers": [
@@ -1681,22 +1282,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "a"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "equal_sign",
                                         "modifiers": [
@@ -1794,22 +1383,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "s"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "equal_sign",
                                         "modifiers": [
@@ -1895,40 +1472,6 @@
                                         "name": "insert mode activated",
                                         "type": "variable_if",
                                         "value": 0
-                                    },
-                                    {
-                                        "name": "leader pressed",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "d",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "d"
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Emacs"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "insert mode activated",
-                                        "type": "variable_if",
-                                        "value": 0
                                     }
                                 ],
                                 "from": {
@@ -1941,22 +1484,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "d"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "equal_sign",
                                         "modifiers": [
@@ -2059,12 +1590,6 @@
                                 ],
                                 "to_if_held_down": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "equal_sign",
                                         "modifiers": [
                                             "left_shift",
@@ -2137,22 +1662,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "g"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "equal_sign",
                                         "modifiers": [
@@ -2226,70 +1739,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "i pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "j pressed",
-                                            "value": 1
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "k pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "l pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "h"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "i pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "j pressed",
-                                            "value": 1
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "k pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "l pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "b",
                                         "modifiers": [
@@ -2337,447 +1790,6 @@
                         ]
                     },
                     {
-                        "description": "j",
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Emacs"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "insert mode activated",
-                                        "type": "variable_if",
-                                        "value": 0
-                                    },
-                                    {
-                                        "name": "j pressed",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "j",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "j"
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Emacs"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "insert mode activated",
-                                        "type": "variable_if",
-                                        "value": 0
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "j",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to_after_key_up": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "key_code": "j"
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "i pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "j pressed",
-                                            "value": 1
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "k pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "l pressed",
-                                            "value": 0
-                                        }
-                                    }
-                                ],
-                                "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "key_code": "b",
-                                        "modifiers": [
-                                            "left_shift",
-                                            "left_control"
-                                        ]
-                                    },
-                                    {
-                                        "halt": true,
-                                        "key_code": "j",
-                                        "repeat": false
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Emacs"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "insert mode activated",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "j",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to_after_key_up": [
-                                    {
-                                        "key_code": "j"
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "k",
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Emacs"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "insert mode activated",
-                                        "type": "variable_if",
-                                        "value": 0
-                                    },
-                                    {
-                                        "name": "k pressed",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "k",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "k"
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Emacs"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "insert mode activated",
-                                        "type": "variable_if",
-                                        "value": 0
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "k",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to_after_key_up": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "key_code": "k"
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "i pressed",
-                                            "value": 1
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "j pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "k pressed",
-                                            "value": 1
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "l pressed",
-                                            "value": 0
-                                        }
-                                    }
-                                ],
-                                "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "key_code": "b",
-                                        "modifiers": [
-                                            "left_shift",
-                                            "left_control"
-                                        ]
-                                    },
-                                    {
-                                        "halt": true,
-                                        "key_code": "k",
-                                        "repeat": false
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Emacs"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "insert mode activated",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "k",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to_after_key_up": [
-                                    {
-                                        "key_code": "k"
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "l",
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Emacs"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "insert mode activated",
-                                        "type": "variable_if",
-                                        "value": 0
-                                    },
-                                    {
-                                        "name": "l pressed",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "l",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "l"
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Emacs"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "insert mode activated",
-                                        "type": "variable_if",
-                                        "value": 0
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "l",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to_after_key_up": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "key_code": "l"
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "i pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "j pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "k pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "l pressed",
-                                            "value": 1
-                                        }
-                                    }
-                                ],
-                                "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "key_code": "b",
-                                        "modifiers": [
-                                            "left_shift",
-                                            "left_control"
-                                        ]
-                                    },
-                                    {
-                                        "halt": true,
-                                        "key_code": "l",
-                                        "repeat": false
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Emacs"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "insert mode activated",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "l",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to_after_key_up": [
-                                    {
-                                        "key_code": "l"
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
                         "description": ";",
                         "manipulators": [
                             {
@@ -2804,70 +1816,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "i pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "j pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "k pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "l pressed",
-                                            "value": 1
-                                        }
-                                    },
-                                    {
                                         "key_code": "semicolon"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "i pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "j pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "k pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "l pressed",
-                                            "value": 1
-                                        }
-                                    },
                                     {
                                         "key_code": "b",
                                         "modifiers": [
@@ -2941,22 +1893,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "quote"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "b",
                                         "modifiers": [
@@ -3030,22 +1970,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "z"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "halt": true,
                                         "key_code": "r",
@@ -3115,22 +2043,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "x"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "equal_sign",
                                         "modifiers": [
@@ -3204,22 +2120,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "c"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "equal_sign",
                                         "modifiers": [
@@ -3293,22 +2197,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "v"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "equal_sign",
                                         "modifiers": [
@@ -3382,22 +2274,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "b"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "equal_sign",
                                         "modifiers": [
@@ -3471,22 +2351,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "n"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "b",
                                         "modifiers": [
@@ -3560,22 +2428,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "m"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "b",
                                         "modifiers": [
@@ -3649,22 +2505,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "comma"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "b",
                                         "modifiers": [
@@ -3738,22 +2582,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "period"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "b",
                                         "modifiers": [
@@ -3835,22 +2667,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "slash"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "b",
                                         "modifiers": [
@@ -3898,22 +2718,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "equal_sign"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "b",
                                         "modifiers": [
@@ -4023,22 +2831,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "grave_accent_and_tilde"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "equal_sign",
                                         "modifiers": [
@@ -4133,22 +2929,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "1"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "equal_sign",
                                         "modifiers": [
@@ -4285,22 +3069,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "7"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "equal_sign",
                                         "modifiers": [
@@ -4442,22 +3214,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "2"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "equal_sign",
                                         "modifiers": [
@@ -4594,22 +3354,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "5"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "equal_sign",
                                         "modifiers": [
@@ -4751,22 +3499,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "3"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "equal_sign",
                                         "modifiers": [
@@ -4903,22 +3639,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "1"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "equal_sign",
                                         "modifiers": [
@@ -5060,22 +3784,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "4"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "equal_sign",
                                         "modifiers": [
@@ -5357,22 +4069,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "5"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "equal_sign",
                                         "modifiers": [
@@ -5509,22 +4209,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "9"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "equal_sign",
                                         "modifiers": [
@@ -5666,22 +4354,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "6"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "b",
                                         "modifiers": [
@@ -5818,22 +4494,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "8"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "b",
                                         "modifiers": [
@@ -5975,22 +4639,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "7"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "b",
                                         "modifiers": [
@@ -6127,22 +4779,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "2"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "b",
                                         "modifiers": [
@@ -6284,22 +4924,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "8"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "b",
                                         "modifiers": [
@@ -6581,22 +5209,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "9"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "b",
                                         "modifiers": [
@@ -6733,22 +5349,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "4"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "b",
                                         "modifiers": [
@@ -6890,22 +5494,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "0"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "b",
                                         "modifiers": [
@@ -7042,22 +5634,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "6"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "b",
                                         "modifiers": [
@@ -7149,22 +5729,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "hyphen"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "b",
                                         "modifiers": [
@@ -7209,22 +5777,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "equal_sign"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "b",
                                         "modifiers": [
@@ -7269,22 +5825,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "backslash"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "key_code": "b",
                                         "modifiers": [
@@ -7329,22 +5873,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "return_or_enter"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "halt": true,
                                         "key_code": "m",
@@ -7448,12 +5980,6 @@
                                 },
                                 "to": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "tab"
                                     }
                                 ],
@@ -7488,58 +6014,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "left_command pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "spacebar pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "i pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "j pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "k pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "l pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "escape"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "halt": true,
                                         "key_code": "j",
@@ -7797,6 +6275,28 @@
                                     {
                                         "halt": true,
                                         "shell_command": "open -a VLC"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "f7",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "f7",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to_after_key_up": [
+                                    {
+                                        "halt": true,
+                                        "shell_command": "echo x0o1@ya.ru|pbcopy"
                                     }
                                 ],
                                 "type": "basic"
@@ -8259,22 +6759,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "page_up"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "halt": true,
                                         "key_code": "home"
@@ -8376,22 +6864,10 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
                                         "key_code": "page_down"
                                     }
                                 ],
                                 "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "leader pressed",
-                                            "value": 0
-                                        }
-                                    },
                                     {
                                         "halt": true,
                                         "key_code": "end"
@@ -8462,11 +6938,63 @@
                         ]
                     },
                     {
-                        "description": "f7",
+                        "description": "i",
                         "manipulators": [
                             {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Emacs"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 0
+                                    }
+                                ],
                                 "from": {
-                                    "key_code": "f7",
+                                    "key_code": "i",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "parameters": {
+                                    "basic.to_if_held_down_threshold_milliseconds": 100
+                                },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "i"
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "i",
+                                        "repeat": true
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Emacs"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "i",
                                     "modifiers": {
                                         "optional": [
                                             "any"
@@ -8475,8 +7003,226 @@
                                 },
                                 "to_after_key_up": [
                                     {
+                                        "key_code": "i"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "j",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Emacs"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 0
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "j",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "parameters": {
+                                    "basic.to_if_held_down_threshold_milliseconds": 100
+                                },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "j"
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
                                         "halt": true,
-                                        "shell_command": "echo x0o1@ya.ru|pbcopy"
+                                        "key_code": "j",
+                                        "repeat": true
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Emacs"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "j",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "j"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "k",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Emacs"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 0
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "k",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "parameters": {
+                                    "basic.to_if_held_down_threshold_milliseconds": 100
+                                },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "k"
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "k",
+                                        "repeat": true
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Emacs"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "k",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "k"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "l",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Emacs"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 0
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "l",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "parameters": {
+                                    "basic.to_if_held_down_threshold_milliseconds": 100
+                                },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "l"
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "l",
+                                        "repeat": true
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Emacs"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "l",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "l"
                                     }
                                 ],
                                 "type": "basic"

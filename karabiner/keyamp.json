@@ -1,7 +1,6 @@
 {
   "title": "Keyamp",
-    "rules": [
-        
+  "rules": [
     {
       "description": "spacebar",
       "manipulators": [
@@ -54,18 +53,6 @@
           ],
           "to": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 1
-              }
-            },
-            {
-              "set_variable": {
-                "name": "j pressed",
-                "value": 0
-              }
-            },  
-            {
               "key_code": "spacebar"
             }
           ]
@@ -104,7 +91,7 @@
             }
           ]
         },
-         {
+        {
           "type": "basic",
           "from": {
             "key_code": "spacebar",
@@ -131,7 +118,7 @@
             {
               "key_code": "spacebar"
             },
-              {
+            {
               "set_variable": {
                 "name": "spacebar pressed",
                 "value": 1
@@ -164,13 +151,12 @@
                   "name": "spacebar pressed",
                   "value": 0
                 }
-              }              
+              }
             ]
-          }   
-        } 
+          }
+        }
       ]
     },
-
     {
       "description": "left_command",
       "manipulators": [
@@ -198,18 +184,6 @@
             }
           ],
           "to": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 1
-              }
-            },
-            {
-              "set_variable": {
-                "name": "l pressed",
-                "value": 0
-              }
-            },  
             {
               "key_code": "delete_or_backspace"
             }
@@ -400,7 +374,6 @@
         }
       ]
     },
-
     {
       "description": "q",
       "manipulators": [
@@ -429,22 +402,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "q"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "equal_sign",
               "modifiers": [
@@ -490,7 +451,6 @@
         }
       ]
     },
-
     {
       "description": "w",
       "manipulators": [
@@ -519,22 +479,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "w"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "a",
               "modifiers": [
@@ -582,7 +530,6 @@
         }
       ]
     },
-
     {
       "description": "e",
       "manipulators": [
@@ -635,22 +582,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "e"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "equal_sign",
               "modifiers": [
@@ -696,7 +631,6 @@
         }
       ]
     },
-
     {
       "description": "r",
       "manipulators": [
@@ -725,22 +659,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "r"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "equal_sign",
               "modifiers": [
@@ -786,7 +708,6 @@
         }
       ]
     },
-
     {
       "description": "t",
       "manipulators": [
@@ -815,22 +736,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "t"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "equal_sign",
               "modifiers": [
@@ -876,7 +785,6 @@
         }
       ]
     },
-
     {
       "description": "y",
       "manipulators": [
@@ -905,22 +813,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "y"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "b",
               "modifiers": [
@@ -966,7 +862,6 @@
         }
       ]
     },
-
     {
       "description": "u",
       "manipulators": [
@@ -995,70 +890,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "i pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "j pressed",
-                "value": 1
-              }
-            },
-            {
-              "set_variable": {
-                "name": "k pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "l pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "u"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "i pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "j pressed",
-                "value": 1
-              }
-            },
-            {
-              "set_variable": {
-                "name": "k pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "l pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "b",
               "modifiers": [
@@ -1104,44 +939,9 @@
         }
       ]
     },
-
     {
       "description": "i",
       "manipulators": [
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "i",
-            "modifiers": {
-              "optional": [
-                "any"
-              ]
-            }
-          },
-          "conditions": [
-            {
-              "type": "frontmost_application_if",
-              "file_paths": [
-                "/Emacs"
-              ]
-            },
-            {
-              "type": "variable_if",
-              "name": "insert mode activated",
-              "value": 0
-            },
-            {
-              "type": "variable_if",
-              "name": "i pressed",
-              "value": 1
-            }
-          ],
-          "to": [
-            {
-              "key_code": "i"
-            }
-          ]
-        },
         {
           "type": "basic",
           "from": {
@@ -1167,59 +967,19 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "i"
-            },
-            {
-              "set_variable": {
-                "name": "i pressed",
-                "value": 1
-              }
-            },
-            {
-              "set_variable": {
-                "name": "j pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "k pressed",
-                "value": 1
-              }
-            },
-            {
-              "set_variable": {
-                "name": "l pressed",
-                "value": 0
-              }
             }
           ],
           "to_if_held_down": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
-              "key_code": "b",
-              "modifiers": [
-                "left_shift",
-                "left_control"
-              ]
-            },
-            {
               "key_code": "i",
-              "repeat": false,
+              "repeat": true,
               "halt": true
             }
-          ]
+          ],
+          "parameters": {
+            "basic.to_if_held_down_threshold_milliseconds": 100
+          }
         },
         {
           "type": "basic",
@@ -1252,7 +1012,6 @@
         }
       ]
     },
-
     {
       "description": "o",
       "manipulators": [
@@ -1281,70 +1040,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "i pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "j pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "k pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "l pressed",
-                "value": 1
-              }
-            },
-            {
               "key_code": "o"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "i pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "j pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "k pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "l pressed",
-                "value": 1
-              }
-            },
             {
               "key_code": "b",
               "modifiers": [
@@ -1390,7 +1089,6 @@
         }
       ]
     },
-
     {
       "description": "p",
       "manipulators": [
@@ -1419,22 +1117,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "p"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "b",
               "modifiers": [
@@ -1480,7 +1166,6 @@
         }
       ]
     },
-
     {
       "description": "open_bracket",
       "manipulators": [
@@ -1509,22 +1194,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "open_bracket"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "b",
               "modifiers": [
@@ -1570,7 +1243,6 @@
         }
       ]
     },
-
     {
       "description": "close_bracket",
       "manipulators": [
@@ -1599,22 +1271,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "close_bracket"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "b",
               "modifiers": [
@@ -1660,7 +1320,6 @@
         }
       ]
     },
-
     {
       "description": "a",
       "manipulators": [
@@ -1689,22 +1348,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "a"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "equal_sign",
               "modifiers": [
@@ -1750,7 +1397,6 @@
         }
       ]
     },
-
     {
       "description": "s",
       "manipulators": [
@@ -1803,22 +1449,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "s"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "equal_sign",
               "modifiers": [
@@ -1864,7 +1498,6 @@
         }
       ]
     },
-
     {
       "description": "d",
       "manipulators": [
@@ -1913,60 +1546,14 @@
               "type": "variable_if",
               "name": "insert mode activated",
               "value": 0
-            },
-            {
-              "type": "variable_if",
-              "name": "leader pressed",
-              "value": 1
-            }
-          ],
-          "to": [
-            {
-              "key_code": "d"
-            }
-          ]
-        },
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "d",
-            "modifiers": {
-              "optional": [
-                "any"
-              ]
-            }
-          },
-          "conditions": [
-            {
-              "type": "frontmost_application_if",
-              "file_paths": [
-                "/Emacs"
-              ]
-            },
-            {
-              "type": "variable_if",
-              "name": "insert mode activated",
-              "value": 0
             }
           ],
           "to_after_key_up": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "d"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "equal_sign",
               "modifiers": [
@@ -2012,7 +1599,6 @@
         }
       ]
     },
-
     {
       "description": "f",
       "manipulators": [
@@ -2070,12 +1656,6 @@
           ],
           "to_if_held_down": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "equal_sign",
               "modifiers": [
                 "left_shift",
@@ -2120,7 +1700,6 @@
         }
       ]
     },
-
     {
       "description": "g",
       "manipulators": [
@@ -2149,22 +1728,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "g"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "equal_sign",
               "modifiers": [
@@ -2210,7 +1777,6 @@
         }
       ]
     },
-
     {
       "description": "h",
       "manipulators": [
@@ -2239,70 +1805,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "i pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "j pressed",
-                "value": 1
-              }
-            },
-            {
-              "set_variable": {
-                "name": "k pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "l pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "h"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "i pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "j pressed",
-                "value": 1
-              }
-            },
-            {
-              "set_variable": {
-                "name": "k pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "l pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "b",
               "modifiers": [
@@ -2348,7 +1854,6 @@
         }
       ]
     },
-
     {
       "description": "j",
       "manipulators": [
@@ -2373,97 +1878,23 @@
               "type": "variable_if",
               "name": "insert mode activated",
               "value": 0
-            },
-            {
-              "type": "variable_if",
-              "name": "j pressed",
-              "value": 1
-            }
-          ],
-          "to": [
-            {
-              "key_code": "j"
-            }
-          ]
-        },
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "j",
-            "modifiers": {
-              "optional": [
-                "any"
-              ]
-            }
-          },
-          "conditions": [
-            {
-              "type": "frontmost_application_if",
-              "file_paths": [
-                "/Emacs"
-              ]
-            },
-            {
-              "type": "variable_if",
-              "name": "insert mode activated",
-              "value": 0
             }
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "j"
-            },
-            {
-              "set_variable": {
-                "name": "i pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "j pressed",
-                "value": 1
-              }
-            },
-            {
-              "set_variable": {
-                "name": "k pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "l pressed",
-                "value": 0
-              }
             }
           ],
           "to_if_held_down": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
-              "key_code": "b",
-              "modifiers": [
-                "left_shift",
-                "left_control"
-              ]
-            },
-            {
               "key_code": "j",
-              "repeat": false,
+              "repeat": true,
               "halt": true
             }
-          ]
+          ],
+          "parameters": {
+            "basic.to_if_held_down_threshold_milliseconds": 100
+          }
         },
         {
           "type": "basic",
@@ -2496,7 +1927,6 @@
         }
       ]
     },
-
     {
       "description": "k",
       "manipulators": [
@@ -2521,97 +1951,23 @@
               "type": "variable_if",
               "name": "insert mode activated",
               "value": 0
-            },
-            {
-              "type": "variable_if",
-              "name": "k pressed",
-              "value": 1
-            }
-          ],
-          "to": [
-            {
-              "key_code": "k"
-            }
-          ]
-        },
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "k",
-            "modifiers": {
-              "optional": [
-                "any"
-              ]
-            }
-          },
-          "conditions": [
-            {
-              "type": "frontmost_application_if",
-              "file_paths": [
-                "/Emacs"
-              ]
-            },
-            {
-              "type": "variable_if",
-              "name": "insert mode activated",
-              "value": 0
             }
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "k"
-            },
-            {
-              "set_variable": {
-                "name": "i pressed",
-                "value": 1
-              }
-            },
-            {
-              "set_variable": {
-                "name": "j pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "k pressed",
-                "value": 1
-              }
-            },
-            {
-              "set_variable": {
-                "name": "l pressed",
-                "value": 0
-              }
             }
           ],
           "to_if_held_down": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
-              "key_code": "b",
-              "modifiers": [
-                "left_shift",
-                "left_control"
-              ]
-            },
-            {
               "key_code": "k",
-              "repeat": false,
+              "repeat": true,
               "halt": true
             }
-          ]
+          ],
+          "parameters": {
+            "basic.to_if_held_down_threshold_milliseconds": 100
+          }
         },
         {
           "type": "basic",
@@ -2644,7 +2000,6 @@
         }
       ]
     },
-
     {
       "description": "l",
       "manipulators": [
@@ -2669,97 +2024,23 @@
               "type": "variable_if",
               "name": "insert mode activated",
               "value": 0
-            },
-            {
-              "type": "variable_if",
-              "name": "l pressed",
-              "value": 1
-            }
-          ],
-          "to": [
-            {
-              "key_code": "l"
-            }
-          ]
-        },
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "l",
-            "modifiers": {
-              "optional": [
-                "any"
-              ]
-            }
-          },
-          "conditions": [
-            {
-              "type": "frontmost_application_if",
-              "file_paths": [
-                "/Emacs"
-              ]
-            },
-            {
-              "type": "variable_if",
-              "name": "insert mode activated",
-              "value": 0
             }
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "l"
-            },
-            {
-              "set_variable": {
-                "name": "i pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "j pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "k pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "l pressed",
-                "value": 1
-              }
             }
           ],
           "to_if_held_down": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
-              "key_code": "b",
-              "modifiers": [
-                "left_shift",
-                "left_control"
-              ]
-            },
-            {
               "key_code": "l",
-              "repeat": false,
+              "repeat": true,
               "halt": true
             }
-          ]
+          ],
+          "parameters": {
+            "basic.to_if_held_down_threshold_milliseconds": 100
+          }
         },
         {
           "type": "basic",
@@ -2792,7 +2073,6 @@
         }
       ]
     },
-
     {
       "description": ";",
       "manipulators": [
@@ -2821,70 +2101,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "i pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "j pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "k pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "l pressed",
-                "value": 1
-              }
-            },
-            {
               "key_code": "semicolon"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "i pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "j pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "k pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "l pressed",
-                "value": 1
-              }
-            },
             {
               "key_code": "b",
               "modifiers": [
@@ -2930,7 +2150,6 @@
         }
       ]
     },
-
     {
       "description": "'",
       "manipulators": [
@@ -2959,22 +2178,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "quote"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "b",
               "modifiers": [
@@ -3020,7 +2227,6 @@
         }
       ]
     },
-
     {
       "description": "z",
       "manipulators": [
@@ -3049,22 +2255,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "z"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "r",
               "modifiers": [
@@ -3106,7 +2300,6 @@
         }
       ]
     },
-
     {
       "description": "x",
       "manipulators": [
@@ -3135,22 +2328,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "x"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "equal_sign",
               "modifiers": [
@@ -3196,7 +2377,6 @@
         }
       ]
     },
-
     {
       "description": "c",
       "manipulators": [
@@ -3225,22 +2405,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "c"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "equal_sign",
               "modifiers": [
@@ -3286,7 +2454,6 @@
         }
       ]
     },
-
     {
       "description": "v",
       "manipulators": [
@@ -3315,22 +2482,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "v"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "equal_sign",
               "modifiers": [
@@ -3376,7 +2531,6 @@
         }
       ]
     },
-
     {
       "description": "b",
       "manipulators": [
@@ -3405,22 +2559,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "b"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "equal_sign",
               "modifiers": [
@@ -3466,7 +2608,6 @@
         }
       ]
     },
-
     {
       "description": "n",
       "manipulators": [
@@ -3495,22 +2636,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "n"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "b",
               "modifiers": [
@@ -3556,7 +2685,6 @@
         }
       ]
     },
-
     {
       "description": "m",
       "manipulators": [
@@ -3585,22 +2713,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "m"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "b",
               "modifiers": [
@@ -3646,7 +2762,6 @@
         }
       ]
     },
-
     {
       "description": ",",
       "manipulators": [
@@ -3675,22 +2790,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "comma"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "b",
               "modifiers": [
@@ -3736,7 +2839,6 @@
         }
       ]
     },
-
     {
       "description": ".",
       "manipulators": [
@@ -3765,22 +2867,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "period"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "b",
               "modifiers": [
@@ -3826,7 +2916,6 @@
         }
       ]
     },
-
     {
       "description": "/",
       "manipulators": [
@@ -3863,22 +2952,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "slash"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "b",
               "modifiers": [
@@ -3926,22 +3003,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "equal_sign"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "b",
               "modifiers": [
@@ -4023,7 +3088,6 @@
         }
       ]
     },
-
     {
       "description": "`",
       "manipulators": [
@@ -4052,22 +3116,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "grave_accent_and_tilde"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "equal_sign",
               "modifiers": [
@@ -4084,7 +3136,6 @@
         }
       ]
     },
-
     {
       "description": "1",
       "manipulators": [
@@ -4163,22 +3214,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "1"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "equal_sign",
               "modifiers": [
@@ -4315,22 +3354,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "7"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "equal_sign",
               "modifiers": [
@@ -4394,7 +3421,6 @@
         }
       ]
     },
-
     {
       "description": "2",
       "manipulators": [
@@ -4473,22 +3499,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "2"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "equal_sign",
               "modifiers": [
@@ -4625,22 +3639,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "5"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "equal_sign",
               "modifiers": [
@@ -4704,7 +3706,6 @@
         }
       ]
     },
-
     {
       "description": "3",
       "manipulators": [
@@ -4783,22 +3784,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "3"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "equal_sign",
               "modifiers": [
@@ -4935,22 +3924,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "1"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "equal_sign",
               "modifiers": [
@@ -5014,7 +3991,6 @@
         }
       ]
     },
-
     {
       "description": "4",
       "manipulators": [
@@ -5093,22 +4069,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "4"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "equal_sign",
               "modifiers": [
@@ -5312,7 +4276,6 @@
         }
       ]
     },
-
     {
       "description": "5",
       "manipulators": [
@@ -5391,22 +4354,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "5"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "equal_sign",
               "modifiers": [
@@ -5543,22 +4494,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "9"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "equal_sign",
               "modifiers": [
@@ -5622,7 +4561,6 @@
         }
       ]
     },
-
     {
       "description": "6",
       "manipulators": [
@@ -5701,22 +4639,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "6"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "b",
               "modifiers": [
@@ -5853,22 +4779,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "8"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "b",
               "modifiers": [
@@ -5932,7 +4846,6 @@
         }
       ]
     },
-
     {
       "description": "7",
       "manipulators": [
@@ -6011,22 +4924,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "7"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "b",
               "modifiers": [
@@ -6163,22 +5064,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "2"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "b",
               "modifiers": [
@@ -6242,7 +5131,6 @@
         }
       ]
     },
-
     {
       "description": "8",
       "manipulators": [
@@ -6321,22 +5209,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "8"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "b",
               "modifiers": [
@@ -6540,7 +5416,6 @@
         }
       ]
     },
-
     {
       "description": "9",
       "manipulators": [
@@ -6619,22 +5494,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "9"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "b",
               "modifiers": [
@@ -6771,22 +5634,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "4"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "b",
               "modifiers": [
@@ -6850,7 +5701,6 @@
         }
       ]
     },
-
     {
       "description": "0",
       "manipulators": [
@@ -6929,22 +5779,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "0"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "b",
               "modifiers": [
@@ -7081,22 +5919,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "6"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "b",
               "modifiers": [
@@ -7160,7 +5986,6 @@
         }
       ]
     },
-
     {
       "description": "hyphen",
       "manipulators": [
@@ -7189,22 +6014,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "hyphen"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "b",
               "modifiers": [
@@ -7221,7 +6034,6 @@
         }
       ]
     },
-
     {
       "description": "equal_sign",
       "manipulators": [
@@ -7250,22 +6062,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "equal_sign"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "b",
               "modifiers": [
@@ -7282,7 +6082,6 @@
         }
       ]
     },
-
     {
       "description": "backslash",
       "manipulators": [
@@ -7311,22 +6110,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "backslash"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "b",
               "modifiers": [
@@ -7343,7 +6130,6 @@
         }
       ]
     },
-
     {
       "description": "return_or_enter",
       "manipulators": [
@@ -7372,22 +6158,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "return_or_enter"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "m",
               "modifiers": [
@@ -7476,7 +6250,6 @@
         }
       ]
     },
-
     {
       "description": "tab",
       "manipulators": [
@@ -7492,19 +6265,12 @@
           },
           "to": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "tab"
             }
           ]
         }
       ]
     },
-
     {
       "description": "escape",
       "manipulators": [
@@ -7520,58 +6286,10 @@
           },
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "left_command pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "spacebar pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "i pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "j pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "k pressed",
-                "value": 0
-              }
-            },
-            {
-              "set_variable": {
-                "name": "l pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "escape"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "j",
               "modifiers": [
@@ -7673,7 +6391,6 @@
         }
       ]
     },
-
     {
       "description": "left_control",
       "manipulators": [
@@ -7701,7 +6418,6 @@
         }
       ]
     },
-
     {
       "description": "left_option",
       "manipulators": [
@@ -7729,7 +6445,6 @@
         }
       ]
     },
-
     {
       "description": "f1",
       "manipulators": [
@@ -7746,7 +6461,6 @@
         }
       ]
     },
-
     {
       "description": "f2",
       "manipulators": [
@@ -7763,7 +6477,6 @@
         }
       ]
     },
-
     {
       "description": "f3",
       "manipulators": [
@@ -7786,7 +6499,6 @@
         }
       ]
     },
-
     {
       "description": "f4",
       "manipulators": [
@@ -7809,7 +6521,6 @@
         }
       ]
     },
-
     {
       "description": "f5",
       "manipulators": [
@@ -7832,7 +6543,6 @@
         }
       ]
     },
-
     {
       "description": "f6",
       "manipulators": [
@@ -7855,7 +6565,6 @@
         }
       ]
     },
-
     {
       "description": "f7",
       "manipulators": [
@@ -7878,7 +6587,6 @@
         }
       ]
     },
-
     {
       "description": "f8",
       "manipulators": [
@@ -7913,7 +6621,6 @@
         }
       ]
     },
-
     {
       "description": "f9",
       "manipulators": [
@@ -7941,7 +6648,6 @@
         }
       ]
     },
-
     {
       "description": "f10",
       "manipulators": [
@@ -7969,7 +6675,6 @@
         }
       ]
     },
-
     {
       "description": "f13",
       "manipulators": [
@@ -7991,7 +6696,6 @@
         }
       ]
     },
-
     {
       "description": "f14",
       "manipulators": [
@@ -8084,7 +6788,6 @@
         }
       ]
     },
-
     {
       "description": "f15",
       "manipulators": [
@@ -8110,7 +6813,6 @@
         }
       ]
     },
-
     {
       "description": "arrows",
       "manipulators": [
@@ -8284,7 +6986,6 @@
         }
       ]
     },
-
     {
       "description": "page_up",
       "manipulators": [
@@ -8343,22 +7044,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "page_up"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "home",
               "halt": true
@@ -8402,7 +7091,6 @@
         }
       ]
     },
-
     {
       "description": "page_down",
       "manipulators": [
@@ -8461,22 +7149,10 @@
           ],
           "to_after_key_up": [
             {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
-            {
               "key_code": "page_down"
             }
           ],
           "to_if_held_down": [
-            {
-              "set_variable": {
-                "name": "leader pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "end",
               "halt": true
@@ -8520,7 +7196,6 @@
         }
       ]
     },
-
     {
       "description": "pause",
       "manipulators": [
@@ -8548,3 +7223,4 @@
     }
   ]
 }
+
