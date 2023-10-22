@@ -3,12 +3,12 @@
 ;; Author: Egor Maltsev <x0o1@ya.ru>
 ;; Version: 1.0 2023-09-13
 
-;;      _     				          _
-;;    _|_|_   				        _|_|_
-;;   |_|_|_|  				       |_|_|_|
-;;           _ _ 	   _ _
-;;          | | |	  | | |
-;;          |_|_|	  |_|_|
+;;      _                   _
+;;    _|_|_               _|_|_
+;;   |_|_|_|             |_|_|_|
+;;           _ _     _ _
+;;          | | |   | | |
+;;          |_|_|   |_|_|
 
 ;; This package is part of input model.
 ;; Follow the link: https://github.com/xEgorka/keyamp
@@ -358,7 +358,8 @@ so-called “ampable” commands.")
   (if (region-active-p)
       (progn
         (deactivate-mark)
-        (when (eq last-command 'select-block)
+        (when (or (eq last-command 'select-block)
+                  (eq last-command 'mark-defun))
           (set-mark-command t)
           (set-mark-command t)))
     (progn
@@ -562,7 +563,7 @@ so-called “ampable” commands.")
  '(("SPC" . extend-selection)
    ("DEL" . select-line)              ("<backspace>" . select-line)
    ("RET" . execute-extended-command) ("<return>"    . execute-extended-command)
-   ("TAB" . toggle-ibuffer)           ("<tab>"       . toggle-ibuffer)
+   ("TAB" . news)                     ("<tab>"       . news)
    ("ESC" . ignore)                   ("<escape>"    . ignore)
 
    ;; right leader left half
@@ -636,7 +637,7 @@ so-called “ampable” commands.")
    ("m" . dired-jump)
    ("," . save-close-current-buffer)
    ("." . recenter-top-bottom)
-   ("/" . ignore)     ("*" . ignore)
+   ("/" . mark-defun)     ("*" . mark-defun)
 
    ("e ESC" . ignore) ("e <escape>" . ignore)
    ("d ESC" . ignore) ("d <escape>" . ignore)
@@ -701,6 +702,8 @@ so-called “ampable” commands.")
    '((backward-kill-word          . sun-moon)                ; w
      (undo                        . split-window-below)      ; e
      (kill-word                   . make-frame-command)      ; r
+     (backward-word               . switch-to-buffer)        ; u
+     (forward-word                . bookmark-jump)           ; o
      (cut-text-block              . calculator)              ; t
      (open-line                   . previous-user-buffer)    ; s
      (cut-bracket-or-delete       . delete-other-windows)    ; d
@@ -1297,6 +1300,9 @@ so-called “ampable” commands.")
                cycle-hyphen-lowline-space                t
                delete-forward-char                       t
                delete-other-windows                      t
+               describe-function                         t
+               describe-key                              t
+               describe-variable                         t
                dired-jump                                t
                dired-mark                                t
                dired-next-line                           t

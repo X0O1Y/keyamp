@@ -2055,9 +2055,7 @@ Works on whole buffer or selection, respects `narrow-to-region'."
         (while (re-search-forward "\n\n\n+" nil 1) (replace-match "\n\n"))
         (goto-char (point-max))
         (while (eq (char-before) 32) (delete-char -1)))))
-  (if (buffer-modified-p)
-      (message "%s" "Cleanup trailing whitespace")
-    (message "%s" "No trailing whitespace")))
+  (if (buffer-modified-p) (message "%s" "Cleanup trailing whitespace")))
 
 (defun make-backup ()
   "Make a backup copy of current file or dired marked files.

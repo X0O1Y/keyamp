@@ -51,11 +51,21 @@
               "value": 0
             }
           ],
-          "to": [
+          "to_after_key_up": [
             {
               "key_code": "spacebar"
             }
-          ]
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "spacebar",
+              "repeat": true,
+              "halt": true
+            }
+          ],
+          "parameters": {
+            "basic.to_if_held_down_threshold_milliseconds": 50
+          }            
         },
         {
           "type": "basic",
@@ -183,11 +193,21 @@
               "value": 0
             }
           ],
-          "to": [
+          "to_after_key_up": [
             {
               "key_code": "delete_or_backspace"
             }
-          ]
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "delete_or_backspace",
+              "repeat": true,
+              "halt": true
+            }
+          ],
+          "parameters": {
+            "basic.to_if_held_down_threshold_milliseconds": 50
+          }            
         },
         {
           "type": "basic",
@@ -978,7 +998,7 @@
             }
           ],
           "parameters": {
-            "basic.to_if_held_down_threshold_milliseconds": 100
+            "basic.to_if_held_down_threshold_milliseconds": 50
           }
         },
         {
@@ -1893,7 +1913,7 @@
             }
           ],
           "parameters": {
-            "basic.to_if_held_down_threshold_milliseconds": 100
+            "basic.to_if_held_down_threshold_milliseconds": 50
           }
         },
         {
@@ -1966,7 +1986,7 @@
             }
           ],
           "parameters": {
-            "basic.to_if_held_down_threshold_milliseconds": 100
+            "basic.to_if_held_down_threshold_milliseconds": 50
           }
         },
         {
@@ -2039,7 +2059,7 @@
             }
           ],
           "parameters": {
-            "basic.to_if_held_down_threshold_milliseconds": 100
+            "basic.to_if_held_down_threshold_milliseconds": 50
           }
         },
         {
@@ -6263,9 +6283,36 @@
               ]
             }
           },
-          "to": [
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 0
+            }
+          ],
+          "to_after_key_up": [
             {
               "key_code": "tab"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "equal_sign",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "tab",
+              "repeat": false,
+              "halt": true
             }
           ]
         }
