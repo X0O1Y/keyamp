@@ -1,4 +1,4 @@
-;;; keyamp.el --- Key «Amplifier» -*- coding: utf-8; lexical-binding: t; -*-
+;;; keyamp.el --- Key Amplifier -*- coding: utf-8; lexical-binding: t; -*-
 
 ;; Author: Egor Maltsev <x0o1@ya.ru>
 ;; Version: 1.0 2023-09-13
@@ -15,10 +15,10 @@
 
 ;;; Commentary:
 
-;; Keyamp provides 3 modes: insert, command and «ampable». Command and
+;; Keyamp provides 3 modes: insert, command and repeat. Command and
 ;; insert modes are persistent transient keymaps.
 
-;; Ampable mode pushes transient remaps to keymap stack on top of
+;; Repeat mode pushes transient remaps to keymap stack on top of
 ;; command mode for easy repeat of commands chains during screen
 ;; positioning, cursor move and editing. Point color indicates
 ;; transient remap is active. ESDF and IJKL are mostly used, DEL/ESC
@@ -46,25 +46,25 @@
   :group 'help
   :prefix "keyamp-")
 
-(defvar keyamp-command-mode-activate-hook nil "Hook for `keyamp-command-mode-activate'")
-(defvar keyamp-insert-mode-activate-hook  nil "Hook for `keyamp-insert-mode-activate'")
+(defvar keyamp-command-hook nil "Hook for `keyamp-command'")
+(defvar keyamp-insert-hook  nil "Hook for `keyamp-insert'")
 
 (defconst keyamp-karabiner-cli
   "/Library/Application Support/org.pqrs/Karabiner-Elements/bin/karabiner_cli"
   "Karabiner-Elements CLI executable")
 
-(defconst keyamp-command-mode-indicator "🟢" "Character indicating command mode is active.")
-(defconst keyamp-insert-mode-indicator  "🟠" "Character indicating insert mode  is active.")
-(defconst keyamp-ampable-mode-indicator "🔵" "Character indicating ampable mode is active.")
+(defconst keyamp-command-indicator "🟢" "Character indicating command mode is active.")
+(defconst keyamp-insert-indicator  "🟠" "Character indicating insert mode is active.")
+(defconst keyamp-repeat-indicator  "🔵" "Character indicating repeat mode is active.")
 
-(defconst keyamp-command-mode-cursor "lawngreen"
+(defconst keyamp-command-cursor "lawngreen"
   "Cursor color indicating command mode is active.")
-(defconst keyamp-insert-mode-cursor  "gold"
-  "Cursor color indicating insert  mode is active.")
-(defconst keyamp-ampable-mode-cursor "deepskyblue"
-  "Cursor color indicating ampable mode is active.")
+(defconst keyamp-insert-cursor  "gold"
+  "Cursor color indicating insert mode is active.")
+(defconst keyamp-repeat-cursor "deepskyblue"
+  "Cursor color indicating repeat mode is active.")
 
-(defconst keyamp-idle-timeout 120 "Mode activation timeout.")
+(defconst keyamp-idle-timeout 120 "Modes timeout.")
 
 
 ;; layout lookup tables for key conversion
@@ -345,30 +345,10 @@ minor modes loaded later may override bindings in this map.")
 
 (defvar keyamp--deactivate-command-mode-func nil)
 
-(defvar keyamp-ampable-commands-hash nil
-  "Hash table with commands which set various transient keymaps,
-so-called “ampable” commands.")
+(defvar keyamp-repeat-commands-hash nil
+  "Hash table with commands which set transient keymaps.")
 
 
-;; setting keys
-
-(defun keyamp-escape ()
-  "Return to command mode. Escape everything."
-  (interactive)
-  (if (region-active-p)
-      (progn
-        (deactivate-mark)
-        (when (or (eq last-command 'select-block)
-                  (eq last-command 'mark-defun))
-          (set-mark-command t)
-          (set-mark-command t)))
-    (progn
-      (if (or (eq last-repeatable-command 'repeat)
-              (gethash last-command keyamp-ampable-commands-hash))
-          (message "")
-        (progn
-          (if (active-minibuffer-window)
-              (abort-recursive-edit)))))))
 
 (progn
   (defconst keyamp-tty-seq-timeout 30
@@ -393,17 +373,17 @@ so-called “ampable” commands.")
   (define-key key-translation-map (kbd "ESC") (kbd "<escape>")))
 
 
+;; setting keys
 
 (keyamp--dfk
  keyamp-shared-map
- '(("<escape>" . keyamp-command-mode-activate)
+ '(("<escape>" . keyamp-escape)          ("S-<escape>" . ignore)
    ("C-^" . keyamp-leader-left-key-map)  ("C-+" . keyamp-leader-left-key-map)
    ("C-_" . keyamp-leader-right-key-map) ("C-И" . keyamp-leader-right-key-map)))
 
 (keyamp--dfk
  keyamp-command-map
- '(("<escape>" . keyamp-escape)                                                        ("S-<escape>"    . ignore)
-   ("RET" . keyamp-insert-mode-activate) ("<return>"    . keyamp-insert-mode-activate) ("S-<return>"    . ignore)
+ '(("RET" . keyamp-insert)               ("<return>"    . keyamp-insert)               ("S-<return>"    . ignore)
    ("DEL" . keyamp-leader-left-key-map)  ("<backspace>" . keyamp-leader-left-key-map)  ("S-<backspace>" . ignore)
    ("SPC" . keyamp-leader-right-key-map)
 
@@ -423,7 +403,7 @@ so-called “ampable” commands.")
 
    ("a" . shrink-whitespaces)           ("ф" . shrink-whitespaces)         ("A" . ignore) ("Ф" . ignore)
    ("s" . open-line)                    ("ы" . open-line)                  ("S" . ignore) ("Ы" . ignore)
-   ("d" . cut-bracket-or-delete)        ("в" . cut-bracket-or-delete)      ("D" . ignore) ("В" . ignore)
+   ("d" . delete-backward)              ("в" . delete-backward)            ("D" . ignore) ("В" . ignore)
    ("f" . newline)                      ("а" . newline)                    ("F" . ignore) ("А" . ignore)
    ("g" . mark-mode)                    ("п" . mark-mode)                  ("G" . ignore) ("П" . ignore)
 
@@ -481,7 +461,7 @@ so-called “ampable” commands.")
    ("2" . kmacro-name-last-macro)
    ("3" . ignore)
    ("4" . clear-register-1)
-   ("5" . ignore)
+   ("5" . repeat-complex-command)
 
    ("q" . reformat-lines)
    ("w" . org-ctrl-c-ctrl-c)
@@ -512,9 +492,9 @@ so-called “ampable” commands.")
    ("y" . find-name-dired)
    ("u" . switch-to-buffer)
 
-                                           ("i i" . show-in-desktop)
-                                           ("i j" . set-buffer-file-coding-system)
-                                           ("i l" . revert-buffer-with-coding-system)
+   ("i e" . flyspell-buffer)               ("i i" . show-in-desktop)
+   ("i f" . count-words)                   ("i j" . set-buffer-file-coding-system)
+   ("i s" . count-matches)                 ("i l" . revert-buffer-with-coding-system)
 
    ("o"  . bookmark-jump)
    ("p"  . view-echo-area-messages)
@@ -523,20 +503,18 @@ so-called “ampable” commands.")
    ("\\" . bookmark-rename)
    ("h"  . recentf-open-files)
 
-   ("j e" . global-hl-line-mode)
+   ("j e" . global-hl-line-mode)           ("j i" . abbrev-mode)
    ("j s" . display-line-numbers-mode)     ("j l" . narrow-to-region-or-block)
    ("j d" . whitespace-mode)               ("j k" . narrow-to-defun)
    ("j f" . toggle-case-fold-search)       ("j j" . widen)
    ("j g" . toggle-word-wrap)              ("j h" . narrow-to-page)
-   ("j a" . text-scale-adjust)             ("j ;" . count-matches)
+   ("j a" . text-scale-adjust)             ("j ;" . glyphless-display-mode)
    ("j t" . toggle-truncate-lines)         ("j y" . visual-line-mode)
-   ("j c" . flyspell-buffer)               ("j ," . glyphless-display-mode)
-   ("j w" . abbrev-mode)                   ("j o" . count-words)
 
    ("k e" . json-pretty-print-buffer)      ("k i" . move-to-column)
    ("k s" . space-to-newline)              ("k l" . list-recently-closed)
    ("k d" . ispell-word)                   ("k k" . list-matching-lines)
-   ("k f" . delete-matching-lines)         ("k j" . repeat-complex-command)
+   ("k f" . delete-matching-lines)
    ("k g" . delete-non-matching-lines)     ("k h" . reformat-to-sentence-lines)
    ("k r" . quote-lines)                   ("k u" . escape-quotes)
    ("k t" . delete-duplicate-lines)        ("k y" . slash-to-double-backslash)
@@ -665,7 +643,7 @@ so-called “ampable” commands.")
 (keyamp--dfk global-map '(("C-r" . open-file-at-cursor) ("C-t" . hippie-expand)))
 
 (let ((x (make-sparse-keymap)))
-  (keyamp--dkr x '((cut-bracket-or-delete . repeat)))
+  (keyamp--dkr x '((delete-backward . repeat)))
   (keyamp--dlk x '(repeat . repeat))
   (keyamp--stm x '(repeat)))
 
@@ -685,13 +663,17 @@ so-called “ampable” commands.")
 (let ((x (make-sparse-keymap)))
   (keyamp--dfk
    x
-   '(("i"   . isearch-ring-retreat)    ("ш"   . isearch-ring-retreat)
-     ("j"   . isearch-repeat-backward) ("о"   . isearch-repeat-backward)
-     ("k"   . isearch-ring-advance)    ("л"   . isearch-ring-advance)
-     ("l"   . isearch-repeat-forward)  ("д"   . isearch-repeat-forward)
-     ("d"   . repeat)                  ("в"   . repeat)
-     ("DEL" . isearch-repeat-backward) ("SPC" . isearch-repeat-forward)))
-  (keyamp--stm x '(isearch-ring-retreat isearch-repeat-backward isearch-ring-advance isearch-repeat-forward search-current-word isearch-yank-kill)))
+   '(("i"   . isearch-ring-retreat)    ("ш" . isearch-ring-retreat)
+     ("j"   . isearch-repeat-backward) ("о" . isearch-repeat-backward)
+     ("k"   . isearch-ring-advance)    ("л" . isearch-ring-advance)
+     ("l"   . isearch-repeat-forward)  ("д" . isearch-repeat-forward)
+     ("d"   . repeat)                  ("в" . repeat)
+     ("DEL" . isearch-repeat-backward) ("<backspace>" . isearch-repeat-backward)
+     ("SPC" . isearch-repeat-forward)))
+  (keyamp--stm
+   x
+   '(isearch-ring-retreat isearch-repeat-backward isearch-ring-advance
+     isearch-repeat-forward search-current-word isearch-yank-kill)))
 
 
 ;; screen
@@ -699,22 +681,22 @@ so-called “ampable” commands.")
 (let ((x (make-sparse-keymap)))
   (keyamp--dkr
    x
-   '((backward-kill-word          . sun-moon)                ; w
-     (undo                        . split-window-below)      ; e
-     (kill-word                   . make-frame-command)      ; r
-     (backward-word               . switch-to-buffer)        ; u
-     (forward-word                . bookmark-jump)           ; o
-     (cut-text-block              . calculator)              ; t
-     (open-line                   . previous-user-buffer)    ; s
-     (cut-bracket-or-delete       . delete-other-windows)    ; d
-     (newline                     . next-user-buffer)        ; f
-     (mark-mode                   . new-empty-buffer)        ; g
-     (cut-line-or-selection       . works)                   ; x
-     (copy-line-or-selection      . agenda)                  ; c
-     (paste-or-paste-previous     . tasks)                   ; v
-     (exchange-point-and-mark     . view-echo-area-messages) ; p
-     (backward-left-bracket       . dired-jump)              ; m
-     (forward-right-bracket       . player)))                ; .
+   '((backward-kill-word      . sun-moon)                ; w
+     (undo                    . split-window-below)      ; e
+     (kill-word               . make-frame-command)      ; r
+     (backward-word           . switch-to-buffer)        ; u
+     (forward-word            . bookmark-jump)           ; o
+     (cut-text-block          . calculator)              ; t
+     (open-line               . previous-user-buffer)    ; s
+     (delete-backward         . delete-other-windows)    ; d
+     (newline                 . next-user-buffer)        ; f
+     (mark-mode               . new-empty-buffer)        ; g
+     (cut-line-or-selection   . works)                   ; x
+     (copy-line-or-selection  . agenda)                  ; c
+     (paste-or-paste-previous . tasks)                   ; v
+     (exchange-point-and-mark . view-echo-area-messages) ; p
+     (backward-left-bracket   . dired-jump)              ; m
+     (forward-right-bracket   . player)))                ; .
   (keyamp--dfk
    x
    '(("TAB" . toggle-ibuffer)       ("<tab>"       . toggle-ibuffer)
@@ -737,12 +719,12 @@ so-called “ampable” commands.")
   (keyamp--stm x '(save-close-current-buffer)))
 
 (let ((x (make-sparse-keymap)))
-  (keyamp--dkr x '((cut-bracket-or-delete . tasks) (paste-or-paste-previous . tasks)))
+  (keyamp--dkr x '((delete-backward . tasks) (paste-or-paste-previous . tasks)))
   (keyamp--dlk x '(previous-user-buffer . tasks))
   (keyamp--stm x '(tasks)))
 
 (let ((x (make-sparse-keymap)))
-  (keyamp--dkr x '((cut-bracket-or-delete . works) (cut-line-or-selection . works)))
+  (keyamp--dkr x '((delete-backward . works) (cut-line-or-selection . works)))
   (keyamp--dlk x '(previous-user-buffer . works))
   (keyamp--stm x '(works)))
 
@@ -750,8 +732,8 @@ so-called “ampable” commands.")
 ;; edit
 
 (let ((x (make-sparse-keymap))) ; q d
-  (keyamp--dlk x '(cut-bracket-or-delete . insert-space-before))
-  (keyamp--stm x '(insert-space-before cut-bracket-or-delete)))
+  (keyamp--dlk x '(delete-backward . insert-space-before))
+  (keyamp--stm x '(insert-space-before delete-backward)))
 
 (let ((x (make-sparse-keymap)))
   (keyamp--dlk x '(delete-forward-char . delete-forward-char))
@@ -763,50 +745,53 @@ so-called “ampable” commands.")
   (keyamp--stm x '(backward-kill-word kill-word)))
 
 (let ((x (make-sparse-keymap))) ; e d
-  (keyamp--dkr x '((cut-bracket-or-delete . undo-redo)))
+  (keyamp--dkr x '((delete-backward . undo-redo)))
   (keyamp--dlk x '(undo . undo-redo))
   (keyamp--stm x '(undo undo-redo)))
 
 (let ((x (make-sparse-keymap))) ; t
-  (keyamp--dkr x '((cut-bracket-or-delete . cut-text-block)))
+  (keyamp--dkr x '((delete-backward . cut-text-block)))
   (keyamp--stm x '(cut-text-block)))
 
 (let ((x (make-sparse-keymap))) ; a
-  (keyamp--dkr x '((cut-bracket-or-delete . shrink-whitespaces)))
+  (keyamp--dkr x '((delete-backward . shrink-whitespaces)))
   (keyamp--dlk x '(shrink-whitespaces . shrink-whitespaces))
   (keyamp--stm x '(shrink-whitespaces)))
 
 (let ((x (make-sparse-keymap))) ; g
-  (keyamp--dkr x '((cut-bracket-or-delete . rectangle-mark-mode)))
+  (keyamp--dkr x '((delete-backward . rectangle-mark-mode)))
   (keyamp--stm x '(mark-mode)))
 
 (let ((x (make-sparse-keymap))) ; z
-  (keyamp--dkr x '((cut-bracket-or-delete . toggle-comment)))
+  (keyamp--dkr x '((delete-backward . toggle-comment)))
   (keyamp--dlk x '(toggle-comment . toggle-comment))
   (keyamp--stm x '(toggle-comment)))
 
 (let ((x (make-sparse-keymap))) ; x
-  (keyamp--dkr x '((cut-bracket-or-delete . cut-line-or-selection)))
+  (keyamp--dkr x '((delete-backward . cut-line-or-selection)))
   (keyamp--dlk x '(cut-line-or-selection . cut-line-or-selection))
   (keyamp--stm x '(cut-line-or-selection)))
 
 (let ((x (make-sparse-keymap))) ; c
-  (keyamp--dkr x '((cut-bracket-or-delete . copy-line-or-selection)))
+  (keyamp--dkr x '((delete-backward . copy-line-or-selection)))
   (keyamp--dlk x '(copy-line-or-selection . copy-line-or-selection))
   (keyamp--stm x '(copy-line-or-selection)))
 
 (let ((x (make-sparse-keymap))) ; v
-  (keyamp--dkr x '((cut-bracket-or-delete . paste-or-paste-previous)))
+  (keyamp--dkr x '((delete-backward . paste-or-paste-previous)))
   (keyamp--dlk x '(undo . paste-or-paste-previous))
   (keyamp--stm x '(paste-or-paste-previous)))
 
 (let ((x (make-sparse-keymap))) ; b
-  (keyamp--dkr x '((cut-bracket-or-delete . toggle-letter-case)))
+  (keyamp--dkr x '((delete-backward . toggle-letter-case)))
   (keyamp--dlk x '(toggle-letter-case . toggle-letter-case))
   (keyamp--stm x '(toggle-letter-case)))
 
 (let ((x (make-sparse-keymap)))
-  (keyamp--dkr x '((undo . org-shiftup) (cut-bracket-or-delete . org-shiftdown) (copy-line-or-selection . agenda)))
+  (keyamp--dkr
+   x
+   '((undo . org-shiftup) (delete-backward . org-shiftdown)
+     (copy-line-or-selection . agenda)))
   (keyamp--dlk x '(org-shiftup . org-shiftdown))
   (keyamp--stm x '(org-shiftup org-shiftdown)))
 
@@ -815,7 +800,7 @@ so-called “ampable” commands.")
   (keyamp--stm x '(todo insert-date)))
 
 (let ((x (make-sparse-keymap)))
-  (keyamp--dkr x '((cut-bracket-or-delete . cycle-hyphen-lowline-space)))
+  (keyamp--dkr x '((delete-backward . cycle-hyphen-lowline-space)))
   (keyamp--stm x '(cycle-hyphen-lowline-space)))
 
 
@@ -924,7 +909,8 @@ so-called “ampable” commands.")
   (keyamp--dfk
    icomplete-minibuffer-map
    '(("C-r" . icomplete-force-complete-and-exit)
-     ("RET" . icomplete-exit-or-force-complete-and-exit) ("<return>" . icomplete-exit-or-force-complete-and-exit)))
+     ("RET" . icomplete-exit-or-force-complete-and-exit)
+     ("<return>" . icomplete-exit-or-force-complete-and-exit)))
 
   (keyamp--dkr
    icomplete-minibuffer-map
@@ -936,9 +922,9 @@ so-called “ampable” commands.")
   (let ((x (make-sparse-keymap)))
     (keyamp--dkr
      x
-     '((previous-line               . previous-line-or-history-element)
-       (next-line                   . next-line-or-history-element)
-       (keyamp-insert-mode-activate . exit-minibuffer)))
+     '((previous-line . previous-line-or-history-element)
+       (next-line     . next-line-or-history-element)
+       (keyamp-insert . exit-minibuffer)))
     (keyamp--dlk x '(previous-line . next-line))
     (keyamp--stm x '(previous-line-or-history-element next-line-or-history-element))))
 
@@ -973,15 +959,15 @@ so-called “ampable” commands.")
     (keyamp--dfk dired-mode-map '(("C-h" . dired-do-delete) ("C-r" . open-in-external-app)))
     (keyamp--dkr
      dired-mode-map
-     '((keyamp-insert-mode-activate . dired-find-file)
-       (backward-left-bracket       . dired-mark)
-       (forward-right-bracket       . dired-unmark)
-       (toggle-comment              . revert-buffer)
-       (copy-to-register-1          . dired-do-copy)
-       (paste-from-register-1       . dired-do-rename)
-       (mark-whole-buffer           . dired-toggle-marks)
-       (reformat-lines              . dired-create-directory)
-       (insert-space-before         . dired-hide-details-mode)))
+     '((keyamp-insert         . dired-find-file)
+       (backward-left-bracket . dired-mark)
+       (forward-right-bracket . dired-unmark)
+       (toggle-comment        . revert-buffer)
+       (copy-to-register-1    . dired-do-copy)
+       (paste-from-register-1 . dired-do-rename)
+       (mark-whole-buffer     . dired-toggle-marks)
+       (reformat-lines        . dired-create-directory)
+       (insert-space-before   . dired-hide-details-mode)))
 
     (let ((x (make-sparse-keymap)))
       (keyamp--dlk x '(dired-previous-line . dired-next-line))
@@ -997,15 +983,15 @@ so-called “ampable” commands.")
 (with-eval-after-load 'rect
   (keyamp--dkr
    rectangle-mark-mode-map
-   '((copy-line-or-selection      . copy-rectangle-as-kill)
-     (cut-bracket-or-delete       . kill-rectangle)
-     (keyamp-insert-mode-activate . string-rectangle)
-     (paste-or-paste-previous     . yank-rectangle)
-     (copy-to-register            . copy-rectangle-to-register)
-     (toggle-comment              . rectangle-number-lines)
-     (cut-line-or-selection       . clear-rectangle)
-     (insert-space-before         . open-rectangle)
-     (clean-whitespace            . delete-whitespace-rectangle))))
+   '((copy-line-or-selection  . copy-rectangle-as-kill)
+     (delete-backward         . kill-rectangle)
+     (keyamp-insert           . string-rectangle)
+     (paste-or-paste-previous . yank-rectangle)
+     (copy-to-register        . copy-rectangle-to-register)
+     (toggle-comment          . rectangle-number-lines)
+     (cut-line-or-selection   . clear-rectangle)
+     (insert-space-before     . open-rectangle)
+     (clean-whitespace        . delete-whitespace-rectangle))))
 
 (progn ; ibuffer
   (with-eval-after-load 'ibuf-ext
@@ -1016,13 +1002,13 @@ so-called “ampable” commands.")
 
     (keyamp--dkr
      ibuffer-mode-map
-     '((keyamp-insert-mode-activate . ibuffer-visit-buffer)
-       (end-of-line-or-block        . ibuffer-forward-filter-group)
-       (beginning-of-line-or-block  . ibuffer-backward-filter-group)
-       (previous-line               . up-line)
-       (next-line                   . down-line)))
+     '((keyamp-insert              . ibuffer-visit-buffer)
+       (end-of-line-or-block       . ibuffer-forward-filter-group)
+       (beginning-of-line-or-block . ibuffer-backward-filter-group)
+       (previous-line              . up-line)
+       (next-line                  . down-line)))
     (keyamp--dfk ibuffer-mode-filter-group-map '(("C-h" . help-command)))
-    (keyamp--dkr ibuffer-mode-filter-group-map '((keyamp-insert-mode-activate . ibuffer-toggle-filter-group)))
+    (keyamp--dkr ibuffer-mode-filter-group-map '((keyamp-insert . ibuffer-toggle-filter-group)))
 
     (let ((x (make-sparse-keymap)))
       (keyamp--dkr
@@ -1034,7 +1020,7 @@ so-called “ampable” commands.")
       (keyamp--stm x '(ibuffer-backward-filter-group ibuffer-forward-filter-group ibuffer-toggle-filter-group))))
 
   (let ((x (make-sparse-keymap)))
-    (keyamp--dkr x '((cut-bracket-or-delete . ibuffer-do-delete)))
+    (keyamp--dkr x '((delete-backward . ibuffer-do-delete)))
     (keyamp--dlk x '(ibuffer-do-delete . ibuffer-do-delete))
     (keyamp--stm x '(ibuffer-do-delete))))
 
@@ -1042,17 +1028,17 @@ so-called “ampable” commands.")
   (keyamp--dfk transient-base-map '(("<escape>" . transient-quit-one))))
 
 (progn ; remap RET
-  (with-eval-after-load 'arc-mode (keyamp--dkr archive-mode-map '((keyamp-insert-mode-activate . archive-extract))))
-  (with-eval-after-load 'bookmark (keyamp--dkr bookmark-bmenu-mode-map '((keyamp-insert-mode-activate . bookmark-bmenu-this-window))))
-  (with-eval-after-load 'button (keyamp--dkr button-map '((keyamp-insert-mode-activate . push-button))))
-  (with-eval-after-load 'compile (keyamp--dkr compilation-button-map '((keyamp-insert-mode-activate . compile-goto-error))))
-  (with-eval-after-load 'gnus-art (keyamp--dkr gnus-mime-button-map '((keyamp-insert-mode-activate . gnus-article-press-button))))
-  (with-eval-after-load 'emms-playlist-mode (keyamp--dkr emms-playlist-mode-map '((keyamp-insert-mode-activate . emms-playlist-mode-play-smart))))
-  (with-eval-after-load 'org-agenda (keyamp--dkr org-agenda-mode-map '((keyamp-insert-mode-activate . org-agenda-switch-to))))
-  (with-eval-after-load 'replace (keyamp--dkr occur-mode-map '((keyamp-insert-mode-activate . occur-mode-goto-occurrence))))
-  (with-eval-after-load 'shr (keyamp--dkr shr-map '((keyamp-insert-mode-activate . shr-browse-url))))
-  (with-eval-after-load 'simple (keyamp--dkr completion-list-mode-map '((keyamp-insert-mode-activate . choose-completion))))
-  (with-eval-after-load 'wid-edit (keyamp--dkr widget-link-keymap '((keyamp-insert-mode-activate . widget-button-press)))))
+  (with-eval-after-load 'arc-mode (keyamp--dkr archive-mode-map '((keyamp-insert . archive-extract))))
+  (with-eval-after-load 'bookmark (keyamp--dkr bookmark-bmenu-mode-map '((keyamp-insert . bookmark-bmenu-this-window))))
+  (with-eval-after-load 'button (keyamp--dkr button-map '((keyamp-insert . push-button))))
+  (with-eval-after-load 'compile (keyamp--dkr compilation-button-map '((keyamp-insert . compile-goto-error))))
+  (with-eval-after-load 'gnus-art (keyamp--dkr gnus-mime-button-map '((keyamp-insert . gnus-article-press-button))))
+  (with-eval-after-load 'emms-playlist-mode (keyamp--dkr emms-playlist-mode-map '((keyamp-insert . emms-playlist-mode-play-smart))))
+  (with-eval-after-load 'org-agenda (keyamp--dkr org-agenda-mode-map '((keyamp-insert . org-agenda-switch-to))))
+  (with-eval-after-load 'replace (keyamp--dkr occur-mode-map '((keyamp-insert . occur-mode-goto-occurrence))))
+  (with-eval-after-load 'shr (keyamp--dkr shr-map '((keyamp-insert . shr-browse-url))))
+  (with-eval-after-load 'simple (keyamp--dkr completion-list-mode-map '((keyamp-insert . choose-completion))))
+  (with-eval-after-load 'wid-edit (keyamp--dkr widget-link-keymap '((keyamp-insert . widget-button-press)))))
 
 (with-eval-after-load 'doc-view
   (keyamp--dkr
@@ -1097,7 +1083,7 @@ so-called “ampable” commands.")
     (add-hook 'eshell-post-command-hook (lambda () "History search."
                                           (set-transient-map x)
                                           (setq this-command 'eshell-previous-input)
-                                          (set-face-background 'cursor keyamp-ampable-mode-cursor)))))
+                                          (set-face-background 'cursor keyamp-repeat-cursor)))))
 
 (with-eval-after-load 'shell
   (keyamp--dfk shell-mode-map '(("C-h" . comint-interrupt-subjob) ("C-r" . comint-send-input)))
@@ -1111,7 +1097,7 @@ so-called “ampable” commands.")
     (keyamp--stm x '(comint-previous-input comint-next-input))
     (add-hook 'comint-output-filter-functions (lambda (&rest r) "History search."
                                                 (set-transient-map x)
-                                                (keyamp-command-mode-activate)
+                                                (keyamp-command)
                                                 (setq this-command 'comint-previous-input)))))
 
 (with-eval-after-load 'term
@@ -1129,21 +1115,21 @@ so-called “ampable” commands.")
     (keyamp--sth x '(term-mode-hook))
     (add-hook 'term-input-filter-functions (lambda (&rest r) "History search."
                                              (set-transient-map x)
-                                             (keyamp-command-mode-activate)
+                                             (keyamp-command)
                                              (setq this-command 'term-send-up)))))
 
 (with-eval-after-load 'info
   (keyamp--dkr
    Info-mode-map
-   '((open-line                   . Info-backward-node)
-     (newline                     . Info-forward-node)
-     (cut-bracket-or-delete       . Info-next-reference)
-     (undo                        . Info-up)
-     (keyamp-insert-mode-activate . Info-follow-nearest-node)
-     (down-line                   . scroll-down-line)
-     (up-line                     . scroll-up-line)
-     (right-char                  . Info-backward-node)
-     (left-char                   . Info-forward-node)))
+   '((open-line       . Info-backward-node)
+     (newline         . Info-forward-node)
+     (delete-backward . Info-next-reference)
+     (undo            . Info-up)
+     (keyamp-insert   . Info-follow-nearest-node)
+     (down-line       . scroll-down-line)
+     (up-line         . scroll-up-line)
+     (right-char      . Info-backward-node)
+     (left-char       . Info-forward-node)))
   (keyamp--dfk Info-mode-map '(("TAB" . scroll-up-command) ("<tab>" . scroll-up-command)))
   (let ((x (make-sparse-keymap)))
     (keyamp--dlk x '(open-line . newline))
@@ -1152,17 +1138,17 @@ so-called “ampable” commands.")
 (with-eval-after-load 'help-mode
   (keyamp--dkr
    help-mode-map
-   '((cut-bracket-or-delete . forward-button)
-     (undo                  . backward-button)
-     (open-line             . help-go-back)
-     (newline               . help-go-forward))))
+   '((delete-backward . forward-button)
+     (undo            . backward-button)
+     (open-line       . help-go-back)
+     (newline         . help-go-forward))))
 
 (progn ; gnus
   (with-eval-after-load 'gnus-topic
     (keyamp--dfk gnus-topic-mode-map '(("TAB" . toggle-ibuffer) ("<tab>" . toggle-ibuffer)))
     (keyamp--dkr
      gnus-topic-mode-map
-     '((keyamp-insert-mode-activate . gnus-topic-select-group)
+     '((keyamp-insert . gnus-topic-select-group)
        (beginning-of-line-or-block  . gnus-topic-goto-previous-topic-line)
        (end-of-line-or-block        . gnus-topic-goto-next-topic-line)
        (previous-line               . up-line)
@@ -1185,8 +1171,8 @@ so-called “ampable” commands.")
   (with-eval-after-load 'gnus-group
     (keyamp--dkr
      gnus-group-mode-map
-     '((undo                  . gnus-group-enter-server-mode)
-       (cut-bracket-or-delete . gnus-group-get-new-news))))
+     '((undo            . gnus-group-enter-server-mode)
+       (delete-backward . gnus-group-get-new-news))))
 
   (with-eval-after-load 'gnus-sum
     (keyamp--dfk
@@ -1195,29 +1181,29 @@ so-called “ampable” commands.")
        ("TAB" . scroll-up-command) ("<tab>" . scroll-up-command)))
     (keyamp--dkr
      gnus-summary-mode-map
-     '((keyamp-insert-mode-activate . gnus-summary-scroll-up)
-       (open-file-at-cursor         . keyamp-insert-mode-activate)
-       (undo                        . gnus-summary-prev-article)
-       (cut-bracket-or-delete       . gnus-summary-next-article)
-       (open-line                   . gnus-summary-prev-group)
-       (newline                     . gnus-summary-next-group)
-       (kill-word                   . gnus-summary-save-parts)
-       (down-line                   . scroll-down-line)
-       (up-line                     . scroll-up-line)
-       (right-char                  . gnus-summary-prev-group)
-       (left-char                   . gnus-summary-next-group)))
+     '((keyamp-insert       . gnus-summary-scroll-up)
+       (open-file-at-cursor . keyamp-insert)
+       (undo                . gnus-summary-prev-article)
+       (delete-backward     . gnus-summary-next-article)
+       (open-line           . gnus-summary-prev-group)
+       (newline             . gnus-summary-next-group)
+       (kill-word           . gnus-summary-save-parts)
+       (down-line           . scroll-down-line)
+       (up-line             . scroll-up-line)
+       (right-char          . gnus-summary-prev-group)
+       (left-char           . gnus-summary-next-group)))
 
     (let ((x (make-sparse-keymap)))
       (keyamp--dkr
        x
-       '((undo                  . gnus-summary-prev-article)
-         (cut-bracket-or-delete . gnus-summary-next-article)
-         (open-line             . gnus-summary-prev-group)
-         (newline               . gnus-summary-next-group)
-         (down-line             . scroll-down-line)
-         (up-line               . scroll-up-line)
-         (right-char            . gnus-summary-prev-group)
-         (left-char             . gnus-summary-next-group)))
+       '((undo            . gnus-summary-prev-article)
+         (delete-backward . gnus-summary-next-article)
+         (open-line       . gnus-summary-prev-group)
+         (newline         . gnus-summary-next-group)
+         (down-line       . scroll-down-line)
+         (up-line         . scroll-up-line)
+         (right-char      . gnus-summary-prev-group)
+         (left-char       . gnus-summary-next-group)))
       (keyamp--dlk x '(gnus-summary-prev-group . gnus-summary-next-group))
       (keyamp--stm x '(gnus-summary-prev-group gnus-summary-next-group))
       (keyamp--sth x '(gnus-summary-prepared-hook)))
@@ -1229,22 +1215,22 @@ so-called “ampable” commands.")
   (with-eval-after-load 'gnus-srvr
     (keyamp--dkr
      gnus-server-mode-map
-     '((keyamp-insert-mode-activate . gnus-server-read-server)
-       (open-file-at-cursor         . keyamp-insert-mode-activate)
-       (cut-bracket-or-delete       . gnus-server-exit)))
+     '((keyamp-insert       . gnus-server-read-server)
+       (open-file-at-cursor . keyamp-insert)
+       (delete-backward     . gnus-server-exit)))
     (keyamp--dkr
      gnus-browse-mode-map
-     '((keyamp-insert-mode-activate . gnus-browse-select-group)
-       (open-file-at-cursor         . keyamp-insert-mode-activate)))))
+     '((keyamp-insert       . gnus-browse-select-group)
+       (open-file-at-cursor . keyamp-insert)))))
 
 (with-eval-after-load 'snake
   (keyamp--dkr
    snake-mode-map
-   '((keyamp-insert-mode-activate . snake-start-game)
-     (keyamp-escape               . snake-pause-game)
-     (next-line                   . snake-move-down)
-     (cut-bracket-or-delete       . snake-move-up)
-     (delete-other-windows        . snake-rotate-up)))
+   '((keyamp-insert        . snake-start-game)
+     (keyamp-escape        . snake-pause-game)
+     (next-line            . snake-move-down)
+     (delete-backward      . snake-move-up)
+     (delete-other-windows . snake-rotate-up)))
 
   (let ((x (make-sparse-keymap)))
     (keyamp--dlk x '(snake-move-left . snake-move-right))
@@ -1257,225 +1243,229 @@ so-called “ampable” commands.")
 (with-eval-after-load 'tetris
   (keyamp--dkr
    tetris-mode-map
-   '((keyamp-escape               . tetris-pause-game)
-     (keyamp-insert-mode-activate . tetris-start-game)
-     (cut-bracket-or-delete       . tetris-rotate-prev)
-     (delete-other-windows        . tetris-rotate-prev)
-     (next-line                   . tetris-move-bottom)))
+   '((keyamp-escape   . tetris-pause-game)
+     (delete-backward . tetris-rotate-prev) (delete-other-windows . tetris-rotate-prev)
+     (newline         . tetris-rotate-next) (next-user-buffer     . tetris-rotate-next)
+     (next-line       . tetris-move-bottom) (backward-char        . tetris-move-down)))
 
   (let ((x (make-sparse-keymap)))
     (keyamp--dlk x '(tetris-move-left . tetris-move-right))
     (keyamp--stm
      x
-     '(tetris-start-game tetris-pause-game tetris-move-left
-       tetris-move-right tetris-rotate-prev tetris-move-bottom))))
+     '(tetris-start-game tetris-pause-game tetris-move-left tetris-move-right
+       tetris-rotate-prev tetris-rotate-next tetris-move-bottom tetris-move-down))))
 
 (with-eval-after-load 'nov
   (keyamp--dkr
    nov-mode-map
-   '((undo                        . nov-goto-toc)
-     (open-line                   . nov-previous-document)
-     (newline                     . nov-next-document)
-     (keyamp-insert-mode-activate . nov-browse-url))))
+   '((undo          . nov-goto-toc)
+     (open-line     . nov-previous-document)
+     (newline       . nov-next-document)
+     (keyamp-insert . nov-browse-url))))
 
 
 
-(setq keyamp-ampable-commands-hash
+(setq keyamp-repeat-commands-hash
       #s(hash-table
          size 100
          test equal
-         data (Info-backward-node                        t
-               Info-forward-node                         t
-               agenda                                    t
-               alternate-buffer                          t
-               backward-punct                            t
-               backward-word                             t
-               beginning-of-line-or-block                t
-               beginning-of-line-or-buffer               t
-               backward-left-bracket                     t
-               comint-next-input                         t
-               comint-previous-input                     t
-               copy-line-or-selection                    t
-               cut-bracket-or-delete                     t
-               cycle-hyphen-lowline-space                t
-               delete-forward-char                       t
-               delete-other-windows                      t
-               describe-function                         t
-               describe-key                              t
-               describe-variable                         t
-               dired-jump                                t
-               dired-mark                                t
-               dired-next-line                           t
-               dired-previous-line                       t
-               dired-unmark                              t
-               down-line                                 t
-               downloads                                 t
-               end-of-line-or-block                      t
-               end-of-line-or-buffer                     t
-               eshell-next-input                         t
-               eshell-previous-input                     t
-               exchange-point-and-mark                   t
-               extend-selection                          t
-               forward-punct                             t
-               forward-right-bracket                     t
-               forward-word                              t
-               gnus-beginning-of-line-or-buffer          t
-               gnus-end-of-line-or-buffer                t
-               gnus-summary-next-article                 t
-               gnus-summary-next-group                   t
-               gnus-summary-prev-article                 t
-               gnus-summary-prev-group                   t
-               gnus-topic-goto-next-topic-line           t
-               gnus-topic-goto-previous-topic-line       t
-               ibuffer-backward-filter-group             t
-               ibuffer-forward-filter-group              t
-               icomplete-backward-completions            t
-               icomplete-forward-completions             t
-               ido-next-match                            t
-               ido-prev-match                            t
-               insert-date                               t
-               insert-space-before                       t
-               isearch-repeat-backward                   t
-               isearch-repeat-forward                    t
-               isearch-ring-advance                      t
-               isearch-ring-retreat                      t
-               isearch-yank-kill                         t
-               kill-region                               t
-               mark-mode                                 t
-               move-row-down                             t
-               move-row-up                               t
-               next-line                                 t
-               next-line-or-history-element              t
-               next-user-buffer                          t
-               org-shiftdown                             t
-               org-shiftup                               t
-               pop-local-mark-ring                       t
-               previous-line                             t
-               previous-line-or-history-element          t
-               previous-user-buffer                      t
-               recenter-top-bottom                       t
-               rectangle-mark-mode                       t
-               save-close-current-buffer                 t
-               scroll-down-command                       t
-               scroll-up-command                         t
-               search-current-word                       t
-               select-line                               t
-               select-text-in-quote                      t
-               shrink-whitespaces                        t
-               split-window-below                        t
-               sun-moon                                  t
-               tasks                                     t
-               term-send-down                            t
-               term-send-up                              t
-               todo                                      t
-               toggle-comment                            t
-               toggle-letter-case                        t
-               undo                                      t
-               undo-redo                                 t
-               up-line                                   t
-               view-echo-area-messages                   t
-               works                                     t
-               yank                                      t
-               yank-pop                                  t)))
+         data (Info-backward-node                  t
+               Info-forward-node                   t
+               agenda                              t
+               alternate-buffer                    t
+               backward-punct                      t
+               backward-word                       t
+               beginning-of-line-or-block          t
+               beginning-of-line-or-buffer         t
+               backward-left-bracket               t
+               comint-next-input                   t
+               comint-previous-input               t
+               copy-line-or-selection              t
+               delete-backward                     t
+               cycle-hyphen-lowline-space          t
+               delete-forward-char                 t
+               delete-other-windows                t
+               describe-function                   t
+               describe-key                        t
+               describe-variable                   t
+               dired-jump                          t
+               dired-mark                          t
+               dired-next-line                     t
+               dired-previous-line                 t
+               dired-unmark                        t
+               down-line                           t
+               downloads                           t
+               end-of-line-or-block                t
+               end-of-line-or-buffer               t
+               eshell-next-input                   t
+               eshell-previous-input               t
+               exchange-point-and-mark             t
+               extend-selection                    t
+               forward-punct                       t
+               forward-right-bracket               t
+               forward-word                        t
+               gnus-beginning-of-line-or-buffer    t
+               gnus-end-of-line-or-buffer          t
+               gnus-summary-next-article           t
+               gnus-summary-next-group             t
+               gnus-summary-prev-article           t
+               gnus-summary-prev-group             t
+               gnus-topic-goto-next-topic-line     t
+               gnus-topic-goto-previous-topic-line t
+               ibuffer-backward-filter-group       t
+               ibuffer-forward-filter-group        t
+               icomplete-backward-completions      t
+               icomplete-forward-completions       t
+               ido-next-match                      t
+               ido-prev-match                      t
+               insert-date                         t
+               insert-space-before                 t
+               isearch-repeat-backward             t
+               isearch-repeat-forward              t
+               isearch-ring-advance                t
+               isearch-ring-retreat                t
+               isearch-yank-kill                   t
+               kill-region                         t
+               mark-mode                           t
+               move-row-down                       t
+               move-row-up                         t
+               next-line                           t
+               next-line-or-history-element        t
+               next-user-buffer                    t
+               org-shiftdown                       t
+               org-shiftup                         t
+               pop-local-mark-ring                 t
+               previous-line                       t
+               previous-line-or-history-element    t
+               previous-user-buffer                t
+               recenter-top-bottom                 t
+               rectangle-mark-mode                 t
+               save-close-current-buffer           t
+               scroll-down-command                 t
+               scroll-up-command                   t
+               search-current-word                 t
+               select-line                         t
+               select-text-in-quote                t
+               shrink-whitespaces                  t
+               split-window-below                  t
+               sun-moon                            t
+               tasks                               t
+               term-send-down                      t
+               term-send-up                        t
+               todo                                t
+               toggle-comment                      t
+               toggle-letter-case                  t
+               undo                                t
+               undo-redo                           t
+               up-line                             t
+               view-echo-area-messages             t
+               works                               t
+               yank                                t
+               yank-pop                            t)))
 
 
 
 (defvar keyamp-insert-state-p t "Non-nil means insertion mode is on.")
 
-(defvar keyamp-insert-mode-idle-timer  nil "Idle timer for exit insert mode.")
-(defvar keyamp-ampable-mode-idle-timer nil "Idle timer for exit ampable mode.")
+(defvar keyamp-insert-idle-timer nil "Idle timer for exit insert mode.")
+(defvar keyamp-repeat-idle-timer nil "Idle timer for exit repeat mode.")
 
-(defun keyamp-command-mode-init ()
+(defun keyamp-command-init ()
   "Set command mode keys."
   (setq keyamp-insert-state-p nil)
   (when keyamp--deactivate-command-mode-func
     (funcall keyamp--deactivate-command-mode-func))
   (setq keyamp--deactivate-command-mode-func
         (set-transient-map keyamp-command-map (lambda () t)))
-  (set-face-background 'cursor keyamp-command-mode-cursor)
-  (setq mode-line-front-space keyamp-command-mode-indicator)
+  (set-face-background 'cursor keyamp-command-cursor)
+  (setq mode-line-front-space keyamp-command-indicator)
   (force-mode-line-update)
   (when (active-minibuffer-window)
     (set-transient-map keyamp-minibuffer-map)
     (setq this-command 'previous-line-or-history-element))
-  (when (timerp keyamp-insert-mode-idle-timer)
-    (cancel-timer keyamp-insert-mode-idle-timer)))
+  (when (timerp keyamp-insert-idle-timer)
+    (cancel-timer keyamp-insert-idle-timer)))
 
-(defun keyamp-insert-mode-init ()
+(defun keyamp-insert-init ()
   "Enter insertion mode."
   (setq keyamp-insert-state-p t)
   (funcall keyamp--deactivate-command-mode-func)
-  (set-face-background 'cursor keyamp-insert-mode-cursor)
-  (setq mode-line-front-space keyamp-insert-mode-indicator)
+  (set-face-background 'cursor keyamp-insert-cursor)
+  (setq mode-line-front-space keyamp-insert-indicator)
   (force-mode-line-update)
-  (setq keyamp-insert-mode-idle-timer
-        (run-with-idle-timer keyamp-idle-timeout nil 'keyamp-command-mode-activate)))
+  (setq keyamp-insert-idle-timer
+        (run-with-idle-timer keyamp-idle-timeout nil 'keyamp-escape)))
 
-(defun keyamp-command-mode-init-karabiner ()
+(defun keyamp-command-init-karabiner ()
   "Karabiner integration.
-Init command mode with `keyamp-command-mode-activate-hook'."
+Init command mode with `keyamp-command-hook'."
   (call-process keyamp-karabiner-cli nil 0 nil
                 "--set-variables" "{\"insert mode activated\":0}"))
 
-(defun keyamp-insert-mode-init-karabiner ()
+(defun keyamp-insert-init-karabiner ()
   "Karabiner integration.
-Init insert mode with `keyamp-insert-mode-activate-hook'."
+Init insert mode with `keyamp-insert-hook'."
   (call-process keyamp-karabiner-cli nil 0 nil
                 "--set-variables" "{\"insert mode activated\":1}"))
 
-(defun keyamp-command-mode-activate ()
+(defun keyamp-command ()
   "Activate command mode."
   (interactive)
-  (keyamp-command-mode-init)
-  (run-hooks 'keyamp-command-mode-activate-hook))
+  (keyamp-command-init)
+  (run-hooks 'keyamp-command-hook))
 
-(defun keyamp-insert-mode-activate ()
+(defun keyamp-insert ()
   "Activate insert mode."
   (interactive)
-  (keyamp-insert-mode-init)
-  (run-hooks 'keyamp-insert-mode-activate-hook))
+  (keyamp-insert-init)
+  (run-hooks 'keyamp-insert-hook))
 
-(defun keyamp-ampable-mode-indicate ()
-  "Indicate ampable mode. Run with `post-command-hook'."
+(defun keyamp-repeat ()
+  "Indicate repeat mode. Run with `post-command-hook'."
   (interactive)
   (unless keyamp-insert-state-p
     (if (or (eq real-this-command 'repeat)
-            (gethash this-command keyamp-ampable-commands-hash))
+            (gethash this-command keyamp-repeat-commands-hash))
         (progn
-          (setq mode-line-front-space keyamp-ampable-mode-indicator)
-          (set-face-background 'cursor keyamp-ampable-mode-cursor))
+          (setq mode-line-front-space keyamp-repeat-indicator)
+          (set-face-background 'cursor keyamp-repeat-cursor))
       (progn
-        (setq mode-line-front-space keyamp-command-mode-indicator)
-        (set-face-background 'cursor keyamp-command-mode-cursor))
+        (setq mode-line-front-space keyamp-command-indicator)
+        (set-face-background 'cursor keyamp-command-cursor))
       (force-mode-line-update))))
 
-(defun keyamp-clear-transient-map ()
-  "Emulate keyboard press to clear transient keymaps.
-Run with `keyamp-ampable-mode-idle-timer'."
-  (execute-kbd-macro (kbd "<escape>")))
+(defun keyamp-escape (&rest Idle)
+  "Return to command mode. Escape everything.
+If run by idle timer, than emulate keyboard press to cancel repeat."
+  (interactive)
+  (cond
+   (Idle                       (execute-kbd-macro (kbd "<escape>")))
+   (keyamp-insert-state-p      (keyamp-command))
+   ((region-active-p)          (deactivate-mark))
+   ((active-minibuffer-window) (abort-recursive-edit))))
 
 
 
 ;;;###autoload
 (define-minor-mode keyamp
-  "Keyboard «Amplifier»."
+  "Key Amplifier."
   :global t
   :keymap keyamp-insert-map
 
   (when keyamp
-    (add-hook 'minibuffer-setup-hook    'keyamp-command-mode-activate)
-    (add-hook 'minibuffer-exit-hook     'keyamp-command-mode-activate)
-    (add-hook 'isearch-mode-end-hook    'keyamp-command-mode-activate)
-    (add-hook 'eshell-pre-command-hook  'keyamp-command-mode-activate)
-    (add-hook 'post-command-hook        'keyamp-ampable-mode-indicate)
+    (add-hook 'minibuffer-setup-hook   'keyamp-command)
+    (add-hook 'minibuffer-exit-hook    'keyamp-command)
+    (add-hook 'isearch-mode-end-hook   'keyamp-command)
+    (add-hook 'eshell-pre-command-hook 'keyamp-command)
+    (add-hook 'post-command-hook       'keyamp-repeat)
     (when (file-exists-p keyamp-karabiner-cli)
-      (add-hook 'keyamp-insert-mode-activate-hook  'keyamp-insert-mode-init-karabiner)
-      (add-hook 'keyamp-command-mode-activate-hook 'keyamp-command-mode-init-karabiner))
+      (add-hook 'keyamp-insert-hook  'keyamp-insert-init-karabiner)
+      (add-hook 'keyamp-command-hook 'keyamp-command-init-karabiner))
     (keyamp-catch-tty-ESC)
     (keyamp-define-input-source 'russian-computer)
-    (keyamp-command-mode-activate)
-    (setq keyamp-ampable-mode-idle-timer
-          (run-with-idle-timer keyamp-idle-timeout t 'keyamp-clear-transient-map))))
+    (keyamp-command)
+    (setq keyamp-repeat-idle-timer
+          (run-with-idle-timer keyamp-idle-timeout t 'keyamp-escape t))))
 
 (provide 'keyamp)
 

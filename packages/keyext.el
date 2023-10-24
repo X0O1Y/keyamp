@@ -481,7 +481,7 @@ If `universal-argument' is called first, do not delete inner text."
      (t
       (delete-char -1)))))
 
-(defun cut-bracket-or-delete ()
+(defun delete-backward ()
   "Try cut bracket. If error, then delete char."
   (interactive)
   (let (xok)
@@ -2501,7 +2501,7 @@ This checks in turn:
 (advice-add 'scroll-up-command       :after (lambda (&rest r) "Recenter." (recenter)))
 (advice-add 'isearch-repeat-backward :after (lambda (&rest r) "Recenter." (recenter)))
 (advice-add 'isearch-repeat-forward  :after (lambda (&rest r) "Recenter." (recenter)))
-(advice-add 'json-pretty-print-buffer :after (lambda (&rest r) "Message." (message "%s" "Json pretty print.")))
+(advice-add 'json-pretty-print-buffer :after (lambda (&rest r) "Message." (message "%s" "Pretty print")))
 
 (provide 'keyext)
 
