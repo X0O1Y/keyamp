@@ -1926,10 +1926,10 @@ This command is similar to `find-file-at-point' but without prompting for confir
                         (find-file (concat xfnamecore ".ts"))
                       (if (> (length xpath) 0)
                           (find-file xpath)
-                        (toggle-eshell)))))
+                        (info)))))
               (if (file-exists-p (concat xpath ".el"))
                   (find-file (concat xpath ".el"))
-                (toggle-eshell)))))))))
+                (info)))))))))
 
 
 
@@ -2280,14 +2280,6 @@ If current frame has only one window, switch to next frame."
   (forward-word)
   (forward-char)
   (kill-line))
-
-(defun toggle-eshell (&optional arg)
-  "Toggle eshell."
-  (interactive "P")
-  (if (string-equal major-mode "eshell-mode")
-      (switch-to-buffer (other-buffer))
-    (progn
-      (eshell arg))))
 
 (defun screenshot ()
   "Take screenshot on macOS."

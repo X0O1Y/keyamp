@@ -15,8 +15,8 @@
 
 ;;; Commentary:
 
-;; Keyamp provides 3 modes: insert, command and repeat. Command and
-;; insert modes are persistent transient keymaps.
+;; Keyamp provides 3 modes: insert, command and repeat. Command mode
+;; based on persistent transient keymap.
 
 ;; Repeat mode pushes transient remaps to keymap stack on top of
 ;; command mode for easy repeat of commands chains during screen
@@ -288,29 +288,29 @@ Useful when Engineer Engram layout not available on OS or keyboard level."
       (message "Translation activated")))
   (let ()
     (keyamp--define-keys-translation
-     '(("-" . "#") ("=" . "%") ("`" . "`")    ("q" . "b") ("w" . "y") ("e" . "o")
-       ("r" . "u") ("t" . "'") ("y" . "\"")   ("u" . "l") ("i" . "d") ("o" . "w")
-       ("p" . "v") ("[" . "z") ("]" . "C-_")  ("a" . "c") ("s" . "i") ("d" . "e")
-       ("f" . "a") ("g" . ",") ("h" . ".")    ("j" . "h") ("k" . "t") ("l" . "s")
-       (";" . "n") ("'" . "q") ("\\" . "C-^") ("z" . "g") ("x" . "x") ("c" . "j")
-       ("v" . "k") ("b" . "-") ("n" . "?")    ("m" . "r") ("," . "m") ("." . "f")
-       ("/" . "p") ("_" . "|") ("+" . "^")    ("~" . "~") ("Q" . "B") ("W" . "Y")
-       ("E" . "O") ("R" . "U") ("T" . "(")    ("Y" . ")") ("U" . "L") ("I" . "D")
-       ("O" . "W") ("P" . "V") ("{" . "Z")    ("}" . "[") ("A" . "C") ("S" . "I")
-       ("D" . "E") ("F" . "A") ("G" . ";")    ("H" . ":") ("J" . "H") ("K" . "T")
-       ("L" . "S") (":" . "N") ("\"" . "Q")   ("|" . "]") ("Z" . "G") ("X" . "X")
-       ("C" . "J") ("V" . "K") ("B" . "_")    ("N" . "!") ("M" . "R") ("<" . "M")
-       (">" . "F") ("?" . "P") ("1" . "7")    ("2" . "5") ("3" . "1") ("4" . "3")
-       ("5" . "9") ("6" . "8") ("7" . "2")    ("8" . "0") ("9" . "4") ("0" . "6")
-       ("!" . "@") ("@" . "&") ("#" . "/")    ("$" . "$") ("%" . "<") ("^" . ">")
-       ("&" . "*") ("*" . "=") ("(" . "+")    (")" . "\\"))
+     '(("-" . "#") ("=" . "%") ("`" . "`")  ("q" . "b") ("w" . "y") ("e" . "o")
+       ("r" . "u") ("t" . "'") ("y" . "\"") ("u" . "l") ("i" . "d") ("o" . "w")
+       ("p" . "v") ("[" . "z") ("]" . "{")  ("a" . "c") ("s" . "i") ("d" . "e")
+       ("f" . "a") ("g" . ",") ("h" . ".")  ("j" . "h") ("k" . "t") ("l" . "s")
+       (";" . "n") ("'" . "q") ("\\" . "}") ("z" . "g") ("x" . "x") ("c" . "j")
+       ("v" . "k") ("b" . "-") ("n" . "?")  ("m" . "r") ("," . "m") ("." . "f")
+       ("/" . "p") ("_" . "|") ("+" . "^")  ("~" . "~") ("Q" . "B") ("W" . "Y")
+       ("E" . "O") ("R" . "U") ("T" . "(")  ("Y" . ")") ("U" . "L") ("I" . "D")
+       ("O" . "W") ("P" . "V") ("{" . "Z")  ("}" . "[") ("A" . "C") ("S" . "I")
+       ("D" . "E") ("F" . "A") ("G" . ";")  ("H" . ":") ("J" . "H") ("K" . "T")
+       ("L" . "S") (":" . "N") ("\"" . "Q") ("|" . "]") ("Z" . "G") ("X" . "X")
+       ("C" . "J") ("V" . "K") ("B" . "_")  ("N" . "!") ("M" . "R") ("<" . "M")
+       (">" . "F") ("?" . "P") ("1" . "7")  ("2" . "5") ("3" . "1") ("4" . "3")
+       ("5" . "9") ("6" . "8") ("7" . "2")  ("8" . "0") ("9" . "4") ("0" . "6")
+       ("!" . "@") ("@" . "&") ("#" . "/")  ("$" . "$") ("%" . "<") ("^" . ">")
+       ("&" . "*") ("*" . "=") ("(" . "+")  (")" . "\\"))
      (get 'keyamp-qwerty-to-engineer-engram 'state))))
 
 
 ;; keymaps
 
 (defvar keyamp-shared-map (make-sparse-keymap)
-  "Parent keymap of `keyamp-command-map' and `keyamp-insert-map'.
+  "Parent keymap of `keyamp-command-map'.
 Define keys that are available in both command and insert modes here.")
 
 (defvar keyamp-command-map (cons 'keymap keyamp-shared-map)
@@ -327,21 +327,6 @@ active maps.
 In this way, bindings in `keyamp-shared-map' can be disabled by this map.
 Effectively, this map takes precedence over all others when command mode
 is enabled.")
-
-(defvar keyamp-insert-map (cons 'keymap keyamp-shared-map)
-  "Keymap for bindings that will be checked in insert mode. Active whenever
-`keyamp' is non-nil.
-
-Inherits bindings from `keyamp-shared-map'. In insert mode, if no binding
-is found in this map `keyamp-shared-map' is checked, then if there is
-still no binding, the other active keymaps are checked like normal. However,
-if a key is explicitly bound to nil in this map, it will not be looked
-up in `keyamp-shared-map' and lookup will skip directly to the normally
-active maps. In this way, bindings in `keyamp-shared-map' can be disabled
-by this map.
-
-Keep in mind that this acts like a normal global minor mode map, so other
-minor modes loaded later may override bindings in this map.")
 
 (defvar keyamp--deactivate-command-mode-func nil)
 
@@ -539,10 +524,10 @@ minor modes loaded later may override bindings in this map.")
 (keyamp--dfk
  (define-prefix-command 'keyamp-leader-right-key-map)
  '(("SPC" . extend-selection)
-   ("DEL" . select-line)              ("<backspace>" . select-line)
-   ("RET" . execute-extended-command) ("<return>"    . execute-extended-command)
-   ("TAB" . news)                     ("<tab>"       . news)
-   ("ESC" . ignore)                   ("<escape>"    . ignore)
+   ("DEL" . select-line)               ("<backspace>" . select-line)
+   ("RET" . eshell)                    ("<return>"    . eshell)
+   ("TAB" . news)                      ("<tab>"       . news)
+   ("ESC" . ignore)                    ("<escape>"    . ignore)
 
    ;; right leader left half
    ("`" . ignore)
@@ -555,29 +540,29 @@ minor modes loaded later may override bindings in this map.")
    ("q" . fill-or-unfill)
    ("w" . sun-moon)
 
-   ("e e" . todo)                        ("e i" . shopping)
-   ("e d" . calendar)                    ("e k" . weather)
-   ("e f" . org-time-stamp)              ("e j" . clock)
+   ("e e" . todo)                      ("e i" . shopping)
+   ("e d" . calendar)                  ("e k" . weather)
+   ("e f" . org-time-stamp)            ("e j" . clock)
 
    ("r" . query-replace-regexp)
    ("t" . calculator)
    ("a" . mark-whole-buffer)
    ("s" . clean-whitespace)
 
-   ("d e" . org-shiftup)                 ("d i" . eval-defun)
-   ("d s" . shell-command-on-region)     ("d l" . delete-frame)
-   ("d d" . insert-date)                 ("d k" . run-current-file)
-   ("d f" . shell-command)               ("d j" . eval-last-sexp)
-   ("d r" . async-shell-command)         ("d u" . elisp-eval-region-or-buffer)
-   ("d v" . elisp-byte-compile-file)     ("d n" . stow)
+   ("d e" . org-shiftup)               ("d i" . eval-defun)
+   ("d s" . shell-command-on-region)   ("d l" . delete-frame)
+   ("d d" . insert-date)               ("d k" . run-current-file)
+   ("d f" . shell-command)             ("d j" . eval-last-sexp)
+   ("d r" . async-shell-command)       ("d u" . elisp-eval-region-or-buffer)
+   ("d v" . elisp-byte-compile-file)   ("d n" . stow)
 
-   ("f e" . insert-emacs-quote)          ("f i" . insert-ascii-single-quote)
-   ("f f" . insert-char)                 ("f j" . insert-brace)
-   ("f d" . emoji-insert)                ("f k" . insert-paren)
-   ("f s" . insert-formfeed)             ("f l" . insert-square-bracket)
-   ("f g" . insert-curly-single-quote)   ("f h" . insert-double-curly-quote)
-   ("f r" . insert-single-angle-quote)   ("f u" . insert-ascii-double-quote)
-   ("f t" . insert-double-angle-quote)   ("f v" . insert-markdown-quote)
+   ("f e" . insert-emacs-quote)        ("f i" . insert-ascii-single-quote)
+   ("f f" . insert-char)               ("f j" . insert-brace)
+   ("f d" . emoji-insert)              ("f k" . insert-paren)
+   ("f s" . insert-formfeed)           ("f l" . insert-square-bracket)
+   ("f g" . insert-curly-single-quote) ("f h" . insert-double-curly-quote)
+   ("f r" . insert-single-angle-quote) ("f u" . insert-ascii-double-quote)
+   ("f t" . insert-double-angle-quote) ("f v" . insert-markdown-quote)
 
    ("g" . new-empty-buffer)
    ("z" . goto-char)
@@ -1082,7 +1067,7 @@ minor modes loaded later may override bindings in this map.")
     (keyamp--stm x '(eshell-previous-input eshell-next-input))
     (add-hook 'eshell-post-command-hook (lambda () "History search."
                                           (set-transient-map x)
-                                          (setq this-command 'eshell-previous-input)
+                                          (setq this-command 'next-line)
                                           (set-face-background 'cursor keyamp-repeat-cursor)))))
 
 (with-eval-after-load 'shell
@@ -1098,7 +1083,7 @@ minor modes loaded later may override bindings in this map.")
     (add-hook 'comint-output-filter-functions (lambda (&rest r) "History search."
                                                 (set-transient-map x)
                                                 (keyamp-command)
-                                                (setq this-command 'comint-previous-input)))))
+                                                (setq this-command 'next-line)))))
 
 (with-eval-after-load 'term
   (keyamp--dfk
@@ -1116,7 +1101,7 @@ minor modes loaded later may override bindings in this map.")
     (add-hook 'term-input-filter-functions (lambda (&rest r) "History search."
                                              (set-transient-map x)
                                              (keyamp-command)
-                                             (setq this-command 'term-send-up)))))
+                                             (setq this-command 'next-line)))))
 
 (with-eval-after-load 'info
   (keyamp--dkr
@@ -1226,10 +1211,8 @@ minor modes loaded later may override bindings in this map.")
 (with-eval-after-load 'snake
   (keyamp--dkr
    snake-mode-map
-   '((keyamp-insert        . snake-start-game)
-     (keyamp-escape        . snake-pause-game)
-     (next-line            . snake-move-down)
-     (delete-backward      . snake-move-up)
+   '((keyamp-insert        . snake-start-game) (keyamp-escape   . snake-pause-game)
+     (next-line            . snake-move-down)  (delete-backward . snake-move-up)
      (delete-other-windows . snake-rotate-up)))
 
   (let ((x (make-sparse-keymap)))
@@ -1258,10 +1241,8 @@ minor modes loaded later may override bindings in this map.")
 (with-eval-after-load 'nov
   (keyamp--dkr
    nov-mode-map
-   '((undo          . nov-goto-toc)
-     (open-line     . nov-previous-document)
-     (newline       . nov-next-document)
-     (keyamp-insert . nov-browse-url))))
+   '((undo    . nov-goto-toc)      (open-line     . nov-previous-document)
+     (newline . nov-next-document) (keyamp-insert . nov-browse-url))))
 
 
 
@@ -1382,12 +1363,12 @@ minor modes loaded later may override bindings in this map.")
   (force-mode-line-update)
   (when (active-minibuffer-window)
     (set-transient-map keyamp-minibuffer-map)
-    (setq this-command 'previous-line-or-history-element))
+    (setq this-command 'next-line))
   (when (timerp keyamp-insert-idle-timer)
     (cancel-timer keyamp-insert-idle-timer)))
 
 (defun keyamp-insert-init ()
-  "Enter insertion mode."
+  "Enter inser mode."
   (setq keyamp-insert-state-p t)
   (funcall keyamp--deactivate-command-mode-func)
   (set-face-background 'cursor keyamp-insert-cursor)
@@ -1397,14 +1378,12 @@ minor modes loaded later may override bindings in this map.")
         (run-with-idle-timer keyamp-idle-timeout nil 'keyamp-escape)))
 
 (defun keyamp-command-init-karabiner ()
-  "Karabiner integration.
-Init command mode with `keyamp-command-hook'."
+  "Karabiner integration. Init command mode with `keyamp-command-hook'."
   (call-process keyamp-karabiner-cli nil 0 nil
                 "--set-variables" "{\"insert mode activated\":0}"))
 
 (defun keyamp-insert-init-karabiner ()
-  "Karabiner integration.
-Init insert mode with `keyamp-insert-hook'."
+  "Karabiner integration. Init insert mode with `keyamp-insert-hook'."
   (call-process keyamp-karabiner-cli nil 0 nil
                 "--set-variables" "{\"insert mode activated\":1}"))
 
@@ -1422,10 +1401,8 @@ Init insert mode with `keyamp-insert-hook'."
 
 (defun keyamp-repeat ()
   "Indicate repeat mode. Run with `post-command-hook'."
-  (interactive)
   (unless keyamp-insert-state-p
-    (if (or (eq real-this-command 'repeat)
-            (gethash this-command keyamp-repeat-commands-hash))
+    (if (gethash this-command keyamp-repeat-commands-hash)
         (progn
           (setq mode-line-front-space keyamp-repeat-indicator)
           (set-face-background 'cursor keyamp-repeat-cursor))
@@ -1434,9 +1411,9 @@ Init insert mode with `keyamp-insert-hook'."
         (set-face-background 'cursor keyamp-command-cursor))
       (force-mode-line-update))))
 
-(defun keyamp-escape (&rest Idle)
+(defun keyamp-escape (&optional Idle)
   "Return to command mode. Escape everything.
-If run by idle timer, than emulate keyboard press to cancel repeat."
+If run by idle timer then emulate keyboard press to cancel repeat."
   (interactive)
   (cond
    (Idle                       (execute-kbd-macro (kbd "<escape>")))
@@ -1450,7 +1427,7 @@ If run by idle timer, than emulate keyboard press to cancel repeat."
 (define-minor-mode keyamp
   "Key Amplifier."
   :global t
-  :keymap keyamp-insert-map
+  :keymap keyamp-shared-map
 
   (when keyamp
     (add-hook 'minibuffer-setup-hook   'keyamp-command)
