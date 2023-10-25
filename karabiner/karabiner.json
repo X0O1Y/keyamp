@@ -1031,9 +1031,19 @@
                                         ]
                                     }
                                 },
+                                "parameters": {
+                                    "basic.to_if_held_down_threshold_milliseconds": 50
+                                },
                                 "to_after_key_up": [
                                     {
                                         "key_code": "i"
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "i",
+                                        "repeat": true
                                     }
                                 ],
                                 "type": "basic"
@@ -1946,9 +1956,19 @@
                                         ]
                                     }
                                 },
+                                "parameters": {
+                                    "basic.to_if_held_down_threshold_milliseconds": 50
+                                },
                                 "to_after_key_up": [
                                     {
                                         "key_code": "j"
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "j",
+                                        "repeat": true
                                     }
                                 ],
                                 "type": "basic"
@@ -2019,9 +2039,19 @@
                                         ]
                                     }
                                 },
+                                "parameters": {
+                                    "basic.to_if_held_down_threshold_milliseconds": 50
+                                },
                                 "to_after_key_up": [
                                     {
                                         "key_code": "k"
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "k",
+                                        "repeat": true
                                     }
                                 ],
                                 "type": "basic"
@@ -2092,9 +2122,19 @@
                                         ]
                                     }
                                 },
+                                "parameters": {
+                                    "basic.to_if_held_down_threshold_milliseconds": 50
+                                },
                                 "to_after_key_up": [
                                     {
                                         "key_code": "l"
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "l",
+                                        "repeat": true
                                     }
                                 ],
                                 "type": "basic"
