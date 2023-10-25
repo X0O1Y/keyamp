@@ -1,7 +1,7 @@
 #+title: Keyamp
 #+author: Egor Maltsev
 
-Input model based on [[file:packages/keyamp.el][keyamp]] for Emacs.
+Input model based on [[file:packages/keyamp.el][Keyamp]] for Emacs.
 
 Below features how to use it.
 
@@ -13,58 +13,14 @@ Below features how to use it.
 
 * ANSI keyboard layout
 
-Thumb cluster for common keyboard, arrows on home row, number row by touch and more.
+Thumb cluster for common keyboard.
 
-- [[file:karabiner/karabiner.json][Karabiner]] config file. Emacs mode integration via variable!
+- [[file:karabiner/karabiner.json][Karabiner]] config file. Emacs Keyamp mode integration!
 - [[http://www.keyboard-layout-editor.com/#/gists/106550cd49793787784ed1b9c9117c3d][Layout]] based on [[file:layouts/Engram.bundle][Engineer Engram]]:
 
 [[screenshots/ansi-keyboard.png]]
 
 - Automatic Russian layout support for command bindings
-
-- Hack 【[[http://xahlee.info/emacs/misc/xah-fly-keys_esc.html][Escape]]】
-Escape activates command mode in GUI and terminal. Escape activates command mode in minibuffer, second press quits minibuffer. Deactivates mark too.
-
-#+begin_src elisp
-;; 1. <escape> set to keymap-command-mode-activate in keymap-shared-map
-;; 2. <escape> set to keymap-escape in keymap-command-map
-;; 3. catched tty ESC translates to <escape>
-
-(progn
-  (defun keyamp-escape ()
-    "Hack escape."
-    (interactive)
-    (when (region-active-p)
-      (deactivate-mark))
-    (when (active-minibuffer-window)
-      (abort-recursive-edit)))
-
-  (define-key keyamp-command-map (kbd "<escape>") 'keyamp-escape))
-
-(progn
-  (defvar keyamp-fast-keyseq-timeout 50)
-
-  (defun keyamp-tty-ESC-filter (map)
-    (if (and (equal (this-single-command-keys) [?\e])
-             (sit-for (/ keyamp-fast-keyseq-timeout 1000.0)))
-        [escape] map))
-
-  (defun keyamp-lookup-key (map key)
-    (catch 'found
-      (map-keyamp (lambda (k b) (if (equal key k) (throw 'found b))) map)))
-
-  (defun keyamp-catch-tty-ESC ()
-    "Setup key mappings of current terminal to turn a tty's ESC into
-`escape'."
-    (when (memq (terminal-live-p (frame-terminal)) '(t pc))
-      (let ((esc-binding (keyamp-lookup-key input-decode-map ?\e)))
-        (define-key input-decode-map
-          [?\e] `(menu-item "" ,esc-binding :filter keyamp-tty-ESC-filter)))))
-
-  (keyamp-catch-tty-ESC)
-
-  (define-key key-translation-map (kbd "ESC") (kbd "<escape>")))
-#+end_src
 
 #+begin_src bash
 # emacs-mac

@@ -309,22 +309,22 @@ Useful when Engineer Engram layout not available on OS or keyboard level."
 
 ;; keymaps
 
-(defvar keyamp-shared-map (make-sparse-keymap)
+(defvar keyamp-map (make-sparse-keymap)
   "Parent keymap of `keyamp-command-map'.
 Define keys that are available in both command and insert modes here.")
 
-(defvar keyamp-command-map (cons 'keymap keyamp-shared-map)
+(defvar keyamp-command-map (cons 'keymap keyamp-map)
   "Keymap that takes precedence over all other keymaps in command mode.
-Inherits bindings from `keyamp-shared-map'.
+Inherits bindings from `keyamp-map'.
 
 In command mode, if no binding is found in this map
-`keyamp-shared-map' is checked, then if there is still no binding,
+`keyamp-map' is checked, then if there is still no binding,
 the other active keymaps are checked like normal. However, if a key is
 explicitly bound to nil in this map, it will not be looked up in
-`keyamp-shared-map' and lookup will skip directly to the normally
+`keyamp-map' and lookup will skip directly to the normally
 active maps.
 
-In this way, bindings in `keyamp-shared-map' can be disabled by this map.
+In this way, bindings in `keyamp-map' can be disabled by this map.
 Effectively, this map takes precedence over all others when command mode
 is enabled.")
 
@@ -361,16 +361,16 @@ is enabled.")
 ;; setting keys
 
 (keyamp--dfk
- keyamp-shared-map
- '(("<escape>" . keyamp-escape)          ("S-<escape>" . ignore)
-   ("C-^" . keyamp-leader-left-key-map)  ("C-+" . keyamp-leader-left-key-map)
-   ("C-_" . keyamp-leader-right-key-map) ("C-И" . keyamp-leader-right-key-map)))
+ keyamp-map
+ '(("<escape>" . keyamp-escape)      ("S-<escape>" . ignore)
+   ("C-^" . keyamp-left-leader-map)  ("C-+" . keyamp-left-leader-map)
+   ("C-_" . keyamp-right-leader-map) ("C-И" . keyamp-right-leader-map)))
 
 (keyamp--dfk
  keyamp-command-map
- '(("RET" . keyamp-insert)               ("<return>"    . keyamp-insert)               ("S-<return>"    . ignore)
-   ("DEL" . keyamp-leader-left-key-map)  ("<backspace>" . keyamp-leader-left-key-map)  ("S-<backspace>" . ignore)
-   ("SPC" . keyamp-leader-right-key-map)
+ '(("RET" . keyamp-insert)           ("<return>"    . keyamp-insert)          ("S-<return>"    . ignore)
+   ("DEL" . keyamp-left-leader-map)  ("<backspace>" . keyamp-left-leader-map) ("S-<backspace>" . ignore)
+   ("SPC" . keyamp-right-leader-map)
 
    ;; left half
    ("`" . delete-forward-char)          ("ё" . delete-forward-char)        ("~" . keyamp-qwerty-to-engineer-engram) ("Ë" . keyamp-qwerty-to-engineer-engram)
@@ -433,7 +433,7 @@ is enabled.")
    ("<left>" . left-char) ("<right>" . right-char)))
 
 (keyamp--dfk
- (define-prefix-command 'keyamp-leader-left-key-map)
+ (define-prefix-command 'keyamp-left-leader-map)
  '(("SPC" . select-text-in-quote)
    ("DEL" . select-block)             ("<backspace>" . select-block)
    ("RET" . execute-extended-command) ("<return>"    . execute-extended-command)
@@ -522,7 +522,7 @@ is enabled.")
    ("k ESC" . ignore) ("k <escape>" . ignore)))
 
 (keyamp--dfk
- (define-prefix-command 'keyamp-leader-right-key-map)
+ (define-prefix-command 'keyamp-right-leader-map)
  '(("SPC" . extend-selection)
    ("DEL" . select-line)               ("<backspace>" . select-line)
    ("RET" . eshell)                    ("<return>"    . eshell)
@@ -606,23 +606,25 @@ is enabled.")
    ("d ESC" . ignore) ("d <escape>" . ignore)
    ("f ESC" . ignore) ("f <escape>" . ignore)))
 
+(keyamp--dlk help-map '(lookup-word-definition . lookup-google-translate))
 (keyamp--dfk
  help-map
- '(("DEL" . lookup-word-definition) ("SPC" . lookup-google-translate) ("<backspace>" . lookup-word-definition)
-   ("ESC" . ignore)                 ("RET" . lookup-web)              ("<escape>" . ignore) ("<return>" . lookup-web)
-   ("e" . describe-char)            ("i" . info)
-   ("s" . info-lookup-symbol)       ("j" . describe-function)
-   ("d" . man)                      ("k" . describe-key)
-   ("f" . elisp-index-search)       ("l" . describe-variable)
+ '(("ESC" . ignore)     ("<escape>" . ignore)
+   ("RET" . lookup-web) ("<return>" . lookup-web)
 
-   ("q" . describe-syntax)          ("p" . apropos-documentation)                           ("<f1>" . ignore) ("<help>" . ignore) ("C-w" . ignore) ("C-c" . ignore)
-   ("w" . describe-bindings)        ("o" . lookup-all-dictionaries)                         ("C-o"  . ignore) ("C-\\"   . ignore) ("C-n" . ignore) ("C-f" . ignore)
-   ("r" . describe-mode)            ("u" . lookup-all-synonyms)                             ("C-s"  . ignore) ("C-e"    . ignore) ("'"   . ignore) ("6"   . ignore)
-   ("a" . describe-face)            (";" . lookup-wiktionary)                               ("9"    . ignore) ("L"      . ignore) ("n"   . ignore) ("p"   . ignore)
-   ("g" . apropos-command)          ("h" . view-lossage)                                    ("?"    . ignore) ("A"      . ignore) ("U"   . ignore) ("S"   . ignore)
-   ("z" . apropos-variable)         ("." . lookup-wikipedia)
-   ("x" . apropos-value)            ("," . lookup-etymology)
-   ("c" . describe-coding-system)   ("m" . lookup-word-dict-org)))
+   ("e" . describe-char)          ("i" . info)
+   ("s" . info-lookup-symbol)     ("j" . describe-function)
+   ("d" . man)                    ("k" . describe-key)
+   ("f" . elisp-index-search)     ("l" . describe-variable)
+
+   ("q" . describe-syntax)        ("p" . apropos-documentation)                               ("<f1>" . ignore) ("<help>" . ignore) ("C-w" . ignore) ("C-c" . ignore)
+   ("w" . describe-bindings)      ("o" . lookup-all-dictionaries)                             ("C-o"  . ignore) ("C-\\"   . ignore) ("C-n" . ignore) ("C-f" . ignore)
+   ("r" . describe-mode)          ("u" . lookup-all-synonyms)                                 ("C-s"  . ignore) ("C-e"    . ignore) ("'"   . ignore) ("6"   . ignore)
+   ("a" . describe-face)          (";" . lookup-wiktionary)                                   ("9"    . ignore) ("L"      . ignore) ("n"   . ignore) ("p"   . ignore)
+   ("g" . apropos-command)        ("h" . view-lossage)                                        ("?"    . ignore) ("A"      . ignore) ("U"   . ignore) ("S"   . ignore)
+   ("z" . apropos-variable)       ("." . lookup-wikipedia)
+   ("x" . apropos-value)          ("," . lookup-etymology)
+   ("c" . describe-coding-system) ("m" . lookup-word-dict-org)))
 
 (keyamp--dfk query-replace-map '(("C-h" . skip) ("C-r" . act)))
 (keyamp--dfk global-map '(("C-r" . open-file-at-cursor) ("C-t" . hippie-expand)))
@@ -633,10 +635,8 @@ is enabled.")
   (keyamp--stm x '(repeat)))
 
 (let ((x (make-sparse-keymap)))
-  (keyamp--dfk
-   x
-   '(("RET" . hippie-expand)      ("<return>"    . hippie-expand)
-     ("DEL" . hippie-expand-undo) ("<backspace>" . hippie-expand-undo)))
+  (keyamp--dlk x '(hippie-expand-undo . hippie-expand))
+  (keyamp--dfk x '(("<escape>" . ignore)))
   (keyamp--stm x '(hippie-expand)))
 
 (keyamp--dfk
@@ -646,15 +646,13 @@ is enabled.")
    ("C-_ n" . isearch-yank-kill)       ("C-И n" . isearch-yank-kill)))
 
 (let ((x (make-sparse-keymap)))
+  (keyamp--dlk x '(isearch-repeat-backward . isearch-repeat-forward))
   (keyamp--dfk
    x
-   '(("i"   . isearch-ring-retreat)    ("ш" . isearch-ring-retreat)
-     ("j"   . isearch-repeat-backward) ("о" . isearch-repeat-backward)
-     ("k"   . isearch-ring-advance)    ("л" . isearch-ring-advance)
-     ("l"   . isearch-repeat-forward)  ("д" . isearch-repeat-forward)
-     ("d"   . repeat)                  ("в" . repeat)
-     ("DEL" . isearch-repeat-backward) ("<backspace>" . isearch-repeat-backward)
-     ("SPC" . isearch-repeat-forward)))
+   '(("i" . isearch-ring-retreat)    ("ш" . isearch-ring-retreat)
+     ("j" . isearch-repeat-backward) ("о" . isearch-repeat-backward)
+     ("k" . isearch-ring-advance)    ("л" . isearch-ring-advance)
+     ("l" . isearch-repeat-forward)  ("д" . isearch-repeat-forward)))
   (keyamp--stm
    x
    '(isearch-ring-retreat isearch-repeat-backward isearch-ring-advance
@@ -982,8 +980,7 @@ is enabled.")
   (with-eval-after-load 'ibuf-ext
     (keyamp--dfk
      ibuffer-mode-map
-     '(("C-h" . ibuffer-do-delete)
-       ("TAB" . news)              ("<tab>" . news)))
+     '(("C-h" . ibuffer-do-delete) ("TAB" . news) ("<tab>" . news)))
 
     (keyamp--dkr
      ibuffer-mode-map
@@ -1069,21 +1066,6 @@ is enabled.")
                                           (set-transient-map x)
                                           (setq this-command 'next-line)
                                           (set-face-background 'cursor keyamp-repeat-cursor)))))
-
-(with-eval-after-load 'shell
-  (keyamp--dfk shell-mode-map '(("C-h" . comint-interrupt-subjob) ("C-r" . comint-send-input)))
-  (keyamp--dkr
-   shell-mode-map
-   '((cut-all      . comint-clear-buffer)
-     (select-block . comint-previous-input)))
-  (let ((x (make-sparse-keymap)))
-    (keyamp--dkr x '((previous-line . comint-previous-input) (next-line . comint-next-input)))
-    (keyamp--dlk x '(previous-line . next-line))
-    (keyamp--stm x '(comint-previous-input comint-next-input))
-    (add-hook 'comint-output-filter-functions (lambda (&rest r) "History search."
-                                                (set-transient-map x)
-                                                (keyamp-command)
-                                                (setq this-command 'next-line)))))
 
 (with-eval-after-load 'term
   (keyamp--dfk
@@ -1293,6 +1275,8 @@ is enabled.")
                gnus-summary-prev-group             t
                gnus-topic-goto-next-topic-line     t
                gnus-topic-goto-previous-topic-line t
+               hippie-expand                       t
+               hippie-expand-undo                  t
                ibuffer-backward-filter-group       t
                ibuffer-forward-filter-group        t
                icomplete-backward-completions      t
@@ -1347,7 +1331,6 @@ is enabled.")
 
 
 (defvar keyamp-insert-state-p t "Non-nil means insertion mode is on.")
-
 (defvar keyamp-insert-idle-timer nil "Idle timer for exit insert mode.")
 (defvar keyamp-repeat-idle-timer nil "Idle timer for exit repeat mode.")
 
@@ -1368,7 +1351,7 @@ is enabled.")
     (cancel-timer keyamp-insert-idle-timer)))
 
 (defun keyamp-insert-init ()
-  "Enter inser mode."
+  "Enter insert mode."
   (setq keyamp-insert-state-p t)
   (funcall keyamp--deactivate-command-mode-func)
   (set-face-background 'cursor keyamp-insert-cursor)
@@ -1401,15 +1384,18 @@ is enabled.")
 
 (defun keyamp-repeat ()
   "Indicate repeat mode. Run with `post-command-hook'."
-  (unless keyamp-insert-state-p
-    (if (gethash this-command keyamp-repeat-commands-hash)
-        (progn
-          (setq mode-line-front-space keyamp-repeat-indicator)
-          (set-face-background 'cursor keyamp-repeat-cursor))
+  (if (or (gethash this-command keyamp-repeat-commands-hash)
+          (eq real-this-command 'repeat))
       (progn
-        (setq mode-line-front-space keyamp-command-indicator)
-        (set-face-background 'cursor keyamp-command-cursor))
-      (force-mode-line-update))))
+        (setq mode-line-front-space keyamp-repeat-indicator)
+        (set-face-background 'cursor keyamp-repeat-cursor))
+    (if keyamp-insert-state-p
+        (progn
+          (setq mode-line-front-space keyamp-insert-indicator)
+          (set-face-background 'cursor keyamp-insert-cursor))
+      (setq mode-line-front-space keyamp-command-indicator)
+      (set-face-background 'cursor keyamp-command-cursor))
+    (force-mode-line-update)))
 
 (defun keyamp-escape (&optional Idle)
   "Return to command mode. Escape everything.
@@ -1427,7 +1413,7 @@ If run by idle timer then emulate keyboard press to cancel repeat."
 (define-minor-mode keyamp
   "Key Amplifier."
   :global t
-  :keymap keyamp-shared-map
+  :keymap keyamp-map
 
   (when keyamp
     (add-hook 'minibuffer-setup-hook   'keyamp-command)
