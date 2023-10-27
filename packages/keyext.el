@@ -2448,10 +2448,12 @@ Show current agenda. Do not select other window, balance windows."
 (defun terminal ()
   "Run terminal emulator for OS specific default shell."
   (interactive)
-  (if (string-equal system-type "darwin")
-      (term "/bin/zsh")
-    (term "/bin/bash"))
-  (term-line-mode))
+  (if (fboundp 'vterm)
+      (vterm)
+    (if (string-equal system-type "darwin")
+        (term "/bin/zsh")
+      (term "/bin/bash"))
+    (term-line-mode)))
 
 (defun hippie-expand-undo ()
   "Undo the expansion."

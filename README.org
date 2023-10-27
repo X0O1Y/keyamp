@@ -107,7 +107,7 @@ Emacs in pocket with unicode support. [[https://apps.apple.com/us/app/termius-te
 
 - Emacs in [[https://ish.app/][iSH]] - offline local access on iOS from Termius
 
-- Nord theme for Emacs and Termius. Works worthy for GUI and terminal.
+- Nord theme for Emacs and Termius
 
 - Color mode indicators
 

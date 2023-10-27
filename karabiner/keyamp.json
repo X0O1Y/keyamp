@@ -64,7 +64,7 @@
             }
           ],
           "parameters": {
-            "basic.to_if_held_down_threshold_milliseconds": 50
+            "basic.to_if_held_down_threshold_milliseconds": 10
           }
         },
         {
@@ -206,7 +206,7 @@
             }
           ],
           "parameters": {
-            "basic.to_if_held_down_threshold_milliseconds": 50
+            "basic.to_if_held_down_threshold_milliseconds": 10
           }
         },
         {
@@ -998,7 +998,7 @@
             }
           ],
           "parameters": {
-            "basic.to_if_held_down_threshold_milliseconds": 50
+            "basic.to_if_held_down_threshold_milliseconds": 10
           }
         },
         {
@@ -1037,7 +1037,7 @@
             }
           ],
           "parameters": {
-            "basic.to_if_held_down_threshold_milliseconds": 50
+            "basic.to_if_held_down_threshold_milliseconds": 10
           }
         }
       ]
@@ -1923,7 +1923,7 @@
             }
           ],
           "parameters": {
-            "basic.to_if_held_down_threshold_milliseconds": 50
+            "basic.to_if_held_down_threshold_milliseconds": 10
           }
         },
         {
@@ -1962,7 +1962,7 @@
             }
           ],
           "parameters": {
-            "basic.to_if_held_down_threshold_milliseconds": 50
+            "basic.to_if_held_down_threshold_milliseconds": 10
           }
         }
       ]
@@ -2006,7 +2006,7 @@
             }
           ],
           "parameters": {
-            "basic.to_if_held_down_threshold_milliseconds": 50
+            "basic.to_if_held_down_threshold_milliseconds": 10
           }
         },
         {
@@ -2045,7 +2045,7 @@
             }
           ],
           "parameters": {
-            "basic.to_if_held_down_threshold_milliseconds": 50
+            "basic.to_if_held_down_threshold_milliseconds": 10
           }
         }
       ]
@@ -2089,7 +2089,7 @@
             }
           ],
           "parameters": {
-            "basic.to_if_held_down_threshold_milliseconds": 50
+            "basic.to_if_held_down_threshold_milliseconds": 10
           }
         },
         {
@@ -2128,7 +2128,7 @@
             }
           ],
           "parameters": {
-            "basic.to_if_held_down_threshold_milliseconds": 50
+            "basic.to_if_held_down_threshold_milliseconds": 10
           }
         }
       ]
@@ -6413,6 +6413,18 @@
           "to_after_key_up": [
             {
               "key_code": "escape"
+            },
+            {
+              "set_variable": {
+                "name": "left_command pressed",
+                "value": 0
+              }
+            },
+            {
+              "set_variable": {
+                "name": "spacebar pressed",
+                "value": 0
+              }
             }
           ],
           "to_if_held_down": [

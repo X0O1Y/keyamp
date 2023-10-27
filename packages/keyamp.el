@@ -546,11 +546,11 @@ is enabled.")
    ("s" . clean-whitespace)
 
    ("d e" . org-shiftup)               ("d i" . eval-defun)
-   ("d s" . shell-command-on-region)   ("d l" . delete-frame)
+   ("d s" . shell-command-on-region)   ("d l" . elisp-eval-region-or-buffer)
    ("d d" . insert-date)               ("d k" . run-current-file)
    ("d f" . shell-command)             ("d j" . eval-last-sexp)
-   ("d r" . async-shell-command)       ("d u" . elisp-eval-region-or-buffer)
-   ("d v" . elisp-byte-compile-file)   ("d n" . stow)
+   ("d r" . async-shell-command)       ("d p" . elisp-byte-compile-file)
+   ("d v" . stow)
 
    ("f e" . insert-emacs-quote)        ("f i" . insert-ascii-single-quote)
    ("f f" . insert-char)               ("f j" . insert-brace)
@@ -653,12 +653,14 @@ is enabled.")
 
 (let ((x (make-sparse-keymap)))
   (keyamp--dkr x
-   '((backward-kill-word      . sun-moon)                ; w
+   '((insert-space-before     . delete-frame)            ; q
+     (backward-kill-word      . sun-moon)                ; w
      (undo                    . split-window-below)      ; e
      (kill-word               . make-frame-command)      ; r
+     (cut-text-block          . calculator)              ; t
      (backward-word           . switch-to-buffer)        ; u
      (forward-word            . bookmark-jump)           ; o
-     (cut-text-block          . calculator)              ; t
+     (shrink-whitespaces      . delete-window)           ; a
      (open-line               . previous-user-buffer)    ; s
      (delete-backward         . delete-other-windows)    ; d
      (newline                 . next-user-buffer)        ; f
@@ -667,7 +669,7 @@ is enabled.")
      (copy-line-or-selection  . agenda)                  ; c
      (paste-or-paste-previous . tasks)                   ; v
      (exchange-point-and-mark . view-echo-area-messages) ; p
-     (backward-left-bracket   . dired-jump)              ; m
+     (backward-left-bracket   . downloads)               ; m
      (forward-right-bracket   . player)))                ; .
   (keyamp--dfk x
    '(("TAB" . toggle-ibuffer)       ("<tab>"       . toggle-ibuffer)
@@ -689,7 +691,10 @@ is enabled.")
   (keyamp--stm x '(save-close-current-buffer)))
 
 (let ((x (make-sparse-keymap)))
-  (keyamp--dkr x '((delete-backward . tasks) (paste-or-paste-previous . tasks)))
+  (keyamp--dkr x
+   '((delete-backward . tasks)
+     (paste-or-paste-previous . tasks)
+     (copy-line-or-selection . agenda)))
   (keyamp--dlk x '(previous-user-buffer . tasks))
   (keyamp--stm x '(tasks)))
 
@@ -984,6 +989,7 @@ is enabled.")
   (with-eval-after-load 'bookmark (keyamp--dkr bookmark-bmenu-mode-map '((keyamp-insert . bookmark-bmenu-this-window))))
   (with-eval-after-load 'button (keyamp--dkr button-map '((keyamp-insert . push-button))))
   (with-eval-after-load 'compile (keyamp--dkr compilation-button-map '((keyamp-insert . compile-goto-error))))
+  (with-eval-after-load 'flymake (keyamp--dkr flymake-diagnostics-buffer-mode-map '((keyamp-insert . flymake-goto-diagnostic))))
   (with-eval-after-load 'gnus-art (keyamp--dkr gnus-mime-button-map '((keyamp-insert . gnus-article-press-button))))
   (with-eval-after-load 'emms-playlist-mode (keyamp--dkr emms-playlist-mode-map '((keyamp-insert . emms-playlist-mode-play-smart))))
   (with-eval-after-load 'org-agenda (keyamp--dkr org-agenda-mode-map '((keyamp-insert . org-agenda-switch-to))))
@@ -1017,37 +1023,49 @@ is enabled.")
     (keyamp--stm x '(image-previous-file image-next-file))))
 
 (with-eval-after-load 'esh-mode
-  (keyamp--dfk eshell-mode-map '(("C-h" . eshell-interrupt-process) ("C-r" . eshell-send-input)))
+  (keyamp--dfk eshell-mode-map '(("C-h" . eshell-interrupt-process)))
   (keyamp--dkr eshell-mode-map
    '((cut-line-or-selection . eshell-clear-input)
      (cut-all               . eshell-clear)
      (select-block          . eshell-previous-input)))
   (let ((x (make-sparse-keymap)))
     (keyamp--dkr x
-     '((previous-line . eshell-previous-input)
-       (next-line     . eshell-next-input)))
+     '((previous-line       . eshell-previous-input)
+       (next-line           . eshell-next-input)
+       (open-file-at-cursor . eshell-send-input)))
     (keyamp--dlk x '(previous-line . next-line))
-    (keyamp--stm x '(eshell-previous-input eshell-next-input))
-    (add-hook 'eshell-post-command-hook (lambda () "History search."
-                                          (set-transient-map x)
-                                          (setq this-command 'next-line)
-                                          (set-face-background 'cursor keyamp-repeat-cursor)))))
+    (advice-add 'eshell-send-input :after (lambda (&rest r) (keyamp-command)))
+    (keyamp--stm x
+     '(eshell-previous-input eshell-next-input eshell-send-input eshell-interrupt-process))
+    (keyamp--sth x '(eshell-mode-hook))))
 
 (with-eval-after-load 'term
   (keyamp--dfk term-raw-map
-   '(("C-h" . term-interrupt-subjob) ("C-r" . term-send-input) ("C-c C-c" . term-line-mode)))
+   '(("C-h" . term-interrupt-subjob) ("C-c C-c" . term-line-mode)))
   (keyamp--dfk term-mode-map
-   '(("C-h" . term-interrupt-subjob) ("C-r" . term-send-input) ("C-c C-c" . term-char-mode)))
+   '(("C-h" . term-interrupt-subjob) ("C-c C-c" . term-char-mode)))
   (keyamp--dkr term-mode-map '((select-block . term-send-up)))
   (let ((x (make-sparse-keymap)))
-    (keyamp--dkr x '((previous-line . term-send-up) (next-line . term-send-down)))
+    (keyamp--dkr x
+     '((previous-line       . term-send-up)
+       (next-line           . term-send-down)
+       (open-file-at-cursor . term-send-input)))
     (keyamp--dlk x '(previous-line . next-line))
-    (keyamp--stm x '(term-send-up term-send-down))
-    (keyamp--sth x '(term-mode-hook))
-    (add-hook 'term-input-filter-functions (lambda (&rest r) "History search."
-                                             (set-transient-map x)
-                                             (keyamp-command)
-                                             (setq this-command 'next-line)))))
+    (advice-add 'term-send-input :after (lambda (&rest r) (keyamp-command)))
+    (keyamp--stm x '(term-send-up term-send-down term-send-input term-interrupt-subjob))
+    (keyamp--sth x '(term-mode-hook))))
+
+(with-eval-after-load 'vterm
+  (keyamp--dfk vterm-mode-map '(("C-h" . term-interrupt-subjob)))
+  (keyamp--dkr vterm-mode-map '((select-block . vterm-send-up)))
+  (let ((x (make-sparse-keymap)))
+    (keyamp--dkr x
+     '((previous-line . vterm-send-up)
+       (next-line     . vterm-send-down)))
+    (keyamp--dlk x '(previous-line . next-line))
+    (advice-add 'vterm-send-return :after (lambda (&rest r) (keyamp-command)))
+    (keyamp--stm x '(vterm-send-up vterm-send-down vterm-send-return))
+    (keyamp--sth x '(vterm-mode-hook))))
 
 (with-eval-after-load 'info
   (keyamp--dkr Info-mode-map
@@ -1178,7 +1196,7 @@ is enabled.")
 
 (setq keyamp-repeat-commands-hash
       #s(hash-table
-         size 100
+         size 110
          test equal
          data (Info-backward-node                  t
                Info-forward-node                   t
@@ -1192,8 +1210,9 @@ is enabled.")
                comint-next-input                   t
                comint-previous-input               t
                copy-line-or-selection              t
-               delete-backward                     t
                cycle-hyphen-lowline-space          t
+               cut-text-block                      t
+               delete-backward                     t
                delete-forward-char                 t
                delete-other-windows                t
                describe-function                   t
@@ -1209,7 +1228,9 @@ is enabled.")
                end-of-line-or-block                t
                end-of-line-or-buffer               t
                eshell-next-input                   t
+               eshell-interrupt-process            t
                eshell-previous-input               t
+               eshell-send-input                   t
                exchange-point-and-mark             t
                extend-selection                    t
                forward-punct                       t
@@ -1253,9 +1274,11 @@ is enabled.")
                previous-user-buffer                t
                recenter-top-bottom                 t
                rectangle-mark-mode                 t
+               run-current-file                    t
                save-close-current-buffer           t
                scroll-down-command                 t
                scroll-up-command                   t
+               select-block                        t
                search-current-word                 t
                select-line                         t
                select-text-in-quote                t
@@ -1263,7 +1286,9 @@ is enabled.")
                split-window-below                  t
                sun-moon                            t
                tasks                               t
+               term-interrupt-subjob               t
                term-send-down                      t
+               term-send-input                     t
                term-send-up                        t
                todo                                t
                toggle-comment                      t
@@ -1272,6 +1297,9 @@ is enabled.")
                undo-redo                           t
                up-line                             t
                view-echo-area-messages             t
+               vterm-send-down                     t
+               vterm-send-return                   t
+               vterm-send-up                       t
                works                               t
                yank                                t
                yank-pop                            t)))
@@ -1350,7 +1378,8 @@ If run by idle timer then emulate keyboard press to cancel repeat."
    (Idle                       (execute-kbd-macro (kbd "<escape>")))
    (keyamp-insert-state-p      (keyamp-command))
    ((region-active-p)          (deactivate-mark))
-   ((active-minibuffer-window) (abort-recursive-edit))))
+   ((active-minibuffer-window) (abort-recursive-edit))
+   (t                          (keyamp-command))))
 
 
 
@@ -1364,7 +1393,6 @@ If run by idle timer then emulate keyboard press to cancel repeat."
     (add-hook 'minibuffer-setup-hook   'keyamp-command)
     (add-hook 'minibuffer-exit-hook    'keyamp-command)
     (add-hook 'isearch-mode-end-hook   'keyamp-command)
-    (add-hook 'eshell-pre-command-hook 'keyamp-command)
     (add-hook 'post-command-hook       'keyamp-repeat)
     (when (file-exists-p keyamp-karabiner-cli)
       (add-hook 'keyamp-insert-hook  'keyamp-insert-init-karabiner)
