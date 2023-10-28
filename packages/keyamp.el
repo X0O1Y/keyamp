@@ -150,14 +150,12 @@ Example usage:
 (defmacro keyamp--define-keys-translation (KeyKeyAlist State-p)
   "Map `define-key' for `key-translation-map' over a alist KeyKeyAlist.
 If State-p is nil, remove the mapping."
-  (let ((xstate (make-symbol "keyboard-state")))
-    `(let ((,xstate ,State-p))
-       ,@(mapcar
-          (lambda (xpair)
-            `(define-key key-translation-map
-               (kbd ,(car xpair))
-               (if ,xstate (kbd ,(cdr xpair)) nil)))
-          (cadr KeyKeyAlist)))))
+  `(let ()
+     ,@(mapcar
+        (lambda (xpair)
+          `(define-key key-translation-map
+                       (kbd ,(car xpair)) (if ,State-p (kbd ,(cdr xpair)))))
+        (cadr KeyKeyAlist))))
 
 (defmacro keyamp--define-keys-remap (KeymapName CmdCmdAlist)
   "Map `define-key' remap over a alist CmdCmdAlist."
@@ -166,21 +164,23 @@ If State-p is nil, remove the mapping."
        ,@(mapcar
           (lambda (xpair)
             `(define-key
-               ,xkeymapName
-               [remap ,(list (car xpair))]
-               ,(list 'quote (cdr xpair))))
+              ,xkeymapName
+              [remap ,(list (car xpair))]
+              ,(list 'quote (cdr xpair))))
           (cadr CmdCmdAlist)))))
 
 (defalias 'keyamp--dkr 'keyamp--define-keys-remap)
 
-(defmacro keyamp--set-transient-map (KeymapName CmdList)
-  "Map `set-transient-map' using `advice-add' over a list CmdList."
+(defmacro keyamp--set-transient-map (KeymapName CmdList &optional CommandMode)
+  "Map `set-transient-map' using `advice-add' over a list CmdList.
+Activate command mode optionally."
   (let ((xkeymapName (make-symbol "keymap-name")))
-    `(let ((,xkeymapName ,KeymapName))
+    `(let ((,xkeymapName ,KeymapName) (x ,CommandMode))
        ,@(mapcar
           (lambda (xcmd)
             `(advice-add ,(list 'quote xcmd) :after
                          (lambda (&rest r) "Repeat."
+                           (if x (keyamp-command))
                            (set-transient-map ,xkeymapName))))
           (cadr CmdList)))))
 
@@ -692,14 +692,13 @@ is enabled.")
 
 (let ((x (make-sparse-keymap)))
   (keyamp--dkr x
-   '((delete-backward . tasks)
-     (paste-or-paste-previous . tasks)
+   '((paste-or-paste-previous . tasks)
      (copy-line-or-selection . agenda)))
   (keyamp--dlk x '(previous-user-buffer . tasks))
   (keyamp--stm x '(tasks)))
 
 (let ((x (make-sparse-keymap)))
-  (keyamp--dkr x '((delete-backward . works) (cut-line-or-selection . works)))
+  (keyamp--dkr x '((cut-line-or-selection . works)))
   (keyamp--dlk x '(previous-user-buffer . works))
   (keyamp--stm x '(works)))
 
@@ -1025,46 +1024,29 @@ is enabled.")
 (with-eval-after-load 'esh-mode
   (keyamp--dfk eshell-mode-map '(("C-h" . eshell-interrupt-process)))
   (keyamp--dkr eshell-mode-map
-   '((cut-line-or-selection . eshell-clear-input)
-     (cut-all               . eshell-clear)
-     (select-block          . eshell-previous-input)))
+               '((cut-line-or-selection . eshell-clear-input)
+                 (cut-all               . eshell-clear)
+                 (select-block          . eshell-previous-input)))
   (let ((x (make-sparse-keymap)))
     (keyamp--dkr x
-     '((previous-line       . eshell-previous-input)
-       (next-line           . eshell-next-input)
-       (open-file-at-cursor . eshell-send-input)))
+                 '((previous-line       . eshell-previous-input)
+                   (next-line           . eshell-next-input)
+                   (open-file-at-cursor . eshell-send-input)))
     (keyamp--dlk x '(previous-line . next-line))
-    (advice-add 'eshell-send-input :after (lambda (&rest r) (keyamp-command)))
-    (keyamp--stm x
-     '(eshell-previous-input eshell-next-input eshell-send-input eshell-interrupt-process))
+    (keyamp--stm x '(eshell-previous-input eshell-next-input eshell-send-input eshell-interrupt-process)
+     :command)
     (keyamp--sth x '(eshell-mode-hook))))
 
-(with-eval-after-load 'term
-  (keyamp--dfk term-raw-map
-   '(("C-h" . term-interrupt-subjob) ("C-c C-c" . term-line-mode)))
-  (keyamp--dfk term-mode-map
-   '(("C-h" . term-interrupt-subjob) ("C-c C-c" . term-char-mode)))
-  (keyamp--dkr term-mode-map '((select-block . term-send-up)))
-  (let ((x (make-sparse-keymap)))
-    (keyamp--dkr x
-     '((previous-line       . term-send-up)
-       (next-line           . term-send-down)
-       (open-file-at-cursor . term-send-input)))
-    (keyamp--dlk x '(previous-line . next-line))
-    (advice-add 'term-send-input :after (lambda (&rest r) (keyamp-command)))
-    (keyamp--stm x '(term-send-up term-send-down term-send-input term-interrupt-subjob))
-    (keyamp--sth x '(term-mode-hook))))
-
 (with-eval-after-load 'vterm
-  (keyamp--dfk vterm-mode-map '(("C-h" . term-interrupt-subjob)))
+  (keyamp--dfk vterm-mode-map '(("C-h" . term-interrupt-subjob) ("C-q" . vterm-send-next-key)))
   (keyamp--dkr vterm-mode-map '((select-block . vterm-send-up)))
   (let ((x (make-sparse-keymap)))
     (keyamp--dkr x
-     '((previous-line . vterm-send-up)
-       (next-line     . vterm-send-down)))
+     '((previous-line           . vterm-send-up)
+       (next-line               . vterm-send-down)
+       (paste-or-paste-previous . vterm-yank)))
     (keyamp--dlk x '(previous-line . next-line))
-    (advice-add 'vterm-send-return :after (lambda (&rest r) (keyamp-command)))
-    (keyamp--stm x '(vterm-send-up vterm-send-down vterm-send-return))
+    (keyamp--stm x '(vterm-send-up vterm-send-down vterm-send-return) :command)
     (keyamp--sth x '(vterm-mode-hook))))
 
 (with-eval-after-load 'info
@@ -1247,6 +1229,7 @@ is enabled.")
                hippie-expand                       t
                hippie-expand-undo                  t
                ibuffer-backward-filter-group       t
+               ibuffer-do-delete                   t
                ibuffer-forward-filter-group        t
                icomplete-backward-completions      t
                icomplete-forward-completions       t

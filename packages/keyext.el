@@ -225,8 +225,8 @@ When `universal-argument' is called first, copy whole buffer
           (progn
             (copy-region-as-kill (region-beginning) (region-end))
             (when (eq last-command 'select-block)
-              (pop-local-mark-ring)
-              (pop-local-mark-ring)))
+              (set-mark-command t)
+              (set-mark-command t)))
         (if (eq last-command this-command)
             (if (eobp)
                 (progn)
@@ -2411,6 +2411,11 @@ Show current agenda. Do not select other window, balance windows."
   "Tmux helper. Force update display resolution."
   (call-process "~/.tmux.sh" nil 0 nil))
 
+(defun mosh-helper ()
+  (interactive)
+  "Mosh helper. Cleanup detached sessions."
+  (call-process "~/.mosh.sh" nil 0 nil))
+
 (defun stow ()
   "Stow packages."
   (interactive)
@@ -2446,14 +2451,9 @@ Show current agenda. Do not select other window, balance windows."
       (advice-remove 'message #'silence))))
 
 (defun terminal ()
-  "Run terminal emulator for OS specific default shell."
+  "Run terminal emulator."
   (interactive)
-  (if (fboundp 'vterm)
-      (vterm)
-    (if (string-equal system-type "darwin")
-        (term "/bin/zsh")
-      (term "/bin/bash"))
-    (term-line-mode)))
+  (vterm))
 
 (defun hippie-expand-undo ()
   "Undo the expansion."
