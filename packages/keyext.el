@@ -71,8 +71,13 @@ Call this repeatedly will cycle all positions in `mark-ring'."
           (beginning-of-visual-line)
         (if (eq major-mode 'eshell-mode)
             (progn
-              (declare-function eshell-bol "esh-mode.el" ())
-              (eshell-bol))
+              ;; custom eshell bol
+              (if (= (line-number-at-pos) (count-lines (point-min) (point-max)))
+                  (progn
+                    (beginning-of-line)
+                    (forward-word )
+                    (forward-char ))
+                (beginning-of-line)))
           (back-to-indentation)
           (when (eq xp (point))
             (beginning-of-line)))))))
@@ -2277,8 +2282,6 @@ If current frame has only one window, switch to next frame."
   "Clear input eshell."
   (interactive)
   (beginning-of-line-or-block)
-  (forward-word)
-  (forward-char)
   (kill-line))
 
 (defun screenshot ()
@@ -2490,6 +2493,12 @@ This checks in turn:
   "Same as `set-mark-command' for key binding."
   (interactive)
   (set-mark-command nil))
+
+(defun run-at-time-wrap (time func)
+  "Wrap for `run-at-time'."
+  (if (and (equal (format-time-string "%H") (substring time 0 2))
+           (equal (format-time-string "%M") (substring time 3 5)))
+      (funcall func)))
 
 (advice-add 'scroll-down-command     :after (lambda (&rest r) "Recenter." (recenter)))
 (advice-add 'scroll-up-command       :after (lambda (&rest r) "Recenter." (recenter)))

@@ -186,16 +186,19 @@ Activate command mode optionally."
 
 (defalias 'keyamp--stm 'keyamp--set-transient-map)
 
-(defmacro keyamp--set-transient-map-hook (KeymapName HookList)
-  "Map `set-transient-map' using `add-hook' over a list HookList."
+(defmacro keyamp--set-transient-map-hook (KeymapName HookList &optional CommandMode InsertMode)
+  "Map `set-transient-map' using `add-hook' over a list HookList.
+Activate command or insert mode optionally."
   (let ((xkeymapName (make-symbol "keymap-name")))
-    `(let ((,xkeymapName ,KeymapName))
+    `(let ((,xkeymapName ,KeymapName) (xCmdMode ,CommandMode) (xInsMode ,InsertMode))
        ,@(mapcar
           (lambda (xhook)
             `(add-hook ,(list 'quote xhook)
-                         (lambda () "Repeat."
-                           (set-transient-map ,xkeymapName)
-                           (setq this-command 'next-line))))
+                       (lambda () "Repeat."
+                         (if xCmdMode (keyamp-command))
+                         (if xInsMode (keyamp-insert))
+                         (set-transient-map ,xkeymapName)
+                         (unless xInsMode (setq this-command 'next-line)))))
           (cadr HookList)))))
 
 (defalias 'keyamp--sth 'keyamp--set-transient-map-hook)
@@ -472,20 +475,20 @@ is enabled.")
    ("-" . ignore)
    ("=" . ignore)
    ("y" . find-name-dired)
-   ("u" . switch-to-buffer)
+   ("u" . bookmark-jump)
 
    ("i e" . flyspell-buffer)               ("i i" . show-in-desktop)
    ("i f" . count-words)                   ("i j" . set-buffer-file-coding-system)
    ("i s" . count-matches)                 ("i l" . revert-buffer-with-coding-system)
 
-   ("o"  . bookmark-jump)
+   ("o"  . switch-to-buffer)
    ("p"  . view-echo-area-messages)
    ("["  . screenshot)
    ("]"  . rename-visited-file)
    ("\\" . bookmark-rename)
    ("h"  . recentf-open-files)
 
-   ("j e" . global-hl-line-mode)           ("j i" . abbrev-mode)
+   ("j e" . hl-line-mode)                  ("j i" . abbrev-mode)
    ("j s" . display-line-numbers-mode)     ("j l" . narrow-to-region-or-block)
    ("j d" . whitespace-mode)               ("j k" . narrow-to-defun)
    ("j f" . toggle-case-fold-search)       ("j j" . widen)
@@ -571,7 +574,7 @@ is enabled.")
    ("6" . ignore)
    ("7" . increment-register)
    ("8" . insert-register)
-   ("9" . ignore)
+   ("9" . toggle-theme)
    ("0" . ignore)
    ("-" . snake)
    ("=" . ignore)
@@ -658,8 +661,9 @@ is enabled.")
      (undo                    . split-window-below)      ; e
      (kill-word               . make-frame-command)      ; r
      (cut-text-block          . calculator)              ; t
-     (backward-word           . switch-to-buffer)        ; u
-     (forward-word            . bookmark-jump)           ; o
+     (backward-word           . bookmark-jump)           ; u
+     (forward-word            . switch-to-buffer)        ; o
+     (exchange-point-and-mark . view-echo-area-messages) ; p
      (shrink-whitespaces      . delete-window)           ; a
      (open-line               . previous-user-buffer)    ; s
      (delete-backward         . delete-other-windows)    ; d
@@ -668,13 +672,10 @@ is enabled.")
      (cut-line-or-selection   . works)                   ; x
      (copy-line-or-selection  . agenda)                  ; c
      (paste-or-paste-previous . tasks)                   ; v
-     (exchange-point-and-mark . view-echo-area-messages) ; p
      (backward-left-bracket   . downloads)               ; m
      (forward-right-bracket   . player)))                ; .
-  (keyamp--dfk x
-   '(("TAB" . toggle-ibuffer)       ("<tab>"       . toggle-ibuffer)
-     ("DEL" . previous-user-buffer) ("<backspace>" . previous-user-buffer)
-     ("SPC" . next-user-buffer)))
+  (keyamp--dlk x '(previous-user-buffer . next-user-buffer))
+  (keyamp--dfk x '(("TAB" . toggle-ibuffer) ("<tab>" . toggle-ibuffer)))
   (keyamp--stm x
    '(delete-other-windows         next-user-buffer     previous-user-buffer
      save-close-current-buffer    split-window-below   alternate-buffer
@@ -857,10 +858,8 @@ is enabled.")
 ;; modes
 
 (let ((x (make-sparse-keymap)))
-  (keyamp--dlk x '(previous-line-or-history-element . next-line-or-history-element))
-  (add-hook 'keyamp-command-hook (lambda () "History search."
-                                   (when (active-minibuffer-window)
-                                     (set-transient-map x) (setq this-command 'next-line)))))
+  (keyamp--dlk x '(previous-line . next-line))
+  (keyamp--sth x '(minibuffer-setup-hook) :command))
 
 (with-eval-after-load 'minibuffer
   (keyamp--dkr minibuffer-local-map
@@ -1024,30 +1023,33 @@ is enabled.")
 (with-eval-after-load 'esh-mode
   (keyamp--dfk eshell-mode-map '(("C-h" . eshell-interrupt-process)))
   (keyamp--dkr eshell-mode-map
-               '((cut-line-or-selection . eshell-clear-input)
-                 (cut-all               . eshell-clear)
-                 (select-block          . eshell-previous-input)))
+   '((cut-line-or-selection . eshell-clear-input)
+     (cut-all               . eshell-clear)
+     (select-block          . eshell-previous-input)))
   (let ((x (make-sparse-keymap)))
     (keyamp--dkr x
-                 '((previous-line       . eshell-previous-input)
-                   (next-line           . eshell-next-input)
-                   (open-file-at-cursor . eshell-send-input)))
+     '((previous-line       . eshell-previous-input)
+       (next-line           . eshell-next-input)
+       (open-file-at-cursor . eshell-send-input)))
     (keyamp--dlk x '(previous-line . next-line))
-    (keyamp--stm x '(eshell-previous-input eshell-next-input eshell-send-input eshell-interrupt-process)
-     :command)
-    (keyamp--sth x '(eshell-mode-hook))))
+    (keyamp--stm x '(eshell-send-input eshell-interrupt-process))
+    (keyamp--stm x '(eshell-previous-input eshell-next-input) :command)
+    (keyamp--sth x '(eshell-mode-hook) nil :insert)))
 
 (with-eval-after-load 'vterm
   (keyamp--dfk vterm-mode-map '(("C-h" . term-interrupt-subjob) ("C-q" . vterm-send-next-key)))
-  (keyamp--dkr vterm-mode-map '((select-block . vterm-send-up)))
+  (keyamp--dkr
+   vterm-mode-map
+   '((select-block            . vterm-send-up)
+     (cut-all                 . vterm-clear)
+     (paste-or-paste-previous . vterm-yank)
+     (paste-from-register-1   . vterm-yank-pop)))
   (let ((x (make-sparse-keymap)))
-    (keyamp--dkr x
-     '((previous-line           . vterm-send-up)
-       (next-line               . vterm-send-down)
-       (paste-or-paste-previous . vterm-yank)))
+    (keyamp--dkr x '((previous-line . vterm-send-up) (next-line . vterm-send-down)))
     (keyamp--dlk x '(previous-line . next-line))
-    (keyamp--stm x '(vterm-send-up vterm-send-down vterm-send-return) :command)
-    (keyamp--sth x '(vterm-mode-hook))))
+    (keyamp--stm x '(vterm-send-return))
+    (keyamp--stm x '(vterm-send-up vterm-send-down) :command)
+    (keyamp--sth x '(vterm-mode-hook) nil :insert)))
 
 (with-eval-after-load 'info
   (keyamp--dkr Info-mode-map
@@ -1178,7 +1180,7 @@ is enabled.")
 
 (setq keyamp-repeat-commands-hash
       #s(hash-table
-         size 110
+         size 128
          test equal
          data (Info-backward-node                  t
                Info-forward-node                   t
@@ -1207,12 +1209,11 @@ is enabled.")
                dired-unmark                        t
                down-line                           t
                downloads                           t
+               eldoc-doc-buffer                    t
                end-of-line-or-block                t
                end-of-line-or-buffer               t
                eshell-next-input                   t
-               eshell-interrupt-process            t
                eshell-previous-input               t
-               eshell-send-input                   t
                exchange-point-and-mark             t
                extend-selection                    t
                forward-punct                       t
@@ -1226,8 +1227,6 @@ is enabled.")
                gnus-summary-prev-group             t
                gnus-topic-goto-next-topic-line     t
                gnus-topic-goto-previous-topic-line t
-               hippie-expand                       t
-               hippie-expand-undo                  t
                ibuffer-backward-filter-group       t
                ibuffer-do-delete                   t
                ibuffer-forward-filter-group        t
@@ -1269,10 +1268,6 @@ is enabled.")
                split-window-below                  t
                sun-moon                            t
                tasks                               t
-               term-interrupt-subjob               t
-               term-send-down                      t
-               term-send-input                     t
-               term-send-up                        t
                todo                                t
                toggle-comment                      t
                toggle-letter-case                  t
@@ -1281,7 +1276,6 @@ is enabled.")
                up-line                             t
                view-echo-area-messages             t
                vterm-send-down                     t
-               vterm-send-return                   t
                vterm-send-up                       t
                works                               t
                yank                                t
@@ -1373,10 +1367,9 @@ If run by idle timer then emulate keyboard press to cancel repeat."
   :keymap keyamp-map
 
   (when keyamp
-    (add-hook 'minibuffer-setup-hook   'keyamp-command)
-    (add-hook 'minibuffer-exit-hook    'keyamp-command)
-    (add-hook 'isearch-mode-end-hook   'keyamp-command)
-    (add-hook 'post-command-hook       'keyamp-repeat)
+    (add-hook 'minibuffer-exit-hook  'keyamp-command)
+    (add-hook 'isearch-mode-end-hook 'keyamp-command)
+    (add-hook 'post-command-hook     'keyamp-repeat)
     (when (file-exists-p keyamp-karabiner-cli)
       (add-hook 'keyamp-insert-hook  'keyamp-insert-init-karabiner)
       (add-hook 'keyamp-command-hook 'keyamp-command-init-karabiner))
