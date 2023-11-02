@@ -723,6 +723,9 @@ When called in a Elisp program, Begin End are region boundaries."
                      ["'S " "'s "]
                      ["'T " "'t "]
 
+                     [" От " " от "]
+                     [" Для " " для "]
+                     [" И " " и "]
                      [" К " " к "]
                      [" С " " с "]
                      [" По " " по "]
@@ -2039,7 +2042,7 @@ If the file is modified or not saved, save it automatically before run."
           (setenv "NO_COLOR")
           (throw 'confirm t))
       (progn
-        (message "Abort")
+        (message "Abort run file")
         nil))))
 
 (defun clean-whitespace ()
@@ -2060,7 +2063,7 @@ Works on whole buffer or selection, respects `narrow-to-region'."
         (while (re-search-forward "\n\n\n+" nil 1) (replace-match "\n\n"))
         (goto-char (point-max))
         (while (eq (char-before) 32) (delete-char -1)))))
-  (if (buffer-modified-p) (message "%s" "Cleanup trailing whitespace")))
+  (if (buffer-modified-p) (message "%s" "Cleanup whitespaces")))
 
 (defun make-backup ()
   "Make a backup copy of current file or dired marked files.
@@ -2142,10 +2145,10 @@ makes it easy to toggle."
   (if (string-equal search-whitespace-regexp nil)
       (progn
         (setq search-whitespace-regexp "[-_ \t\n]+")
-        (message "Space set to hyphen lowline tab newline space."))
+        (message "Space set to hyphen lowline tab newline space"))
     (progn
       (setq search-whitespace-regexp nil)
-      (message "Space set to literal."))))
+      (message "Space set to literal"))))
 
 (defun search-current-word ()
   "Call `isearch' on current word or “word” here is A to Z, a to z, and
@@ -2268,7 +2271,7 @@ If current frame has only one window, switch to next frame."
 (defun kmacro-helper ()
   "Ad hoc function."
   (interactive)
-  (message "Kmacro helper"))
+  (message "Keyboard macro helper"))
 
 (defalias 'kmacro-play 'call-last-kbd-macro)
 
@@ -2422,7 +2425,8 @@ Show current agenda. Do not select other window, balance windows."
 (defun stow ()
   "Stow packages."
   (interactive)
-  (shell-command "~/.stow.sh && echo Stow complete"))
+  (shell-command "~/.stow.sh && echo")
+  (message "%s" "Stow complete"))
 
 (defun screensaver ()
   "Start screensaver in tmux."
@@ -2494,17 +2498,25 @@ This checks in turn:
   (interactive)
   (set-mark-command nil))
 
-(defun run-at-time-wrap (time func)
+(defun run-at-time-wrap (time func &rest args)
   "Wrap for `run-at-time'."
   (if (and (equal (format-time-string "%H") (substring time 0 2))
            (equal (format-time-string "%M") (substring time 3 5)))
-      (funcall func)))
+      (apply func args)))
+
+(defun dired-recursive-expand (dir)
+  "Recursive expand dired dir."
+  (interactive (list default-directory))
+  (mapc #'dired-maybe-insert-subdir
+        (seq-filter #'file-directory-p (directory-files-recursively dir "" t))))
 
 (advice-add 'scroll-down-command     :after (lambda (&rest r) "Recenter." (recenter)))
 (advice-add 'scroll-up-command       :after (lambda (&rest r) "Recenter." (recenter)))
 (advice-add 'isearch-repeat-backward :after (lambda (&rest r) "Recenter." (recenter)))
 (advice-add 'isearch-repeat-forward  :after (lambda (&rest r) "Recenter." (recenter)))
-(advice-add 'json-pretty-print-buffer :after (lambda (&rest r) "Message." (message "%s" "Pretty print")))
+(advice-add 'previous-user-buffer    :after (lambda (&rest r) "Recenter." (recenter)))
+(advice-add 'next-user-buffer        :after (lambda (&rest r) "Recenter." (recenter)))
+(advice-add 'json-pretty-print-buffer :after (lambda (&rest r) "Message." (message "%s" "Pretty print JSON")))
 
 (provide 'keyext)
 
