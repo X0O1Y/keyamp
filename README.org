@@ -3,24 +3,18 @@
 
 Input model based on [[file:packages/keyamp.el][Keyamp]] for Emacs.
 
-Below features how to use it.
-
-** Features
-- ANSI keyboard layout
+** Keyboard Layouts
+- ANSI keyboard
 - Virtual keyboard
-- Split keyboard layout
-- [[https://github.com/philc/vimium][Vimium]] mappings
+- Split keyboard
 
-* ANSI keyboard layout
-
-Thumb cluster for common keyboard.
+* ANSI keyboard
 
 - [[file:karabiner/karabiner.json][Karabiner]] config file. Emacs Keyamp mode integration!
 - [[http://www.keyboard-layout-editor.com/#/gists/106550cd49793787784ed1b9c9117c3d][Layout]] based on [[file:layouts/Engram.bundle][Engineer Engram]]:
+- Automatic Russian layout support for command bindings
 
 [[screenshots/ansi-keyboard.png]]
-
-- Automatic Russian layout support for command bindings
 
 #+begin_src bash
 # emacs-mac
@@ -106,16 +100,13 @@ Emacs in pocket with unicode support. [[https://apps.apple.com/us/app/termius-te
 #+end_src
 
 - Emacs in [[https://ish.app/][iSH]] - offline local access on iOS from Termius
-
 - Nord theme for Emacs and Termius
-
 - Color mode indicators
 
-* Split keyboard layout
+* Split keyboard
+
 - Kinesis Advantage2 [[http://www.keyboard-layout-editor.com/#/gists/6a1a62133ab9f741589bd556cb946792][layout]] and [[file:layouts/qwerty2.txt][config]]:
 
 [[screenshots/advantage2.png]]
 
-* Vimium mappings
-
-- Complete config file: [[file:layouts/vimium-options.json][vimium-options.json]]
+- Vimium mappings: [[file:layouts/vimium-options.json][vimium-options.json]]
