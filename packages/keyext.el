@@ -48,7 +48,7 @@ Call this repeatedly will cycle all positions in `mark-ring'."
   (set-mark-command nil)
   (deactivate-mark))
 
-(defun beginning-of-line-or-block ()
+(defun beg-of-line-or-block ()
   "Move cursor to beginning of line or previous block.
 
 • When called first time, move cursor to beginning of char in current
@@ -100,7 +100,7 @@ Call this repeatedly will cycle all positions in `mark-ring'."
         (end-of-visual-line)
       (end-of-line))))
 
-(defun beginning-of-line-or-buffer ()
+(defun beg-of-line-or-buffer ()
   "If cursor is at the end of not empty line or last command is
 `set-mark-command' then move to the beginning of line. Else go to the
 beginning of buffer."
@@ -108,7 +108,7 @@ beginning of buffer."
   (if (or (and (equal (point) (line-end-position))
                (> (current-column) 0))
           (eq last-command 'set-mark-command))
-      (beginning-of-line-or-block)
+      (beg-of-line-or-block)
     (beginning-of-buffer)))
 
 (defun end-of-line-or-buffer ()
@@ -1723,7 +1723,7 @@ You can override this function to get your idea of “user buffer”."
    ((string-equal buffer-file-truename org-agenda-file-3) nil)
    (t t)))
 
-(defun previous-user-buffer ()
+(defun prev-user-buffer ()
   "Switch to the previous user buffer.
 “user buffer” is determined by `user-buffer-p'."
   (interactive)
@@ -2000,8 +2000,7 @@ If the file is modified or not saved, save it automatically before run."
                  (xfname buffer-file-name)
                  (xfExt (file-name-extension xfname))
                  (xappCmdStr (cdr (assoc xfExt xextAppMap)))
-                 xcmdStr
-                 )
+                 xcmdStr)
             ;; FIXME: Rather than `shell-command' with an `&', better use
             ;; `make-process' or `start-process' since we're not using the shell at all
             ;; (worse, we need to use `shell-quote-argument' to circumvent the shell).
@@ -2284,7 +2283,7 @@ If current frame has only one window, switch to next frame."
 (defun eshell-clear-input ()
   "Clear input eshell."
   (interactive)
-  (beginning-of-line-or-block)
+  (beg-of-line-or-block)
   (kill-line))
 
 (defun screenshot ()
@@ -2514,7 +2513,7 @@ This checks in turn:
 (advice-add 'scroll-up-command       :after (lambda (&rest r) "Recenter." (recenter)))
 (advice-add 'isearch-repeat-backward :after (lambda (&rest r) "Recenter." (recenter)))
 (advice-add 'isearch-repeat-forward  :after (lambda (&rest r) "Recenter." (recenter)))
-(advice-add 'previous-user-buffer    :after (lambda (&rest r) "Recenter." (recenter)))
+(advice-add 'prev-user-buffer        :after (lambda (&rest r) "Recenter." (recenter)))
 (advice-add 'next-user-buffer        :after (lambda (&rest r) "Recenter." (recenter)))
 (advice-add 'json-pretty-print-buffer :after (lambda (&rest r) "Message." (message "%s" "Pretty print JSON")))
 
