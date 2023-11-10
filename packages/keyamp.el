@@ -2,14 +2,14 @@
 
 ;; Author: Egor Maltsev <x0o1@ya.ru>
 ;; Version: 1.0 2023-09-13
-
-;;            Koala Paw
 ;;      _                   _
 ;;    _|_|_               _|_|_
 ;;   |_|_|_|             |_|_|_|
 ;;           _ _     _ _
 ;;          | | |   | | |
 ;;          |_|_|   |_|_|
+;;
+;;            Koala Paw
 
 ;; This package is part of input model.
 ;; Follow the link: https://github.com/xEgorka/keyamp
@@ -136,7 +136,7 @@ If Direct-p is t, do not remap key to current keyboard layout.
 
 Example usage:
 (keyamp--map
- (define-prefix-command \\='xyz-map)
+ (define-prefix-command \\='x-map)
  \\='(
    (\"h\" . highlight-symbol-at-point)
    (\".\" . isearch-forward-symbol-at-point)
@@ -146,8 +146,7 @@ Example usage:
        (if (eq ,xkeymapName keyamp-command-map) (setq keyamp-command-alist ,KeyCmdAlist))
        ,@(mapcar
           (lambda (xpair)
-            `(define-key
-               ,xkeymapName
+            `(define-key ,xkeymapName
                (kbd (,(if Direct-p #'identity #'keyamp--convert-kbd-str) ,(car xpair)))
                ,(list 'quote (cdr xpair))))
           (cadr KeyCmdAlist)))))
@@ -207,14 +206,13 @@ Activate command, insert or repeat mode optionally."
   "Map leader keys using `keyamp--map'."
   (let ((xkeymapName (make-symbol "keymap-name")))
     `(let ((,xkeymapName ,KeymapName))
-       (keyamp--map
-        ,xkeymapName
+       (keyamp--map ,xkeymapName
         '(("DEL" . ,(keyamp--lookup-command-by-key-code (car (cadr CmdCons))))
           ("<backspace>" . ,(keyamp--lookup-command-by-key-code (car (cadr CmdCons))))
           ("SPC" . ,(keyamp--lookup-command-by-key-code (cdr (cadr CmdCons)))))))))
 
 (defmacro with-sparse-keymap-x (&rest args)
-  "Make sparse keymap x for next use by args."
+  "Make sparse keymap x for next use by ARGS."
   `(let ((x (make-sparse-keymap))) ,@args))
 
 
@@ -630,313 +628,270 @@ is enabled.")
 (keyamp--map query-replace-map '(("d" . skip) ("k" . act)))
 (keyamp--map global-map '(("C-r" . open-file-at-cursor) ("C-t" . hippie-expand)))
 
-(with-sparse-keymap-x
-  (keyamp--remap x '(("d" . repeat)))
-  (keyamp--map-leaders x '("d" . "d")) (keyamp--set-map x '(repeat)))
+(with-sparse-keymap-x (keyamp--remap x '(("d" . repeat)))
+ (keyamp--map-leaders x '("d" . "d")) (keyamp--set-map x '(repeat)))
 
-(with-sparse-keymap-x
-  (keyamp--map-leaders x '(hippie-expand-undo . hippie-expand))
-  (keyamp--map x '(("RET" . insert-space-before) ("<return>" . insert-space-before)))
-  (keyamp--set-map x '(hippie-expand)))
+(with-sparse-keymap-x (keyamp--map-leaders x '(hippie-expand-undo . hippie-expand))
+ (keyamp--map x '(("RET" . insert-space-before) ("<return>" . insert-space-before)))
+ (keyamp--set-map x '(hippie-expand)))
 
-(keyamp--map isearch-mode-map
- '(("<escape>" . isearch-abort)
-   ("C-h"   . isearch-repeat-backward) ("C-r"   . isearch-repeat-forward)
-   ("C-_ n" . isearch-yank-kill)       ("C-И n" . isearch-yank-kill)))
-
+(keyamp--map isearch-mode-map '(("<escape>" . isearch-abort)
+ ("C-h"   . isearch-repeat-backward) ("C-r"   . isearch-repeat-forward)
+ ("C-_ n" . isearch-yank-kill)       ("C-И n" . isearch-yank-kill)))
 (with-sparse-keymap-x
-  (keyamp--map x
-   '(("i" . isearch-ring-retreat)    ("ш" . isearch-ring-retreat)
-     ("j" . isearch-repeat-backward) ("о" . isearch-repeat-backward)
-     ("k" . isearch-ring-advance)    ("л" . isearch-ring-advance)
-     ("l" . isearch-repeat-forward)  ("д" . isearch-repeat-forward)))
-  (keyamp--map-leaders x '(isearch-repeat-backward . isearch-repeat-forward))
-  (keyamp--set-map x
-   '(isearch-ring-retreat isearch-repeat-backward isearch-ring-advance
-     isearch-repeat-forward search-current-word isearch-yank-kill)))
+ (keyamp--map x
+  '(("i" . isearch-ring-retreat)    ("ш" . isearch-ring-retreat)
+    ("j" . isearch-repeat-backward) ("о" . isearch-repeat-backward)
+    ("k" . isearch-ring-advance)    ("л" . isearch-ring-advance)
+    ("l" . isearch-repeat-forward)  ("д" . isearch-repeat-forward)))
+ (keyamp--map-leaders x '(isearch-repeat-backward . isearch-repeat-forward))
+ (keyamp--set-map x
+  '(isearch-ring-retreat isearch-repeat-backward isearch-ring-advance
+    isearch-repeat-forward search-current-word isearch-yank-kill)))
 
 
 ;; command screen
 
 (with-sparse-keymap-x
-  (keyamp--map x '(("TAB" . toggle-ibuffer) ("<tab>" . toggle-ibuffer)))
-  (keyamp--remap x
-   '(("q" . delete-frame)         ("w" . sun-moon)
-     ("e" . split-window-below)   ("r" . make-frame-command)
-     ("t" . calculator)           ("u" . bookmark-jump)
-     ("o" . switch-to-buffer)     ("p" . view-echo-area-messages)
-     ("a" . delete-window)        ("s" . prev-user-buffer)
-     ("d" . delete-other-windows) ("f" . next-user-buffer)
-     ("g" . new-empty-buffer)     ("x" . works)
-     ("c" . agenda)               ("v" . tasks)
-     ("m" . downloads)            ("." . player)))
-  (keyamp--map-leaders x '("s" . "f"))
-  (keyamp--set-map x
-   '(next-user-buffer prev-user-buffer
-     save-close-current-buffer split-window-below alternate-buffer
-     ibuffer-forward-filter-group ibuffer-backward-filter-group))
-  (keyamp--set-map-hook x '(ibuffer-hook)))
+ (keyamp--map x '(("TAB" . toggle-ibuffer) ("<tab>" . toggle-ibuffer)))
+ (keyamp--remap x
+  '(("q" . delete-frame)         ("w" . sun-moon)
+    ("e" . split-window-below)   ("r" . make-frame-command)
+    ("t" . calculator)           ("u" . bookmark-jump)
+    ("o" . switch-to-buffer)     ("p" . view-echo-area-messages)
+    ("a" . delete-window)        ("s" . prev-user-buffer)
+    ("d" . delete-other-windows) ("f" . next-user-buffer)
+    ("g" . new-empty-buffer)     ("x" . works)
+    ("c" . agenda)               ("v" . tasks)
+    ("m" . downloads)            ("." . player)))
+ (keyamp--map-leaders x '("s" . "f"))
+ (keyamp--set-map x '(next-user-buffer prev-user-buffer
+  save-close-current-buffer split-window-below alternate-buffer
+  ibuffer-forward-filter-group ibuffer-backward-filter-group))
+ (keyamp--set-map-hook x '(ibuffer-hook)))
 
-(with-sparse-keymap-x
-  (keyamp--remap x '(("s" . prev-user-buffer) ("m" . dired-jump)))
-  (keyamp--map-leaders x '("s" . "m"))
-  (keyamp--set-map x '(dired-jump downloads player)))
+(with-sparse-keymap-x (keyamp--remap x '(("s" . prev-user-buffer) ("m" . dired-jump)))
+ (keyamp--map-leaders x '("s" . "m"))
+ (keyamp--set-map x '(dired-jump downloads player)))
 
-(with-sparse-keymap-x
-  (keyamp--remap x '(("," . save-close-current-buffer)))
-  (keyamp--set-map x '(save-close-current-buffer)))
+(with-sparse-keymap-x (keyamp--remap x '(("," . save-close-current-buffer)))
+ (keyamp--set-map x '(save-close-current-buffer)))
 
-(with-sparse-keymap-x
-  (keyamp--remap x '(("s" . prev-user-buffer) ("v" . tasks) ("c" . agenda)))
-  (keyamp--map-leaders x '("s" . "v")) (keyamp--set-map x '(tasks)))
+(with-sparse-keymap-x (keyamp--remap x '(("s" . prev-user-buffer) ("f" . tasks)
+ ("x" . works) ("c" . agenda) ("v" . tasks)))
+ (keyamp--map-leaders x '("s" . "f")) (keyamp--set-map x '(tasks)))
 
-(with-sparse-keymap-x
-  (keyamp--remap x '(("s" . prev-user-buffer) ("x" . works)))
-  (keyamp--map-leaders x '("s" . "x")) (keyamp--set-map x '(works)))
+(with-sparse-keymap-x (keyamp--remap x '(("s" . prev-user-buffer) ("f" . works)
+ ("x" . works) ("c" . agenda) ("v" . tasks)))
+ (keyamp--map-leaders x '("s" . "f")) (keyamp--set-map x '(works)))
 
 
 ;; command edit
 
-(with-sparse-keymap-x
-  (keyamp--map-leaders x '("`" . "`")) (keyamp--set-map x '(delete-forward-char)))
+(with-sparse-keymap-x (keyamp--map-leaders x '("`" . "`"))
+ (keyamp--set-map x '(delete-forward-char)))
+(with-sparse-keymap-x (keyamp--map-leaders x '("d" . "q"))
+ (keyamp--set-map x '(delete-backward insert-space-before)))
+(with-sparse-keymap-x (keyamp--remap x '(("s" . backward-kill-word) ("f" . kill-word)))
+ (keyamp--map-leaders x '("s" . "f"))
+ (keyamp--set-map x '(backward-kill-word kill-word)))
+(with-sparse-keymap-x (keyamp--remap x '(("d" . undo-redo)))
+ (keyamp--map-leaders x '("e" . "d")) (keyamp--set-map x '(undo undo-redo)))
+(with-sparse-keymap-x (keyamp--remap x '(("d" . cut-text-block)))
+ (keyamp--set-map x '(cut-text-block)))
+
+(with-sparse-keymap-x (keyamp--remap x '(("d" . shrink-whitespaces)))
+ (keyamp--map-leaders x '("d" . "d")) (keyamp--set-map x '(shrink-whitespaces)))
+(with-sparse-keymap-x (keyamp--remap x '(("d" . rectangle-mark-mode)))
+ (keyamp--set-map x '(mark-mode)))
+
+(with-sparse-keymap-x (keyamp--remap x '(("d" . toggle-comment)))
+ (keyamp--map-leaders x '("d" . "d")) (keyamp--set-map x '(toggle-comment)))
+(with-sparse-keymap-x (keyamp--remap x '(("d" . cut-line-or-selection)))
+ (keyamp--map-leaders x '("d" . "d")) (keyamp--set-map x '(cut-line-or-selection)))
+(with-sparse-keymap-x (keyamp--remap x '(("d" . copy-line-or-selection)))
+ (keyamp--map-leaders x '("d" . "d")) (keyamp--set-map x '(copy-line-or-selection)))
+(with-sparse-keymap-x (keyamp--map-leaders x '("e" . "v"))
+ (keyamp--set-map x '(paste-or-paste-previous)))
+(with-sparse-keymap-x (keyamp--remap x '(("d" . toggle-letter-case)))
+ (keyamp--map-leaders x '("d" . "d")) (keyamp--set-map x '(toggle-letter-case)))
 
 (with-sparse-keymap-x
-  (keyamp--map-leaders x '("d" . "q"))
-  (keyamp--set-map x '(delete-backward insert-space-before)))
-
-(with-sparse-keymap-x
-  (keyamp--remap x '(("s" . backward-kill-word) ("f" . kill-word)))
-  (keyamp--map-leaders x '("s" . "f"))
-  (keyamp--set-map x '(backward-kill-word kill-word)))
-
-(with-sparse-keymap-x
-  (keyamp--remap x '(("d" . undo-redo)))
-  (keyamp--map-leaders x '("e" . "d")) (keyamp--set-map x '(undo undo-redo)))
-
-(with-sparse-keymap-x
-  (keyamp--remap x '(("d" . cut-text-block))) (keyamp--set-map x '(cut-text-block)))
-
-(with-sparse-keymap-x
-  (keyamp--remap x '(("d" . shrink-whitespaces)))
-  (keyamp--map-leaders x '("d" . "d")) (keyamp--set-map x '(shrink-whitespaces)))
-
-(with-sparse-keymap-x
-  (keyamp--remap x '(("d" . rectangle-mark-mode))) (keyamp--set-map x '(mark-mode)))
-
-(with-sparse-keymap-x
-  (keyamp--remap x '(("d" . toggle-comment)))
-  (keyamp--map-leaders x '("d" . "d")) (keyamp--set-map x '(toggle-comment)))
-
-(with-sparse-keymap-x
-  (keyamp--remap x '(("d" . cut-line-or-selection)))
-  (keyamp--map-leaders x '("d" . "d")) (keyamp--set-map x '(cut-line-or-selection)))
-
-(with-sparse-keymap-x
-  (keyamp--remap x '(("d" . copy-line-or-selection)))
-  (keyamp--map-leaders x '("d" . "d")) (keyamp--set-map x '(copy-line-or-selection)))
-
-(with-sparse-keymap-x
-  (keyamp--map-leaders x '("e" . "v")) (keyamp--set-map x '(paste-or-paste-previous)))
-
-(with-sparse-keymap-x
-  (keyamp--remap x '(("d" . toggle-letter-case)))
-  (keyamp--map-leaders x '("d" . "d")) (keyamp--set-map x '(toggle-letter-case)))
-
-(with-sparse-keymap-x
-  (keyamp--remap x '(("e" . org-shiftup) ("d" . org-shiftdown) ("c" . agenda)))
-  (keyamp--map-leaders x '("e" . "d")) (keyamp--set-map x '(org-shiftup org-shiftdown)))
-
-(with-sparse-keymap-x
-  (keyamp--remap x '(("e" . todo) ("c" . agenda))) (keyamp--set-map x '(todo insert-date)))
-
-(with-sparse-keymap-x
-  (keyamp--remap x '(("d" . cycle-hyphen-lowline-space)))
-  (keyamp--set-map x '(cycle-hyphen-lowline-space)))
+ (keyamp--remap x '(("e" . org-shiftup) ("d" . org-shiftdown) ("c" . agenda)))
+ (keyamp--map-leaders x '("d" . "e")) (keyamp--set-map x '(org-shiftup org-shiftdown)))
+(with-sparse-keymap-x (keyamp--remap x '(("e" . todo) ("c" . agenda)))
+ (keyamp--set-map x '(todo insert-date)))
+(with-sparse-keymap-x (keyamp--remap x '(("d" . cycle-hyphen-lowline-space)))
+ (keyamp--set-map x '(cycle-hyphen-lowline-space)))
 
 
 ;; command repeat
 
-(with-sparse-keymap-x
-  (keyamp--remap x '(("i" . up-line) ("k" . down-line)))
-  (keyamp--map-leaders x '("<up>" . "<down>")) (keyamp--set-map x '(up-line down-line)))
+(with-sparse-keymap-x (keyamp--remap x '(("i" . up-line) ("k" . down-line)))
+ (keyamp--map-leaders x '("<up>" . "<down>"))
+ (keyamp--set-map x '(up-line down-line)))
+
+(with-sparse-keymap-x (keyamp--map-leaders x '("m" . "."))
+ (keyamp--set-map x '(backward-left-bracket forward-right-bracket)))
 
 (with-sparse-keymap-x
-  (keyamp--map-leaders x '("m" . "."))
-  (keyamp--set-map x '(backward-left-bracket forward-right-bracket)))
+ (keyamp--remap x '(("i" . beg-of-line-or-block) ("k" . end-of-line-or-block)
+  ("h" . beg-of-line-or-buffer) (";" . end-of-line-or-buffer)))
+ (keyamp--map-leaders x '("i" . "k"))
+ (keyamp--set-map x '(beg-of-line-or-block end-of-line-or-block
+  beg-of-line-or-buffer end-of-line-or-buffer)))
+
+(with-sparse-keymap-x (keyamp--remap x '(("j" . backward-word) ("l" . forward-word)
+  ("u" . backward-punct) ("o" . forward-punct)))
+ (keyamp--map-leaders x '("j" . "l"))
+ (keyamp--set-map x '(backward-word forward-word backward-punct forward-punct
+  mark-mode rectangle-mark-mode)))
+
+(with-sparse-keymap-x (keyamp--remap x '(("i" . scroll-down-line) ("k" . scroll-up-line)))
+ (keyamp--map-leaders x '("i" . "k"))
+ (keyamp--set-map x '(scroll-down-line scroll-up-line)))
 
 (with-sparse-keymap-x
-  (keyamp--remap x
-   '(("i" . beg-of-line-or-block)  ("k" . end-of-line-or-block)
-     ("h" . beg-of-line-or-buffer) (";" . end-of-line-or-buffer)))
-  (keyamp--map-leaders x '("i" . "k"))
-  (keyamp--set-map x
-   '(beg-of-line-or-block end-of-line-or-block
-     beg-of-line-or-buffer end-of-line-or-buffer)))
+ (keyamp--remap x '(("i" . scroll-down-command) ("k" . scroll-up-command)))
+ (keyamp--map-leaders x '("i" . "k"))
+ (keyamp--set-map x '(scroll-down-command scroll-up-command)))
+
+(with-sparse-keymap-x (keyamp--remap x '(("k" . pop-local-mark-ring)))
+ (keyamp--map-leaders x '("k" . "k")) (keyamp--set-map x '(pop-local-mark-ring)))
+
+(with-sparse-keymap-x (keyamp--remap x '(("k" . recenter-top-bottom)))
+ (keyamp--map-leaders x '("k" . "k")) (keyamp--set-map x '(recenter-top-bottom)))
 
 (with-sparse-keymap-x
-  (keyamp--remap x
-   '(("j" . backward-word)  ("l" . forward-word)
-     ("u" . backward-punct) ("o" . forward-punct)))
-  (keyamp--map-leaders x '("j" . "l"))
-  (keyamp--set-map x
-   '(backward-word forward-word backward-punct forward-punct
-     mark-mode rectangle-mark-mode)))
+ (keyamp--remap x '(("i" . beg-of-line-or-block) ("k" . select-block)))
+ (keyamp--map-leaders x '("i" . "k")) (keyamp--set-map x '(select-block)))
 
-(with-sparse-keymap-x
-  (keyamp--remap x '(("i" . scroll-down-line) ("k" . scroll-up-line)))
-  (keyamp--map-leaders x '("i" . "k"))
-  (keyamp--set-map x '(scroll-down-line scroll-up-line)))
+(with-sparse-keymap-x (keyamp--remap x '(("k" . extend-selection)
+ ("j" . backward-word)  ("l" . forward-word)
+ ("u" . backward-punct) ("o" . forward-punct)))
+ (keyamp--map-leaders x '("j" . "l")) (keyamp--set-map x '(extend-selection)))
 
-(with-sparse-keymap-x
-  (keyamp--remap x '(("i" . scroll-down-command) ("k" . scroll-up-command)))
-  (keyamp--map-leaders x '("i" . "k"))
-  (keyamp--set-map x '(scroll-down-command scroll-up-command)))
+(with-sparse-keymap-x (keyamp--remap x '(("k" . select-line)))
+ (keyamp--map-leaders x '("i" . "k")) (keyamp--set-map x '(select-line)))
 
-(with-sparse-keymap-x
-  (keyamp--remap x '(("k" . pop-local-mark-ring)))
-  (keyamp--map-leaders x '("k" . "k")) (keyamp--set-map x '(pop-local-mark-ring)))
-
-(with-sparse-keymap-x
-  (keyamp--remap x '(("k" . recenter-top-bottom)))
-  (keyamp--map-leaders x '("k" . "k")) (keyamp--set-map x '(recenter-top-bottom)))
-
-(with-sparse-keymap-x
-  (keyamp--remap x '(("i" . beg-of-line-or-block) ("k" . select-block)))
-  (keyamp--map-leaders x '("i" . "k")) (keyamp--set-map x '(select-block)))
-
-(with-sparse-keymap-x
-  (keyamp--remap x
-   '(("k" . extend-selection)
-     ("j" . backward-word)  ("l" . forward-word)
-     ("u" . backward-punct) ("o" . forward-punct)))
-  (keyamp--map-leaders x '("j" . "l"))
-  (keyamp--set-map x '(extend-selection)))
-
-(with-sparse-keymap-x
-  (keyamp--remap x '(("k" . select-line)))
-  (keyamp--map-leaders x '("i" . "k")) (keyamp--set-map x '(select-line)))
-
-(with-sparse-keymap-x
-  (keyamp--remap x '(("k" . select-text-in-quote)))
-  (keyamp--set-map x '(select-text-in-quote)))
+(with-sparse-keymap-x (keyamp--remap x '(("k" . select-text-in-quote)))
+ (keyamp--set-map x '(select-text-in-quote)))
 
 
 ;; modes remap
 
 (with-eval-after-load 'minibuffer
- (with-sparse-keymap-x
-   (keyamp--map-leaders x '("i" . "k"))
+  (with-sparse-keymap-x (keyamp--map-leaders x '("i" . "k"))
    (keyamp--set-map-hook x '(minibuffer-setup-hook) nil nil :repeat))
- (with-sparse-keymap-x
-  (keyamp--remap x
-   '(("d" . y-or-n-p-insert-n) ("i" . y-or-n-p-insert-n)
-     ("k" . y-or-n-p-insert-y)))
-  (keyamp--set-map x '(y-or-n-p) nil nil :before))
- (with-sparse-keymap-x
-  (keyamp--set-map x '(read-char-from-minibuffer) nil :insert :before))
-  (keyamp--remap minibuffer-local-map
-   '(("i" . previous-line-or-history-element) ("k" . next-line-or-history-element)
-     (select-block  . previous-line-or-history-element)))
-  (keyamp--remap minibuffer-mode-map
-   '(("i" . previous-line-or-history-element) ("k" . next-line-or-history-element)
-     (open-file-at-cursor . exit-minibuffer)
-     (select-block        . previous-line-or-history-element))))
+  (with-sparse-keymap-x (keyamp--remap x '(("d" . y-or-n-p-insert-n)
+   ("i" . y-or-n-p-insert-n) ("k" . y-or-n-p-insert-y)))
+   (keyamp--set-map x '(y-or-n-p) nil nil :before))
+  (with-sparse-keymap-x
+   (keyamp--set-map x '(read-char-from-minibuffer) nil :insert :before))
+   (keyamp--remap minibuffer-local-map
+    '(("i" . previous-line-or-history-element) ("k" . next-line-or-history-element)
+      (select-block  . previous-line-or-history-element)))
+   (keyamp--remap minibuffer-mode-map
+    '(("i" . previous-line-or-history-element) ("k" . next-line-or-history-element)
+      (open-file-at-cursor . exit-minibuffer)
+      (select-block        . previous-line-or-history-element))))
 
 (with-eval-after-load 'icomplete
   (keyamp--map icomplete-minibuffer-map
    '(("C-r" . icomplete-force-complete-and-exit)
      ("RET" . icomplete-exit-or-force-complete-and-exit)
      ("<return>" . icomplete-exit-or-force-complete-and-exit)))
-
   (keyamp--remap icomplete-minibuffer-map
    '(("i" . icomplete-backward-completions) ("k" . icomplete-forward-completions)
      (select-block     . previous-line-or-history-element)
      (extend-selection . next-line-or-history-element)))
-
+  (with-sparse-keymap-x (keyamp--remap x '((keyamp-insert . exit-minibuffer)
+   ("i" . previous-line-or-history-element) ("k" . next-line-or-history-element)))
+   (keyamp--map-leaders x '("i" . "k"))
+   (keyamp--set-map x '(previous-line-or-history-element next-line-or-history-element))))
+  (with-sparse-keymap-x (keyamp--remap x
+    '(("i" . previous-line-or-history-element) ("k" . next-line-or-history-element)))
+   (keyamp--set-map-hook x '(icomplete-minibuffer-setup-hook) nil nil :repeat))
   (with-sparse-keymap-x
-    (keyamp--remap x
-     '(("i" . previous-line-or-history-element) ("k" . next-line-or-history-element)
-       (keyamp-insert . exit-minibuffer)))
-    (keyamp--map-leaders x '("i" . "k"))
-    (keyamp--set-map x '(previous-line-or-history-element next-line-or-history-element))))
-
-  (with-sparse-keymap-x
-    (keyamp--remap x
-     '(("i" . previous-line-or-history-element) ("k" . next-line-or-history-element)))
-    (keyamp--set-map-hook x '(icomplete-minibuffer-setup-hook) nil nil :repeat))
-
-  (with-sparse-keymap-x
-    (keyamp--remap x
-     '(("i" . icomplete-backward-completions) ("k" . icomplete-forward-completions)))
-    (keyamp--map-leaders x '("i" . "k"))
-    (keyamp--set-map x '(icomplete-backward-completions icomplete-forward-completions)))
+   (keyamp--remap x
+    '(("i" . icomplete-backward-completions) ("k" . icomplete-forward-completions)))
+   (keyamp--map-leaders x '("i" . "k"))
+   (keyamp--set-map x '(icomplete-backward-completions icomplete-forward-completions)))
 
 (add-hook 'ido-setup-hook
-          (lambda ()
-            (keyamp--map ido-completion-map '(("C-r" . ido-exit-minibuffer)))
-            (keyamp--remap ido-completion-map
-             '(("i" . ido-prev-match) ("k" . ido-next-match)))
-            (with-sparse-keymap-x
-              (keyamp--map-leaders x '("i" . "k"))
-              (keyamp--set-map x '(ido-prev-match ido-next-match)))))
+ (lambda () (keyamp--map ido-completion-map '(("C-r" . ido-exit-minibuffer)))
+   (keyamp--remap ido-completion-map '(("i" . ido-prev-match) ("k" . ido-next-match)))
+   (with-sparse-keymap-x (keyamp--map-leaders x '("i" . "k"))
+    (keyamp--set-map x '(ido-prev-match ido-next-match)))))
 
 (progn ; dired
   (with-eval-after-load 'dired
     (keyamp--map dired-mode-map '(("C-h" . dired-do-delete) ("C-r" . open-in-external-app)))
-    (keyamp--remap dired-mode-map
-     '(("RET" . dired-find-file)
-       ("m" . dired-mark)    ("." . dired-unmark)
-       ("z" . revert-buffer) ("q" . dired-hide-details-mode)
-       (copy-to-register-1    . dired-do-copy)
-       (paste-from-register-1 . dired-do-rename)
-       (mark-whole-buffer     . dired-toggle-marks)
-       (reformat-lines        . dired-create-directory)))
+    (keyamp--remap dired-mode-map '(("RET" . dired-find-file)
+     ("m" . dired-mark)    ("." . dired-unmark)
+     ("z" . revert-buffer) ("q" . dired-hide-details-mode)
+     (copy-to-register-1    . dired-do-copy)
+     (paste-from-register-1 . dired-do-rename)
+     (mark-whole-buffer     . dired-toggle-marks)
+     (reformat-lines        . dired-create-directory)))
     (with-sparse-keymap-x
-      (keyamp--map-leaders x '(dired-previous-line . dired-next-line))
-      (keyamp--set-map x '(dired-previous-line dired-next-line)))
-    (with-sparse-keymap-x
-      (keyamp--map-leaders x '(dired-unmark . dired-mark))
-      (keyamp--set-map x '(dired-unmark dired-mark))))
-
+     (keyamp--map-leaders x '(dired-previous-line . dired-next-line))
+     (keyamp--set-map x '(dired-previous-line dired-next-line)))
+    (with-sparse-keymap-x (keyamp--map-leaders x '(dired-unmark . dired-mark))
+     (keyamp--set-map x '(dired-unmark dired-mark))))
   (with-eval-after-load 'wdired
     (keyamp--map wdired-mode-map '(("C-h" . wdired-abort-changes) ("C-r" . wdired-finish-edit)))))
 
 (with-eval-after-load 'rect
-  (keyamp--remap rectangle-mark-mode-map
-   '(("RET" . string-rectangle)
-     ("c" . copy-rectangle-as-kill) ("d" . kill-rectangle)
-     ("v" . yank-rectangle)         ("8" . copy-rectangle-to-register)
-     ("z" . rectangle-number-lines) ("x" . clear-rectangle)
-     ("q" . open-rectangle) (clean-whitespace . delete-whitespace-rectangle))))
+  (keyamp--remap rectangle-mark-mode-map '(("RET" . string-rectangle)
+   ("c" . copy-rectangle-as-kill) ("d" . kill-rectangle)
+   ("v" . yank-rectangle)         ("8" . copy-rectangle-to-register)
+   ("z" . rectangle-number-lines) ("x" . clear-rectangle)
+   ("q" . open-rectangle) (clean-whitespace . delete-whitespace-rectangle))))
 
 (progn ; ibuffer
   (with-eval-after-load 'ibuf-ext
     (keyamp--map ibuffer-mode-map
      '(("C-h" . ibuffer-do-delete) ("TAB" . news) ("<tab>" . news)))
-    (keyamp--remap ibuffer-mode-map
-     '(("RET" . ibuffer-visit-buffer)
-       (";" . ibuffer-forward-filter-group) ("h" . ibuffer-backward-filter-group)
-       ("i" . up-line)                      ("k" . down-line)
-       ("q" . delete-frame)                 ("w" . sun-moon)
-       ("e" . split-window-below)           ("r" . make-frame-command)
-       ("t" . calculator)                   ("u" . bookmark-jump)
-       ("o" . switch-to-buffer)             ("p" . view-echo-area-messages)
-       ("a" . delete-window)                ("s" . prev-user-buffer)
-       ("d" . delete-other-windows)         ("f" . next-user-buffer)
-       ("g" . new-empty-buffer)             ("x" . works)
-       ("c" . agenda)                       ("v" . tasks)
-       ("m" . downloads)                    ("." . player)))
+    (keyamp--remap ibuffer-mode-map '(("RET" . ibuffer-visit-buffer)
+     (";" . ibuffer-forward-filter-group) ("h" . ibuffer-backward-filter-group)
+     ("i" . up-line)                      ("k" . down-line)
+     ("q" . delete-frame)                 ("w" . sun-moon)
+     ("e" . split-window-below)           ("r" . make-frame-command)
+     ("t" . calculator)                   ("u" . bookmark-jump)
+     ("o" . switch-to-buffer)             ("p" . view-echo-area-messages)
+     ("a" . delete-window)                ("s" . prev-user-buffer)
+     ("d" . delete-other-windows)         ("f" . next-user-buffer)
+     ("g" . new-empty-buffer)             ("x" . works)
+     ("c" . agenda)                       ("v" . tasks)
+     ("m" . downloads)                    ("." . player)))
     (keyamp--map ibuffer-mode-filter-group-map '(("C-h" . help-command)))
     (keyamp--remap ibuffer-mode-filter-group-map '(("RET" . ibuffer-toggle-filter-group)))
-
     (with-sparse-keymap-x
-      (keyamp--remap x
-       '(("i" . ibuffer-backward-filter-group) ("k" . ibuffer-forward-filter-group)
-         ("h" . beg-of-line-or-buffer)         (";" . end-of-line-or-buffer)))
-      (keyamp--set-map x '(ibuffer-backward-filter-group ibuffer-forward-filter-group ibuffer-toggle-filter-group))))
-  (with-sparse-keymap-x
-    (keyamp--remap x '((delete-backward . ibuffer-do-delete)))
+     (keyamp--remap x
+      '(("i" . ibuffer-backward-filter-group) ("k" . ibuffer-forward-filter-group)
+        ("h" . beg-of-line-or-buffer)         (";" . end-of-line-or-buffer)))
+     (keyamp--set-map x '(ibuffer-backward-filter-group ibuffer-forward-filter-group ibuffer-toggle-filter-group))))
+  (with-sparse-keymap-x (keyamp--remap x '(("d" . ibuffer-do-delete)))
     (keyamp--map-leaders x '("d" . "d")) (keyamp--set-map x '(ibuffer-do-delete))))
+
+(with-eval-after-load 'company
+  (with-sparse-keymap-x (keyamp--remap x '(("n" . company-search-candidates)
+     (keyamp-escape . company-abort) (keyamp-insert . company-complete-selection)
+     ("i" . company-select-previous) ("k" . company-select-next)
+     ("j" . company-previous-page)   ("l" . company-next-page)))
+   (keyamp--map-leaders x '("i" . "k"))
+   (keyamp--set-map x '(company-select-previous company-select-next company-previous-page
+    company-next-page company-show-doc-buffer company-search-abort))
+   (add-hook 'keyamp-command-hook (lambda ()
+                                    (when company-candidates (set-transient-map x)
+                                     (setq this-command 'keyamp--repeat-dummy)))))
+  (with-sparse-keymap-x
+   (keyamp--set-map x '(company-abort company-complete-selection
+    company-search-candidates) nil :insert)
+   (keyamp--set-map x '(company-search-abort) :command))
+  (keyamp--map company-search-map '(("<escape>" . company-search-abort)
+   ("C-q" . company-search-repeat-backward) ("C-t" . company-search-repeat-forward))))
 
 (with-eval-after-load 'transient
   (keyamp--map transient-base-map '(("<escape>" . transient-quit-one))))
@@ -961,27 +916,23 @@ is enabled.")
      ("j" . doc-view-previous-page)                  ("l" . doc-view-next-page)
      ("u" . doc-view-shrink)                         ("o" . doc-view-enlarge)
      ("h" . doc-view-scroll-down-or-previous-page)   (";" . doc-view-scroll-up-or-next-page)))
-  (with-sparse-keymap-x
-    (keyamp--remap x
-     '(("i" . doc-view-scroll-down-or-previous-page) ("k" . doc-view-scroll-up-or-next-page)))
-    (keyamp--map-leaders x '("i" . "k"))
-    (keyamp--set-map x '(doc-view-scroll-down-or-previous-page doc-view-scroll-up-or-next-page))))
+  (with-sparse-keymap-x (keyamp--remap x
+    '(("i" . doc-view-scroll-down-or-previous-page) ("k" . doc-view-scroll-up-or-next-page)))
+   (keyamp--map-leaders x '("i" . "k"))
+   (keyamp--set-map x '(doc-view-scroll-down-or-previous-page doc-view-scroll-up-or-next-page))))
 
 (with-eval-after-load 'image-mode
   (keyamp--remap image-mode-map '(("j" . image-previous-file) ("l" . image-next-file)))
-  (with-sparse-keymap-x
-    (keyamp--map-leaders x '("j" . "l"))
-    (keyamp--set-map x '(image-previous-file image-next-file))))
+  (with-sparse-keymap-x (keyamp--map-leaders x '("j" . "l"))
+   (keyamp--set-map x '(image-previous-file image-next-file))))
 
 (with-eval-after-load 'esh-mode
   (keyamp--map eshell-mode-map '(("C-h" . eshell-interrupt-process)))
-  (keyamp--remap eshell-mode-map
-   '(("x" . eshell-clear-input)
-     (cut-all . eshell-clear) (select-block . eshell-previous-input)))
+  (keyamp--remap eshell-mode-map '(("x" . eshell-clear-input)
+   (cut-all . eshell-clear) (select-block . eshell-previous-input)))
   (with-sparse-keymap-x
-    (keyamp--remap x
-     '(("i" . eshell-previous-input) ("k" . eshell-next-input)
-       (open-file-at-cursor . eshell-send-input)))
+   (keyamp--remap x '(("i" . eshell-previous-input) ("k" . eshell-next-input)
+    (open-file-at-cursor . eshell-send-input)))
     (keyamp--map-leaders x '("i" . "k"))
     (keyamp--set-map x '(eshell-send-input eshell-interrupt-process))
     (keyamp--set-map x '(eshell-previous-input eshell-next-input) :command)
@@ -989,86 +940,73 @@ is enabled.")
 
 (with-eval-after-load 'vterm
   (keyamp--map vterm-mode-map '(("C-h" . term-interrupt-subjob) ("C-q" . vterm-send-next-key)))
-  (keyamp--remap
-   vterm-mode-map
-   '((select-block . vterm-send-up) (cut-all . vterm-clear)
-     ("v" . vterm-yank)             (paste-from-register-1 . vterm-yank-pop)))
-  (with-sparse-keymap-x
-    (keyamp--remap x '(("i" . vterm-send-up) ("k" . vterm-send-down)))
+  (keyamp--remap vterm-mode-map '((select-block . vterm-send-up) (cut-all . vterm-clear)
+   ("v" . vterm-yank) (paste-from-register-1 . vterm-yank-pop)))
+  (with-sparse-keymap-x (keyamp--remap x '(("i" . vterm-send-up) ("k" . vterm-send-down)))
     (keyamp--map-leaders x '("i" . "k"))
     (keyamp--set-map x '(vterm-send-return))
     (keyamp--set-map x '(vterm-send-up vterm-send-down) :command)
     (keyamp--set-map-hook x '(vterm-mode-hook) nil :insert)))
 
 (with-eval-after-load 'info
-  (keyamp--remap Info-mode-map
-   '(("RET" . Info-follow-nearest-node)
-     ("s" . Info-backward-node)       ("f" . Info-forward-node)
-     ("d" . Info-next-reference)      ("e" . Info-up)
-     ("<down>"  . scroll-down-line)   ("<up>"    . scroll-up-line)
-     ("<right>" . Info-backward-node) ("<left>"  . Info-forward-node)))
+  (keyamp--remap Info-mode-map    '(("RET" . Info-follow-nearest-node)
+   ("s"      . Info-backward-node)  ("f"       . Info-forward-node)
+   ("e"      . Info-up)             ("d"       . Info-next-reference)
+   ("<up>"   . scroll-up-line)      ("<down>"  . scroll-down-line)
+   ("<left>" . Info-forward-node)   ("<right>" . Info-backward-node)))
   (keyamp--map Info-mode-map '(("TAB" . scroll-up-command) ("<tab>" . scroll-up-command)))
-  (with-sparse-keymap-x
-    (keyamp--map-leaders x '("s" . "f"))
-    (keyamp--set-map x '(Info-backward-node Info-forward-node))))
+  (with-sparse-keymap-x (keyamp--map-leaders x '("s" . "f"))
+   (keyamp--set-map x '(Info-backward-node Info-forward-node))))
 
 (with-eval-after-load 'help-mode
-  (keyamp--remap help-mode-map
-   '(("d" . forward-button) ("e" . backward-button)
-     ("s" . help-go-back)   ("f" . help-go-forward))))
+  (keyamp--remap help-mode-map '(("e" . backward-button) ("d" . forward-button)
+   ("s" . help-go-back) ("f" . help-go-forward))))
 
 (progn ; gnus
   (with-eval-after-load 'gnus-topic
     (keyamp--map gnus-topic-mode-map '(("TAB" . toggle-ibuffer) ("<tab>" . toggle-ibuffer)))
-    (keyamp--remap gnus-topic-mode-map
-     '(("RET" . gnus-topic-select-group)
-       ("h" . gnus-topic-goto-previous-topic-line) (";" . gnus-topic-goto-next-topic-line)
-       ("i" . up-line) ("k" . down-line)))
+    (keyamp--remap gnus-topic-mode-map '(("RET" . gnus-topic-select-group)
+     ("h" . gnus-topic-goto-previous-topic-line) (";" . gnus-topic-goto-next-topic-line)
+     ("i" . up-line) ("k" . down-line)))
     (with-sparse-keymap-x
-      (keyamp--remap x
-       '(("i" . gnus-topic-goto-previous-topic-line) ("k" . gnus-topic-goto-next-topic-line)
-         ("h" . gnus-beginning-of-line-or-buffer)    (";" . gnus-end-of-line-or-buffer)))
-      (keyamp--map-leaders x '("i" . "k"))
-      (keyamp--set-map x
-       '(gnus-topic-goto-previous-topic-line
-         gnus-topic-goto-next-topic-line
-         gnus-beginning-of-line-or-buffer
-         gnus-end-of-line-or-buffer))))
+     (keyamp--remap x
+      '(("i" . gnus-topic-goto-previous-topic-line) ("k" . gnus-topic-goto-next-topic-line)
+        ("h" . gnus-beginning-of-line-or-buffer)    (";" . gnus-end-of-line-or-buffer)))
+     (keyamp--map-leaders x '("i" . "k"))
+     (keyamp--set-map x '(gnus-topic-goto-previous-topic-line
+      gnus-topic-goto-next-topic-line gnus-beginning-of-line-or-buffer
+      gnus-end-of-line-or-buffer))))
 
   (with-eval-after-load 'gnus-group
     (keyamp--remap gnus-group-mode-map
      '(("e" . gnus-group-enter-server-mode) ("d" . gnus-group-get-new-news))))
 
   (with-eval-after-load 'gnus-sum
-    (keyamp--map gnus-summary-mode-map
-     '(("C-h" . gnus-summary-delete-article)
-       ("TAB" . scroll-up-command) ("<tab>" . scroll-up-command)))
+    (keyamp--map gnus-summary-mode-map '(("C-h" . gnus-summary-delete-article)
+      ("TAB" . scroll-up-command) ("<tab>" . scroll-up-command)))
     (keyamp--remap gnus-summary-mode-map
      '(("RET" . gnus-summary-scroll-up) (open-file-at-cursor . keyamp-insert)
        ("r" . gnus-summary-save-parts)
-       ("e" . gnus-summary-prev-article) ("d" . gnus-summary-next-article)
-       ("s" . gnus-summary-prev-group)   ("f" . gnus-summary-next-group)
-       ("<down>"  . scroll-down-line)        ("<up>"    . scroll-up-line)
-       ("<right>" . gnus-summary-prev-group) ("<left>"  . gnus-summary-next-group)))
-
+       ("e" . gnus-summary-prev-article)    ("d" . gnus-summary-next-article)
+       ("s" . gnus-summary-prev-group)      ("f" . gnus-summary-next-group)
+       ("<up>"   . scroll-up-line)          ("<down>"  . scroll-down-line)
+       ("<left>" . gnus-summary-next-group) ("<right>" . gnus-summary-prev-group) ))
     (with-sparse-keymap-x
-      (keyamp--remap x
-       '(("e" . gnus-summary-prev-article)     ("d" . gnus-summary-next-article)
-         ("s" . gnus-summary-prev-group)       ("f" . gnus-summary-next-group)
-         ("<down>"  . scroll-down-line)        ("<up>"   . scroll-up-line)
-         ("<right>" . gnus-summary-prev-group) ("<left>" . gnus-summary-next-group)))
+     (keyamp--remap x
+      '(("e" . gnus-summary-prev-article)    ("d" . gnus-summary-next-article)
+        ("s" . gnus-summary-prev-group)      ("f" . gnus-summary-next-group)
+        ("<up>"   . scroll-up-line)          ("<down>"  . scroll-down-line)
+        ("<left>" . gnus-summary-next-group) ("<right>" . gnus-summary-prev-group) ))
       (keyamp--map-leaders x '("s" . "f"))
       (keyamp--set-map x '(gnus-summary-prev-group gnus-summary-next-group))
       (keyamp--set-map-hook x '(gnus-summary-prepared-hook)))
-
     (with-sparse-keymap-x
-      (keyamp--map-leaders x '(gnus-summary-prev-article . gnus-summary-next-article))
-      (keyamp--set-map x '(gnus-summary-prev-article gnus-summary-next-article))))
+     (keyamp--map-leaders x '(gnus-summary-prev-article . gnus-summary-next-article))
+     (keyamp--set-map x '(gnus-summary-prev-article gnus-summary-next-article))))
 
   (with-eval-after-load 'gnus-srvr
-    (keyamp--remap gnus-server-mode-map
-     '(("RET" . gnus-server-read-server) (open-file-at-cursor . keyamp-insert)
-       ("d" . gnus-server-exit)))
+    (keyamp--remap gnus-server-mode-map '(("RET" . gnus-server-read-server)
+     (open-file-at-cursor . keyamp-insert) ("d" . gnus-server-exit)))
     (keyamp--remap gnus-browse-mode-map
      '(("RET" . gnus-browse-select-group) (open-file-at-cursor . keyamp-insert)))))
 
@@ -1078,28 +1016,24 @@ is enabled.")
      ("d" . snake-move-up)      ("k" . snake-move-down)
      (delete-other-windows . snake-rotate-up)))
   (with-sparse-keymap-x
-    (keyamp--map-leaders x '(snake-move-left . snake-move-right))
-    (keyamp--set-map x
-     '(snake-start-game snake-pause-game snake-move-left
-       snake-move-right snake-move-down snake-move-up))
-    (keyamp--set-map-hook x '(snake-mode-hook))))
+   (keyamp--map-leaders x '(snake-move-left . snake-move-right))
+   (keyamp--set-map x '(snake-start-game snake-pause-game snake-move-left
+    snake-move-right snake-move-down snake-move-up))
+   (keyamp--set-map-hook x '(snake-mode-hook))))
 
 (with-eval-after-load 'tetris
-  (keyamp--remap tetris-mode-map
-   '(("<escape>" . tetris-pause-game)
-     ("d" . tetris-rotate-prev) (delete-other-windows . tetris-rotate-prev)
-     ("f" . tetris-rotate-next) (next-user-buffer     . tetris-rotate-next)
-     ("k" . tetris-move-bottom) ("j" . tetris-move-down)))
+  (keyamp--remap tetris-mode-map '(("<escape>" . tetris-pause-game)
+   ("d" . tetris-rotate-prev) (delete-other-windows . tetris-rotate-prev)
+   ("f" . tetris-rotate-next) (next-user-buffer     . tetris-rotate-next)
+   ("k" . tetris-move-bottom) ("j" . tetris-move-down)))
   (with-sparse-keymap-x
-    (keyamp--map-leaders x '(tetris-move-left . tetris-move-right))
-    (keyamp--set-map x
-     '(tetris-start-game tetris-pause-game tetris-move-left tetris-move-right
-       tetris-rotate-prev tetris-rotate-next tetris-move-bottom tetris-move-down))))
+   (keyamp--map-leaders x '(tetris-move-left . tetris-move-right))
+   (keyamp--set-map x '(tetris-start-game tetris-pause-game tetris-move-left tetris-move-right
+     tetris-rotate-prev tetris-rotate-next tetris-move-bottom tetris-move-down))))
 
 (with-eval-after-load 'nov
-  (keyamp--remap nov-mode-map
-   '(("RET" . nov-browse-url)      ("d" . nov-goto-toc)
-     ("s" . nov-previous-document) ("f" . nov-next-document))))
+  (keyamp--remap nov-mode-map '(("RET" . nov-browse-url) ("d" . nov-goto-toc)
+   ("s" . nov-previous-document) ("f" . nov-next-document))))
 
 
 
@@ -1112,6 +1046,10 @@ is enabled.")
                beg-of-line-or-block                t
                beg-of-line-or-buffer               t
                backward-left-bracket               t
+               company-select-previous             t
+               company-select-next                 t
+               company-next-page                   t
+               company-previous-page               t
                copy-line-or-selection              t
                dired-mark                          t
                dired-next-line                     t
@@ -1150,6 +1088,8 @@ is enabled.")
                rectangle-mark-mode                 t
                scroll-down-command                 t
                scroll-up-command                   t
+               scroll-down-line                    t
+               scroll-up-line                      t
                select-block                        t
                search-current-word                 t
                select-line                         t
@@ -1196,6 +1136,7 @@ is enabled.")
   (setq keyamp--deactivate-command-mode-func
         (set-transient-map keyamp-command-map (lambda () t)))
   (set-face-background 'cursor keyamp-command-cursor)
+  (blink-cursor-mode 0)
   (setq mode-line-front-space keyamp-command-indicator)
   (force-mode-line-update))
 
@@ -1204,6 +1145,7 @@ is enabled.")
   (setq keyamp-insert-p t)
   (funcall keyamp--deactivate-command-mode-func)
   (set-face-background 'cursor keyamp-insert-cursor)
+  (blink-cursor-mode 1)
   (setq mode-line-front-space keyamp-insert-indicator)
   (force-mode-line-update))
 
@@ -1230,7 +1172,7 @@ is enabled.")
   (run-hooks 'keyamp-insert-hook))
 
 (defun keyamp-indicate ()
-  "Indicate mode. Run with `post-command-hook'."
+  "Indicate the mode. Run with `post-command-hook'."
   (if (gethash this-command keyamp-repeat-commands-hash)
       (progn
         (setq mode-line-front-space keyamp-repeat-indicator)
