@@ -618,9 +618,11 @@ is enabled.")
   (keyamp--map x '(("RET" . insert-space-before) ("<return>" . insert-space-before)))
   (keyamp--set-map x '(hippie-expand)))
 
-(keyamp--map isearch-mode-map '(("<escape>" . isearch-abort)
-  ("C-h"   . isearch-repeat-backward) ("C-r"   . isearch-repeat-forward)
-  ("C-_ n" . isearch-yank-kill)       ("C-И n" . isearch-yank-kill)))
+(keyamp--map isearch-mode-map
+  '(("<escape>" . isearch-abort)        ("C-^" . nil) ; conlfict
+    ("C-h"   . isearch-repeat-backward) ("C-r"   . isearch-repeat-forward)
+    ("C-_ n" . isearch-yank-kill)       ("C-И n" . isearch-yank-kill)
+    ("TAB" . isearch-ring-retreat)      ("<tab>" . isearch-ring-retreat)))
 (with-sparse-keymap-x
   (keyamp--map x
     '(("i" . isearch-ring-retreat)    ("ш" . isearch-ring-retreat)
