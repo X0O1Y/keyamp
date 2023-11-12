@@ -322,17 +322,6 @@ In this way, bindings in `keyamp-map' can be disabled by this map.
 Effectively, this map takes precedence over all others when command mode
 is enabled.")
 
-(defvar keyamp--deactivate-command-mode-func nil)
-
-(defvar keyamp-repeat-commands-hash nil
-  "Hash table with commands which set repeat transient keymaps.")
-
-(defvar keyamp-edit-commands-hash nil
-  "Hash table with commands which set edit transient keymaps.")
-
-(defvar keyamp-screen-commands-hash nil
-  "Hash table with commands which set screen transient keymaps.")
-
 
 
 (progn
@@ -1023,6 +1012,13 @@ is enabled.")
 
 
 
+(defvar keyamp-repeat-commands-hash nil
+  "Hash table with commands which set repeat transient keymaps.")
+(defvar keyamp-edit-commands-hash nil
+  "Hash table with commands which set edit transient keymaps.")
+(defvar keyamp-screen-commands-hash nil
+  "Hash table with commands which set screen transient keymaps.")
+
 (setq keyamp-screen-commands-hash #s(hash-table test equal data
   (agenda                              t
    alternate-buffer                    t
@@ -1122,6 +1118,7 @@ is enabled.")
 
 
 
+(defvar keyamp--deactivate-command-mode-func nil)
 (defvar keyamp-insert-p t "Non-nil means insert is on.")
 (defvar keyamp-idle-timer nil "Idle timer.")
 
