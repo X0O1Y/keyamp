@@ -1313,7 +1313,7 @@
                                 ],
                                 "to_if_held_down": [
                                     {
-                                        "key_code": "b",
+                                        "key_code": "equal_sign",
                                         "modifiers": [
                                             "left_shift",
                                             "left_control"
@@ -6134,7 +6134,7 @@
                                 ],
                                 "to_if_held_down": [
                                     {
-                                        "key_code": "b",
+                                        "key_code": "equal_sign",
                                         "modifiers": [
                                             "left_shift",
                                             "left_control"
@@ -6786,6 +6786,14 @@
                         "description": "f13",
                         "manipulators": [
                             {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Brave Browser"
+                                        ],
+                                        "type": "frontmost_application_unless"
+                                    }
+                                ],
                                 "from": {
                                     "key_code": "f13",
                                     "modifiers": {
@@ -6797,6 +6805,30 @@
                                 "to": [
                                     {
                                         "shell_command": "open -a 'Brave Browser'"
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Brave Browser"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f13",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "shell_command": "open -a 'Emacs'"
                                     }
                                 ],
                                 "type": "basic"
