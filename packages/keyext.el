@@ -2517,16 +2517,6 @@ This checks in turn:
 (advice-add 'next-user-buffer        :after (lambda (&rest r) "Recenter." (recenter)))
 (advice-add 'json-pretty-print-buffer :after (lambda (&rest r) "Message." (message "%s" "Pretty print JSON")))
 
-(defun read-answer-insert-n ()
-  (interactive)
-  (keyamp-insert-init)
-  (execute-kbd-macro (kbd "n")))
-
-(defun read-answer-insert-y ()
-  (interactive)
-  (keyamp-insert-init)
-  (execute-kbd-macro (kbd "y")))
-
 (provide 'keyext)
 
 ;;; keyext.el ends here

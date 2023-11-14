@@ -657,14 +657,14 @@ is enabled.")
       ("c" . agenda)               ("v" . tasks)
       ("m" . downloads)            ("." . player)))
   (keyamp--map-leaders x '("s" . "f"))
-  (keyamp--set-map x '(next-user-buffer prev-user-buffer
+  (keyamp--set-map x '(next-user-buffer prev-user-buffer delete-other-windows
     save-close-current-buffer split-window-below alternate-buffer)))
 
-(with-sparse-keymap-x (keyamp--remap x '(("m" . dired-jump)))
- (keyamp--map-leaders x '("'" . "m"))
+(with-sparse-keymap-x (keyamp--map-leaders x '("'" . "m"))
+ (keyamp--remap x '(("m" . dired-jump) ("e" . split-window-below)))
  (keyamp--set-map x '(dired-jump downloads player)))
-(with-sparse-keymap-x (keyamp--remap x '(("," . save-close-current-buffer) ("m" . dired-jump)))
- (keyamp--map-leaders x '("," . "m"))
+(with-sparse-keymap-x (keyamp--map-leaders x '("," . "m"))
+ (keyamp--remap x '(("," . save-close-current-buffer) ("m" . dired-jump)))
  (keyamp--set-map x '(save-close-current-buffer)))
 (with-sparse-keymap-x (keyamp--remap x '(("s" . prev-user-buffer) ("f" . tasks)
   ("x" . works) ("c" . agenda) ("v" . tasks)))
@@ -759,7 +759,11 @@ is enabled.")
 
 (with-eval-after-load 'minibuffer
   (with-sparse-keymap-x (keyamp--map-leaders x '("i" . "k"))
-    (keyamp--remap x '((";" . read-answer-insert-n) ("w" . read-answer-insert-y)))
+    (keyamp--remap x
+      '((";" . (lambda () (interactive)
+          (keyamp-insert-init) (execute-kbd-macro (kbd "n"))))
+        ("w" . (lambda () (interactive)
+          (keyamp-insert-init) (execute-kbd-macro (kbd "y"))))))
     (keyamp--set-map-hook x '(minibuffer-setup-hook) :command nil :repeat))
   (keyamp--remap y-or-n-p-map '(("i" . y-or-n-p-insert-n)
     ("d" . y-or-n-p-insert-n) ("k" . y-or-n-p-insert-y)))
@@ -1033,6 +1037,7 @@ is enabled.")
 (setq keyamp-screen-commands-hash #s(hash-table test equal data
   (agenda                              t
    alternate-buffer                    t
+   delete-other-windows                t
    dired-jump                          t
    downloads                           t
    next-user-buffer                    t
