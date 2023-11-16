@@ -213,6 +213,16 @@ The list of brackets to jump to is defined by `left-brackets' and `right-bracket
     (let ((xbds (get-bounds-of-block-or-region))) (setq xp1 (car xbds) xp2 (cdr xbds)))
     (narrow-to-region xp1 xp2)))
 
+(defun back-word ()
+  "Wrap for `backward-word' to use in transient remaps."
+  (interactive)
+  (backward-word))
+
+(defun forw-word ()
+  "Wrap for `forward-word' to use in transient remaps."
+  (interactive)
+  (forward-word))
+
 
 ;; editing commands
 
