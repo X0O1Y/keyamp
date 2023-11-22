@@ -1768,6 +1768,29 @@ You can override this function to get your idea of “user buffer”."
       (toggle-ibuffer)
     (switch-to-buffer (other-buffer))))
 
+(defun dired-find-next-file (&optional backward)
+  "Find the next file (by name) in the current directory.
+With prefix arg, find the previous file."
+  (interactive "P")
+  (when buffer-file-name
+    (let* ((file (expand-file-name buffer-file-name))
+           (files (cl-remove-if (lambda (file) (cl-first (file-attributes file)))
+                                (sort (directory-files (file-name-directory file) t nil t) 'string<)))
+           (pos (mod (+ (cl-position file files :test 'equal) (if backward -1 1))
+                     (length files))))
+      (find-file (nth pos files)))))
+
+(defun dired-find-prev-file ()
+  "Find the prev file (by name) in the current directory."
+  (interactive)
+  (when buffer-file-name
+    (let* ((file (expand-file-name buffer-file-name))
+           (files (cl-remove-if (lambda (file) (cl-first (file-attributes file)))
+                                (sort (directory-files (file-name-directory file) t nil t) 'string<)))
+           (pos (mod (+ (cl-position file files :test 'equal) -1)
+                     (length files))))
+      (find-file (nth pos files)))))
+
 (defun new-empty-buffer ()
   "Create a new empty buffer.
 New buffer is named file, file<2>, etc.
@@ -2197,7 +2220,7 @@ This command can be called when in a file buffer or in `dired'."
                              (expand-file-name default-directory ))))
      ((string-equal system-type "darwin")
       (shell-command
-       (concat "open -R " (shell-quote-argument xpath))))
+       (concat "open -R " (shell-quote-argument xpath) " && echo Show in Finder")))
      ((string-equal system-type "gnu/linux")
       (call-process shell-file-name nil 0 nil
                     shell-command-switch
@@ -2526,6 +2549,7 @@ This checks in turn:
 (advice-add 'prev-user-buffer        :after (lambda (&rest r) "Recenter." (recenter)))
 (advice-add 'next-user-buffer        :after (lambda (&rest r) "Recenter." (recenter)))
 (advice-add 'json-pretty-print-buffer :after (lambda (&rest r) "Message." (message "%s" "Pretty print JSON")))
+(add-hook 'replace-update-post-hook 'recenter)
 
 (provide 'keyext)
 
