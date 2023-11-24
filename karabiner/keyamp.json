@@ -2741,6 +2741,20 @@
             {
               "key_code": "n"
             }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "b",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "n",
+              "repeat": false,
+              "halt": true
+            }
           ]
         }
       ]
@@ -2894,6 +2908,20 @@
           "to_after_key_up": [
             {
               "key_code": "comma"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "b",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "comma",
+              "repeat": false,
+              "halt": true
             }
           ]
         }
@@ -6794,14 +6822,14 @@
                 "/Brave Browser"
               ]
             }
-          ],            
+          ],
           "to": [
             {
               "shell_command": "open -a 'Brave Browser'"
             }
           ]
         },
-{
+        {
           "type": "basic",
           "from": {
             "key_code": "f13",
@@ -6818,13 +6846,13 @@
                 "/Brave Browser"
               ]
             }
-          ],            
+          ],
           "to": [
             {
               "shell_command": "open -a 'Emacs'"
             }
           ]
-        }          
+        }
       ]
     },
     {

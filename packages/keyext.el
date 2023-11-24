@@ -131,7 +131,7 @@ line of buffer."
     "⟦⟧" "⟨⟩" "⟪⟫" "⟮⟯" "⟬⟭" "⌈⌉" "⌊⌋" "⦇⦈" "⦉⦊" "❛❜" "❝❞" "❨❩"
     "❪❫" "❴❵" "❬❭" "❮❯" "❰❱" "❲❳" "〈〉" "⦑⦒" "⧼⧽" "﹙﹚" "﹛﹜" "﹝﹞"
     "⁽⁾" "₍₎" "⦋⦌" "⦍⦎" "⦏⦐" "⁅⁆" "⸢⸣" "⸤⸥" "⟅⟆" "⦓⦔" "⦕⦖" "⸦⸧"
-    "⸨⸩" "｟｠")
+    "⸨⸩" "｟｠" "``")
 "A list of strings, each element is a string of 2 chars, the left
 bracket and a matching right bracket. Used by `select-text-in-quote'
 and others.")
@@ -1486,8 +1486,8 @@ if in one of the lisp modes;
 (defun insert-square-bracket ()           (interactive) (insert-bracket-pair "[" "]"))
 (defun insert-brace ()                    (interactive) (insert-bracket-pair "{" "}"))
 
-(defun insert-markdown-quote ()           (interactive) (insert-bracket-pair "`" "`"))
-(defun insert-markdown-triple-quote ()    (interactive) (insert-bracket-pair "```\n" "\n```"))
+(defun insert-backtick-quote ()           (interactive) (insert-bracket-pair "`" "`"))
+(defun insert-backtick-triple-quote ()    (interactive) (insert-bracket-pair "```\n" "\n```"))
 
 (defun insert-double-curly-quote ()       (interactive) (insert-bracket-pair "“" "”"))
 (defun insert-curly-single-quote ()       (interactive) (insert-bracket-pair "‘" "’"))
@@ -2292,6 +2292,14 @@ If current frame has only one window, switch to next frame."
   (if (one-window-p)
       (other-frame 1)
     (other-window 1)))
+
+(defun alternate-buf-or-frame ()
+  "Switch to alternate buffer or frame.
+If there more than one frame, switch to next frame."
+  (interactive)
+  (if (< 1 (length (frame-list)))
+      (other-frame 1)
+    (alternate-buffer)))
 
 (defun kmacro-record ()
   "Start or stop macro recording."
