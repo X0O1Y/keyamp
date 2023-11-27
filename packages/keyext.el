@@ -1,5 +1,7 @@
 ;;; keyext.el --- Key extensions -*- coding: utf-8; lexical-binding: t; -*-
 
+;; This package is a fork of xah-fly-keys.
+
 (defun get-bounds-of-block ()
   "Return the boundary (START . END) of current block."
   (let (xp1 xp2 (xblankRegex "\n[ \t]*\n"))

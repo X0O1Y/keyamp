@@ -6825,6 +6825,12 @@
           ],
           "to": [
             {
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              },
+              "repeat": false
+            },
+            {
               "shell_command": "open -a 'Brave Browser'"
             }
           ]
@@ -6848,6 +6854,12 @@
             }
           ],
           "to": [
+            {
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              },
+              "repeat": false
+            },
             {
               "shell_command": "open -a 'Emacs'"
             }
@@ -6961,6 +6973,12 @@
             }
           },
           "to": [
+            {
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              },
+              "repeat": false
+            },
             {
               "key_code": "tab",
               "modifiers": [

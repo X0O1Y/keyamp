@@ -36,6 +36,8 @@
 ;; might be configured on ANSI keyboard, ergonomic split and virtual
 ;; keyboards. See the link for layouts and karabiner config.
 
+;; This package is a fork of xah-fly-keys.
+
 ;;; Code:
 
 
@@ -105,14 +107,11 @@ Do not manually set this variable.")
 `keyamp--convert-table'. Charstr must be a string that is the argument
 to `kbd'. E.g. \"a\" and \"a b c\". Each space separated token is
 converted according to `keyamp--convert-table'."
-  (mapconcat
-   'identity
-   (mapcar
-    (lambda (x)
-      (let ((xresult (assoc x keyamp--convert-table)))
-        (if xresult (cdr xresult) x)))
-    (split-string Charstr " +"))
-   " "))
+  (mapconcat 'identity
+             (mapcar
+              (lambda (x) (let ((xresult (assoc x keyamp--convert-table)))
+                            (if xresult (cdr xresult) x)))
+              (split-string Charstr " +")) " "))
 
 (defvar keyamp-command-alist nil
   "Alist of `keyamp-command-map' in qwerty format for command lookup by key code.")
@@ -424,7 +423,7 @@ is enabled.")
 
     ;; left leader left half
     ("`" . ignore)
-    ("1" . ignore)
+    ("1" . periodic-chart)
     ("2" . kmacro-name-last-macro)
     ("3" . apply-macro-to-region-lines)
     ("4" . clear-register-1)
@@ -633,6 +632,7 @@ is enabled.")
   (keyamp--set-map x '(isearch-ring-retreat isearch-repeat-backward isearch-ring-advance
       isearch-repeat-forward search-current-word isearch-yank-kill)))
 (with-sparse-keymap-x (keyamp--map-leaders x '(isearch-ring-retreat . isearch-ring-advance))
+  (keyamp--map x '(("v" . isearch-yank-kill) ("м" . isearch-yank-kill)))
   (keyamp--set-map-hook x '(isearch-mode-hook) nil nil :repeat))
 
 
@@ -745,26 +745,50 @@ is enabled.")
 (with-sparse-keymap-x (keyamp--map-leaders x '("k" . "k"))
   (keyamp--remap x '(("k" . select-text-in-quote))) (keyamp--set-map x '(select-text-in-quote)))
 
+(with-sparse-keymap-x (keyamp--map-leaders x
+  '((lambda () (interactive) (text-scale-adjust -1)) . (lambda () (interactive) (text-scale-adjust 1))))
+  (keyamp--map x '(("TAB" . (lambda () (interactive) (text-scale-adjust 0)))
+    ("<tab>" . (lambda () (interactive) (text-scale-adjust 0)))))
+  (keyamp--set-map x '(text-scale-adjust)))
+
 
 ;; modes remap
 
+(defun keyamp-insert-minibuffer ()
+  "If minibuffer input not empty or default value then confirm
+instead of insert mode activation."
+  (interactive)
+  (if (or (< 0 (length (buffer-substring (minibuffer-prompt-end) (point))))
+          (< 0 (length minibuffer-default)))
+      (exit-minibuffer) (keyamp-insert)))
+
+(defun keyamp-escape-minibuffer ()
+  "If minibuffer input not empty or default value then activate
+command mode instead of quit minibuffer."
+  (interactive)
+  (if (or (< 0 (length (buffer-substring (minibuffer-prompt-end) (point))))
+          (< 0 (length minibuffer-default)))
+      (keyamp-escape) (abort-recursive-edit)))
+
+(defun keyamp-minibuffer-n ()
+  "Insert literally n to minibuffer."
+  (interactive)
+  (keyamp-insert-init) (execute-kbd-macro (kbd "n")))
+
+(defun keyamp-minibuffer-y ()
+  "Insert literally y to minibuffer."
+  (interactive)
+  (keyamp-insert-init) (execute-kbd-macro (kbd "y")))
+
 (with-eval-after-load 'minibuffer
   (with-sparse-keymap-x (keyamp--map-leaders x '("i" . "k"))
-    (keyamp--remap x '((end-of-line-or-block . (lambda () (interactive)
-          (keyamp-insert-init) (execute-kbd-macro (kbd "n"))))
-        (backward-kill-word   . (lambda () (interactive)
-          (keyamp-insert-init) (execute-kbd-macro (kbd "y"))))
-        (keyamp-insert . (lambda () (interactive)
-          (if (or (< 0 (length (buffer-substring (minibuffer-prompt-end) (point))))
-                  (< 0 (length minibuffer-default)))
-            (exit-minibuffer) (keyamp-insert))))
-        (keyamp-escape . (lambda () (interactive)
-          (if (or (< 0 (length (buffer-substring (minibuffer-prompt-end) (point))))
-                  (< 0 (length minibuffer-default)))
-            (keyamp-escape) (abort-recursive-edit))))))
-    (advice-add 'paste-or-paste-previous :after (lambda (&rest r) (when (minibufferp)
-        (set-transient-map x) (setq this-command 'keyamp--repeat-dummy))))
+    (keyamp--remap x '((end-of-line-or-block . keyamp-minibuffer-n)
+        (backward-kill-word . keyamp-minibuffer-y)
+        (keyamp-insert      . keyamp-insert-minibuffer)
+        (keyamp-escape      . keyamp-escape-minibuffer)))
     (keyamp--set-map-hook x '(minibuffer-setup-hook) :command nil :repeat))
+  (advice-add 'paste-or-paste-previous :after (lambda (&rest r)
+    (when (minibufferp) (keyamp-insert))))
   (keyamp--remap y-or-n-p-map '(("i" . y-or-n-p-insert-n)
     ("d" . y-or-n-p-insert-n) ("k" . y-or-n-p-insert-y)))
   (keyamp--remap minibuffer-local-map
@@ -803,7 +827,8 @@ is enabled.")
       (keyamp--set-map x '(ido-prev-match ido-next-match)))))
 
 (with-eval-after-load 'dired
-  (keyamp--map dired-mode-map '(("C-h" . dired-do-delete) ("C-r" . open-in-external-app)))
+  (keyamp--map dired-mode-map '(("C-h" . dired-do-delete) ("C-r" . open-in-external-app)
+    ("<mouse-1>" . mouse-set-point) ("<double-mouse-1>" . dired-find-file)))
   (keyamp--remap dired-mode-map '(("RET" . dired-find-file) ("f" . dired-sort)
     ("m" . dired-mark)    ("." . dired-unmark)
     ("z" . revert-buffer) ("q" . dired-create-directory)
@@ -835,7 +860,8 @@ is enabled.")
     (clean-whitespace . delete-whitespace-rectangle))))
 
 (with-eval-after-load 'ibuf-ext (keyamp--map ibuffer-mode-map
-    '(("C-h" . ibuffer-do-delete) ("TAB" . news) ("<tab>" . news)))
+    '(("C-h" . ibuffer-do-delete) ("TAB" . news) ("<tab>" . news)
+      ("<double-mouse-1>" . ibuffer-visit-buffer)))
   (keyamp--remap ibuffer-mode-map '(("RET" . ibuffer-visit-buffer)
     (";" . ibuffer-forward-filter-group) ("h" . ibuffer-backward-filter-group)
     ("q" . delete-frame)                 ("w" . sun-moon)
@@ -848,8 +874,9 @@ is enabled.")
     ("c" . agenda)                       ("v" . tasks)
     ("m" . downloads)                    ("." . player)
     (select-block . prev-user-buffer)    (extend-selection . next-user-buffer)))
-  (keyamp--map ibuffer-mode-filter-group-map '(("C-h" . help-command)))
-  (keyamp--remap ibuffer-mode-filter-group-map '(("RET" . ibuffer-toggle-filter-group)))
+  (keyamp--map ibuffer-mode-filter-group-map
+    '(("C-h" . help-command) ("<mouse-1>" . ibuffer-toggle-filter-group)))
+  (keyamp--remap ibuffer-mode-filter-group-map '(("RET" . ibuffer-toggle-filter-group) ))
   (with-sparse-keymap-x (keyamp--remap x
     '(("i" . ibuffer-backward-filter-group) ("k" . ibuffer-forward-filter-group)
       ("e" . ibuffer-backward-filter-group) ("d" . ibuffer-forward-filter-group)
@@ -886,12 +913,15 @@ is enabled.")
 (with-eval-after-load 'compile (keyamp--remap compilation-button-map '(("RET" . compile-goto-error))))
 (with-eval-after-load 'flymake (keyamp--remap flymake-diagnostics-buffer-mode-map '(("RET" . flymake-goto-diagnostic))))
 (with-eval-after-load 'gnus-art (keyamp--remap gnus-mime-button-map '(("RET" . gnus-article-press-button))))
-(with-eval-after-load 'emms-playlist-mode (keyamp--remap emms-playlist-mode-map '(("RET" . emms-playlist-mode-play-smart))))
 (with-eval-after-load 'org-agenda (keyamp--remap org-agenda-mode-map '(("RET" . org-agenda-switch-to))))
 (with-eval-after-load 'replace (keyamp--remap occur-mode-map '(("RET" . occur-mode-goto-occurrence))))
 (with-eval-after-load 'shr (keyamp--remap shr-map '(("RET" . shr-browse-url))))
 (with-eval-after-load 'simple (keyamp--remap completion-list-mode-map '(("RET" . choose-completion))))
 (with-eval-after-load 'wid-edit (keyamp--remap widget-link-keymap '(("RET" . widget-button-press))))
+
+(with-eval-after-load 'emms-playlist-mode (keyamp--remap emms-playlist-mode-map
+  '(("RET" . emms-playlist-mode-play-smart)
+    (extend-selection . emms-playlist-mode-play-smart))))
 
 (with-eval-after-load 'doc-view (keyamp--remap doc-view-mode-map
     '(("i" . doc-view-previous-line-or-previous-page) ("k" . doc-view-next-line-or-next-page)
@@ -908,7 +938,9 @@ is enabled.")
 
 (with-eval-after-load 'image-mode (keyamp--remap image-mode-map
     '(("j" . image-previous-file) ("l" . image-next-file)
-      ("s" . image-previous-file) ("f" . image-next-file)))
+      ("s" . image-previous-file) ("f" . image-next-file)
+      ("i" . image-decrease-size) ("k" . image-increase-size)
+      ("e" . image-dired)         ("d" . image-rotate)))
   (with-sparse-keymap-x (keyamp--map-leaders x '("j" . "l"))
     (keyamp--set-map x '(image-previous-file image-next-file))))
 
