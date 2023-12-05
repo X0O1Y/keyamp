@@ -125,7 +125,8 @@ line of buffer."
         (end-of-line-or-block))
     (progn
       (end-of-buffer)
-      (previous-line))))
+      (if (not (eq major-mode 'eshell-mode))
+          (previous-line)))))
 
 (defvar brackets
   '("“”" "()" "[]" "{}" "<>" "＜＞" "（）" "［］" "｛｝" "⦅⦆" "〚〛" "⦃⦄"
@@ -2326,8 +2327,10 @@ If there more than one frame, switch to next frame."
 (defun eshell-clear-input ()
   "Clear input eshell."
   (interactive)
-  (beg-of-line-or-block)
-  (kill-line))
+  (if (region-active-p)
+      (cut-line-or-selection)
+    (beg-of-line-or-block)
+    (kill-line)))
 
 (defun screenshot ()
   "Take screenshot on macOS."
@@ -2355,6 +2358,11 @@ Force switch to current buffer to update `other-buffer'."
         (unless (member (buffer-name (cadr (buffer-list)))
                         ibuffer-never-show-predicates)
           (ibuffer-jump-to-buffer xbuf))))))
+
+(defun flyspell-goto-prev-error ()
+  "Go to prev error."
+  (interactive)
+  (flyspell-goto-next-error t))
 
 (defun icomplete-exit-or-force-complete-and-exit ()
   "Exit if file completion. Else force complete and exit."

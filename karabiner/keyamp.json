@@ -64,7 +64,7 @@
             }
           ],
           "parameters": {
-            "basic.to_if_held_down_threshold_milliseconds": 50
+            "basic.to_if_held_down_threshold_milliseconds": 120
           }
         },
         {
@@ -170,6 +170,30 @@
     {
       "description": "left_command",
       "manipulators": [
+      {
+          "type": "basic",
+          "from": {
+            "key_code": "left_command",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Books"
+              ]
+            }
+          ],
+          "to": [
+            {
+              "key_code": "left_arrow"
+            }
+          ]
+        },
         {
           "type": "basic",
           "from": {
@@ -206,7 +230,7 @@
             }
           ],
           "parameters": {
-            "basic.to_if_held_down_threshold_milliseconds": 50
+            "basic.to_if_held_down_threshold_milliseconds": 120
           }
         },
         {
@@ -998,7 +1022,7 @@
             }
           ],
           "parameters": {
-            "basic.to_if_held_down_threshold_milliseconds": 50
+            "basic.to_if_held_down_threshold_milliseconds": 120
           }
         },
         {
@@ -1037,7 +1061,7 @@
             }
           ],
           "parameters": {
-            "basic.to_if_held_down_threshold_milliseconds": 50
+            "basic.to_if_held_down_threshold_milliseconds": 120
           }
         }
       ]
@@ -1923,7 +1947,7 @@
             }
           ],
           "parameters": {
-            "basic.to_if_held_down_threshold_milliseconds": 50
+            "basic.to_if_held_down_threshold_milliseconds": 120
           }
         },
         {
@@ -1962,7 +1986,7 @@
             }
           ],
           "parameters": {
-            "basic.to_if_held_down_threshold_milliseconds": 50
+            "basic.to_if_held_down_threshold_milliseconds": 120
           }
         }
       ]
@@ -2006,7 +2030,7 @@
             }
           ],
           "parameters": {
-            "basic.to_if_held_down_threshold_milliseconds": 50
+            "basic.to_if_held_down_threshold_milliseconds": 120
           }
         },
         {
@@ -2045,7 +2069,7 @@
             }
           ],
           "parameters": {
-            "basic.to_if_held_down_threshold_milliseconds": 50
+            "basic.to_if_held_down_threshold_milliseconds": 120
           }
         }
       ]
@@ -2089,7 +2113,7 @@
             }
           ],
           "parameters": {
-            "basic.to_if_held_down_threshold_milliseconds": 50
+            "basic.to_if_held_down_threshold_milliseconds": 120
           }
         },
         {
@@ -2128,7 +2152,7 @@
             }
           ],
           "parameters": {
-            "basic.to_if_held_down_threshold_milliseconds": 50
+            "basic.to_if_held_down_threshold_milliseconds": 120
           }
         }
       ]
@@ -6789,6 +6813,9 @@
             }
           },
           "to_after_key_up": [
+            {
+              "shell_command": "defaults write -g InitialKeyRepeat -int 10 && defaults write -g KeyRepeat -int 2 && echo \"normal min 15 (225 ms) and 2 (30 ms)\""
+            },
             {
               "shell_command": "open -a Karabiner-Elements"
             }
