@@ -671,7 +671,21 @@
             {
               "key_code": "e"
             }
-          ]
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "equal_sign",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "e",
+              "repeat": false,
+              "halt": true
+            }
+          ]            
         }
       ]
     },
@@ -1548,6 +1562,20 @@
             {
               "key_code": "s"
             }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "equal_sign",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "s",
+              "repeat": false,
+              "halt": true
+            }
           ]
         }
       ]
@@ -1649,6 +1677,20 @@
             {
               "key_code": "d"
             }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "equal_sign",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "d",
+              "repeat": false,
+              "halt": true
+            }
           ]
         }
       ]
@@ -1749,6 +1791,20 @@
           "to_after_key_up": [
             {
               "key_code": "f"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "equal_sign",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "f",
+              "repeat": false,
+              "halt": true
             }
           ]
         }
@@ -2611,6 +2667,20 @@
             {
               "key_code": "v"
             }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "equal_sign",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "v",
+              "repeat": false,
+              "halt": true
+            }
           ]
         }
       ]
@@ -2855,6 +2925,20 @@
           "to_after_key_up": [
             {
               "key_code": "m"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "b",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "m",
+              "repeat": false,
+              "halt": true
             }
           ]
         }
@@ -7424,7 +7508,65 @@
           ]
         }
       ]
-    }
+    },
+    {
+      "description": "left_arrow",
+      "manipulators": [
+      {
+          "type": "basic",
+          "from": {
+            "key_code": "left_arrow",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/VLC"
+              ]
+            }
+          ],
+          "to": [
+            {
+              "key_code": "j"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "right_arrow",
+      "manipulators": [
+      {
+          "type": "basic",
+          "from": {
+            "key_code": "right_arrow",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/VLC"
+              ]
+            }
+          ],
+          "to": [
+            {
+              "key_code": "l"
+            }
+          ]
+        }
+      ]
+    }      
   ]
 }
 

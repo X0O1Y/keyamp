@@ -2345,6 +2345,21 @@ If there more than one frame, switch to next frame."
   (world-clock)
   (other-window 1))
 
+(defun text-scale-decrease ()
+  "Decrease text scale."
+  (interactive)
+  (text-scale-adjust -1))
+
+(defun text-scale-increase ()
+  "Increase text scale."
+  (interactive)
+  (text-scale-adjust 1))
+
+(defun text-scale-reset ()
+  "Reset text scale."
+  (interactive)
+  (text-scale-adjust 0))
+
 (defun toggle-ibuffer ()
   "Toggle ibuffer.
 Force switch to current buffer to update `other-buffer'."
@@ -2517,6 +2532,12 @@ Show current agenda. Do not select other window, balance windows."
   (interactive)
   (hippie-expand -1))
 
+(defun pass-generate ()
+  "Generate and copy pass."
+  (interactive)
+  (let ((xpass (read-from-minibuffer "Pass path: ")))
+    (shell-command (concat "pass generate -c " xpass))))
+
 (defun describe-foo-at-point ()
   "Show the documentation of the Elisp function and variable near point.
 This checks in turn:
@@ -2559,6 +2580,21 @@ This checks in turn:
   (interactive (list default-directory))
   (mapc #'dired-maybe-insert-subdir
         (seq-filter #'file-directory-p (directory-files-recursively dir "" t))))
+
+(defun org-insert-source-code (&optional file)
+  "Insert source code block for LANGUAGE.  Optionally pull in FILE contents.
+With a `\\[universal-argument]' prefix, prompts for FILE.
+The `:tangle FILE` header argument will be added when pulling in file contents."
+  (interactive)
+  (let ((col (current-column))
+        (lang "bash")
+        (file (if current-prefix-arg (read-file-name "Enter file name: ") nil)))
+    (insert
+     (format "#+begin_src %s%s" lang (if file (concat " :tangle " file) "")))
+    (newline)(newline)
+    (move-to-column col t)(insert "#+end_src")(newline)
+    (forward-line -2)(move-to-column col t)
+    (if file (insert-file-contents file))))
 
 (advice-add 'scroll-down-command     :after (lambda (&rest r) "Recenter." (recenter)))
 (advice-add 'scroll-up-command       :after (lambda (&rest r) "Recenter." (recenter)))
