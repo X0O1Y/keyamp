@@ -19,7 +19,7 @@ Input model based on [[file:packages/keyamp.el][Keyamp]] for Emacs.
 #+begin_src bash
 # emacs-mac
 brew tap railwaycat/emacsmacport
-brew install emacs-mac --with-natural-title-bar
+brew install emacs-mac --with-natural-title-bar --with-native-comp
 defaults write org.gnu.Emacs TransparentTitleBar DARK
 defaults write org.gnu.Emacs HideDocumentIcon YES
 #+end_src
