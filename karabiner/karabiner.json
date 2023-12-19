@@ -2480,16 +2480,9 @@
                                 ],
                                 "to_if_held_down": [
                                     {
-                                        "key_code": "equal_sign",
-                                        "modifiers": [
-                                            "left_shift",
-                                            "left_control"
-                                        ]
-                                    },
-                                    {
                                         "halt": true,
-                                        "key_code": "x",
-                                        "repeat": false
+                                        "repeat": false,
+                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(save-buffers-kill-terminal)' && sleep 0.05 && open -a 'Emacs'"
                                     }
                                 ],
                                 "type": "basic"
@@ -2854,6 +2847,97 @@
                                     {
                                         "halt": true,
                                         "key_code": "n",
+                                        "repeat": false
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "m",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Emacs"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 0
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "m",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "m"
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "key_code": "b",
+                                        "modifiers": [
+                                            "left_shift",
+                                            "left_control"
+                                        ]
+                                    },
+                                    {
+                                        "halt": true,
+                                        "key_code": "m",
+                                        "repeat": false
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Emacs"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "m",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "m"
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "key_code": "b",
+                                        "modifiers": [
+                                            "left_shift",
+                                            "left_control"
+                                        ]
+                                    },
+                                    {
+                                        "halt": true,
+                                        "key_code": "m",
                                         "repeat": false
                                     }
                                 ],
@@ -7001,7 +7085,6 @@
                                 },
                                 "to": [
                                     {
-                                        "repeat": false,
                                         "select_input_source": {
                                             "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
                                         }
@@ -7011,7 +7094,8 @@
                                         "key_code": "tab",
                                         "modifiers": [
                                             "command"
-                                        ]
+                                        ],
+                                        "repeat": false
                                     }
                                 ],
                                 "type": "basic"
@@ -7420,97 +7504,6 @@
                                                 "delay_milliseconds": 500
                                             }
                                         }
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "m",
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Emacs"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "insert mode activated",
-                                        "type": "variable_if",
-                                        "value": 0
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "m",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to_after_key_up": [
-                                    {
-                                        "key_code": "m"
-                                    }
-                                ],
-                                "to_if_held_down": [
-                                    {
-                                        "key_code": "b",
-                                        "modifiers": [
-                                            "left_shift",
-                                            "left_control"
-                                        ]
-                                    },
-                                    {
-                                        "halt": true,
-                                        "key_code": "m",
-                                        "repeat": false
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Emacs"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "insert mode activated",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "m",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to_after_key_up": [
-                                    {
-                                        "key_code": "m"
-                                    }
-                                ],
-                                "to_if_held_down": [
-                                    {
-                                        "key_code": "b",
-                                        "modifiers": [
-                                            "left_shift",
-                                            "left_control"
-                                        ]
-                                    },
-                                    {
-                                        "halt": true,
-                                        "key_code": "m",
-                                        "repeat": false
                                     }
                                 ],
                                 "type": "basic"

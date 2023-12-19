@@ -2472,18 +2472,11 @@
             }
           ],
           "to_if_held_down": [
-            {
-              "key_code": "equal_sign",
-              "modifiers": [
-                "left_shift",
-                "left_control"
-              ]
-            },
-            {
-              "key_code": "x",
+          {
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(save-buffers-kill-terminal)' && sleep 0.05 && open -a 'Emacs'",
               "repeat": false,
               "halt": true
-            }
+            }            
           ]
         },
         {
@@ -7087,15 +7080,15 @@
             {
               "select_input_source": {
                 "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
-              },
-              "repeat": false
+              }
             },
             {
               "key_code": "tab",
               "modifiers": [
                 "command"
               ],
-              "halt": true
+              "halt": true,
+              "repeat": false
             }
           ]
         }
