@@ -42,6 +42,8 @@
 
 
 
+(require 'keyext)
+
 (defgroup keyamp nil "Customization options for keyamp"
   :group 'help :prefix "keyamp-")
 
@@ -340,7 +342,7 @@ is enabled.")
 (keyamp--map keyamp-command-map
   '(("RET" . keyamp-insert)              ("<return>"    . keyamp-insert)          ("S-<return>"    . ignore)
     ("DEL" . keyamp-left-leader-map)     ("<backspace>" . keyamp-left-leader-map) ("S-<backspace>" . ignore)
-    ("SPC" . keyamp-right-leader-map)
+    ("SPC" . keyamp-right-leader-map)                                             ("S-SPC"         . ignore)
 
     ;; left half
     ("`" . delete-forward-char)          ("ё" . delete-forward-char)     ("~" . keyamp-qwerty-to-engineer-engram) ("Ë" . keyamp-qwerty-to-engineer-engram)
@@ -599,9 +601,14 @@ is enabled.")
     ("C-t" . hippie-expand)
     ("<down-mouse-1>"   . keyamp-command)
     ("<double-mouse-1>" . extend-selection)
-    ("<mouse-3>"        . select-block)
+    ("<mouse-3>"        . paste-or-paste-previous)
     ("<header-line> <mouse-1>" . other-frame)
     ("<header-line> <mouse-3>" . make-frame-command)))
+
+(advice-add 'mouse-set-point :before
+            (lambda (&rest r) (when (region-active-p)
+                                (copy-line-or-selection)
+                                (deactivate-mark))))
 
 (with-sparse-keymap-x
  (keyamp--remap x '((delete-backward . repeat)))
@@ -614,31 +621,24 @@ is enabled.")
  (keyamp--set-map x '(hippie-expand)))
 
 (keyamp--map isearch-mode-map
-  '(("<escape>" . isearch-cancel)     ("C-^" . ignore)
-    ("C-h" . isearch-repeat-backward) ("C-r" . isearch-repeat-forward)))
+  '(("<escape>" . isearch-cancel) ("C-^" . ignore)
+    ("C-h" . isearch-quote-char)  ("SPC" . isearch-repeat-forward)))
+
+(with-sparse-keymap-x
+ (keyamp--map-leaders x '(isearch-ring-retreat . isearch-yank-kill))
+ (keyamp--set-map-hook x '(isearch-mode-hook) nil nil :repeat))
 
 (with-sparse-keymap-x
  (keyamp--map x
    '(("i" . isearch-ring-retreat)    ("ш" . isearch-ring-retreat)
      ("j" . isearch-repeat-backward) ("о" . isearch-repeat-backward)
      ("k" . isearch-ring-advance)    ("л" . isearch-ring-advance)
-     ("l" . isearch-repeat-forward)  ("д" . isearch-repeat-forward)
-     ("e" . isearch-ring-retreat)    ("у" . isearch-ring-retreat)
-     ("s" . isearch-repeat-backward) ("ы" . isearch-repeat-backward)
-     ("d" . isearch-ring-advance)    ("в" . isearch-ring-advance)
-     ("f" . isearch-repeat-forward)  ("а" . isearch-repeat-forward)))
+     ("l" . isearch-repeat-forward)  ("д" . isearch-repeat-forward)))
   (keyamp--map-leaders x '(isearch-repeat-backward . isearch-repeat-forward))
   (keyamp--set-map x
-    '(isearch-ring-retreat
-      isearch-repeat-backward
-      isearch-ring-advance
-      isearch-repeat-forward
-      search-current-word
-      isearch-yank-kill)))
-
-(with-sparse-keymap-x
- (keyamp--map-leaders x '(isearch-ring-retreat . isearch-yank-kill))
- (keyamp--set-map-hook x '(isearch-mode-hook) nil nil :repeat))
+    '(isearch-ring-retreat    isearch-ring-advance
+      isearch-repeat-backward isearch-repeat-forward
+      search-current-word     isearch-yank-kill)))
 
 
 ;; command screen
@@ -847,10 +847,18 @@ is enabled.")
    '((previous-line . beg-of-line-or-block) (next-line . select-block)))
  (keyamp--set-map x '(select-block)))
 
+(defun deactivate-mark-and-bol (&rest r)
+  "If region active deactivate mark and go to the beginning of line."
+  (interactive)
+  (when (region-active-p)
+    (deactivate-mark)
+    (beginning-of-line)))
+
 (with-sparse-keymap-x
- (keyamp--map-leaders x '(next-line . next-line))
- (keyamp--remap x '((next-line . extend-selection)))
- (keyamp--set-map x '(extend-selection)))
+ (keyamp--map-leaders x '(up-line . down-line))
+ (keyamp--set-map x '(extend-selection))
+ (advice-add 'up-line :before 'deactivate-mark-and-bol)
+ (advice-add 'down-line :before 'deactivate-mark-and-bol))
 
 (with-sparse-keymap-x
  (keyamp--map-leaders x '(next-line . next-line))
@@ -1070,12 +1078,11 @@ of confirm and exit minibuffer."
       (copy-line-or-selection  . agenda)
       (paste-or-paste-previous . tasks)
       (backward-left-bracket   . downloads)
-      (forward-right-bracket   . player)
-      (select-block            . prev-user-buffer)
-      (extend-selection        . next-user-buffer)))
+      (forward-right-bracket   . player)))
 
   (keyamp--map ibuffer-mode-filter-group-map
-    '(("C-h" . help-command) ("<mouse-1>" . ibuffer-toggle-filter-group)))
+    '(("C-h" . help-command) ("<mouse-1>" . mouse-set-point)
+      ("<double-mouse-1>" . ibuffer-toggle-filter-group)))
 
   (keyamp--remap ibuffer-mode-filter-group-map
     '((keyamp-insert . ibuffer-toggle-filter-group)))
@@ -1094,7 +1101,7 @@ of confirm and exit minibuffer."
        ibuffer-toggle-filter-group))))
 
 (with-eval-after-load 'ibuffer
-  (keyamp--map ibuffer-name-map '(("<mouse-1>" . ibuffer-jump))))
+  (keyamp--map ibuffer-name-map '(("<mouse-1>" . mouse-set-point))))
 
 (with-sparse-keymap-x
  (keyamp--remap x '((delete-backward . ibuffer-do-delete)))
@@ -1338,7 +1345,8 @@ of confirm and exit minibuffer."
 
 (with-eval-after-load 'gnus-topic
   (keyamp--map gnus-topic-mode-map
-    '(("TAB" . toggle-ibuffer) ("<tab>" . toggle-ibuffer)))
+    '(("TAB" . toggle-ibuffer) ("<tab>" . toggle-ibuffer)
+      ("<double-mouse-1>" . gnus-topic-select-group)))
   (keyamp--remap gnus-topic-mode-map
     '((keyamp-insert        . gnus-topic-select-group)
       (beg-of-line-or-block . gnus-topic-goto-prev-topic-line)
