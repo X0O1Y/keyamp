@@ -833,7 +833,6 @@ is enabled.")
  (keyamp--set-map x '(recenter-top-bottom)))
 
 (with-sparse-keymap-x
- ;; (keyamp--map-leaders x '(previous-line . next-line))
  (keyamp--map-leaders x '(up-line . down-line))
  (keyamp--remap x
    '((previous-line . beg-of-line-or-block) (next-line . select-block)))
@@ -842,8 +841,8 @@ is enabled.")
 (with-sparse-keymap-x
  (keyamp--map-leaders x '(up-line . down-line))
  (keyamp--set-map x '(extend-selection))
- (advice-add 'up-line :before 'deactivate-mark-and-bol)
- (advice-add 'down-line :before 'deactivate-mark-and-bol))
+ (advice-add 'up-line :before 'deactivate-mark-and-return)
+ (advice-add 'down-line :before 'deactivate-mark-and-return))
 
 (with-sparse-keymap-x
  (keyamp--map-leaders x '(next-line . next-line))
@@ -894,6 +893,7 @@ of confirm and exit minibuffer."
 (with-eval-after-load 'minibuffer
   (with-sparse-keymap-x
    (keyamp--map-leaders x '(select-block . extend-selection))
+   (keyamp--map x '(("k" . extend-selection)))
    (keyamp--remap x
      '((end-of-line-or-block . keyamp-insert-n)
        (backward-kill-word   . keyamp-insert-y)
@@ -910,9 +910,8 @@ of confirm and exit minibuffer."
                    (set-transient-map x)))))
 
   (keyamp--remap y-or-n-p-map
-    '((previous-line   . y-or-n-p-insert-n)
-      (delete-backward . y-or-n-p-insert-n)
-      (next-line       . y-or-n-p-insert-y)))
+    '((delete-backward  . y-or-n-p-insert-n) (select-block . y-or-n-p-insert-n)
+      (extend-selection . y-or-n-p-insert-y) (next-line    . y-or-n-p-insert-y)))
 
   (keyamp--remap minibuffer-local-map
     '((previous-line . previous-line-or-history-element)
@@ -936,30 +935,24 @@ of confirm and exit minibuffer."
 
   (with-sparse-keymap-x
     (keyamp--remap x
-      '((keyamp-insert   . icomplete-exit-or-force-complete-and-exit)
-        (previous-line   . icomplete-backward-completions)
-        (next-line       . icomplete-forward-completions)
-        (undo            . icomplete-backward-completions)
-        (delete-backward . icomplete-forward-completions)))
+      '((keyamp-insert . icomplete-exit-or-force-complete-and-exit)
+        (previous-line . icomplete-backward-completions)
+        (next-line     . icomplete-forward-completions)))
     (keyamp--map-leaders x '(previous-line . next-line))
     (keyamp--set-map x
       '(icomplete-backward-completions icomplete-forward-completions)))
 
   (with-sparse-keymap-x
    (keyamp--remap x
-     '((previous-line   . previous-line-or-history-element)
-       (next-line       . next-line-or-history-element)
-       (undo            . previous-line-or-history-element)
-       (delete-backward . next-line-or-history-element)))
+     '((previous-line . previous-line-or-history-element)
+       (next-line     . next-line-or-history-element)))
     (keyamp--set-map-hook x '(icomplete-minibuffer-setup-hook) nil nil :repeat))
 
   (with-sparse-keymap-x
    (keyamp--remap x
-     '((keyamp-insert   . exit-minibuffer)
-       (previous-line   . previous-line-or-history-element)
-       (next-line       . next-line-or-history-element)
-       (undo            . previous-line-or-history-element)
-       (delete-backward . next-line-or-history-element)))
+     '((keyamp-insert . exit-minibuffer)
+       (previous-line . previous-line-or-history-element)
+       (next-line     . next-line-or-history-element)))
     (keyamp--map-leaders x '(previous-line . next-line))
     (keyamp--set-map x
       '(previous-line-or-history-element next-line-or-history-element))))
@@ -968,13 +961,11 @@ of confirm and exit minibuffer."
           (lambda ()
             (keyamp--remap ido-completion-map
               '((keyamp-insert . ido-exit-minibuffer)
-                (previous-line . ido-prev-match)
-                (next-line     . ido-next-match)))))
+                (previous-line . ido-prev-match) (select-block     . ido-prev-match)
+                (next-line     . ido-next-match) (extend-selection . ido-next-match)))))
 
 (with-sparse-keymap-x
- (keyamp--map-leaders x '(previous-line . next-line))
- (keyamp--remap x
-   '((undo . ido-prev-match) (delete-backward . ido-next-match)))
+ (keyamp--map-leaders x '(select-block . extend-selection))
  (keyamp--set-map x '(ido-prev-match ido-next-match)))
 
 (with-eval-after-load 'dired
@@ -1233,6 +1224,12 @@ of confirm and exit minibuffer."
    (keyamp--set-map x '(image-previous-file image-next-file))))
 
 (with-eval-after-load 'esh-mode
+  (advice-add 'mac-mwheel-scroll :before
+              (lambda (&rest r)
+                (if (and (eq major-mode 'eshell-mode)
+                           keyamp-insert-p)
+                  (keyamp-command))))
+
   (keyamp--map eshell-mode-map '(("C-h" . eshell-interrupt-process)))
   (keyamp--remap eshell-mode-map
     '((cut-line-or-selection . eshell-clear-input)
