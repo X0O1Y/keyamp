@@ -2578,8 +2578,8 @@ The `:tangle FILE` header argument will be added when pulling in file contents."
     (move-to-column col t)
     (if file (insert-file-contents file))))
 
-(defun deactivate-mark-and-bol (&rest r)
-  "If region active deactivate mark and go to the beginning of line."
+(defun deactivate-mark-and-return (&rest r)
+  "If region active deactivate mark and return to the line before select."
   (interactive)
   (when (region-active-p)
     (deactivate-mark)
