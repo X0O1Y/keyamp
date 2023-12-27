@@ -27,15 +27,15 @@
   "Previous line. On the first line go to the last line of buffer."
   (interactive)
   (if (= (line-number-at-pos) 1)
-      (goto-line (count-lines (point-min) (point-max)))
-    (previous-line)))
+      (forward-line (count-lines (point-min) (point-max)))
+    (forward-line -1)))
 
 (defun down-line ()
   "Next line. On the last line go to the first line of buffer."
   (interactive)
-  (next-line)
+  (forward-line)
   (if (>= (line-number-at-pos) (+ 1 (count-lines (point-min) (point-max))))
-      (goto-line 1)))
+      (forward-line (- (count-lines (point-min) (point-max))))))
 
 (defun pop-local-mark-ring ()
   "Move cursor to last mark position of current buffer.
@@ -111,7 +111,7 @@ beginning of buffer."
                (> (current-column) 0))
           (eq last-command 'set-mark-command))
       (beg-of-line-or-block)
-    (beginning-of-buffer)))
+    (goto-char (point-min))))
 
 (defun end-of-line-or-buffer ()
   "If cursor is at the beginning of not empty line or last command is
@@ -124,11 +124,11 @@ line of buffer."
       (progn
         (end-of-line-or-block))
     (progn
-      (end-of-buffer)
+      (goto-char (point-max))
       (if (not (eq major-mode 'eshell-mode))
-          (previous-line)))))
+          (forward-line -1)))))
 
-(defvar brackets
+(defvar keyext-brackets
   '("“”" "()" "[]" "{}" "<>" "＜＞" "（）" "［］" "｛｝" "⦅⦆" "〚〛" "⦃⦄"
     "‹›" "«»" "「」" "〈〉" "《》" "【】" "〔〕" "⦗⦘" "『』" "〖〗" "〘〙" "｢｣"
     "⟦⟧" "⟨⟩" "⟪⟫" "⟮⟯" "⟬⟭" "⌈⌉" "⌊⌋" "⦇⦈" "⦉⦊" "❛❜" "❝❞" "❨❩"
@@ -140,11 +140,11 @@ bracket and a matching right bracket. Used by `select-text-in-quote'
 and others.")
 
 (defconst left-brackets
-  (mapcar (lambda (x) (substring x 0 1)) brackets)
+  (mapcar (lambda (x) (substring x 0 1)) keyext-brackets)
   "List of left bracket chars. Each element is a string.")
 
 (defconst right-brackets
-  (mapcar (lambda (x) (substring x 1 2)) brackets)
+  (mapcar (lambda (x) (substring x 1 2)) keyext-brackets)
   "List of right bracket chars. Each element is a string.")
 
 (defconst punctuation-regex "[!?\".,`'#$%&*+:;=@^|~]+"
@@ -177,7 +177,8 @@ The list of brackets to jump to is defined by `right-brackets'."
 (defun goto-matching-bracket ()
   "Move cursor to the matching bracket.
 If cursor is not on a bracket, call `backward-up-list'.
-The list of brackets to jump to is defined by `left-brackets' and `right-brackets'."
+The list of brackets to jump to is defined by `left-brackets'
+and `right-brackets'."
   (interactive)
   (if (nth 3 (syntax-ppss))
       (backward-up-list 1 'ESCAPE-STRINGS 'NO-SYNTAX-CROSSING)
@@ -207,7 +208,7 @@ The list of brackets to jump to is defined by `left-brackets' and `right-bracket
       (sort-subr nil 'forward-line 'end-of-line
                  (lambda ()
                    (search-forward ":" nil nil 1)
-                   (string-to-number (buffer-substring (point) (point-at-eol))))))))
+                   (string-to-number (buffer-substring (point) (pos-eol))))))))
 
 (defun narrow-to-region-or-block ()
   "Same as `narrow-to-region', but if no selection, narrow to the current block."
@@ -241,10 +242,7 @@ When `universal-argument' is called first, copy whole buffer
           (copy-region-as-kill (point-min) (point-max)))
       (if (region-active-p)
           (progn
-            (copy-region-as-kill (region-beginning) (region-end))
-            (when (eq last-command 'select-block)
-              (set-mark-command t)
-              (set-mark-command t)))
+            (copy-region-as-kill (region-beginning) (region-end)))
         (if (eq last-command this-command)
             (if (eobp)
                 (progn)
@@ -290,7 +288,8 @@ When `universal-argument' is called first, copy whole buffer
   "Paste. When called repeatedly, paste previous.
 This command calls `yank', and if repeated, call `yank-pop'.
 
-When `universal-argument' is called first with a number arg, paste that many times."
+When `universal-argument' is called first with a number arg,
+paste that many times."
   (interactive)
   (progn
     (when (and delete-selection-mode (region-active-p))
@@ -372,26 +371,6 @@ When `universal-argument' is called first with a number arg, paste that many tim
       (setq xn2 (point)))
     (transpose-regions xc1 xc2 xn1 xn2)
     (goto-char xn2)))
-
-(defun move-row-up ()
-  "Move row up."
-  (interactive)
-  (when (> (line-number-at-pos) 1)
-    (cut-line-or-selection)
-    (previous-line)
-    (paste-or-paste-previous)
-    (previous-line)
-    (setq this-command 'move-row-up)))
-
-(defun move-row-down ()
-  "Move row down."
-  (interactive)
-  (when (< (line-number-at-pos) (count-lines (point-min) (point-max)))
-    (cut-line-or-selection)
-    (next-line)
-    (paste-or-paste-previous)
-    (previous-line)
-    (setq this-command 'move-row-down)))
 
 (defun cut-bracket-text ()
   "Delete the matching brackets/quotes to the left of cursor,
@@ -928,15 +907,12 @@ This command does the inverse of `fill-region'."
       (while (re-search-forward " +" nil 1) (replace-match " "))
       (goto-char (point-max))))
 
-(defun reformat-to-multi-lines (&optional Begin End MinLength)
+(defun reformat-to-multi-lines (&optional Begin End)
   "Replace spaces by a newline at ~70 chars, on current block or selection.
 If `universal-argument' is called first, ask user for max width."
   (interactive)
-  (let (xp1 xp2 xminlen)
-    (setq (if MinLength MinLength
-            (if current-prefix-arg
-                (prefix-numeric-value current-prefix-arg)
-              fill-column)))
+  (let (xp1 xp2 (xminlen fill-column))
+    ;; (setq (if MinLength MinLength))
     (if (and Begin End)
         (setq xp1 Begin xp2 End)
       (let ((xbds (get-bounds-of-block-or-region)))
@@ -949,7 +925,7 @@ If `universal-argument' is called first, ask user for max width."
           (when (> (- (point) (line-beginning-position)) xminlen)
             (replace-match "\n")))))))
 
-(defun reformat-lines (&optional Width)
+(defun reformat-lines ()
   "Reformat current block or selection into short lines or 1 long line.
 When called for the first time, change to one line. Second call change
 it to multi-lines. Repeated call toggles.
@@ -965,20 +941,16 @@ exchange whitespace sequence."
   ;; and nil. This property is used to easily determine whether to
   ;; compact or uncompact, when this command is called again.
 
-  (let (xisLong xwidth xp1 xp2)
-    (setq xwidth (if Width Width
-                   (if current-prefix-arg
-                       (prefix-numeric-value current-prefix-arg)
-                     66)))
+  (let (xisLong xp1 xp2)
     (setq xisLong (if (eq last-command this-command)
                       (get this-command 'is-long-p)
                     nil))
     (let ((xbds (get-bounds-of-block-or-region)))
       (setq xp1 (car xbds) xp2 (cdr xbds)))
     (if current-prefix-arg
-        (reformat-to-multi-lines xp1 xp2 xwidth)
+        (reformat-to-multi-lines xp1 xp2)
       (if xisLong
-          (reformat-to-multi-lines xp1 xp2 xwidth)
+          (reformat-to-multi-lines xp1 xp2)
         (progn
           (reformat-whitespaces-to-one-space xp1 xp2))))
     (put this-command 'is-long-p (not xisLong))))
@@ -1406,7 +1378,8 @@ If there is selection, delete it first."
       (t (format-time-string "%Y-%m-%d"))))))
 
 (defun insert-bracket-pair (LBracket RBracket &optional WrapMethod)
-  "Insert brackets around selection, word, at point, and maybe move cursor in between.
+  "Insert brackets around selection, word, at point, and maybe move cursor
+ in between.
 LBracket and RBracket are strings. WrapMethod must be either `line' or
 `block'. `block' means between empty lines.
 
@@ -1693,7 +1666,7 @@ the selected char is “c”, not “a(b)c”.
 
 Supports one extra level: second call for \"<f6▮>\" will select <f6>."
   (interactive)
-  (let ((xskipChars (concat "^\"`'" (mapconcat #'identity brackets ""))))
+  (let ((xskipChars (concat "^\"`'" (mapconcat #'identity keyext-brackets ""))))
     (if (eq last-command this-command)
         (progn
           (deactivate-mark)
@@ -1797,7 +1770,8 @@ With prefix arg, find the previous file."
 (defun new-empty-buffer ()
   "Create a new empty buffer.
 New buffer is named file, file<2>, etc.
-On Emacs quit, if you want Emacs to prompt for save, set `buffer-offer-save' to t.
+On Emacs quit, if you want Emacs to prompt for save, set `buffer-offer-save'
+to t.
 It returns the buffer."
   (interactive)
   (let ((xbuf (generate-new-buffer "file")))
@@ -1807,11 +1781,11 @@ It returns the buffer."
 
 (defvar recently-closed-buffers nil
   "A alist of recently closed buffers. Each element is (bufferName . filePath).
-The max number to track is controlled by the variable `recently-closed-buffers-max'.")
+The max number to track is controlled by the variable
+`recently-closed-buffers-max'.")
 
-(defcustom recently-closed-buffers-max 40
-  "The maximum length for `recently-closed-buffers'."
-  :type 'integer)
+(defvar recently-closed-buffers-max 40
+  "The maximum length for `recently-closed-buffers'.")
 
 (declare-function minibuffer-keyboard-quit "delsel" ())
 (declare-function org-edit-src-save "org-src" ())
@@ -1912,11 +1886,13 @@ If the path starts with “http://”, open the URL in browser.
 Input path can be {relative, full path, URL}.
 Path may have a trailing “:‹n›” that indicates line number, or “:‹n›:‹m›”
 with line and column number. If so, jump to that line number.
-If path does not have a file extension, automatically try with “.el” for elisp files.
+If path does not have a file extension, automatically try with “.el”
+for elisp files.
 
 See also `open-file-at-cursor-pre-hook'.
 
-This command is similar to `find-file-at-point' but without prompting for confirmation."
+This command is similar to `find-file-at-point' but without prompting
+for confirmation."
   (interactive)
   (let* ((xinput
           (if (region-active-p)
@@ -2015,13 +1991,18 @@ To build, call `universal-argument' first."
     ("rb" . "ruby")
     ("sh" . "bash")
     ("ts" . "deno run"))
-  "A association list that maps file extension to program name, used by `run-current-file'. Each item is (EXT . PROGRAM), both strings. EXT is file suffix (without the dot prefix), PROGRAM is program name or path, with possibly command options. You can customize this alist.")
+  "A association list that maps file extension to program name, used by
+`run-current-file'. Each item is (EXT . PROGRAM), both strings. EXT
+is file suffix (without the dot prefix), PROGRAM is program name or path,
+with possibly command options. You can customize this alist.")
 
 (defun run-current-file ()
   "Execute the current file.
-For example, if the current buffer is x.py, then it'll call [python x.py] in a shell.
+For example, if the current buffer is x.py, then it'll call [python x.py]
+in a shell.
 Output is printed to buffer “*run output*”.
-File suffix is used to determine which program to run, set in the variable `run-current-file-map'.
+File suffix is used to determine which program to run, set in the variable
+`run-current-file-map'.
 
 If the file is modified or not saved, save it automatically before run."
   (interactive)
@@ -2374,10 +2355,11 @@ Force switch to current buffer to update `other-buffer'."
                         ibuffer-never-show-predicates)
           (ibuffer-jump-to-buffer xbuf))))))
 
-(defun flyspell-goto-prev-error ()
-  "Go to prev error."
-  (interactive)
-  (flyspell-goto-next-error t))
+(with-eval-after-load 'flyspell
+  (defun flyspell-goto-prev-error ()
+    "Go to prev error."
+    (interactive)
+    (flyspell-goto-next-error t)))
 
 (defun icomplete-exit-or-force-complete-and-exit ()
   "Exit if file completion. Else force complete and exit."
@@ -2483,8 +2465,8 @@ Show current agenda. Do not select other window, balance windows."
   (call-process "~/.tmux.sh" nil 0 nil))
 
 (defun mosh-helper ()
-  (interactive)
   "Mosh helper. Cleanup detached sessions."
+  (interactive)
   (call-process "~/.mosh.sh" nil 0 nil))
 
 (defun stow ()
@@ -2506,7 +2488,7 @@ Show current agenda. Do not select other window, balance windows."
 
 (defun who-called-defun (oldfun format &rest args)
   "Backtrace. For example, to find out who called `message':
-(advice-add 'message :around #'who-called-defun)"
+(advice-add \='message :around #\='who-called-defun)"
   (let ((trace nil) (n 1) (frame nil))
     (while (setf frame (backtrace-frame n))
       (setf n (1+ n)
@@ -2515,7 +2497,7 @@ Show current agenda. Do not select other window, balance windows."
 
 (defun suppress-messages (oldfun &rest args)
   "Suppress messages from function. For example:
-(advice-add 'ibuffer-update :around 'suppress-messages)"
+(advice-add \='ibuffer-update :around \='suppress-messages)"
   (cl-flet ((silence (&rest args1) (ignore)))
     (advice-add 'message :around #'silence)
     (unwind-protect
@@ -2561,13 +2543,9 @@ This checks in turn:
           ((setq sym (variable-at-point)) (describe-variable sym))
           ;; now let it operate fully -- i.e. also check the
           ;; surrounding sexp for a function call.
-          ((setq sym (function-at-point)) (describe-function sym))))
+          ;; ((setq sym (function-at-point)) (describe-function sym))
+          ))
   (setq this-command 'split-window-below))
-
-(defun mark-mode ()
-  "Same as `set-mark-command' for key binding."
-  (interactive)
-  (set-mark-command nil))
 
 (defun run-at-time-wrap (time func &rest args)
   "Wrap for `run-at-time'."
@@ -2591,20 +2569,45 @@ The `:tangle FILE` header argument will be added when pulling in file contents."
         (file (if current-prefix-arg (read-file-name "Enter file name: ") nil)))
     (insert
      (format "#+begin_src %s%s" lang (if file (concat " :tangle " file) "")))
-    (newline)(newline)
-    (move-to-column col t)(insert "#+end_src")(newline)
-    (forward-line -2)(move-to-column col t)
+    (newline)
+    (newline)
+    (move-to-column col t)
+    (insert "#+end_src")
+    (newline)
+    (forward-line -2)
+    (move-to-column col t)
     (if file (insert-file-contents file))))
 
-(advice-add 'scroll-down-command     :after (lambda (&rest r) "Recenter." (recenter)))
-(advice-add 'scroll-up-command       :after (lambda (&rest r) "Recenter." (recenter)))
-(advice-add 'isearch-repeat-backward :after (lambda (&rest r) "Recenter." (recenter)))
-(advice-add 'isearch-repeat-forward  :after (lambda (&rest r) "Recenter." (recenter)))
-(advice-add 'prev-user-buffer        :after (lambda (&rest r) "Recenter." (recenter)))
-(advice-add 'next-user-buffer        :after (lambda (&rest r) "Recenter." (recenter)))
-(advice-add 'json-pretty-print-buffer :after (lambda (&rest r) "Message." (message "%s" "Pretty print JSON")))
+(defun deactivate-mark-and-bol (&rest r)
+  "If region active deactivate mark and go to the beginning of line."
+  (interactive)
+  (when (region-active-p)
+    (deactivate-mark)
+    (when (eq last-command 'select-block)
+      (set-mark-command t)
+      (set-mark-command t))))
+
+(advice-add 'scroll-down-command     :after (lambda (&rest r) "recenter" (recenter)))
+(advice-add 'scroll-up-command       :after (lambda (&rest r) "recenter" (recenter)))
+(advice-add 'isearch-repeat-backward :after (lambda (&rest r) "recenter" (recenter)))
+(advice-add 'isearch-repeat-forward  :after (lambda (&rest r) "recenter" (recenter)))
+(advice-add 'prev-user-buffer        :after (lambda (&rest r) "recenter" (recenter)))
+(advice-add 'next-user-buffer        :after (lambda (&rest r) "recenter" (recenter)))
+
 (add-hook 'replace-update-post-hook 'recenter)
+
+(advice-add 'json-pretty-print-buffer :after
+            (lambda (&rest r) "message" (message "%s" "Pretty print json")))
+(advice-add 'next-line-or-history-element :before
+            (lambda (&rest r) "move point to the end of line beforehand"
+              (goto-char (point-max))))
+(advice-add 'mouse-set-point :before
+            (lambda (&rest r) "copy selection with left click"
+              (if (region-active-p) (copy-line-or-selection))))
 
 (provide 'keyext)
 
+;; Local Variables:
+;; byte-compile-warnings: (not lexical unresolved)
+;; End:
 ;;; keyext.el ends here

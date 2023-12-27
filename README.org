@@ -10,7 +10,7 @@ Input model based on [[file:packages/keyamp.el][Keyamp]] for Emacs.
 
 * ANSI keyboard
 
-- [[file:karabiner/karabiner.json][Karabiner]] config file. Emacs Keyamp mode integration!
+- [[file:karabiner/karabiner.json][Karabiner]] config file. Emacs Keyamp mode integration
 - [[http://www.keyboard-layout-editor.com/#/gists/106550cd49793787784ed1b9c9117c3d][Layout]] based on [[file:layouts/Engram.bundle][Engineer Engram]]:
 - Automatic Russian layout support for command bindings
 

@@ -170,7 +170,7 @@
     {
       "description": "left_command",
       "manipulators": [
-      {
+        {
           "type": "basic",
           "from": {
             "key_code": "left_command",
@@ -252,11 +252,6 @@
             },
             {
               "type": "variable_if",
-              "name": "left_command pressed",
-              "value": 1
-            },
-            {
-              "type": "variable_if",
               "name": "insert mode activated",
               "value": 1
             }
@@ -266,70 +261,6 @@
               "key_code": "delete_or_backspace"
             }
           ]
-        },
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "left_command",
-            "modifiers": {
-              "optional": [
-                "any"
-              ]
-            }
-          },
-          "conditions": [
-            {
-              "type": "frontmost_application_if",
-              "file_paths": [
-                "/Emacs"
-              ]
-            },
-            {
-              "type": "variable_if",
-              "name": "insert mode activated",
-              "value": 1
-            }
-          ],
-          "to_after_key_up": [
-            {
-              "key_code": "delete_or_backspace"
-            },
-            {
-              "set_variable": {
-                "name": "left_command pressed",
-                "value": 1
-              }
-            }
-          ],
-          "to_if_held_down": [
-            {
-              "key_code": "equal_sign",
-              "modifiers": [
-                "left_shift",
-                "left_control"
-              ],
-              "repeat": false,
-              "halt": true
-            }
-          ],
-          "to_delayed_action": {
-            "to_if_invoked": [
-              {
-                "set_variable": {
-                  "name": "left_command pressed",
-                  "value": 0
-                }
-              }
-            ],
-            "to_if_canceled": [
-              {
-                "set_variable": {
-                  "name": "left_command pressed",
-                  "value": 0
-                }
-              }
-            ]
-          }
         },
         {
           "type": "basic",
@@ -685,7 +616,7 @@
               "repeat": false,
               "halt": true
             }
-          ]            
+          ]
         }
       ]
     },
@@ -2472,11 +2403,11 @@
             }
           ],
           "to_if_held_down": [
-          {
+            {
               "shell_command": "/Applications/emacsclient --no-wait --eval '(save-buffers-kill-terminal)' && sleep 0.05 && open -a 'Emacs'",
               "repeat": false,
               "halt": true
-            }            
+            }
           ]
         },
         {
@@ -6835,14 +6766,8 @@
           ],
           "to_if_held_down": [
             {
-              "key_code": "b",
-              "modifiers": [
-                "left_shift",
-                "left_control"
-              ]
-            },
-            {
-              "key_code": "f8",
+              "shell_command": "open -a SwitchBetweenAudioDevices.app",
+              "repeat": false,
               "halt": true
             }
           ]
@@ -7505,7 +7430,7 @@
     {
       "description": "left_arrow",
       "manipulators": [
-      {
+        {
           "type": "basic",
           "from": {
             "key_code": "left_arrow",
@@ -7534,7 +7459,7 @@
     {
       "description": "right_arrow",
       "manipulators": [
-      {
+        {
           "type": "basic",
           "from": {
             "key_code": "right_arrow",
@@ -7559,7 +7484,7 @@
           ]
         }
       ]
-    }      
+    }
   ]
 }
 
