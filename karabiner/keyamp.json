@@ -423,6 +423,35 @@
               "key_code": "q"
             }
           ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "q",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Books"
+              ]
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "q",
+              "modifiers": [
+                "left_command"
+              ],
+              "repeat": false,
+              "halt": true
+            }
+          ]
         }
       ]
     },

@@ -103,30 +103,37 @@ Call this repeatedly will cycle all positions in `mark-ring'."
       (end-of-line))))
 
 (defun beg-of-line-or-buffer ()
-  "If cursor is at the end of not empty line or last command is
-`set-mark-command' then move to the beginning of line. Else go to the
-beginning of buffer."
+  "If point is at the end of line, then go to the beginning of line. Else go
+to the beginning of buffer, next press to the end of buffer, next press
+return to the beginning of buffer. "
   (interactive)
-  (if (or (and (equal (point) (line-end-position))
-               (> (current-column) 0))
-          (eq last-command 'set-mark-command))
-      (beg-of-line-or-block)
-    (goto-char (point-min))))
+  (if (equal (point) (point-min))
+      (progn
+        (if (not (eq major-mode 'eshell-mode))
+            (progn
+              (goto-char (point-max))
+              (forward-line -1))))
+    (if (and (equal (point) (line-end-position))
+             (> (current-column) 0))
+        (beg-of-line-or-block)
+      (goto-char (point-min)))))
 
 (defun end-of-line-or-buffer ()
-  "If cursor is at the beginning of not empty line or last command is
-`set-mark-command' then move to the end of line. Else go to the last
-line of buffer."
+  "If point is at the beginning of line, then go to the end of line. Else go
+to the end of buffer, next press to the beginning of buffer, next press
+return to the end of buffer."
   (interactive)
-  (if (or (and (equal (point) (line-beginning-position))
-               (> (current-column) 0))
-          (eq last-command 'set-mark-command))
-      (progn
-        (end-of-line-or-block))
+  (if (eq (count-lines 1 (point)) (- (count-lines (point-min) (point-max)) 1))
+      (goto-char (point-min))
     (progn
-      (goto-char (point-max))
-      (if (not (eq major-mode 'eshell-mode))
-          (forward-line -1)))))
+      (if (and (equal (point) (line-beginning-position))
+               (> (current-column) 0))
+          (progn
+            (end-of-line-or-block))
+        (progn
+          (goto-char (point-max))
+          (if (not (eq major-mode 'eshell-mode))
+              (forward-line -1)))))))
 
 (defvar keyext-brackets
   '("“”" "()" "[]" "{}" "<>" "＜＞" "（）" "［］" "｛｝" "⦅⦆" "〚〛" "⦃⦄"
@@ -1707,6 +1714,7 @@ You can override this function to get your idea of “user buffer”."
    ((string-equal buffer-file-truename org-agenda-file-1) nil)
    ((string-equal buffer-file-truename org-agenda-file-2) nil)
    ((string-equal buffer-file-truename org-agenda-file-3) nil)
+   ((string-match ".+em/project+." default-directory) nil)
    (t t)))
 
 (defun prev-user-buffer ()
@@ -1731,6 +1739,39 @@ You can override this function to get your idea of “user buffer”."
   (let ((i 0))
     (while (< i 20)
       (if (not (user-buffer-p))
+          (progn
+            (next-buffer)
+            (setq i (1+ i)))
+        (progn
+          (setq i 100))))))
+
+(defun project-buffer-p ()
+  "Return t if current buffer is a project buffer, else nil."
+  (interactive)
+  (cond
+   ((and (string-match ".+em/project+." default-directory)
+         (not (string-equal major-mode "dired-mode"))) t)))
+
+(defun prev-project-buffer ()
+  "Switch to the previous project buffer."
+  (interactive)
+  (previous-buffer)
+  (let ((i 0))
+    (while (< i 20)
+      (if (not (project-buffer-p))
+          (progn
+            (previous-buffer)
+            (setq i (1+ i)))
+        (progn
+          (setq i 100))))))
+
+(defun next-project-buffer ()
+  "Switch to the next project buffer."
+  (interactive)
+  (next-buffer)
+  (let ((i 0))
+    (while (< i 20)
+      (if (not (project-buffer-p))
           (progn
             (next-buffer)
             (setq i (1+ i)))
@@ -1946,10 +1987,10 @@ for confirmation."
                         (find-file (concat xfnamecore ".ts"))
                       (if (> (length xpath) 0)
                           (find-file xpath)
-                        (info)))))
+                        (delete-other-windows)))))
               (if (file-exists-p (concat xpath ".el"))
                   (find-file (concat xpath ".el"))
-                (info)))))))))
+                (delete-other-windows)))))))))
 
 
 
@@ -2355,14 +2396,17 @@ Force switch to current buffer to update `other-buffer'."
                         ibuffer-never-show-predicates)
           (ibuffer-jump-to-buffer xbuf))))))
 
-(with-eval-after-load 'flyspell
-  (defun flyspell-goto-prev-error ()
-    "Go to prev error."
-    (interactive)
-    (flyspell-goto-next-error t)))
+(defun flyspell-goto-prev-error ()
+  "Go to prev error."
+  (interactive)
+  (flyspell-goto-next-error t))
 
 (defun icomplete-exit-or-force-complete-and-exit ()
-  "Exit if file completion. Else force complete and exit."
+  "Exit if file completion. It means use content of minibuffer as it is, no
+select completion candidates. Else force complete and exit, that is select
+and use first completion candidate.
+In case file completion, most cases no need to complete, because there is NO
+right candidate. Otherwise, almost all cases user MUST select a candidate."
   (interactive)
   (if (eq (icomplete--category) 'file)
       (exit-minibuffer)
@@ -2479,7 +2523,7 @@ Show current agenda. Do not select other window, balance windows."
   "Start screensaver in tmux."
   (shell-command "tmux clock-mode && echo"))
 
-(defun news ()
+(defun toggle-gnus ()
   "Show news."
   (interactive)
   (if (get-buffer "*Group*")
@@ -2524,11 +2568,9 @@ Show current agenda. Do not select other window, balance windows."
   "Show the documentation of the Elisp function and variable near point.
 This checks in turn:
 • for a function name where point is;
-• for a variable name where point is;
-• for a surrounding function call."
+• for a variable name where point is."
   (interactive)
   (let (sym)
-    ;; sigh, function-at-point is too clever, we want only the first half
     (cond ((setq sym (ignore-errors
                        (with-syntax-table emacs-lisp-mode-syntax-table
                          (save-excursion
@@ -2540,11 +2582,7 @@ This checks in turn:
                            (let ((obj (read (current-buffer))))
                              (and (symbolp obj) (fboundp obj) obj))))))
            (describe-function sym))
-          ((setq sym (variable-at-point)) (describe-variable sym))
-          ;; now let it operate fully -- i.e. also check the
-          ;; surrounding sexp for a function call.
-          ;; ((setq sym (function-at-point)) (describe-function sym))
-          ))
+          ((setq sym (variable-at-point)) (describe-variable sym))))
   (setq this-command 'split-window-below))
 
 (defun run-at-time-wrap (time func &rest args)
