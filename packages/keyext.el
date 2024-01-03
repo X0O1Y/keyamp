@@ -2388,7 +2388,7 @@ Force switch to current buffer to update `other-buffer'."
   (interactive)
   (let ((xbuf (buffer-name)))
     (if (string-equal major-mode "ibuffer-mode")
-        (news)
+        (toggle-gnus)
       (progn
         (switch-to-buffer xbuf)
         (ibuffer)
@@ -2524,7 +2524,7 @@ Show current agenda. Do not select other window, balance windows."
   (shell-command "tmux clock-mode && echo"))
 
 (defun toggle-gnus ()
-  "Show news."
+  "Toggle gnus."
   (interactive)
   (if (get-buffer "*Group*")
       (switch-to-buffer "*Group*")
@@ -2597,24 +2597,11 @@ This checks in turn:
   (mapc #'dired-maybe-insert-subdir
         (seq-filter #'file-directory-p (directory-files-recursively dir "" t))))
 
-(defun org-insert-source-code (&optional file)
-  "Insert source code block for LANGUAGE.  Optionally pull in FILE contents.
-With a `\\[universal-argument]' prefix, prompts for FILE.
-The `:tangle FILE` header argument will be added when pulling in file contents."
+(defun org-insert-source-code ()
+  "Insert source code block."
   (interactive)
-  (let ((col (current-column))
-        (lang "bash")
-        (file (if current-prefix-arg (read-file-name "Enter file name: ") nil)))
-    (insert
-     (format "#+begin_src %s%s" lang (if file (concat " :tangle " file) "")))
-    (newline)
-    (newline)
-    (move-to-column col t)
-    (insert "#+end_src")
-    (newline)
-    (forward-line -2)
-    (move-to-column col t)
-    (if file (insert-file-contents file))))
+  (org-insert-structure-template "src")
+  (newline))
 
 (defun deactivate-mark-and-return (&rest r)
   "If region active deactivate mark and return to the line before select."

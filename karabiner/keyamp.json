@@ -6700,9 +6700,15 @@
               ]
             }
           },
-          "to": [
+          "to_after_key_up": [
             {
-              "shell_command": "open -a Books",
+              "shell_command": "open -a Books"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "shell_command": "open -a Weather",
+              "repeat": false,
               "halt": true
             }
           ]

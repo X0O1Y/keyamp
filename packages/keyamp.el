@@ -68,7 +68,7 @@
 
 (defvar keyamp-layouts nil "A alist. Key is layout name, string type.
 Value is a alist, each element is of the form (\"e\" . \"d\").
-First char is qwerty, second is corresponding char of the destination layout.
+First char is QWERTY, second is corresponding char of the destination layout.
 When a char is not in this alist, they are assumed to be the same.")
 
 (push '("qwerty" . nil) keyamp-layouts)
@@ -96,7 +96,7 @@ When a char is not in this alist, they are assumed to be the same.")
   "The current keyboard layout. Value is a key in `keyamp-layouts'.")
 
 (defvar keyamp--convert-table nil
-  "A alist that's the conversion table from qwerty to current layout.
+  "A alist that's the conversion table from QWERTY to current layout.
 Value structure is one of the key's value of `keyamp-layouts'.
 Value is programmatically set from value of `keyamp-current-layout'.
 Do not manually set this variable.")
@@ -117,7 +117,7 @@ converted according to `keyamp--convert-table'."
 
 (defmacro keyamp--map (KeymapName KeyCmdAlist &optional Direct-p)
   "Map `keymap-set' over a alist KEYCMDALIST, with key layout remap.
-The key is remapped from qwerty to the current keyboard layout by
+The key is remapped from QWERTY to the current keyboard layout by
 `keyamp--convert-kbd-str'.
 If Direct-p is t, do not remap key to current keyboard layout."
   (let ((xkeymapName (make-symbol "keymap-name")))
@@ -201,40 +201,34 @@ Activate command, insert or repeat mode optionally."
     ("v" . "з") ("w" . "щ") ("x" . "ч") ("y" . "ц") ("z" . "х")
     ("." . "р") ("?" . "т") ("-" . "и") ("," . "п") ("'" . "е")
     ("`" . "ё") ("{" . "ъ") ("\"" . "н"))
-  "Mapping for `keyamp-define-input-source'")
+  "Mapping for `keyamp-map-input-source'")
 
-(defun keyamp-quail-get-translation (from)
+(defun keyamp-quail-get-translation (Xfrom)
   "Get translation Engineer Engram to russian-computer.
 From character to character code."
-  (let ((to (alist-get from keyamp-engineer-engram-to-russian-computer
+  (let ((xto (alist-get Xfrom keyamp-engineer-engram-to-russian-computer
              nil nil 'string-equal)))
-    (when (stringp to)
-      (string-to-char to))))
+    (when (stringp xto)
+      (string-to-char xto))))
 
-(defun keyamp-define-input-source (input-method)
+(defun keyamp-map-input-source (input-method)
   "Build reverse mapping for `input-method'.
 Use Russian input source for command mode. Respect Engineer Engram layout."
-  (interactive
-   (list (read-input-method-name "Use input method (default current): ")))
-  (if (and input-method (symbolp input-method))
-      (setq input-method (symbol-name input-method)))
-  (let ((current current-input-method)
-        (modifiers '(nil (control))))
-    (when input-method
-      (activate-input-method input-method))
+  (let ((xinput (symbol-name input-method))
+        (xmods '(nil (control))))
+    (activate-input-method xinput)
     (when (and current-input-method quail-keyboard-layout)
-      (dolist (map (cdr (quail-map)))
-        (let* ((to (car map))
-               (from (if (string-equal keyamp-current-layout "engineer-engram")
-                         (keyamp-quail-get-translation (char-to-string to))
-                       (quail-get-translation (cadr map) (char-to-string to) 1))))
-          (when (and (characterp from) (characterp to))
-            (dolist (mod modifiers)
+      (dolist (xmap (cdr (quail-map)))
+        (let* ((xto (car xmap))
+               (xfrom (if (string-equal keyamp-current-layout "engineer-engram")
+                         (keyamp-quail-get-translation (char-to-string xto))
+                       (quail-get-translation (cadr xmap) (char-to-string xto) 1))))
+          (when (and (characterp xfrom) (characterp xto))
+            (dolist (x xmods)
               (define-key local-function-key-map
-                (vector (append mod (list from)))
-                (vector (append mod (list to)))))))))
-    (when input-method
-      (activate-input-method current))))
+                          (vector (append x (list xfrom)))
+                          (vector (append x (list xto))))))))))
+  (activate-input-method nil))
 
 
 
@@ -248,23 +242,25 @@ Use Russian input source for command mode. Respect Engineer Engram layout."
                               "
   "Engineer Engram keyboard layout for Quail, e.g. for input method.")
 
-(require 'quail)
-(push (cons "engineer-engram" quail-keyboard-layout-engineer-engram)
-      quail-keyboard-layout-alist)
+(defun keyamp-push-quail-keyboard-layout ()
+  "Push keyboard layout to quail."
+  (require 'quail)
+  (push (cons "engineer-engram" quail-keyboard-layout-engineer-engram)
+        quail-keyboard-layout-alist))
 
 (defun keyamp-qwerty-to-engineer-engram ()
-  "Toggle translate qwerty layout to engineer engram on Emacs level.
+  "Toggle translate QWERTY layout to Engineer Engram on Emacs level.
 Useful when Engineer Engram layout not available on OS or keyboard level."
   (interactive)
   (if (get 'keyamp-qwerty-to-engineer-engram 'state)
       (progn
         (put 'keyamp-qwerty-to-engineer-engram 'state nil)
         (quail-set-keyboard-layout "standard")
-        (message "Translation deactivated"))
+        (message "QWERTY layout deactivated"))
     (progn
       (put 'keyamp-qwerty-to-engineer-engram 'state t)
       (quail-set-keyboard-layout "engineer-engram")
-      (message "Translation activated")))
+      (message "QWERTY layout activated")))
   (let ()
     (keyamp--map-translation
       '(("-" . "#") ("=" . "%") ("`" . "`")  ("q" . "b") ("w" . "y") ("e" . "o")
@@ -444,7 +440,7 @@ is enabled.")
     ("9" . emacs-uptime)
     ("0" . abbrev-mode)
     ("-" . move-to-column)
-    ("=" . eww)
+    ("=" . butterfly)
     ("y" . find-name-dired)
     ("u" . bookmark-jump)
 
@@ -498,7 +494,7 @@ is enabled.")
     ("`" . next-buffer)
     ("1" . view-lossage)
     ("2" . insert-kbd-macro)
-    ("3" . next-project-buffer)
+    ("3" . config)
     ("4" . change-bracket-pairs)
     ("5" . json-pretty-print-buffer)
 
@@ -651,12 +647,12 @@ is enabled.")
      (keyamp-insert           . delete-other-windows)
      (newline                 . next-user-buffer)
      (set-mark-command        . new-empty-buffer)
-     (cut-line-or-selection   . works)
+     (cut-line-or-selection   . next-project-buffer)
      (copy-line-or-selection  . agenda)
      (paste-or-paste-previous . tasks)
      (backward-left-bracket   . downloads)
      (forward-right-bracket   . player)
-     (kmacro-play             . prev-project-buffer)))
+     (kmacro-play             . config)))
  (keyamp--set-map x
    '(prev-user-buffer     next-user-buffer
      delete-other-windows save-close-current-buffer
@@ -679,12 +675,12 @@ is enabled.")
      (keyamp-insert           . delete-other-windows)
      (newline                 . next-project-buffer)
      (set-mark-command        . new-empty-buffer)
-     (cut-line-or-selection   . works)
+     (cut-line-or-selection   . next-project-buffer)
      (copy-line-or-selection  . agenda)
      (paste-or-paste-previous . tasks)
      (backward-left-bracket   . downloads)
      (forward-right-bracket   . player)
-     (kmacro-play             . prev-project-buffer)))
+     (kmacro-play             . config)))
  (keyamp--set-map x '(prev-project-buffer next-project-buffer)))
 
 (with-sparse-keymap-x
@@ -706,7 +702,7 @@ is enabled.")
  (keyamp--remap x
    '((open-line               . prev-user-buffer)
      (newline                 . tasks)
-     (cut-line-or-selection   . works)
+     (cut-line-or-selection   . next-project-buffer)
      (copy-line-or-selection  . agenda)
      (paste-or-paste-previous . tasks)))
  (keyamp--set-map x '(tasks)))
@@ -715,11 +711,12 @@ is enabled.")
  (keyamp--map-leaders x '(open-line . newline))
  (keyamp--remap x
    '((open-line               . prev-user-buffer)
-     (newline                 . works)
-     (cut-line-or-selection   . works)
+     (newline                 . config)
+     (cut-line-or-selection   . next-project-buffer)
      (copy-line-or-selection  . agenda)
-     (paste-or-paste-previous . tasks)))
- (keyamp--set-map x '(works)))
+     (paste-or-paste-previous . tasks)
+     (kmacro-play             . config)))
+ (keyamp--set-map x '(config)))
 
 (with-sparse-keymap-x
  (keyamp--map-leaders x '(open-line . newline))
@@ -807,6 +804,7 @@ is enabled.")
 
 (with-sparse-keymap-x
  (keyamp--remap x '((previous-line . up-line) (next-line . down-line)))
+ (keyamp--map x '(("TAB" . toggle-ibuffer) ("<tab>" . toggle-ibuffer)))
  (keyamp--map-leaders x '(previous-line . next-line))
  (keyamp--set-map x '(up-line down-line)))
 
@@ -1059,6 +1057,7 @@ of confirm and exit minibuffer."
 
   (keyamp--remap ibuffer-mode-map
     '((keyamp-insert           . ibuffer-visit-buffer)
+      (keyamp-escape           . alternate-buffer)
       (end-of-line-or-block    . ibuffer-forward-filter-group)
       (beg-of-line-or-block    . ibuffer-backward-filter-group)
       (insert-space-before     . delete-frame)
@@ -1074,11 +1073,12 @@ of confirm and exit minibuffer."
       (delete-backward         . delete-other-windows)
       (newline                 . next-user-buffer)
       (mark-mode               . new-empty-buffer)
-      (cut-line-or-selection   . works)
+      (cut-line-or-selection   . next-project-buffer)
       (copy-line-or-selection  . agenda)
       (paste-or-paste-previous . tasks)
       (backward-left-bracket   . downloads)
-      (forward-right-bracket   . player)))
+      (forward-right-bracket   . player)
+      (kmacro-play             . config)))
 
   (keyamp--map ibuffer-mode-filter-group-map
     '(("C-h" . help-command) ("<mouse-1>" . mouse-set-point)
@@ -1286,7 +1286,7 @@ of confirm and exit minibuffer."
     (keyamp--set-map x '(eshell-previous-input eshell-next-input) :command)
     (keyamp--set-map-hook x '(eshell-mode-hook) nil :insert)))
 
-;; if jump from insert mode then activate command mode
+;; activate command mode when jump from insert mode
 (with-sparse-keymap-x
  (keyamp--set-map x
    '(alternate-buf-or-frame
@@ -1302,9 +1302,9 @@ of confirm and exit minibuffer."
 
 (with-eval-after-load 'vterm
   (keyamp--map vterm-mode-map
-    '(("C-h" . term-interrupt-subjob)
-      ("C-q" . term-interrupt-subjob)
-      ("C-r" . vterm-send-next-key)))
+    '(("C-h" . term-interrupt-subjob) ("C-q" . term-interrupt-subjob)
+      ("C-r" . delete-other-windows)  ("C-t" . delete-other-windows)
+      ("C-u" . vterm-send-next-key)))
   (keyamp--remap vterm-mode-map
     '((select-block            . vterm-send-up)
       (cut-all                 . vterm-clear)
@@ -1369,17 +1369,20 @@ of confirm and exit minibuffer."
 
 (with-eval-after-load 'gnus-art
   (keyamp--remap gnus-mime-button-map
-    '((keyamp-insert . gnus-article-press-button))))
+    '((keyamp-insert . gnus-article-press-button)))
+  (keyamp--remap gnus-article-mode-map
+    '((undo            . backward-button)
+      (delete-backward . forward-button))))
 
 (with-eval-after-load 'gnus-sum
   (keyamp--map gnus-summary-mode-map
     '(("C-h" . gnus-summary-delete-article)
-      ("C-r" . gnus-summary-save-parts)
-      ("TAB" . ignore)))
+      ("TAB" . ignore) ("<tab>" . ignore)))
   (keyamp--remap gnus-summary-mode-map
     '((keyamp-insert . gnus-summary-scroll-up)
       (open-line     . gnus-summary-prev-group)
-      (newline       . gnus-summary-next-group)))
+      (newline       . gnus-summary-next-group)
+      (save-buffer   . gnus-summary-save-parts)))
 
   (with-sparse-keymap-x
    (keyamp--map-leaders x '(open-line . newline))
@@ -1570,6 +1573,7 @@ of confirm and exit minibuffer."
                  dired-find-prev-file             t
                  dired-jump                       t
                  downloads                        t
+                 next-project-buffer              t
                  next-user-buffer                 t
                  player                           t
                  prev-user-buffer                 t
@@ -1578,7 +1582,6 @@ of confirm and exit minibuffer."
                  sun-moon                         t
                  tasks                            t
                  view-echo-area-messages          t
-                 works                            t
                  xref-find-definitions            t
                  xref-go-back                     t)))
 
@@ -1745,8 +1748,9 @@ If run by idle timer then emulate escape keyboard press."
     (add-hook 'post-command-hook     'keyamp-indicate)
     (add-function :after after-focus-change-function #'keyamp-command)
     (keyamp-catch-tty-ESC)
-    (keyamp-define-input-source 'russian-computer)
     (keyamp-command)
+    (run-with-timer 1 nil 'keyamp-map-input-source 'russian-computer)
+    (run-with-timer 2 nil 'keyamp-push-quail-keyboard-layout)
     (setq keyamp-idle-timer
           (run-with-idle-timer keyamp-idle-timeout t 'keyamp-escape t))))
 
