@@ -285,11 +285,11 @@ When `universal-argument' is called first, copy whole buffer
   (kill-new (buffer-string))
   (message "Buffer content copy"))
 
-(defun cut-all ()
-  "Cut buffer content to `kill-ring'. Respects `narrow-to-region'."
-  (interactive)
-  (kill-new (buffer-string))
-  (delete-region (point-min) (point-max)))
+;; (defun cut-all ()
+;;   "Cut buffer content to `kill-ring'. Respects `narrow-to-region'."
+;;   (interactive)
+;;   (kill-new (buffer-string))
+;;   (delete-region (point-min) (point-max)))
 
 (defun paste-or-paste-previous ()
   "Paste. When called repeatedly, paste previous.
@@ -316,7 +316,7 @@ paste that many times."
 (defun show-kill-ring ()
   "Insert all `kill-ring' content in a new buffer named *copy stack*."
   (interactive)
-  (let ((xbuf (generate-new-buffer "*copy stack"))
+  (let ((xbuf (generate-new-buffer "*copy stack*"))
         (inhibit-read-only t))
     (progn
       (switch-to-buffer xbuf)
@@ -326,58 +326,6 @@ paste that many times."
          (insert x show-kill-ring-separator ))
        kill-ring))
     (goto-char (point-min))))
-
-(defun move-block-up ()
-  "Swap the current text block with the previous."
-  (interactive)
-  (let ((xp0 (point))
-        xc1 xc2 ; curr
-        xp1 xp2 ; prev
-        )
-    (if (re-search-forward "\n[ \t]*\n+" nil "move")
-        (setq xc2 (match-beginning 0))
-      (setq xc2 (point)))
-    (goto-char xp0)
-    (if (re-search-backward "\n[ \t]*\n+" nil "move")
-        (progn
-          (skip-chars-backward "\n \t")
-          (setq xp2 (point))
-          (skip-chars-forward "\n \t")
-          (setq xc1 (point)))
-      (error "No previous block."))
-    (goto-char xp2)
-    (if (re-search-backward "\n[ \t]*\n+" nil "move")
-        (progn
-          (setq xp1 (match-end 0)))
-      (setq xp1 (point)))
-    (transpose-regions xp1 xp2 xc1 xc2)
-    (goto-char xp1)))
-
-(defun move-block-down ()
-  "Swap the current text block with the next."
-  (interactive)
-  (let ((xp0 (point))
-        xc1 xc2 ; curr
-        xn1 xn2 ; next
-        )
-    (if (eq (point-min) (point))
-        (setq xc1 (point))
-      (if (re-search-backward "\n\n+" nil "move")
-          (progn
-            (setq xc1 (match-end 0)))
-        (setq xc1 (point))))
-    (goto-char xp0)
-    (if (re-search-forward "\n[ \t]*\n+" nil "move")
-        (progn
-          (setq xc2 (match-beginning 0))
-          (setq xn1 (match-end 0)))
-      (error "No next block."))
-    (if (re-search-forward "\n[ \t]*\n+" nil "move")
-        (progn
-          (setq xn2 (match-beginning 0)))
-      (setq xn2 (point)))
-    (transpose-regions xc1 xc2 xn1 xn2)
-    (goto-char xn2)))
 
 (defun cut-bracket-text ()
   "Delete the matching brackets/quotes to the left of cursor,
@@ -1749,10 +1697,11 @@ You can override this function to get your idea of “user buffer”."
   "Return t if current buffer is a project buffer, else nil."
   (interactive)
   (cond
+   ((string-equal "*" (substring (buffer-name) 0 1)) nil)
    ((and (string-match ".+em/project+." default-directory)
          (not (string-equal major-mode "dired-mode"))) t)))
 
-(defun prev-project-buffer ()
+(defun prev-proj-buffer ()
   "Switch to the previous project buffer."
   (interactive)
   (previous-buffer)
@@ -1765,7 +1714,7 @@ You can override this function to get your idea of “user buffer”."
         (progn
           (setq i 100))))))
 
-(defun next-project-buffer ()
+(defun next-proj-buffer ()
   "Switch to the next project buffer."
   (interactive)
   (next-buffer)
@@ -1785,7 +1734,17 @@ You can override this function to get your idea of “user buffer”."
       (toggle-ibuffer)
     (switch-to-buffer (other-buffer))))
 
-(defun dired-find-next-file (&optional backward)
+(defun prev-frame ()
+  "Previous frame."
+  (interactive)
+  (other-frame -1))
+
+(defun forw-frame ()
+  "Next frame."
+  (interactive)
+  (other-frame 1))
+
+(defun find-next-dir-file (&optional backward)
   "Find the next file (by name) in the current directory.
 With prefix arg, find the previous file."
   (interactive "P")
@@ -1797,7 +1756,7 @@ With prefix arg, find the previous file."
                      (length files))))
       (find-file (nth pos files)))))
 
-(defun dired-find-prev-file ()
+(defun find-prev-dir-file ()
   "Find the prev file (by name) in the current directory."
   (interactive)
   (when buffer-file-name
@@ -1816,7 +1775,7 @@ to t.
 It returns the buffer."
   (interactive)
   (let ((xbuf (generate-new-buffer "file")))
-    (switch-to-buffer xbuf)
+    (switch-to-buffer-other-window xbuf)
     (funcall initial-major-mode)
     xbuf))
 
@@ -2358,24 +2317,13 @@ If there more than one frame, switch to next frame."
   "Take screenshot on macOS."
   (interactive)
   (when (string-equal system-type "darwin")
-    (shell-command (concat "screencapture -W -U dummy"))
-    (message "Screenshot complete")))
+    (shell-command (concat "screencapture -W -U dummy"))))
 
 (defun clock ()
   "World clock."
   (interactive)
   (world-clock)
   (other-window 1))
-
-(defun text-scale-decrease ()
-  "Decrease text scale."
-  (interactive)
-  (text-scale-adjust -1))
-
-(defun text-scale-increase ()
-  "Increase text scale."
-  (interactive)
-  (text-scale-adjust 1))
 
 (defun text-scale-reset ()
   "Reset text scale."
@@ -2406,7 +2354,7 @@ Force switch to current buffer to update `other-buffer'."
 select completion candidates. Else force complete and exit, that is select
 and use first completion candidate.
 In case file completion, most cases no need to complete, because there is NO
-right candidate. Otherwise, almost all cases user MUST select a candidate."
+right candidate. Otherwise, in almost all cases one MUST select a candidate."
   (interactive)
   (if (eq (icomplete--category) 'file)
       (exit-minibuffer)
@@ -2521,7 +2469,9 @@ Show current agenda. Do not select other window, balance windows."
 
 (defun screensaver ()
   "Start screensaver in tmux."
-  (shell-command "tmux clock-mode && echo"))
+  (let ((message-log-max nil)
+        (inhibit-message t))
+    (shell-command "tmux clock-mode")))
 
 (defun toggle-gnus ()
   "Toggle gnus."
@@ -2561,7 +2511,7 @@ Show current agenda. Do not select other window, balance windows."
 (defun pass-generate ()
   "Generate and copy pass."
   (interactive)
-  (let ((xpass (read-from-minibuffer "Pass path: ")))
+  (let ((xpass (read-from-minibuffer "Generate pass path: ")))
     (shell-command (concat "pass generate -c " xpass))))
 
 (defun describe-foo-at-point ()
@@ -2570,8 +2520,8 @@ This checks in turn:
 • for a function name where point is;
 • for a variable name where point is."
   (interactive)
-  (let (sym)
-    (cond ((setq sym (ignore-errors
+  (let (xsym)
+    (cond ((setq xsym (ignore-errors
                        (with-syntax-table emacs-lisp-mode-syntax-table
                          (save-excursion
                            (or (not (zerop (skip-syntax-backward "_w")))
@@ -2581,8 +2531,8 @@ This checks in turn:
                            (skip-chars-forward "`'")
                            (let ((obj (read (current-buffer))))
                              (and (symbolp obj) (fboundp obj) obj))))))
-           (describe-function sym))
-          ((setq sym (variable-at-point)) (describe-variable sym))))
+           (describe-function xsym))
+          ((setq xsym (variable-at-point)) (describe-variable xsym))))
   (setq this-command 'split-window-below))
 
 (defun run-at-time-wrap (time func &rest args)
@@ -2597,16 +2547,30 @@ This checks in turn:
   (mapc #'dired-maybe-insert-subdir
         (seq-filter #'file-directory-p (directory-files-recursively dir "" t))))
 
+(defun json-pretty ()
+  "Pretty buffer if json, echo message."
+  (interactive)
+  (if (string-equal (file-name-extension buffer-file-name) "json")
+      (progn
+        (json-pretty-print-buffer)
+        (message "%s" "Pretty print json"))
+    (message "%s" "Not json")))
+
 (defun org-insert-source-code ()
   "Insert source code block."
   (interactive)
   (org-insert-structure-template "src")
   (newline))
 
-(defun deactivate-mark-and-return (&rest r)
-  "If region active deactivate mark and return to the line before select."
+(defun deactivate-mark-before-move (&rest r)
+  "If region active deactivate mark conditionally and return to the line
+before selection. This func to be run as before advice for move func."
   (interactive)
-  (when (region-active-p)
+  (when (and (region-active-p)
+             (or (eq last-command 'select-block)
+                 (eq last-command 'extend-selection)
+                 (eq last-command 'select-line)
+                 (eq last-command 'select-text-in-quote)))
     (deactivate-mark)
     (when (eq last-command 'select-block)
       (set-mark-command t)
@@ -2618,17 +2582,20 @@ This checks in turn:
 (advice-add 'isearch-repeat-forward  :after (lambda (&rest r) "recenter" (recenter)))
 (advice-add 'prev-user-buffer        :after (lambda (&rest r) "recenter" (recenter)))
 (advice-add 'next-user-buffer        :after (lambda (&rest r) "recenter" (recenter)))
+(advice-add 'prev-proj-buffer        :after (lambda (&rest r) "recenter" (recenter)))
+(advice-add 'next-proj-buffer        :after (lambda (&rest r) "recenter" (recenter)))
+(advice-add 'find-previous-match     :after (lambda (&rest r) "recenter" (recenter)))
+(advice-add 'find-next-match         :after (lambda (&rest r) "recenter" (recenter)))
 
 (add-hook 'replace-update-post-hook 'recenter)
 
-(advice-add 'json-pretty-print-buffer :after
-            (lambda (&rest r) "message" (message "%s" "Pretty print json")))
 (advice-add 'next-line-or-history-element :before
             (lambda (&rest r) "move point to the end of line beforehand"
               (goto-char (point-max))))
 (advice-add 'mouse-set-point :before
             (lambda (&rest r) "copy selection with left click"
-              (if (region-active-p) (copy-line-or-selection))))
+              (if (region-active-p)
+                  (copy-region-as-kill (region-beginning) (region-end)))))
 
 (provide 'keyext)
 
