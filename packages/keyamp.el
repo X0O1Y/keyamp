@@ -55,13 +55,15 @@
   "/Library/Application Support/org.pqrs/Karabiner-Elements/bin/karabiner_cli"
   "Karabiner-Elements CLI executable")
 
-(defconst keyamp-command-indicator "🟢" "Character indicating command is active.")
-(defconst keyamp-insert-indicator  "🟠" "Character indicating insert is active.")
-(defconst keyamp-repeat-indicator  "🔵" "Character indicating repeat is active.")
+(defconst keyamp-command-indicator "🟢" "Character indicating command.")
+(defconst keyamp-insert-indicator  "🟠" "Character indicating insert or edit.")
+(defconst keyamp-repeat-indicator  "🔵" "Character indicating repeat view.")
+(defconst keyamp-screen-indicator  "🟣" "Character indicating view screen.")
 
-(defconst keyamp-command-cursor "lawngreen"   "Cursor color command.")
-(defconst keyamp-insert-cursor  "gold"        "Cursor color insert.")
-(defconst keyamp-repeat-cursor  "deepskyblue" "Cursor color repeat.")
+(defconst keyamp-command-cursor "LawnGreen"      "Cursor color command.")
+(defconst keyamp-insert-cursor  "Gold"           "Cursor color insert.")
+(defconst keyamp-repeat-cursor  "DeepSkyBlue"    "Cursor color repeat.")
+(defconst keyamp-screen-cursor  "LightSlateBlue" "Cursor color screen.")
 
 (defconst keyamp-idle-timeout 60 "Idle timeout.")
 
@@ -420,11 +422,11 @@ is enabled.")
 
     ("q" . reformat-lines)
     ("w" . org-ctrl-c-ctrl-c)
-    ("e" . split-window-below)
+    ("e" . delete-window)
     ("r" . query-replace)
     ("t" . kill-line)
 
-    ("a" . delete-window)
+    ("a" . split-window-below)
     ("s" . prev-user-buffer)
     ("d" . delete-other-windows)
     ("f" . next-user-buffer)
@@ -651,15 +653,16 @@ is enabled.")
  (keyamp--map-leaders x '(open-line . newline))
  (keyamp--map x
    '(("TAB" . toggle-ibuffer) ("<tab>" . toggle-ibuffer)
-     ("C-h" . delete-window)))
+     ("C-h" . delete-window)  ("C-r"   . delete-other-windows)))
+
  (keyamp--remap x
    '((insert-space-before     . delete-frame)
      (backward-kill-word      . sun-moon)
-     (undo                    . split-window-below)
+     (undo                    . delete-window)
      (kill-word               . make-frame-command)
      (cut-text-block          . calc)
      (exchange-point-and-mark . view-echo-area-messages)
-     (shrink-whitespaces      . delete-window)
+     (shrink-whitespaces      . split-window-below)
      (delete-backward         . delete-other-windows)
      (set-mark-command        . new-empty-buffer)
      (cut-line-or-selection   . next-proj-buffer)
@@ -668,6 +671,7 @@ is enabled.")
      (backward-left-bracket   . downloads)
      (forward-right-bracket   . player)
      (kmacro-play             . config)))
+
  (keyamp--set-map x
    '(prev-user-buffer     next-user-buffer
      delete-other-windows split-window-below
@@ -715,7 +719,7 @@ is enabled.")
  (keyamp--set-map x '(previous-buffer next-buffer)))
 
 (with-sparse-keymap-x
- ;; When a lot of frames hold down [ to activate.
+ ;; When a lot of frames hold down [ to activate frame selection with DEL/SPC.
  (keyamp--map-leaders x '(open-line . newline))
  (keyamp--remap x '((open-line . prev-frame) (newline . forw-frame)))
  (keyamp--set-map x '(prev-frame forw-frame)))
@@ -945,7 +949,7 @@ of insert mode activation."
 of quit minibuffer."
   (interactive)
   (if (> (length (buffer-substring (minibuffer-prompt-end) (point))) 0)
-      (keyamp-escape)
+      (keyamp-command)
     (abort-recursive-edit)))
 
 (defun keyamp-insert-n ()
@@ -1123,13 +1127,13 @@ of quit minibuffer."
       (beg-of-line-or-block    . ibuffer-backward-filter-group)
       (insert-space-before     . delete-frame)
       (backward-kill-word      . sun-moon)
-      (undo                    . split-window-below)
+      (undo                    . delete-window)
       (kill-word               . make-frame-command)
       (cut-text-block          . calc)
       (back-word               . switch-to-buffer)
       (forw-word               . recentf-open-files)
       (exchange-point-and-mark . view-echo-area-messages)
-      (shrink-whitespaces      . delete-window)
+      (shrink-whitespaces      . split-window-below)
       (open-line               . prev-user-buffer)
       (delete-backward         . delete-other-windows)
       (newline                 . next-user-buffer)
@@ -1649,14 +1653,17 @@ of quit minibuffer."
                 (agenda                           t
                  alternate-buffer                 t
                  async-shell-command              t
+                 config                           t
                  delete-other-windows             t
-                 find-next-dir-file               t
-                 find-prev-dir-file               t
+                 delete-window                    t
                  dired-jump                       t
                  downloads                        t
+                 find-next-dir-file               t
+                 find-prev-dir-file               t
                  next-proj-buffer                 t
                  next-user-buffer                 t
                  new-empty-buffer                 t
+                 open-file-at-cursor              t
                  player                           t
                  prev-proj-buffer                 t
                  prev-user-buffer                 t
@@ -1746,9 +1753,9 @@ of quit minibuffer."
 
 
 
-(defvar keyamp--deactivate-command-mode-func nil)
 (defvar keyamp-insert-p t "Non-nil means insert is on.")
-(defvar keyamp-repeat-p nil "Non-nil means repeat is on.")
+
+(defvar keyamp--deactivate-command-mode-func nil)
 
 (defun keyamp-command-init ()
   "Set command mode."
@@ -1790,23 +1797,21 @@ of quit minibuffer."
   "Indicate keyamp state. Run with `post-command-hook'."
   (cond
    ((gethash this-command keyamp-screen-commands-hash)
-    (setq mode-line-front-space keyamp-command-indicator)
-    (set-face-background 'cursor keyamp-command-cursor)
-    (blink-cursor-mode 1))
+    (setq mode-line-front-space keyamp-screen-indicator)
+    (set-face-background 'cursor keyamp-screen-cursor))
    ((gethash this-command keyamp-repeat-commands-hash)
-    (setq keyamp-repeat-p t)
     (setq mode-line-front-space keyamp-repeat-indicator)
-    (set-face-background 'cursor keyamp-repeat-cursor)
-    (blink-cursor-mode 0))
+    (set-face-background 'cursor keyamp-repeat-cursor))
    ((or (gethash this-command keyamp-edit-commands-hash)
-        (eq real-this-command 'repeat) keyamp-insert-p)
+        (eq real-this-command 'repeat)
+        keyamp-insert-p)
     (setq mode-line-front-space keyamp-insert-indicator)
-    (set-face-background 'cursor keyamp-insert-cursor)
-    (if keyamp-insert-p (blink-cursor-mode 1) (blink-cursor-mode 0)))
-   (t (setq keyamp-repeat-p nil)
-      (setq mode-line-front-space keyamp-command-indicator)
-      (set-face-background 'cursor keyamp-command-cursor)
-      (blink-cursor-mode 0))))
+    (set-face-background 'cursor keyamp-insert-cursor))
+   (t
+    (setq mode-line-front-space keyamp-command-indicator)
+    (set-face-background 'cursor keyamp-command-cursor)))
+  (unless (eq this-command last-command)
+    (force-mode-line-update)))
 
 (defun keyamp-escape (&optional Keyamp-idle-p)
   "Return to command mode or escape everything.
@@ -1815,7 +1820,6 @@ If run by idle timer then emulate escape keyboard press."
   (cond
    (Keyamp-idle-p     (execute-kbd-macro (kbd "<escape>")))
    (keyamp-insert-p   (keyamp-command))
-   (keyamp-repeat-p   (keyamp-command))
    ((region-active-p) (deactivate-mark))
    ((minibufferp)     (abort-recursive-edit))
    (t                 (keyamp-command))))
