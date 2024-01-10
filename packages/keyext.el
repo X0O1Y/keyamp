@@ -2576,26 +2576,27 @@ before selection. This func to be run as before advice for move func."
       (set-mark-command t)
       (set-mark-command t))))
 
-(advice-add 'scroll-down-command     :after (lambda (&rest r) "recenter" (recenter)))
-(advice-add 'scroll-up-command       :after (lambda (&rest r) "recenter" (recenter)))
-(advice-add 'isearch-repeat-backward :after (lambda (&rest r) "recenter" (recenter)))
-(advice-add 'isearch-repeat-forward  :after (lambda (&rest r) "recenter" (recenter)))
-(advice-add 'prev-user-buffer        :after (lambda (&rest r) "recenter" (recenter)))
-(advice-add 'next-user-buffer        :after (lambda (&rest r) "recenter" (recenter)))
-(advice-add 'prev-proj-buffer        :after (lambda (&rest r) "recenter" (recenter)))
-(advice-add 'next-proj-buffer        :after (lambda (&rest r) "recenter" (recenter)))
-(advice-add 'find-previous-match     :after (lambda (&rest r) "recenter" (recenter)))
-(advice-add 'find-next-match         :after (lambda (&rest r) "recenter" (recenter)))
+(defmacro advice-add-macro (SymList How Function)
+  "Map `advice-add' over a list SYMLIST to FUNCTION."
+  `(progn
+     ,@(mapcar
+        (lambda (xcmd)
+          `(advice-add ,(list 'quote xcmd) ,How ,Function))
+        (cadr SymList))))
+
+(advice-add-macro '(scroll-down-command
+                    scroll-up-command
+                    isearch-repeat-backward
+                    isearch-repeat-forward
+                    prev-user-buffer
+                    next-user-buffer
+                    prev-proj-buffer
+                    next-proj-buffer
+                    find-previous-match
+                    find-next-match)
+                  :after (lambda (&rest r) "recenter" (recenter)))
 
 (add-hook 'replace-update-post-hook 'recenter)
-
-(advice-add 'next-line-or-history-element :before
-            (lambda (&rest r) "move point to the end of line beforehand"
-              (goto-char (point-max))))
-(advice-add 'mouse-set-point :before
-            (lambda (&rest r) "copy selection with left click"
-              (if (region-active-p)
-                  (copy-region-as-kill (region-beginning) (region-end)))))
 
 (provide 'keyext)
 

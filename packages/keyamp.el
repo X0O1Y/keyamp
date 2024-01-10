@@ -135,7 +135,7 @@ If Direct-p is t, do not remap key to current keyboard layout."
 (defmacro keyamp--map-translation (KeyKeyAlist State-p)
   "Map `keymap-set' for `key-translation-map' over a alist KEYKEYALIST.
 If State-p is nil, remove the mapping."
-  `(let ()
+  `(progn
      ,@(mapcar
         (lambda (xpair)
           `(keymap-set key-translation-map ,(car xpair) (if ,State-p ,(cdr xpair))))
@@ -413,7 +413,7 @@ is enabled.")
     ("ESC" . ignore)                     ("<escape>"    . ignore)
 
     ;; left leader left half
-    ("`" . find-next-dir-file)
+    ("`" . next-buffer)
     ("1" . periodic-chart)
     ("2" . kmacro-name-last-macro)
     ("3" . apply-macro-to-region-lines)
@@ -496,7 +496,7 @@ is enabled.")
     ("ESC" . ignore)                   ("<escape>"    . ignore)
 
     ;; right leader left half
-    ("`" . next-buffer)
+    ("`" . find-next-dir-file)
     ("1" . view-lossage)
     ("2" . insert-kbd-macro)
     ("3" . config)
@@ -591,13 +591,18 @@ is enabled.")
     ("x" . apropos-value)      ("," . lookup-etymology)))
 
 (keyamp--map global-map
-  '(("C-r" . open-file-at-cursor) ; Hold down RET to post C-r (karabiner).
-    ("C-t" . hippie-expand)       ; Hold down RET in insert mode.
-    ("<down-mouse-1>"   . keyamp-command)
+  '(("C-r" . open-file-at-cursor) ; hold down RET to post C-r (karabiner)
+    ("C-t" . hippie-expand)       ; hold down RET in insert mode
     ("<double-mouse-1>" . extend-selection)
-    ("<mouse-3>"        . paste-or-paste-previous)
+    ("<down-mouse-1>"   . keyamp-command)          ; left click for command mode
+    ("<mouse-3>"        . paste-or-paste-previous) ; paste with right click
     ("<header-line> <mouse-1>" . prev-frame)
     ("<header-line> <mouse-3>" . make-frame-command)))
+
+(advice-add 'mouse-set-point :before
+            (lambda (&rest r) "copy selection with left click"
+              (if (region-active-p)
+                  (copy-region-as-kill (region-beginning) (region-end)))))
 
 ;; Avoid karabiner sync mode lag.
 (keyamp--remap keyamp-command-map '((hippie-expand . open-file-at-cursor)))
@@ -656,7 +661,8 @@ is enabled.")
      ("C-h" . delete-window)  ("C-r"   . delete-other-windows)))
 
  (keyamp--remap x
-   '((insert-space-before     . delete-frame)
+   '((delete-forward-char     . next-buffer)
+     (insert-space-before     . delete-frame)
      (backward-kill-word      . sun-moon)
      (undo                    . delete-window)
      (kill-word               . make-frame-command)
@@ -843,11 +849,6 @@ is enabled.")
    '(ibuffer-backward-filter-group   ibuffer-forward-filter-group
      gnus-topic-goto-prev-topic-line gnus-topic-goto-next-topic-line)))
 
-(advice-add 'ibuffer-backward-filter-group   :before 'deactivate-mark-before-move)
-(advice-add 'ibuffer-forward-filter-group    :before 'deactivate-mark-before-move)
-(advice-add 'gnus-topic-goto-prev-topic-line :before 'deactivate-mark-before-move)
-(advice-add 'gnus-topic-goto-next-topic-line :before 'deactivate-mark-before-move)
-
 (with-sparse-keymap-x
  ;; Double SPC to run `extend-selection', then next SPC press to
  ;; deactivate mark and run `down-line'. That is, hold down SPC to start move
@@ -855,9 +856,6 @@ is enabled.")
  ;; and move by blocks.
  (keyamp--map-leaders x '(up-line . down-line))
  (keyamp--set-map x '(extend-selection)))
-
-(advice-add 'up-line   :before 'deactivate-mark-before-move)
-(advice-add 'down-line :before 'deactivate-mark-before-move)
 
 (with-sparse-keymap-x
  ;; Triple DEL (hold down) to move lines up and activate View Screen.
@@ -872,8 +870,14 @@ is enabled.")
  (keyamp--remap x '((next-line . select-line)))
  (keyamp--set-map x '(select-line)))
 
-(advice-add 'beg-of-line-or-block :before 'deactivate-mark-before-move)
-(advice-add 'end-of-line-or-block :before 'deactivate-mark-before-move)
+;; If region active deactivate mark conditionally and return to the line
+;; before selection.
+(advice-add-macro
+ '(ibuffer-backward-filter-group   ibuffer-forward-filter-group
+   gnus-topic-goto-prev-topic-line gnus-topic-goto-next-topic-line
+   up-line                         down-line
+   beg-of-line-or-block            end-of-line-or-block)
+ :before 'deactivate-mark-before-move)
 
 (with-sparse-keymap-x
  ;; DEL SPC SPC to call `end-of-line-or-block'. Hold down SPC to repeat.
@@ -1009,7 +1013,11 @@ of quit minibuffer."
   (keyamp--remap minibuffer-mode-map
     '((previous-line . previous-line-or-history-element)
       (next-line     . next-line-or-history-element)
-      (select-block  . previous-line-or-history-element))))
+      (select-block  . previous-line-or-history-element)))
+
+  (advice-add 'next-line-or-history-element :before
+            (lambda (&rest r) "move point to the end of line beforehand"
+              (goto-char (point-max)))))
 
 (with-eval-after-load 'icomplete
   ;; Exit if file completion. It means use content of minibuffer as it is, no
@@ -1660,16 +1668,20 @@ of quit minibuffer."
                  downloads                        t
                  find-next-dir-file               t
                  find-prev-dir-file               t
+                 next-buffer                      t
                  next-proj-buffer                 t
                  next-user-buffer                 t
                  new-empty-buffer                 t
                  open-file-at-cursor              t
                  player                           t
+                 previous-buffer                  t
                  prev-proj-buffer                 t
                  prev-user-buffer                 t
+                 run-current-file                 t
                  save-close-current-buffer        t
                  split-window-below               t
                  sun-moon                         t
+                 sync                             t
                  tasks                            t
                  view-echo-area-messages          t
                  xref-find-definitions            t
