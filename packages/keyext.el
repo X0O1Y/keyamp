@@ -2480,6 +2480,20 @@ Show current agenda. Do not select other window, balance windows."
       (switch-to-buffer "*Group*")
     (gnus)))
 
+(defun server-run ()
+  "Run project server. Switch to console if already running."
+  (interactive)
+  (let ((xpath (getenv "SERVER_RUN"))
+        (xbuf (concat "*run server*")))
+    (if (get-buffer xbuf)
+        (switch-to-buffer-other-window xbuf)
+      (async-shell-command (format "cd %s && go run main.go" xpath) xbuf))))
+
+(defun test-run ()
+  "Run project tests."
+  (interactive)
+  (async-shell-command "$TEST_RUN"))
+
 (defun who-called-defun (oldfun format &rest args)
   "Backtrace. For example, to find out who called `message':
 (advice-add \='message :around #\='who-called-defun)"
@@ -2497,6 +2511,35 @@ Show current agenda. Do not select other window, balance windows."
     (unwind-protect
          (apply oldfun args)
       (advice-remove 'message #'silence))))
+
+(defun command-error-function-silent (data context caller)
+  "Ignore some signals; pass the rest to the default handler."
+  (when (not (memq (car data) '(buffer-read-only
+                                text-read-only
+                                beginning-of-buffer
+                                end-of-buffer
+                                quit)))
+    (command-error-default-function data context caller)))
+
+(defun disable-kill-buffer-query-functions (kill-func &rest args)
+  "Disable confirmation conditionally before buffer kill."
+  (let ((x kill-buffer-query-functions))
+    (when (string-match "run server" (buffer-name))
+      (setq kill-buffer-query-functions nil))
+    (unwind-protect
+        (apply kill-func args)
+      (setq kill-buffer-query-functions x))
+    (setq kill-buffer-query-functions x)))
+
+(defun disable-func (func &rest args)
+  "Conditionally disable FUNC. Run as advice."
+  (unless (minibufferp)
+      (apply func args)))
+
+(defun byte-compile-package ()
+  "Byte compile current package."
+  (if (string-match ".+emacs.d/packages+." (buffer-file-name))
+      (byte-compile-file (expand-file-name (buffer-file-name)))))
 
 (defun terminal ()
   "Run terminal emulator."

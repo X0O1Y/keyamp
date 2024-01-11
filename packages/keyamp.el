@@ -441,8 +441,8 @@ is enabled.")
     ;; left leader right half
     ("6" . save-buffers-kill-terminal)
     ("7" . jump-to-register)
-    ("8" . test)
-    ("9" . server)
+    ("8" . test-run)
+    ("9" . server-run)
     ("0" . abbrev-mode)
     ("-" . move-to-column)
     ("=" . screenshot)
@@ -708,7 +708,7 @@ is enabled.")
 (with-sparse-keymap-x
  (keyamp--remap x
    '((open-line . prev-proj-buffer) (newline . next-proj-buffer)
-     (eshell    . server)))
+     (eshell    . server-run)))
  (keyamp--set-map x '(prev-proj-buffer next-proj-buffer)))
 
 (with-sparse-keymap-x
@@ -1200,11 +1200,12 @@ of quit minibuffer."
                  (set-transient-map x)
                  (setq this-command 'keyamp--repeat-dummy)))))
 
-  (with-sparse-keymap-x
-   (keyamp--set-map x
-     '(company-search-abort company-complete-selection) :command)
-   (keyamp--set-map x
-     '(company-search-candidates) nil :insert))
+  (advice-add-macro
+   '(company-search-abort company-complete-selection)
+   :after (lambda (&rest r) "`keyamp-command'"
+            (if keyamp-insert-p (keyamp-command))))
+
+  (advice-add 'company-search-candidates :after 'keyamp-insert-init)
 
   (keyamp--map company-search-map
     '(("<escape>"  . company-search-abort)
@@ -1359,23 +1360,28 @@ of quit minibuffer."
      '((previous-line . eshell-previous-input)
        (next-line     . eshell-next-input)))
    (keyamp--map x
-     '(("v" . paste-or-paste-previous) ("м" . paste-or-paste-previous)
+     '(("TAB"   . eshell-previous-matching-input)
+       ("<tab>" . eshell-previous-matching-input)
+       ("v" . paste-or-paste-previous) ("м" . paste-or-paste-previous)
        ("'" . alternate-buffer)        ("э" . alternate-buffer)
        ("[" . alternate-buf-or-frame)  ("х" . alternate-buf-or-frame)))
     (keyamp--set-map x '(eshell-send-input eshell-interrupt-process))
     (keyamp--set-map x '(eshell-previous-input eshell-next-input) :command)
     (keyamp--set-map-hook x '(eshell-mode-hook) nil :insert)))
 
-(with-sparse-keymap-x
- ;; Command mode when jump from insert. No keymap. The commands might be run
- ;; by hold down a key or transient keymap from insert mode, mostly eshell.
- (keyamp--set-map x
-   '(alternate-buf-or-frame  alternate-buffer
-     delete-other-windows    delete-window
-     split-window-below      dired-jump
-     prev-user-buffer        next-user-buffer
-     toggle-ibuffer          save-close-current-buffer)
-   :command))
+;; Command mode when jump from insert. The commands might be run
+;; by hold down a key or transient keymap from insert mode, mostly eshell.
+(advice-add-macro
+ '(alternate-buf-or-frame  alternate-buffer
+   delete-other-windows    delete-window
+   split-window-below      dired-jump
+   prev-user-buffer        next-user-buffer
+   toggle-ibuffer          save-close-current-buffer)
+ :after (lambda (&rest r) "`keyamp-command'"
+          (if keyamp-insert-p (keyamp-command))))
+
+;; Exception. Keep insert mode after split by `completion-at-point'.
+(advice-add 'completion-at-point :after 'keyamp-insert-init)
 
 (with-eval-after-load 'vterm
   (keyamp--map vterm-mode-map
@@ -1679,10 +1685,12 @@ of quit minibuffer."
                  prev-user-buffer                 t
                  run-current-file                 t
                  save-close-current-buffer        t
+                 server-run                       t
                  split-window-below               t
                  sun-moon                         t
                  sync                             t
                  tasks                            t
+                 test-run                         t
                  view-echo-area-messages          t
                  xref-find-definitions            t
                  xref-go-back                     t)))
@@ -1765,7 +1773,9 @@ of quit minibuffer."
 
 
 
-(defvar keyamp-insert-p t "Non-nil means insert is on.")
+(defvar keyamp-insert-p t   "Non-nil means insert is on.")
+(defvar keyamp-repeat-p nil "Non-nil means repeat is on.")
+(defvar keyamp-screen-p nil "Non-nil means screen is on.")
 
 (defvar keyamp--deactivate-command-mode-func nil)
 
@@ -1810,10 +1820,14 @@ of quit minibuffer."
   (cond
    ((gethash this-command keyamp-screen-commands-hash)
     (setq mode-line-front-space keyamp-screen-indicator)
-    (set-face-background 'cursor keyamp-screen-cursor))
+    (set-face-background 'cursor keyamp-screen-cursor)
+    (setq keyamp-repeat-p nil)
+    (setq keyamp-screen-p t))
    ((gethash this-command keyamp-repeat-commands-hash)
     (setq mode-line-front-space keyamp-repeat-indicator)
-    (set-face-background 'cursor keyamp-repeat-cursor))
+    (set-face-background 'cursor keyamp-repeat-cursor)
+    (setq keyamp-repeat-p t)
+    (setq keyamp-screen-p nil))
    ((or (gethash this-command keyamp-edit-commands-hash)
         (eq real-this-command 'repeat)
         keyamp-insert-p)
@@ -1821,20 +1835,24 @@ of quit minibuffer."
     (set-face-background 'cursor keyamp-insert-cursor))
    (t
     (setq mode-line-front-space keyamp-command-indicator)
-    (set-face-background 'cursor keyamp-command-cursor)))
+    (set-face-background 'cursor keyamp-command-cursor)
+    (setq keyamp-repeat-p nil)
+    (setq keyamp-screen-p nil)))
   (unless (eq this-command last-command)
     (force-mode-line-update)))
 
 (defun keyamp-escape (&optional Keyamp-idle-p)
-  "Return to command mode or escape everything.
-If run by idle timer then emulate escape keyboard press."
+  "Return to command mode or clear selection or quit minibuffer.
+If run by idle timer then emulate escape keyboard press which required to
+deactivate transient map."
   (interactive)
   (cond
-   (Keyamp-idle-p     (execute-kbd-macro (kbd "<escape>")))
-   (keyamp-insert-p   (keyamp-command))
-   ((region-active-p) (deactivate-mark))
-   ((minibufferp)     (abort-recursive-edit))
-   (t                 (keyamp-command))))
+   (Keyamp-idle-p        (execute-kbd-macro (kbd "<escape>")))
+   ((or keyamp-insert-p
+        keyamp-repeat-p
+        keyamp-screen-p) (keyamp-command))
+   ((region-active-p)    (deactivate-mark))
+   ((minibufferp)        (abort-recursive-edit))))
 
 
 
