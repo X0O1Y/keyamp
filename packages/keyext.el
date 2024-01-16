@@ -285,12 +285,6 @@ When `universal-argument' is called first, copy whole buffer
   (kill-new (buffer-string))
   (message "Buffer content copy"))
 
-;; (defun cut-all ()
-;;   "Cut buffer content to `kill-ring'. Respects `narrow-to-region'."
-;;   (interactive)
-;;   (kill-new (buffer-string))
-;;   (delete-region (point-min) (point-max)))
-
 (defun paste-or-paste-previous ()
   "Paste. When called repeatedly, paste previous.
 This command calls `yank', and if repeated, call `yank-pop'.
@@ -1212,10 +1206,10 @@ If a buffer is not file and not dired, copy value of `default-directory'."
     (kill-new
      (if DirPathOnlyQ
          (progn
-           (message "Copy: %s" (file-name-directory xfpath))
+           (message "%s" (file-name-directory xfpath))
            (file-name-directory xfpath))
        (progn
-         (message "Copy: %s" xfpath)
+         (message "%s" xfpath)
          xfpath )))))
 
 (defun cut-text-block ()
@@ -1855,7 +1849,7 @@ Similar to `kill-buffer', with the following addition:
   (interactive)
   (if (> (length recently-closed-buffers) 0)
       (find-file (cdr (pop recently-closed-buffers)))
-    (progn (message "No recently close buffer in this session"))))
+    (progn (message "No recently closed buffers in this session"))))
 
 (defun open-recently-closed ()
   "Open recently closed file.
@@ -1978,9 +1972,7 @@ To build, call `universal-argument' first."
     (progn
       (message "Running %s" xfname)
       (message "%s" xcmdStr)
-      (shell-command xcmdStr xoutputb )
-      ;;
-      )))
+      (shell-command xcmdStr xoutputb))))
 
 (defconst run-current-file-map
   '(("go" . "go run")
@@ -2006,60 +1998,56 @@ File suffix is used to determine which program to run, set in the variable
 
 If the file is modified or not saved, save it automatically before run."
   (interactive)
-  (catch 'confirm
-    (if (y-or-n-p "Do you really want to run current file?")
-        (progn
-          (setenv "NO_COLOR" "1") ; 2022-09-10 for deno. Default color has yellow parts, hard to see
-          (when (not buffer-file-name) (save-buffer))
-          (let* ((xoutBuffer "*run output*")
-                 ;; (resize-mini-windows nil)
-                 (xextAppMap run-current-file-map)
-                 (xfname buffer-file-name)
-                 (xfExt (file-name-extension xfname))
-                 (xappCmdStr (cdr (assoc xfExt xextAppMap)))
-                 xcmdStr)
-            ;; FIXME: Rather than `shell-command' with an `&', better use
-            ;; `make-process' or `start-process' since we're not using the shell at all
-            ;; (worse, we need to use `shell-quote-argument' to circumvent the shell).
-            (setq xcmdStr
-                  (when xappCmdStr
-                    (format "%s %s &"
-                            xappCmdStr
-                            (shell-quote-argument xfname))))
-            (when (buffer-modified-p) (save-buffer))
-            (run-hooks 'run-current-file-before-hook)
-            (cond
-             ((string-equal xfExt "el")
-              (load xfname))
-             ((string-equal xfExt "go")
-              (run-current-go-file))
-             ((string-match "\\.\\(ws?l\\|m\\|nb\\)\\'" xfExt)
-              (if (fboundp 'run-wolfram-script)
-                  (progn
-                    (run-wolfram-script nil current-prefix-arg))
-                (if xappCmdStr
-                    (progn
-                      (message "Running")
-                      (shell-command xcmdStr xoutBuffer))
-                  (error "%s: Unknown file extension: %s" real-this-command xfExt))))
-             ((string-equal xfExt "java")
-              (progn
-                (shell-command (format "javac %s" xfname) xoutBuffer)
-                (shell-command (format "java %s" (file-name-sans-extension
-                                                  (file-name-nondirectory xfname)))
-                               xoutBuffer)))
-             (t (if xappCmdStr
-                    (progn
-                      (message "Running %s" xcmdStr)
-                      (shell-command xcmdStr xoutBuffer))
-                  (error "%s: Unknown file extension: %s" real-this-command xfExt))))
-
-            (run-hooks 'run-current-file-after-hook))
-          (setenv "NO_COLOR")
-          (throw 'confirm t))
+  (if (y-or-n-p "Run?")
       (progn
-        (message "Abort run file")
-        nil))))
+        (setenv "NO_COLOR" "1") ; 2022-09-10 for deno. Default color has yellow parts, hard to see
+        (when (not buffer-file-name) (save-buffer))
+        (let* ((xoutBuffer "*run output*")
+               ;; (resize-mini-windows nil)
+               (xextAppMap run-current-file-map)
+               (xfname buffer-file-name)
+               (xfExt (file-name-extension xfname))
+               (xappCmdStr (cdr (assoc xfExt xextAppMap)))
+               xcmdStr)
+          ;; FIXME: Rather than `shell-command' with an `&', better use
+          ;; `make-process' or `start-process' since we're not using the shell at all
+          ;; (worse, we need to use `shell-quote-argument' to circumvent the shell).
+          (setq xcmdStr
+                (when xappCmdStr
+                  (format "%s %s &"
+                          xappCmdStr
+                          (shell-quote-argument xfname))))
+          (when (buffer-modified-p) (save-buffer))
+          (run-hooks 'run-current-file-before-hook)
+          (cond
+           ((string-equal xfExt "el")
+            (load xfname))
+           ((string-equal xfExt "go")
+            (run-current-go-file))
+           ((string-match "\\.\\(ws?l\\|m\\|nb\\)\\'" xfExt)
+            (if (fboundp 'run-wolfram-script)
+                (progn
+                  (run-wolfram-script nil current-prefix-arg))
+              (if xappCmdStr
+                  (progn
+                    (message "Running")
+                    (shell-command xcmdStr xoutBuffer))
+                (error "%s: Unknown file extension: %s" real-this-command xfExt))))
+           ((string-equal xfExt "java")
+            (progn
+              (shell-command (format "javac %s" xfname) xoutBuffer)
+              (shell-command (format "java %s" (file-name-sans-extension
+                                                (file-name-nondirectory xfname)))
+                             xoutBuffer)))
+           (t (if xappCmdStr
+                  (progn
+                    (message "Running %s" xcmdStr)
+                    (shell-command xcmdStr xoutBuffer))
+                (error "%s: Unknown file extension: %s" real-this-command xfExt))))
+
+          (run-hooks 'run-current-file-after-hook))
+        (setenv "NO_COLOR"))
+    (message "Abort run file")))
 
 (defun clean-whitespace ()
   "Delete trailing whitespace, and replace repeated blank lines to just 1.
@@ -2078,8 +2066,7 @@ Works on whole buffer or selection, respects `narrow-to-region'."
         (goto-char (point-min))
         (while (re-search-forward "\n\n\n+" nil 1) (replace-match "\n\n"))
         (goto-char (point-max))
-        (while (eq (char-before) 32) (delete-char -1)))))
-  (if (buffer-modified-p) (message "%s" "Cleanup whitespaces")))
+        (while (eq (char-before) 32) (delete-char -1))))))
 
 (defun make-backup ()
   "Make a backup copy of current file or dired marked files.
@@ -2325,6 +2312,13 @@ If there more than one frame, switch to next frame."
   (world-clock)
   (other-window 1))
 
+(defun player ()
+  "Run player."
+  (interactive)
+  (if (fboundp 'emms-playlist)
+    (emms-playlist)
+  (message "%s" "Player not found")))
+
 (defun text-scale-reset ()
   "Reset text scale."
   (interactive)
@@ -2349,17 +2343,6 @@ Force switch to current buffer to update `other-buffer'."
   (interactive)
   (flyspell-goto-next-error t))
 
-(defun icomplete-exit-or-force-complete-and-exit ()
-  "Exit if file completion. It means use content of minibuffer as it is, no
-select completion candidates. Else force complete and exit, that is select
-and use first completion candidate.
-In case file completion, most cases no need to complete, because there is NO
-right candidate. Otherwise, in almost all cases one MUST select a candidate."
-  (interactive)
-  (if (eq (icomplete--category) 'file)
-      (exit-minibuffer)
-    (icomplete-force-complete-and-exit)))
-
 (defun sun-moon ()
   "Show the Sun and the Moon schedule."
   (interactive)
@@ -2381,7 +2364,7 @@ right candidate. Otherwise, in almost all cases one MUST select a candidate."
     (browse-url (concat url "/?" lat "," lon ",9"))))
 
 (defun weather-helper ()
-  "Send weather forecast."
+  "Email weather forecast."
   (call-process "~/.weather/run.sh" nil 0 nil))
 
 (defun books ()
@@ -2423,11 +2406,15 @@ Show current agenda. Do not select other window, balance windows."
 (defun todo ()
   "Modification of `org-todo'. Capitalize task title if not study."
   (interactive)
-  (org-todo)
-  (unless (string-equal (buffer-name) "study")
-    (beginning-of-line)
-    (title-case-region-or-line)
-    (beginning-of-line)))
+  (if (eq major-mode 'org-mode)
+      (progn
+        (org-todo)
+        (unless (string-equal (buffer-name) "study")
+          (beginning-of-line)
+          (title-case-region-or-line)
+          (beginning-of-line))))
+  (if (eq major-mode 'org-agenda-mode)
+      (org-agenda-todo)))
 
 (defun sudo ()
   "Use Tramp to `sudo' current file."
@@ -2480,19 +2467,39 @@ Show current agenda. Do not select other window, balance windows."
       (switch-to-buffer "*Group*")
     (gnus)))
 
-(defun server-run ()
+(defun run-server ()
   "Run project server. Switch to console if already running."
   (interactive)
-  (let ((xpath (getenv "SERVER_RUN"))
+  (let ((xpath (getenv "RUN_SERVER"))
         (xbuf (concat "*run server*")))
     (if (get-buffer xbuf)
         (switch-to-buffer-other-window xbuf)
       (async-shell-command (format "cd %s && go run main.go" xpath) xbuf))))
 
-(defun test-run ()
+(defun run-test ()
   "Run project tests."
   (interactive)
-  (async-shell-command "$TEST_RUN"))
+  (async-shell-command "$RUN_TEST" "*run test*"))
+
+(defun exec-query ()
+  "Execute potgres SQL statement separated by `;'."
+  (interactive)
+  (let ((xconn (getenv "CONNINFO"))
+        (xbuf (concat "*exec query*"))
+        xquery xp1 xp2 (xsepRegex ";"))
+    (if (region-active-p)
+        (setq xp1 (region-beginning) xp2 (region-end))
+      (save-excursion
+        (setq xp1 (if (re-search-backward xsepRegex nil 1)
+                      (goto-char (match-end 0))
+                    (point)))
+        (setq xp2 (if (re-search-forward xsepRegex nil 1)
+                      (match-beginning 0)
+                    (point)))))
+    (setq xquery (string-trim
+                  (concat (buffer-substring-no-properties xp1 xp2))) )
+    (async-shell-command
+     (format "psql %s -c '%s'" xconn xquery) xbuf)))
 
 (defun who-called-defun (oldfun format &rest args)
   "Backtrace. For example, to find out who called `message':
@@ -2602,8 +2609,21 @@ This checks in turn:
 (defun org-insert-source-code ()
   "Insert source code block."
   (interactive)
-  (org-insert-structure-template "src")
-  (newline))
+  (if (eq major-mode 'org-mode)
+      (progn
+        (org-insert-structure-template "src")
+        (insert "bash")
+        (newline))
+    (message "%s" "Not in org-mode")))
+
+(defun dired-toggle-mark ()
+  "Toggle mark for the current file."
+  (interactive)
+  (if (string-equal " "
+                    (buffer-substring-no-properties
+                     (line-beginning-position) (1+ (line-beginning-position))))
+      (dired-mark 1)
+    (dired-unmark 1)))
 
 (defun deactivate-mark-before-move (&rest r)
   "If region active deactivate mark conditionally and return to the line

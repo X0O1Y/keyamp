@@ -14,14 +14,15 @@
 
 ;;; Commentary:
 
-;; Keyamp provides 3 modes: insert, command and repeat. Command mode
-;; based on persistent transient keymap.
+;; Keyamp provides 4 modes: insert, command, repeat, screen. Command
+;; mode based on persistent transient keymap.
 
 ;; Repeat mode pushes transient remaps to keymap stack on top of
 ;; command mode for easy repeat of command chains during screen
 ;; positioning, cursor move and editing. Point color indicates
 ;; transient remap is active. ESDF and IJKL are mostly used, DEL/ESC
 ;; and RET/SPC control EVERYTHING. Home row and thumb cluster only.
+;; Screen mode is similar to repeat with separate color indicator.
 
 ;; DEL and SPC are two leader keys, RET activates insert mode, ESC does
 ;; command one. Holding down each of the keys posts control sequence
@@ -53,17 +54,17 @@
 
 (defconst keyamp-karabiner-cli
   "/Library/Application Support/org.pqrs/Karabiner-Elements/bin/karabiner_cli"
-  "Karabiner-Elements CLI executable")
+  "Karabiner-Elements CLI executable. Optional for mode sync.")
 
-(defconst keyamp-command-indicator "🟢" "Character indicating command.")
-(defconst keyamp-insert-indicator  "🟠" "Character indicating insert or edit.")
-(defconst keyamp-repeat-indicator  "🔵" "Character indicating repeat view.")
-(defconst keyamp-screen-indicator  "🟣" "Character indicating view screen.")
+(defconst keyamp-command-indicator "🟢" "Command mode.")
+(defconst keyamp-insert-indicator  "🟠" "Insert mode.")
+(defconst keyamp-repeat-indicator  "🔵" "Repeat mode.")
+(defconst keyamp-screen-indicator  "🟣" "Screen mode.")
 
-(defconst keyamp-command-cursor "LawnGreen"      "Cursor color command.")
-(defconst keyamp-insert-cursor  "Gold"           "Cursor color insert.")
-(defconst keyamp-repeat-cursor  "DeepSkyBlue"    "Cursor color repeat.")
-(defconst keyamp-screen-cursor  "LightSlateBlue" "Cursor color screen.")
+(defconst keyamp-command-cursor "LawnGreen"      "Color command.")
+(defconst keyamp-insert-cursor  "Gold"           "Color insert.")
+(defconst keyamp-repeat-cursor  "DeepSkyBlue"    "Color repeat.")
+(defconst keyamp-screen-cursor  "LightSlateBlue" "Color screen.")
 
 (defconst keyamp-idle-timeout 60 "Idle timeout.")
 
@@ -334,9 +335,12 @@ is enabled.")
 ;; setting keys
 
 (keyamp--map keyamp-map
-  '(("<escape>" . keyamp-escape)         ("S-<escape>" . ignore)
-    ("C-^" . keyamp-left-leader-map)     ("C-+" . keyamp-left-leader-map)
-    ("C-_" . keyamp-right-leader-map)    ("C-И" . keyamp-right-leader-map)))
+  '(("TAB" . keyamp-leader-map)          ("<tab>"    . keyamp-leader-map)
+                                         ("<escape>" . keyamp-escape)             ("S-<escape>" . ignore)
+    ;; Control sequence leaders. Russian converted from Engineer Engram.
+    ;; The sequences are used as prefixes for key hold down in karabiner.
+    ("C-^" . keyamp-left-leader-map)     ("C-+"      . keyamp-left-leader-map)
+    ("C-_" . keyamp-right-leader-map)    ("C-И"      . keyamp-right-leader-map)))
 
 ;; Single keys mapping must double in Russian here. All prefix sequences mapped
 ;; automatically using `keyamp-map-input-source'.
@@ -346,71 +350,79 @@ is enabled.")
     ("SPC" . keyamp-right-leader-map)                                             ("S-SPC"         . ignore)
 
     ;; left half
-    ("`" . delete-forward-char)          ("ё" . delete-forward-char)     ("~" . keyamp-qwerty-to-engineer-engram) ("Ë" . keyamp-qwerty-to-engineer-engram)
-    ("1" . kmacro-record)                                                ("!" . ignore)
-    ("2" . kmacro-helper)                                                ("@" . ignore)
-    ("3" . kmacro-play)                                                  ("#" . ignore) ("№" . ignore)
-    ("4" . append-to-register-1)                                         ("$" . ignore)
-    ("5" . repeat)                                                       ("%" . ignore)
+    ("`" . delete-forward-char)          ("ё" . delete-forward-char)              ("~" . keyamp-qwerty-to-engineer-engram) ("Ë" . keyamp-qwerty-to-engineer-engram)
+    ("1" . kmacro-record)                                                         ("!" . ignore)
+    ("2" . kmacro-helper)                                                         ("@" . ignore)
+    ("3" . kmacro-play)                                                           ("#" . ignore) ("№" . ignore)
+    ("4" . append-to-register-1)                                                  ("$" . ignore)
+    ("5" . repeat)                                                                ("%" . ignore)
 
-    ("q" . insert-space-before)          ("й" . insert-space-before)     ("Q" . ignore) ("Й" . ignore)
-    ("w" . backward-kill-word)           ("ц" . backward-kill-word)      ("W" . ignore) ("Ц" . ignore)
-    ("e" . undo)                         ("у" . undo)                    ("E" . ignore) ("У" . ignore)
-    ("r" . kill-word)                    ("к" . kill-word)               ("R" . ignore) ("К" . ignore)
-    ("t" . cut-text-block)               ("е" . cut-text-block)          ("T" . ignore) ("Е" . ignore)
+    ("q" . insert-space-before)          ("й" . insert-space-before)              ("Q" . ignore) ("Й" . ignore)
+    ("w" . backward-kill-word)           ("ц" . backward-kill-word)               ("W" . ignore) ("Ц" . ignore)
+    ("e" . undo)                         ("у" . undo)                             ("E" . ignore) ("У" . ignore)
+    ("r" . kill-word)                    ("к" . kill-word)                        ("R" . ignore) ("К" . ignore)
+    ("t" . cut-text-block)               ("е" . cut-text-block)                   ("T" . ignore) ("Е" . ignore)
 
-    ("a" . shrink-whitespaces)           ("ф" . shrink-whitespaces)      ("A" . ignore) ("Ф" . ignore)
-    ("s" . open-line)                    ("ы" . open-line)               ("S" . ignore) ("Ы" . ignore)
-    ("d" . delete-backward)              ("в" . delete-backward)         ("D" . ignore) ("В" . ignore)
-    ("f" . newline)                      ("а" . newline)                 ("F" . ignore) ("А" . ignore)
-    ("g" . set-mark-command)             ("п" . set-mark-command)        ("G" . ignore) ("П" . ignore)
+    ("a" . shrink-whitespaces)           ("ф" . shrink-whitespaces)               ("A" . ignore) ("Ф" . ignore)
+    ("s" . open-line)                    ("ы" . open-line)                        ("S" . ignore) ("Ы" . ignore)
+    ("d" . delete-backward)              ("в" . delete-backward)                  ("D" . ignore) ("В" . ignore)
+    ("f" . newline)                      ("а" . newline)                          ("F" . ignore) ("А" . ignore)
+    ("g" . set-mark-command)             ("п" . set-mark-command)                 ("G" . ignore) ("П" . ignore)
 
-    ("z" . toggle-comment)               ("я" . toggle-comment)          ("Z" . ignore) ("Я" . ignore)
-    ("x" . cut-line-or-selection)        ("ч" . cut-line-or-selection)   ("X" . ignore) ("Ч" . ignore)
-    ("c" . copy-line-or-selection)       ("с" . copy-line-or-selection)  ("C" . ignore) ("С" . ignore)
-    ("v" . paste-or-paste-previous)      ("м" . paste-or-paste-previous) ("V" . ignore) ("М" . ignore)
-    ("b" . toggle-letter-case)           ("и" . toggle-letter-case)      ("B" . ignore) ("И" . ignore)
+    ("z" . toggle-comment)               ("я" . toggle-comment)                   ("Z" . ignore) ("Я" . ignore)
+    ("x" . cut-line-or-selection)        ("ч" . cut-line-or-selection)            ("X" . ignore) ("Ч" . ignore)
+    ("c" . copy-line-or-selection)       ("с" . copy-line-or-selection)           ("C" . ignore) ("С" . ignore)
+    ("v" . paste-or-paste-previous)      ("м" . paste-or-paste-previous)          ("V" . ignore) ("М" . ignore)
+    ("b" . toggle-letter-case)           ("и" . toggle-letter-case)               ("B" . ignore) ("И" . ignore)
 
     ;; right half
-    ("6" . pass)                                                         ("^" . ignore)
-    ("7" . number-to-register)                                           ("&" . ignore)
-    ("8" . copy-to-register)                                             ("*" . goto-matching-bracket) ; qwerty「*」→「=」engram, qwerty「/」→「=」ru pc karabiner
-    ("9" . eshell)                                                       ("(" . ignore)
-    ("0" . terminal)                                                     (")" . ignore)
-    ("-" . tetris)                                                       ("_" . ignore)
-    ("=" . goto-matching-bracket)                                        ("+" . ignore)
+    ("6" . pass)                                                                  ("^" . ignore)
+    ("7" . number-to-register)                                                    ("&" . ignore)
+    ("8" . copy-to-register)                                                      ("*" . goto-matching-bracket) ; qwerty「*」→「=」engram, qwerty「/」→「=」ru pc karabiner
+    ("9" . eshell)                                                                ("(" . ignore)
+    ("0" . terminal)                                                              (")" . ignore)
+    ("-" . tetris)                                                                ("_" . ignore)
+    ("=" . goto-matching-bracket)                                                 ("+" . ignore)
 
-    ("y"  . search-current-word)         ("н" . search-current-word)     ("Y" . ignore) ("Н" . ignore)
-    ("u"  . back-word)                   ("г" . back-word)               ("U" . ignore) ("Г" . ignore)
-    ("i"  . previous-line)               ("ш" . previous-line)           ("I" . ignore) ("Ш" . ignore)
-    ("o"  . forw-word)                   ("щ" . forw-word)               ("O" . ignore) ("Щ" . ignore)
-    ("p"  . exchange-point-and-mark)     ("з" . exchange-point-and-mark) ("P" . ignore) ("З" . ignore)
-    ("["  . alternate-buf-or-frame)      ("х" . alternate-buf-or-frame)  ("{" . ignore) ("Х" . ignore)
-    ("]"  . write-file)                  ("ъ" . write-file)              ("}" . ignore) ("Ъ" . ignore)
-    ("\\" . bookmark-set)                                                ("|" . ignore)
+    ("y"  . search-current-word)         ("н" . search-current-word)              ("Y" . ignore) ("Н" . ignore)
+    ("u"  . back-word)                   ("г" . back-word)                        ("U" . ignore) ("Г" . ignore)
+    ("i"  . previous-line)               ("ш" . previous-line)                    ("I" . ignore) ("Ш" . ignore)
+    ("o"  . forw-word)                   ("щ" . forw-word)                        ("O" . ignore) ("Щ" . ignore)
+    ("p"  . exchange-point-and-mark)     ("з" . exchange-point-and-mark)          ("P" . ignore) ("З" . ignore)
+    ("["  . alternate-buf-or-frame)      ("х" . alternate-buf-or-frame)           ("{" . ignore) ("Х" . ignore)
+    ("]"  . write-file)                  ("ъ" . write-file)                       ("}" . ignore) ("Ъ" . ignore)
+    ("\\" . bookmark-set)                                                         ("|" . ignore)
 
-    ("h" . beg-of-line-or-block)         ("р" . beg-of-line-or-block)    ("H"  . ignore) ("Р" . ignore)
-    ("j" . backward-char)                ("о" . backward-char)           ("J"  . ignore) ("О" . ignore)
-    ("k" . next-line)                    ("л" . next-line)               ("K"  . ignore) ("Л" . ignore)
-    ("l" . forward-char)                 ("д" . forward-char)            ("L"  . ignore) ("Д" . ignore)
-    (";" . end-of-line-or-block)         ("ж" . end-of-line-or-block)    (":"  . ignore) ("Ж" . ignore)
-    ("'" . alternate-buffer)             ("э" . alternate-buffer)        ("\"" . ignore) ("Э" . ignore)
+    ("h" . beg-of-line-or-block)         ("р" . beg-of-line-or-block)             ("H"  . ignore) ("Р" . ignore)
+    ("j" . backward-char)                ("о" . backward-char)                    ("J"  . ignore) ("О" . ignore)
+    ("k" . next-line)                    ("л" . next-line)                        ("K"  . ignore) ("Л" . ignore)
+    ("l" . forward-char)                 ("д" . forward-char)                     ("L"  . ignore) ("Д" . ignore)
+    (";" . end-of-line-or-block)         ("ж" . end-of-line-or-block)             (":"  . ignore) ("Ж" . ignore)
+    ("'" . alternate-buffer)             ("э" . alternate-buffer)                 ("\"" . ignore) ("Э" . ignore)
 
-    ("n" . isearch-forward)              ("т" . isearch-forward)         ("N" . ignore) ("Т" . ignore)
-    ("m" . backward-left-bracket)        ("ь" . backward-left-bracket)   ("M" . ignore) ("Ь" . ignore)
-    ("," . next-window-or-frame)         ("б" . next-window-or-frame)    ("<" . ignore) ("Б" . ignore)
-    ("." . forward-right-bracket)        ("ю" . forward-right-bracket)   (">" . ignore) ("Ю" . ignore)
-    ("/" . goto-matching-bracket)                                        ("?" . ignore)
+    ("n" . isearch-forward)              ("т" . isearch-forward)                  ("N" . ignore) ("Т" . ignore)
+    ("m" . backward-left-bracket)        ("ь" . backward-left-bracket)            ("M" . ignore) ("Ь" . ignore)
+    ("," . next-window-or-frame)         ("б" . next-window-or-frame)             ("<" . ignore) ("Б" . ignore)
+    ("." . forward-right-bracket)        ("ю" . forward-right-bracket)            (">" . ignore) ("Ю" . ignore)
+    ("/" . goto-matching-bracket)                                                 ("?" . ignore)
 
-    ("<left>" . left-char) ("<right>" . right-char)
-    ("<up>"   . up-line)   ("<down>"  . down-line)))
+    ("<left>" . left-char)               ("<right>" . right-char)
+    ("<up>"   . up-line)                 ("<down>"  . down-line)))
+
+;; TAB serves for other major modes as leader key.
+;; Hit TAB ESC/RET or DEL/SPC for move by lines or chars, also in insert mode.
+(keyamp--map (define-prefix-command 'keyamp-leader-map)
+  '(("ESC" . previous-line)              ("<escape>"    . previous-line)
+    ("RET" . next-line)                  ("<return>"    . next-line)
+    ("DEL" . left-char)                  ("<backspace>" . left-char)
+    ("SPC" . right-char)))
 
 (keyamp--map (define-prefix-command 'keyamp-left-leader-map)
-  '(("SPC" . select-text-in-quote)
-    ("DEL" . select-block)               ("<backspace>" . select-block)
-    ("RET" . execute-extended-command)   ("<return>"    . execute-extended-command)
-    ("TAB" . toggle-ibuffer)             ("<tab>"       . toggle-ibuffer)
+  '(("TAB" . toggle-ibuffer)             ("<tab>"       . toggle-ibuffer)
     ("ESC" . ignore)                     ("<escape>"    . ignore)
+    ("RET" . execute-extended-command)   ("<return>"    . execute-extended-command)
+    ("DEL" . select-block)               ("<backspace>" . select-block)
+    ("SPC" . select-text-in-quote)
 
     ;; left leader left half
     ("`" . next-buffer)
@@ -441,16 +453,16 @@ is enabled.")
     ;; left leader right half
     ("6" . save-buffers-kill-terminal)
     ("7" . jump-to-register)
-    ("8" . test-run)
-    ("9" . server-run)
+    ("8" . run-test)
+    ("9" . run-server)
     ("0" . abbrev-mode)
     ("-" . move-to-column)
     ("=" . screenshot)
     ("y" . find-name-dired)
     ("u" . switch-to-buffer)
 
-                                            ("i i"   . show-in-desktop)
-    ("i DEL" . count-words)                 ("i SPC" . count-matches)
+                                         ("i i"   . show-in-desktop)
+    ("i DEL" . count-words)              ("i SPC" . count-matches)
 
     ("o"  . recentf-open-files)
     ("p"  . view-echo-area-messages)
@@ -459,21 +471,21 @@ is enabled.")
     ("\\" . bookmark-rename)
     ("h"  . bookmark-jump)
 
-    ("j s" . glyphless-display-mode)        ("j l" . narrow-to-region-or-block)
-    ("j d" . toggle-case-fold-search)       ("j k" . narrow-to-defun)
-    ("j f" . toggle-word-wrap)              ("j j" . widen)
-    ("j DEL" . hl-line-mode)                ("j SPC" . whitespace-mode)
+    ("j s" . glyphless-display-mode)     ("j l" . narrow-to-region-or-block)
+    ("j d" . toggle-case-fold-search)    ("j k" . narrow-to-defun)
+    ("j f" . toggle-word-wrap)           ("j j" . widen)
+    ("j DEL" . hl-line-mode)             ("j SPC" . whitespace-mode)
 
     ("k s" . space-to-newline)
-    ("k d" . delete-matching-lines)         ("k k" . list-matching-lines)
+    ("k d" . delete-matching-lines)      ("k k" . list-matching-lines)
     ("k f" . delete-non-matching-lines)
-    ("k r" . quote-lines)                   ("k u" . escape-quotes)
-    ("k t" . delete-duplicate-lines)        ("k y" . slash-to-double-backslash)
-    ("k v" . reformat-to-sentence-lines)    ("k n" . double-backslash-to-slash)
-    ("k w" . sort-lines-key-value)          ("k o" . slash-to-backslash)
-    ("k x" . insert-column-a-z)             ("k ." . sort-lines-block-or-region)
-    ("k c" . cycle-hyphen-lowline-space)    ("k ," . sort-numeric-fields)
-    ("k DEL" . ispell-word)                 ("k SPC" . flyspell-buffer)
+    ("k r" . quote-lines)                ("k u" . escape-quotes)
+    ("k t" . delete-duplicate-lines)     ("k y" . slash-to-double-backslash)
+    ("k v" . reformat-to-sentence-lines) ("k n" . double-backslash-to-slash)
+    ("k w" . sort-lines-key-value)       ("k o" . slash-to-backslash)
+    ("k x" . insert-column-a-z)          ("k ." . sort-lines-block-or-region)
+    ("k c" . cycle-hyphen-lowline-space) ("k ," . sort-numeric-fields)
+    ("k DEL" . ispell-word)              ("k SPC" . flyspell-buffer)
 
     ("l" . describe-foo-at-point)
     (";" . bookmark-bmenu-list)
@@ -484,16 +496,16 @@ is enabled.")
     ("." . player)
     ("/" . goto-line)
 
-    ("i ESC" . ignore) ("i <escape>" . ignore)
-    ("j ESC" . ignore) ("j <escape>" . ignore)
-    ("k ESC" . ignore) ("k <escape>" . ignore)))
+    ("i ESC" . ignore)                   ("i <escape>" . ignore)
+    ("j ESC" . ignore)                   ("j <escape>" . ignore)
+    ("k ESC" . ignore)                   ("k <escape>" . ignore)))
 
 (keyamp--map (define-prefix-command 'keyamp-right-leader-map)
-  '(("SPC" . extend-selection)
-    ("DEL" . select-line)              ("<backspace>" . select-line)
-    ("RET" . read-only-mode)           ("<return>"    . read-only-mode)
-    ("TAB" . toggle-gnus)              ("<tab>"       . toggle-gnus)
-    ("ESC" . ignore)                   ("<escape>"    . ignore)
+  '(("TAB" . toggle-gnus)                ("<tab>"       . toggle-gnus)
+    ("ESC" . ignore)                     ("<escape>"    . ignore)
+    ("RET" . read-only-mode)             ("<return>"    . read-only-mode)
+    ("DEL" . select-line)                ("<backspace>" . select-line)
+    ("SPC" . extend-selection)
 
     ;; right leader left half
     ("`" . find-next-dir-file)
@@ -507,7 +519,7 @@ is enabled.")
     ("w" . sun-moon)
 
     ("e e" . todo)
-    ("e DEL" . clock)                   ("e SPC" . calendar)
+    ("e DEL" . clock)                    ("e SPC" . calendar)
 
     ("r" . query-replace-regexp)
     ("t" . calc)
@@ -515,17 +527,17 @@ is enabled.")
     ("s" . clean-whitespace)
 
     ("d e" . org-shiftup)
-    ("d s" . shell-command-on-region)   ("d l" . elisp-eval-region-or-buffer)
-    ("d d" . insert-date)               ("d k" . run-current-file)
-    ("d f" . shell-command)             ("d j" . eval-last-sexp)
-    ("d DEL" . stow)                    ("d SPC" . eval-defun)
+    ("d s" . shell-command-on-region)    ("d l" . elisp-eval-region-or-buffer)
+    ("d d" . insert-date)                ("d k" . run-current-file)
+    ("d f" . shell-command)              ("d j" . eval-last-sexp)
+    ("d DEL" . stow)                     ("d SPC" . eval-defun)
 
-    ("f e" . insert-emacs-quote)        ("f i" . insert-ascii-single-quote)
-    ("f f" . insert-char)               ("f j" . insert-brace)
-    ("f d" . emoji-insert)              ("f k" . insert-paren)
-    ("f s" . insert-formfeed)           ("f l" . insert-square-bracket)
-    ("f g" . insert-double-angle-quote) ("f h" . insert-double-curly-quote)
-    ("f DEL" . insert-backtick-quote)   ("f SPC" . insert-ascii-double-quote)
+    ("f e" . insert-emacs-quote)         ("f i" . insert-ascii-single-quote)
+    ("f f" . insert-char)                ("f j" . insert-brace)
+    ("f d" . emoji-insert)               ("f k" . insert-paren)
+    ("f s" . insert-formfeed)            ("f l" . insert-square-bracket)
+    ("f g" . insert-double-angle-quote)  ("f h" . insert-double-curly-quote)
+    ("f DEL" . insert-backtick-quote)    ("f SPC" . insert-ascii-double-quote)
 
     ("g" . new-empty-buffer)
     ("z" . goto-char)
@@ -565,9 +577,9 @@ is enabled.")
     ("." . recenter-top-bottom)
     ("/" . mark-defun) ("*" . mark-defun)
 
-    ("e ESC" . ignore) ("e <escape>" . ignore)
-    ("d ESC" . ignore) ("d <escape>" . ignore)
-    ("f ESC" . ignore) ("f <escape>" . ignore)))
+    ("e ESC" . ignore)                   ("e <escape>" . ignore)
+    ("d ESC" . ignore)                   ("d <escape>" . ignore)
+    ("f ESC" . ignore)                   ("f <escape>" . ignore)))
 
 
 ;; Core Remaps
@@ -650,7 +662,7 @@ is enabled.")
      search-current-word     isearch-yank-kill)))
 
 
-;; Repeat View Screen
+;; Screen mode.
 
 (with-sparse-keymap-x
  ;; Leader layer to become transient main. Base map for next leaders adjustment
@@ -708,7 +720,7 @@ is enabled.")
 (with-sparse-keymap-x
  (keyamp--remap x
    '((open-line . prev-proj-buffer) (newline . next-proj-buffer)
-     (eshell    . server-run)))
+     (eshell    . run-server)))
  (keyamp--set-map x '(prev-proj-buffer next-proj-buffer)))
 
 (with-sparse-keymap-x
@@ -743,81 +755,12 @@ is enabled.")
   (keyamp--set-map x '(dired-jump downloads player)))
 
 
-;; Repeat Edit
+;; Repeat mode. View commands.
 
 (with-sparse-keymap-x
- (keyamp--map-leaders x '(delete-forward-char . delete-forward-char))
-  (keyamp--set-map x '(delete-forward-char)))
-
-(with-sparse-keymap-x
- (keyamp--map-leaders x '(delete-backward . insert-space-before))
- (keyamp--set-map x '(delete-backward insert-space-before)))
-
-(with-sparse-keymap-x
- (keyamp--map-leaders x '(open-line . newline))
- (keyamp--remap x '((open-line . backward-kill-word) (newline . kill-word)))
- (keyamp--set-map x '(backward-kill-word kill-word)))
-
-(with-sparse-keymap-x
- (keyamp--map-leaders x '(undo . delete-backward))
- (keyamp--remap x '((delete-backward . undo-redo)))
- (keyamp--set-map x '(undo undo-redo)))
-
-(with-sparse-keymap-x
- (keyamp--remap x '((delete-backward . cut-text-block)))
- (keyamp--set-map x '(cut-text-block)))
-
-(with-sparse-keymap-x
- (keyamp--map-leaders x '(delete-backward . delete-backward))
- (keyamp--remap x '((delete-backward . shrink-whitespaces)))
- (keyamp--set-map x '(shrink-whitespaces)))
-
-(with-sparse-keymap-x
- (keyamp--map-leaders x '(delete-backward . delete-backward))
- (keyamp--remap x '((delete-backward . toggle-comment)))
- (keyamp--set-map x '(toggle-comment)))
-
-(with-sparse-keymap-x
- (keyamp--map-leaders x '(delete-backward . delete-backward))
- (keyamp--remap x '((delete-backward . cut-line-or-selection)))
- (keyamp--set-map x '(cut-line-or-selection)))
-
-(with-sparse-keymap-x
- (keyamp--map-leaders x '(delete-backward . delete-backward))
- (keyamp--remap x '((delete-backward . copy-line-or-selection)))
- (keyamp--set-map x '(copy-line-or-selection)))
-
-(with-sparse-keymap-x
- (keyamp--map-leaders x '(delete-backward . delete-backward))
- (keyamp--remap x '((delete-backward . paste-or-paste-previous)))
- (keyamp--set-map x '(paste-or-paste-previous)))
-
-(with-sparse-keymap-x
- (keyamp--remap x '((delete-backward . toggle-letter-case)))
- (keyamp--set-map x '(toggle-letter-case)))
-
-(with-sparse-keymap-x
- (keyamp--map-leaders x '(delete-backward . undo))
- (keyamp--remap x
-   '((undo                   . org-shiftup)
-     (delete-backward        . org-shiftdown)
-     (copy-line-or-selection . agenda)))
- (keyamp--set-map x '(org-shiftup org-shiftdown)))
-
-(with-sparse-keymap-x
- (keyamp--remap x '((undo . todo) (copy-line-or-selection . agenda)))
- (keyamp--set-map x '(todo insert-date)))
-
-(with-sparse-keymap-x
- (keyamp--remap x '((delete-backward . cycle-hyphen-lowline-space)))
- (keyamp--set-map x '(cycle-hyphen-lowline-space)))
-
-
-;; Repeat View
-
-(with-sparse-keymap-x
- ;; Initiate by triple DEL/SPC (hold down). Transition to View Screen.
+ ;; Initiate by triple DEL/SPC (hold down). Transition to Screen mode.
  ;; I/K or DEL/SPC to move by lines. See deactivate-mark-before-move.
+ ;; This keymap related both to Screen and to Repeat modes.
  (keyamp--map-leaders x '(previous-line . next-line))
  (keyamp--remap x
    '((previous-line . up-line)              (next-line . down-line)
@@ -858,7 +801,7 @@ is enabled.")
  (keyamp--set-map x '(extend-selection)))
 
 (with-sparse-keymap-x
- ;; Triple DEL (hold down) to move lines up and activate View Screen.
+ ;; Triple DEL (hold down) to move lines up and activate Screen mode.
  (keyamp--map-leaders x '(up-line . down-line))
  (keyamp--remap x
    '((previous-line . beg-of-line-or-block) (next-line . select-block)))
@@ -938,7 +881,77 @@ is enabled.")
  (keyamp--set-map x '(backward-button forward-button)))
 
 
-;; Modes Remaps
+;; Repeat mode. Edit commands.
+
+(with-sparse-keymap-x
+ (keyamp--map-leaders x '(delete-forward-char . delete-forward-char))
+  (keyamp--set-map x '(delete-forward-char)))
+
+(with-sparse-keymap-x
+ (keyamp--map-leaders x '(delete-backward . insert-space-before))
+ (keyamp--set-map x '(delete-backward insert-space-before)))
+
+(with-sparse-keymap-x
+ (keyamp--map-leaders x '(open-line . newline))
+ (keyamp--remap x '((open-line . backward-kill-word) (newline . kill-word)))
+ (keyamp--set-map x '(backward-kill-word kill-word)))
+
+(with-sparse-keymap-x
+ (keyamp--map-leaders x '(undo . delete-backward))
+ (keyamp--remap x '((delete-backward . undo-redo)))
+ (keyamp--set-map x '(undo undo-redo)))
+
+(with-sparse-keymap-x
+ (keyamp--remap x '((delete-backward . cut-text-block)))
+ (keyamp--set-map x '(cut-text-block)))
+
+(with-sparse-keymap-x
+ (keyamp--map-leaders x '(delete-backward . delete-backward))
+ (keyamp--remap x '((delete-backward . shrink-whitespaces)))
+ (keyamp--set-map x '(shrink-whitespaces)))
+
+(with-sparse-keymap-x
+ (keyamp--map-leaders x '(delete-backward . delete-backward))
+ (keyamp--remap x '((delete-backward . toggle-comment)))
+ (keyamp--set-map x '(toggle-comment)))
+
+(with-sparse-keymap-x
+ (keyamp--map-leaders x '(delete-backward . delete-backward))
+ (keyamp--remap x '((delete-backward . cut-line-or-selection)))
+ (keyamp--set-map x '(cut-line-or-selection)))
+
+(with-sparse-keymap-x
+ (keyamp--map-leaders x '(delete-backward . delete-backward))
+ (keyamp--remap x '((delete-backward . copy-line-or-selection)))
+ (keyamp--set-map x '(copy-line-or-selection)))
+
+(with-sparse-keymap-x
+ (keyamp--map-leaders x '(delete-backward . insert-space-before))
+ (keyamp--remap x '((delete-backward . paste-or-paste-previous)))
+ (keyamp--set-map x '(paste-or-paste-previous)))
+
+(with-sparse-keymap-x
+ (keyamp--remap x '((delete-backward . toggle-letter-case)))
+ (keyamp--set-map x '(toggle-letter-case)))
+
+(with-sparse-keymap-x
+ (keyamp--map-leaders x '(delete-backward . undo))
+ (keyamp--remap x
+   '((undo                   . org-shiftup)
+     (delete-backward        . org-shiftdown)
+     (copy-line-or-selection . agenda)))
+ (keyamp--set-map x '(org-shiftup org-shiftdown)))
+
+(with-sparse-keymap-x
+ (keyamp--remap x '((undo . todo) (copy-line-or-selection . agenda)))
+ (keyamp--set-map x '(todo insert-date)))
+
+(with-sparse-keymap-x
+ (keyamp--remap x '((delete-backward . cycle-hyphen-lowline-space)))
+ (keyamp--set-map x '(cycle-hyphen-lowline-space)))
+
+
+;; Modes Remaps.
 
 (defun keyamp-minibuffer-insert ()
   "If minibuffer input not empty then confirm and exit instead
@@ -968,6 +981,15 @@ of quit minibuffer."
   (keyamp-insert-init)
   (execute-kbd-macro (kbd "y")))
 
+(defun keyamp-insert-! ()
+  "Insert ! literally."
+  (interactive)
+  (if (y-or-n-p "Confirm")
+      (progn
+        (keyamp-insert-init)
+        (execute-kbd-macro (kbd "!")))
+    (message "Abort")))
+
 (with-eval-after-load 'minibuffer
   (with-sparse-keymap-x
    ;; On minibuffer start up press DEL or I to list history backwards or
@@ -982,12 +1004,14 @@ of quit minibuffer."
    ;; Hit D or DEL for No, K or SPC for Yes right away to answer y or n.
    (keyamp--map x
      '(("d" . select-block)     ("в" . select-block)
-       ("k" . extend-selection) ("л" . extend-selection)))
+       ("k" . extend-selection) ("л" . extend-selection)
+       ;; Engineer Engram layout ! is QWERTY N and Russian Т
+       ("N" . keyamp-insert-!)  ("Т" . keyamp-insert-!)))
    (keyamp--remap y-or-n-p-map
      '((select-block     . y-or-n-p-insert-n)
        (extend-selection . y-or-n-p-insert-y)))
 
-   ;; The hook is last one run during minibuffer setup.
+   ;; The hook is last one run during minibuffer setup. So the keymap x.
    (keyamp--remap x
      '((end-of-line-or-block . keyamp-insert-n) ; Engineer Engram layout,
        (backward-kill-word   . keyamp-insert-y) ; remap required for other
@@ -1020,14 +1044,19 @@ of quit minibuffer."
               (goto-char (point-max)))))
 
 (with-eval-after-load 'icomplete
-  ;; Exit if file completion. It means use content of minibuffer as it is, no
-  ;; select completion candidates. Else force complete and exit, that is, select
-  ;; and use first completion candidate.
-  ;; In case file completion, for most cases no need to complete, because there
-  ;; is NO right candidate. Otherwise, in all cases one MUST select a candidate.
+  (defun keyamp-icomplete-exit ()
+    "Exit if file completion. It means use content of minibuffer as it is,
+  no select completion candidates. Else force complete and exit, that
+  is, select and use first completion candidate. In case file
+  completion, for most cases no need to complete, because there is NO
+  right candidate. Otherwise, in all cases one MUST select a candidate."
+    (interactive)
+    (if (eq (icomplete--category) 'file)
+        (exit-minibuffer)
+      (icomplete-force-complete-and-exit)))
+
   (keyamp--map icomplete-minibuffer-map
-    '(("RET"      . icomplete-exit-or-force-complete-and-exit)
-      ("<return>" . icomplete-exit-or-force-complete-and-exit)))
+    '(("RET" . keyamp-icomplete-exit) ("<return>" . keyamp-icomplete-exit)))
 
   (keyamp--remap icomplete-minibuffer-map
     '((previous-line    . icomplete-backward-completions)
@@ -1037,7 +1066,7 @@ of quit minibuffer."
   (with-sparse-keymap-x
     (keyamp--map-leaders x '(previous-line . next-line))
     (keyamp--remap x
-      '((keyamp-insert . icomplete-exit-or-force-complete-and-exit)
+      '((keyamp-insert . keyamp-icomplete-exit)
         (previous-line . icomplete-backward-completions)
         (next-line     . icomplete-forward-completions)))
     (keyamp--set-map x
@@ -1071,25 +1100,31 @@ of quit minibuffer."
 
 (with-eval-after-load 'dired
   (keyamp--map dired-mode-map
-    '(("C-h" . dired-do-delete)       ("C-r" . open-in-external-app)
-      ("<mouse-1>" . mouse-set-point) ("<mouse-2>" . mouse-set-point)
-      ("<double-mouse-1>" . dired-find-file)))
+    '(("C-h" . dired-do-delete) ("C-r" . open-in-external-app)
+      ("<mouse-1>" . mouse-set-point)
+      ("<mouse-2>" . mouse-set-point) ; mouse-2 does mouse-1
+      ("<double-mouse-1>" . dired-find-file)
+      ("<mouse-3>" . open-in-external-app)))
 
   (keyamp--remap dired-mode-map
-    '((keyamp-insert         . dired-find-file)
-      (newline               . dired-sort)
-      (backward-left-bracket . dired-mark)
-      (forward-right-bracket . dired-unmark)
-      (toggle-comment        . revert-buffer)
-      (insert-space-before   . dired-create-directory)
-      (shrink-whitespaces    . dired-hide-details-mode)
-      (copy-to-register-1    . dired-do-copy)
-      (paste-from-register-1 . dired-do-rename)
-      (mark-whole-buffer     . dired-toggle-marks)))
+    '((keyamp-insert           . dired-find-file)
+      (insert-space-before     . dired-omit-mode)
+      (kill-word               . dired-unmark-all-marks)
+      (backward-kill-word      . dired-do-chmod)
+      (shrink-whitespaces      . dired-hide-details-mode)
+      (open-line               . dired-maybe-insert-subdir)
+      (delete-backward         . dired-toggle-mark)
+      (newline                 . dired-sort)
+      (toggle-comment          . revert-buffer)
+      (cut-line-or-selection   . dired-diff)
+      (paste-or-paste-previous . dired-create-directory)
+      (copy-to-register-1      . dired-do-copy)
+      (paste-from-register-1   . dired-do-rename)
+      (mark-whole-buffer       . dired-toggle-marks)))
 
   (with-sparse-keymap-x
-    (keyamp--map-leaders x '(dired-unmark . dired-mark))
-    (keyamp--set-map x '(dired-unmark dired-mark))))
+    (keyamp--map-leaders x '(dired-toggle-mark . dired-toggle-mark))
+    (keyamp--set-map x '(dired-toggle-mark))))
 
 (with-eval-after-load 'wdired
   (keyamp--map wdired-mode-map
@@ -1098,7 +1133,7 @@ of quit minibuffer."
 (with-eval-after-load 'dired-utils
   (keyamp--map dired-mode-map
     '(("TAB" . dired-leader-map) ("<tab>" . dired-leader-map)))
-  (keyamp--map dired-leader-map
+  (keyamp--map (define-prefix-command 'dired-leader-map)
     '(("ESC" . ignore)                         ("<escape>" . ignore)
       ("TAB" . dired-omit-mode)                ("<tab>"    . dired-omit-mode)
       ("q" . dired-image-remove-transparency)  ("e" . dired-optimize-png)
@@ -1125,10 +1160,9 @@ of quit minibuffer."
 
 (with-eval-after-load 'ibuf-ext
   (keyamp--map ibuffer-mode-map
-    '(("C-h" . ibuffer-do-delete) ("<double-mouse-1>" . ibuffer-visit-buffer)
-      ("TAB" . toggle-gnus)       ("<tab>" . toggle-gnus)))
+    '(("C-h" . ibuffer-do-delete) ("<double-mouse-1>" . ibuffer-visit-buffer)))
 
-  ;; Same as base map for View Screen, always available in ibuffer.
+  ;; Same as base map for Screen, always available in ibuffer.
   (keyamp--remap ibuffer-mode-map
     '((keyamp-insert           . ibuffer-visit-buffer)
       (end-of-line-or-block    . ibuffer-forward-filter-group)
@@ -1200,10 +1234,9 @@ of quit minibuffer."
                  (set-transient-map x)
                  (setq this-command 'keyamp--repeat-dummy)))))
 
-  (advice-add-macro
-   '(company-search-abort company-complete-selection)
-   :after (lambda (&rest r) "`keyamp-command'"
-            (if keyamp-insert-p (keyamp-command))))
+  (advice-add-macro '(company-search-abort company-complete-selection)
+                    :after (lambda (&rest r) "`keyamp-command'"
+                             (if keyamp-insert-p (keyamp-command))))
 
   (advice-add 'company-search-candidates :after 'keyamp-insert-init)
 
@@ -1337,10 +1370,15 @@ of quit minibuffer."
                            keyamp-insert-p)
                   (keyamp-command))))
 
-  (keyamp--map eshell-mode-map '(("C-h" . eshell-interrupt-process)))
+  (keyamp--map eshell-mode-map
+    '(("C-h" . eshell-interrupt-process)
+      ("TAB" . eshell-leader-map) ("<tab>" . eshell-leader-map)
+      ("S-<tab>" . ignore)        ("<backtab>" . ignore)))
+  (keyamp--map (define-prefix-command 'eshell-leader-map)
+    '(("TAB" . completion-at-point) ("<tab>" . completion-at-point)))
   (keyamp--remap eshell-mode-map
     '((cut-line-or-selection . eshell-clear-input)
-      (next-proj-buffer      . eshell-clear)
+      (cut-text-block        . eshell-clear)
       (select-block          . eshell-previous-input)
       (quoted-insert         . eshell-interrupt-process)))
 
@@ -1352,9 +1390,14 @@ of quit minibuffer."
                    (keyamp-insert)
                    (set-transient-map x)))))
 
+  (advice-add 'paste-or-paste-previous :before
+              (lambda (&rest r) "go to input before paste"
+                (when (eq major-mode 'eshell-mode) (goto-char (point-max)))))
+
   (with-sparse-keymap-x
    ;; Insert mode is primary for eshell. The keymap ready after eshell start,
-   ;; command submit or cancel. Use DEL/SPC to list history, V for paste.
+   ;; command submit or cancel. Use DEL/SPC to list history, V for paste and
+   ;; other commands available in insert mode right after send input.
    (keyamp--map-leaders x '(previous-line . next-line))
    (keyamp--remap x
      '((previous-line . eshell-previous-input)
@@ -1364,7 +1407,8 @@ of quit minibuffer."
        ("<tab>" . eshell-previous-matching-input)
        ("v" . paste-or-paste-previous) ("м" . paste-or-paste-previous)
        ("'" . alternate-buffer)        ("э" . alternate-buffer)
-       ("[" . alternate-buf-or-frame)  ("х" . alternate-buf-or-frame)))
+       ("[" . alternate-buf-or-frame)  ("х" . alternate-buf-or-frame)
+       ("0" . terminal)))
     (keyamp--set-map x '(eshell-send-input eshell-interrupt-process))
     (keyamp--set-map x '(eshell-previous-input eshell-next-input) :command)
     (keyamp--set-map-hook x '(eshell-mode-hook) nil :insert)))
@@ -1387,7 +1431,11 @@ of quit minibuffer."
   (keyamp--map vterm-mode-map
     '(("C-h" . term-interrupt-subjob) ("C-q" . term-interrupt-subjob)
       ("C-r" . delete-other-windows)  ("C-t" . delete-other-windows)
-      ("C-u" . vterm-send-next-key)))
+      ("C-u" . vterm-send-next-key)
+      ("TAB" . vterm-leader-map)      ("<tab>" . vterm-leader-map)
+      ("S-<tab>" . ignore)            ("<backtab>" . ignore)))
+  (keyamp--map (define-prefix-command 'vterm-leader-map)
+    '(("TAB" . vterm-send-tab) ("<tab>" . vterm-send-tab)))
   (keyamp--remap vterm-mode-map
     '((select-block            . vterm-send-up)
       (next-proj-buffer        . vterm-clear)
@@ -1402,7 +1450,8 @@ of quit minibuffer."
    (keyamp--map x
      '(("v" . paste-or-paste-previous) ("м" . paste-or-paste-previous)
        ("'" . alternate-buffer)        ("э" . alternate-buffer)
-       ("[" . alternate-buf-or-frame)  ("х" . alternate-buf-or-frame)))
+       ("[" . alternate-buf-or-frame)  ("х" . alternate-buf-or-frame)
+       ("9" . eshell)))
     (keyamp--set-map x '(vterm-send-return))
     (keyamp--set-map x '(vterm-send-up vterm-send-down) :command)
     (keyamp--set-map-hook x '(vterm-mode-hook) nil :insert)))
@@ -1427,8 +1476,7 @@ of quit minibuffer."
 
 (with-eval-after-load 'gnus-topic
   (keyamp--map gnus-topic-mode-map
-    '(("TAB" . toggle-ibuffer) ("<tab>" . toggle-ibuffer)
-      ("<double-mouse-1>" . gnus-topic-select-group)))
+    '(("<double-mouse-1>" . gnus-topic-select-group)))
   (keyamp--remap gnus-topic-mode-map
     '((keyamp-insert        . gnus-topic-select-group)
       (beg-of-line-or-block . gnus-topic-goto-prev-topic-line)
@@ -1463,8 +1511,7 @@ of quit minibuffer."
 
 (with-eval-after-load 'gnus-sum
   (keyamp--map gnus-summary-mode-map
-    '(("C-h" . gnus-summary-delete-article)
-      ("TAB" . ignore) ("<tab>" . ignore)
+    '(("C-h"              . gnus-summary-delete-article)
       ("<double-mouse-1>" . gnus-summary-scroll-up)))
   (keyamp--remap gnus-summary-mode-map
     '((keyamp-insert . gnus-summary-scroll-up)
@@ -1539,13 +1586,16 @@ of quit minibuffer."
 
 (with-eval-after-load 'find-replace
   (keyamp--map find-output-mode-map
-    '(("TAB"       . find-next-match)     ("<tab>"   . find-next-match)
-      ("<backtab>" . find-previous-match) ("S-<tab>" . find-previous-match)))
+    '(("TAB"       . find-output-leader-map) ("<tab>"   . find-output-leader-map)
+      ("<backtab>" . find-previous-match)    ("S-<tab>" . find-previous-match)))
+  (keyamp--map (define-prefix-command 'find-output-leader-map)
+    '(("TAB" . find-next-match) ("<tab>" . find-next-match)))
   (keyamp--remap find-output-mode-map
     '((keyamp-insert . find--jump-to-place)))
 
   (with-sparse-keymap-x
    (keyamp--map-leaders x '(backward-char . forward-char))
+   (keyamp--map x '(("TAB" . find-next-match) ("<tab>" . find-next-match)))
    (keyamp--remap x
      '((previous-line . find-previous-file)  (next-line    . find-next-file)
        (backward-char . find-previous-match) (forward-char . find-next-match)))
@@ -1557,7 +1607,7 @@ of quit minibuffer."
   (keyamp--map emacs-lisp-mode-map
     '(("TAB" . emacs-lisp-leader-map) ("<tab>" . emacs-lisp-leader-map)
       ("S-<tab>" . ignore)            ("<backtab>" . ignore)))
-  (keyamp--map emacs-lisp-leader-map
+  (keyamp--map (define-prefix-command 'emacs-lisp-leader-map)
     '(("ESC" . ignore) ("<escape>" . ignore)
       ("TAB"   . emacs-lisp-complete-or-indent)
       ("<tab>" . emacs-lisp-complete-or-indent)
@@ -1571,9 +1621,15 @@ of quit minibuffer."
 
 (with-eval-after-load 'python-mode
   (keyamp--map python-mode-map
-    '(("TAB" . python-indent-or-complete) ("<tab>"    . python-indent-or-complete)
-      ("RET" . python-return-and-indent)  ("<return>" . python-return-and-indent)
+    '(("TAB" . python-leader-map)         ("<tab>"     . python-leader-map)
+      ("RET" . python-return-and-indent)  ("<return>"  . python-return-and-indent)
       ("S-<tab>" . python-de-indent)      ("<backtab>" . python-de-indent)))
+  (keyamp--map (define-prefix-command 'python-leader-map)
+    '(("TAB" . python-indent-or-complete) ("<tab>" . python-indent-or-complete)))
+  (with-sparse-keymap-x
+   (keyamp--map x
+    '(("TAB" . python-indent-or-complete) ("<tab>" . python-indent-or-complete)))
+   (keyamp--set-map x '(python-indent-or-complete python-de-indent)))
   (keyamp--remap python-mode-map
     '((open-line      . python-return-and-indent)
       (reformat-lines . flymake-goto-next-error)
@@ -1581,6 +1637,9 @@ of quit minibuffer."
 
 (with-eval-after-load 'go-ts-mode
   (keyamp--map go-ts-mode-map
+    '(("TAB" . go-ts-leader-map) ("<tab>" . go-ts-leader-map)
+      ("S-<tab>" . ignore)       ("<backtab>" . ignore)))
+  (keyamp--map (define-prefix-command 'go-ts-leader-map)
     '(("TAB" . go-format-buffer) ("<tab>" . go-format-buffer)))
   (keyamp--remap go-ts-mode-map
     '((describe-foo-at-point . xref-find-definitions)
@@ -1592,13 +1651,23 @@ of quit minibuffer."
    (keyamp--map-leaders x '(xref-go-back . xref-find-definitions))
    (keyamp--set-map x '(xref-go-back xref-find-definitions))))
 
+(with-eval-after-load 'sqlite-mode
+  (keyamp--remap sqlite-mode-map
+    '((keyamp-insert   . sqlite-mode-list-data)
+      (delete-backward . sqlite-mode-delete)
+      (newline         . sqlite-mode-list-columns)
+      (open-line       . sqlite-mode-list-tables))))
+
+(with-eval-after-load 'sql
+  (keyamp--remap sql-mode-map '((eval-defun . exec-query))))
+
 (with-eval-after-load 'html-mode
   (keyamp--map html-mode-map
     '(("TAB" . html-leader-map)      ("<tab>" . html-leader-map)
       ("RET" . html-open-local-link) ("<return>" . html-open-local-link)
       ("C-r" . html-open-in-browser)))
 
-  (keyamp--map html-leader-map
+  (keyamp--map (define-prefix-command 'html-leader-map)
     '(("TAB"    . html-insert-tag)                   ("<tab>"    . html-insert-tag)
       ("RET"    . html-insert-br-tag)                ("<return>" . html-insert-br-tag)
       ("<left>" . html-prev-opening-tag)             ("<right>"  . html-next-opening-tag)
@@ -1643,7 +1712,7 @@ of quit minibuffer."
 (with-eval-after-load 'js-mode
   (keyamp--map js-mode-map
     '(("TAB" . js-leader-map)         ("<tab>" . js-leader-map)))
-  (keyamp--map js-leader-map
+  (keyamp--map (define-prefix-command 'js-leader-map)
     '(("TAB" . js-complete-or-indent) ("<tab>" . js-complete-or-indent)
       ("h" . typescript-compile-file)
       ("," . js-eval-line) ("." . js-eval-region)))
@@ -1652,7 +1721,7 @@ of quit minibuffer."
 (with-eval-after-load 'css-mode
   (keyamp--map css-mode-map
     '(("TAB" . css-leader-map) ("<tab>" . css-leader-map)))
-  (keyamp--map css-leader-map
+  (keyamp--map (define-prefix-command 'css-leader-map)
     '(("," . css-insert-random-color-hsl)
       ("TAB" . css-complete-or-indent) ("<tab>" . css-complete-or-indent)
       ("'" . css-hex-color-to-hsl)     ("a" . css-complete-symbol)
@@ -1672,6 +1741,7 @@ of quit minibuffer."
                  delete-window                    t
                  dired-jump                       t
                  downloads                        t
+                 exec-query                       t
                  find-next-dir-file               t
                  find-prev-dir-file               t
                  next-buffer                      t
@@ -1685,12 +1755,12 @@ of quit minibuffer."
                  prev-user-buffer                 t
                  run-current-file                 t
                  save-close-current-buffer        t
-                 server-run                       t
+                 run-server                       t
                  split-window-below               t
                  sun-moon                         t
                  sync                             t
                  tasks                            t
-                 test-run                         t
+                 run-test                         t
                  view-echo-area-messages          t
                  xref-find-definitions            t
                  xref-go-back                     t)))
@@ -1823,7 +1893,8 @@ of quit minibuffer."
     (set-face-background 'cursor keyamp-screen-cursor)
     (setq keyamp-repeat-p nil)
     (setq keyamp-screen-p t))
-   ((gethash this-command keyamp-repeat-commands-hash)
+   ((and (gethash this-command keyamp-repeat-commands-hash)
+         (not keyamp-insert-p))
     (setq mode-line-front-space keyamp-repeat-indicator)
     (set-face-background 'cursor keyamp-repeat-cursor)
     (setq keyamp-repeat-p t)
@@ -1839,10 +1910,10 @@ of quit minibuffer."
     (setq keyamp-repeat-p nil)
     (setq keyamp-screen-p nil)))
   (unless (eq this-command last-command)
-    (force-mode-line-update)))
+    (force-mode-line-update t)))
 
 (defun keyamp-escape (&optional Keyamp-idle-p)
-  "Return to command mode or clear selection or quit minibuffer.
+  "Return to command mode, clear selection or quit minibuffer.
 If run by idle timer then emulate escape keyboard press which required to
 deactivate transient map."
   (interactive)
