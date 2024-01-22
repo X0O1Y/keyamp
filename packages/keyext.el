@@ -62,6 +62,7 @@ Call this repeatedly will cycle all positions in `mark-ring'."
   (let ((xp (point)))
     (if (or (equal (point) (line-beginning-position))
             (eq last-command this-command)
+            (equal "D" (this-command-keys)) ; shift i Engram
             (equal [backspace] (this-command-keys))
             (= 127 (aref (this-command-keys) 0))) ; DEL repeat
         (when
@@ -77,8 +78,8 @@ Call this repeatedly will cycle all positions in `mark-ring'."
               (if (= (line-number-at-pos) (count-lines (point-min) (point-max)))
                   (progn
                     (beginning-of-line)
-                    (forward-word )
-                    (forward-char ))
+                    (forward-word)
+                    (forward-char))
                 (beginning-of-line)))
           (back-to-indentation)
           (when (eq xp (point))
@@ -94,6 +95,7 @@ Call this repeatedly will cycle all positions in `mark-ring'."
   (interactive)
   (if (or (equal (point) (line-end-position))
           (eq last-command this-command)
+          (equal "T" (this-command-keys))  ; shift k Engram
           (equal " " (this-command-keys))) ; SPC repeat
       (progn
         (re-search-forward "\n[\t\n ]*\n+" nil 1)
@@ -2153,7 +2155,7 @@ makes it easy to toggle."
       (setq search-whitespace-regexp nil)
       (message "Space set to literal"))))
 
-(defun search-current-word ()
+(defun isearch-cur-word ()
   "Call `isearch' on current word or “word” here is A to Z, a to z, and
 hyphen [-] and lowline [_], independent of syntax table."
   (interactive)
@@ -2171,6 +2173,18 @@ hyphen [-] and lowline [_], independent of syntax table."
       (goto-char xp1))
     (isearch-mode t)
     (isearch-yank-string (buffer-substring-no-properties xp1 xp2))))
+
+(defun isearch-cur-word-forward ()
+  "Forward `search-current-word'."
+  (interactive)
+  (isearch-cur-word)
+  (isearch-repeat-forward))
+
+(defun isearch-cur-word-backward ()
+  "Backward `search-current-word'."
+  (interactive)
+  (isearch-cur-word)
+  (isearch-repeat-backward))
 
 (declare-function w32-shell-execute "w32fns.c"
                   (operation document &optional parameters show-flag)) ; (w32-shell-execute "open" default-directory)
@@ -2467,19 +2481,30 @@ Show current agenda. Do not select other window, balance windows."
       (switch-to-buffer "*Group*")
     (gnus)))
 
-(defun run-server ()
+(defun server ()
   "Run project server. Switch to console if already running."
   (interactive)
   (let ((xpath (getenv "RUN_SERVER"))
-        (xbuf (concat "*run server*")))
+        (xbuf "*run server*"))
     (if (get-buffer xbuf)
         (switch-to-buffer-other-window xbuf)
-      (async-shell-command (format "cd %s && go run main.go" xpath) xbuf))))
+      (async-shell-command
+       (if (> (length (getenv "CONNINFO")) 0)
+           (format "cd %s && go run main.go -d $CONNINFO " xpath)
+         (format "cd %s && go run main.go" xpath)) xbuf))))
 
-(defun run-test ()
+(defun test ()
   "Run project tests."
   (interactive)
+  (let ((xbuf "*run server*"))
+    (if (get-buffer xbuf)
+        (kill-buffer xbuf)))
   (async-shell-command "$RUN_TEST" "*run test*"))
+
+(defun sql ()
+  "Open SQL client."
+  (interactive)
+  (find-file "~/.sql"))
 
 (defun exec-query ()
   "Execute potgres SQL statement separated by `;'."
@@ -2499,7 +2524,7 @@ Show current agenda. Do not select other window, balance windows."
     (setq xquery (string-trim
                   (concat (buffer-substring-no-properties xp1 xp2))) )
     (async-shell-command
-     (format "psql %s -c '%s'" xconn xquery) xbuf)))
+     (format "psql %s -c '%s' -q" xconn xquery) xbuf)))
 
 (defun who-called-defun (oldfun format &rest args)
   "Backtrace. For example, to find out who called `message':
@@ -2527,6 +2552,12 @@ Show current agenda. Do not select other window, balance windows."
                                 end-of-buffer
                                 quit)))
     (command-error-default-function data context caller)))
+
+(defun hide-messages (func &rest args)
+  "Inhibit messages for FUNC. Run as advice."
+  (let ((message-log-max nil)
+        (inhibit-messages t))
+    (apply func args)))
 
 (defun disable-kill-buffer-query-functions (kill-func &rest args)
   "Disable confirmation conditionally before buffer kill."
@@ -2661,9 +2692,15 @@ before selection. This func to be run as before advice for move func."
 
 (add-hook 'replace-update-post-hook 'recenter)
 
+(defun quit ()
+  "Confirm and quit. Because restart without confirm."
+  (interactive)
+  (if (y-or-n-p "Quit?")
+      (save-buffers-kill-terminal)))
+
 (provide 'keyext)
 
 ;; Local Variables:
-;; byte-compile-warnings: (not lexical unresolved)
+;; byte-compile-warnings: (not free-vars lexical unresolved)
 ;; End:
 ;;; keyext.el ends here
