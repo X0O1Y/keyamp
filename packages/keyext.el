@@ -42,13 +42,15 @@
 Call this repeatedly will cycle all positions in `mark-ring'."
   (interactive)
   (set-mark-command t)
-  (setq this-command 'pop-local-mark-ring))
+  (setq this-command 'pop-local-mark-ring)
+  (message "%s" "Mark pop")) ; same usual messages suppressed
 
 (defun set-mark-deactivate-mark ()
   "Set the mark where point is, and deactivate it."
   (interactive)
   (set-mark-command nil)
-  (deactivate-mark))
+  (deactivate-mark)
+  (message "%s" "Mark set"))
 
 (defun beg-of-line-or-block ()
   "Move cursor to beginning of line or previous block.
@@ -915,15 +917,15 @@ Move cursor to the beginning of next text block."
     (save-restriction
       (narrow-to-region xp1 xp2)
       (goto-char (point-min))
-      (while (re-search-forward "\\([A-Za-z0-9]+\\)[ \t]*\n[ \t]*\\([A-Za-z0-9]+\\)" nil t)
+      (while (re-search-forward "\\([A-Za-zА-Яа-я0-9]+\\)[ \t]*\n[ \t]*\\([A-Za-zА-Яа-я0-9]+\\)" nil t)
         (replace-match "\\1 \\2"))
       (goto-char (point-min))
-      (while (re-search-forward "\\([,]\\)[ \t]*\n[ \t]*\\([A-Za-z0-9]+\\)" nil t)
+      (while (re-search-forward "\\([,]\\)[ \t]*\n[ \t]*\\([A-Za-zА-Яа-я0-9]+\\)" nil t)
         (replace-match "\\1 \\2"))
       (goto-char (point-min))
       (while (re-search-forward "  +" nil t) (replace-match " "))
       (goto-char (point-min))
-      (while (re-search-forward "\\([.?!]\\) +\\([(0-9A-Za-z]+\\)" nil t) (replace-match "\\1\n\\2"))
+      (while (re-search-forward "\\([.?!]\\) +\\([(0-9A-Za-zА-Яа-я]+\\)" nil t) (replace-match "\\1\n\\2"))
       (goto-char (point-max))
       (while (eq (char-before) 32) (delete-char -1))))
   (re-search-forward "\n+" nil 1))
@@ -1581,12 +1583,12 @@ experimental. But when cursor is on a any type of bracket
        ;;  (push-mark (line-beginning-position) t t))
        (
         ;; (prog2 (backward-char) (looking-at "[-_a-zA-Z0-9]") (forward-char))
-        (looking-back "[-_a-zA-Z0-9]" (max (- (point) 1) (point-min)))
+        (looking-back "[-_a-zа-яA-ZА-Я0-9]" (max (- (point) 1) (point-min)))
         ;; (message "left is word or symbol")
-        (skip-chars-backward "-_a-zA-Z0-9")
+        (skip-chars-backward "-_a-zа-яA-ZА-Я0-9")
         ;; (re-search-backward "^\\(\\sw\\|\\s_\\)" nil t)
         (push-mark)
-        (skip-chars-forward "-_a-zA-Z0-9")
+        (skip-chars-forward "-_a-zа-яA-ZА-Я0-9")
         (setq mark-active t)
         ;; (exchange-point-and-mark)
         )
@@ -1648,8 +1650,8 @@ You can override this function to get your idea of “user buffer”."
   (interactive)
   (cond
    ((string-equal "*" (substring (buffer-name) 0 1)) nil)
-   ((string-equal major-mode "dired-mode") nil)
    ((string-equal major-mode "eww-mode") nil)
+   ((string-equal major-mode "dired-mode") nil)
    ((string-equal major-mode "help-mode") nil)
    ((string-equal major-mode "nov-mode") nil)
    ((string-equal major-mode "doc-view-mode") nil)
@@ -1717,6 +1719,111 @@ You can override this function to get your idea of “user buffer”."
   (let ((i 0))
     (while (< i 20)
       (if (not (project-buffer-p))
+          (progn
+            (next-buffer)
+            (setq i (1+ i)))
+        (progn
+          (setq i 100))))))
+
+(defun eww-reload-all ()
+  "Reload all eww buffers."
+  (interactive)
+  (mapcar
+   (lambda (xbuf)
+     (with-current-buffer xbuf
+       (when (eq major-mode 'eww-mode)
+         (eww-reload))))
+   (buffer-list)))
+
+(defvar places-eww nil "Alist url to place.")
+
+(defun eww-load-place ()
+  "Go to saved place in eww buffers."
+  (interactive)
+  (setq places-eww
+        (with-temp-buffer
+          (insert-file-contents "~/.emacs.d/places-eww")
+          (read (current-buffer))))
+  (mapcar
+   (lambda (xbuf)
+     (with-current-buffer xbuf
+       (when (eq major-mode 'eww-mode)
+         (let ((xp1 (point))
+               (xp2 (alist-get (replace-regexp-in-string
+                                (getenv "HOME") "~"
+                                (plist-get eww-data :url))
+                               places-eww 1 nil 'string-equal)))
+           (if (> (abs (- xp1 xp2)) 1000) ; if position changed significantly
+               (goto-char xp2))))))
+   (buffer-list)))
+
+(defvar headers-eww nil "Alist url to header. Manual reference.")
+
+(defun eww-update-header ()
+  "Update header line for some buffers."
+  (interactive)
+  (let ((xh (alist-get (replace-regexp-in-string (getenv "HOME") "~"
+                                                 (plist-get eww-data :url))
+                       headers-eww nil nil 'string-equal)))
+    (when xh
+      (setq header-line-format nil)
+      (rename-buffer (concat "*" (string-trim xh) "*")))))
+
+(defun eww-after-render ()
+  "Make eww buffers readable. Run with `eww-after-render-hook'"
+  (eww-readable)
+  (eww-load-place)
+  (eww-update-header))
+
+(defun eww-save-place ()
+  "Save place in eww buffers. Create new or update existing buffers."
+  (interactive)
+  (mapc
+   (lambda (xbuf)
+     (with-current-buffer xbuf
+       (when (eq major-mode 'eww-mode)
+         (let ((xurl (replace-regexp-in-string (getenv "HOME") "~"
+                                               (plist-get eww-data :url))))
+           (if (assoc xurl places-eww)
+               (if (> (point) 1000) ; only if point not in the beg
+                   (setf (alist-get xurl
+                                    places-eww 1 nil 'string-equal) (point)))
+             (push (cons xurl (point)) places-eww))))))
+
+   (buffer-list))
+  (with-temp-buffer
+    (if (> (length places-eww) 0) ; only if something
+        (progn
+          (pp places-eww (current-buffer))
+          (write-region (point-min) (point-max)
+                        "~/.emacs.d/places-eww" nil 'quiet)))))
+
+(defun eww-buffer-p ()
+  (interactive)
+  (cond
+   ((string-equal major-mode "eww-mode") t)
+   (t nil)))
+
+(defun prev-eww-buffer ()
+  "Switch to the previous eww buffer."
+  (interactive)
+  (previous-buffer)
+  (let ((i 0))
+    (while (< i 20)
+      (if (not (eww-buffer-p))
+          (progn
+            (previous-buffer)
+            (setq i (1+ i)))
+        (progn
+          (setq i 100))))))
+
+(defun next-eww-buffer ()
+  "Switch to the next eww buffer."
+  (interactive)
+  (next-buffer)
+  (let ((i 0))
+    (while (< i 20)
+      (if (not (eww-buffer-p))
           (progn
             (next-buffer)
             (setq i (1+ i)))
@@ -2163,10 +2270,10 @@ hyphen [-] and lowline [_], independent of syntax table."
     (if (region-active-p)
         (setq xp1 (region-beginning) xp2 (region-end))
       (save-excursion
-        (skip-chars-backward "-_A-Za-z0-9")
+        (skip-chars-backward "-_A-ZА-Яa-zа-я0-9")
         (setq xp1 (point))
         (right-char)
-        (skip-chars-forward "-_A-Za-z0-9")
+        (skip-chars-forward "-_A-ZА-Яa-zа-я0-9")
         (setq xp2 (point))))
     (setq mark-active nil)
     (when (< xp1 (point))
@@ -2338,18 +2445,24 @@ If there more than one frame, switch to next frame."
   (interactive)
   (text-scale-adjust 0))
 
+(defun cur-point ()
+  "Get position."
+  (interactive)
+  (message "%s" (point)))
+
 (defun toggle-ibuffer ()
   "Toggle ibuffer.
 Force switch to current buffer to update `other-buffer'."
   (interactive)
-  (let ((xbuf (buffer-name)))
+  (let ((xbuf (buffer-name)) (xm major-mode))
     (if (string-equal major-mode "ibuffer-mode")
         (toggle-gnus)
       (progn
         (switch-to-buffer xbuf)
         (ibuffer)
-        (unless (member (buffer-name (cadr (buffer-list)))
-                        ibuffer-never-show-predicates)
+        (unless (or (member (buffer-name (cadr (buffer-list)))
+                            ibuffer-never-show-predicates)
+                    (string-equal xm "eww-mode"))
           (ibuffer-jump-to-buffer xbuf))))))
 
 (defun flyspell-goto-prev-error ()
@@ -2546,11 +2659,11 @@ Show current agenda. Do not select other window, balance windows."
 
 (defun command-error-function-silent (data context caller)
   "Ignore some signals; pass the rest to the default handler."
-  (when (not (memq (car data) '(buffer-read-only
-                                text-read-only
-                                beginning-of-buffer
-                                end-of-buffer
-                                quit)))
+  (unless (memq (car data) '(buffer-read-only
+                             text-read-only
+                             beginning-of-buffer
+                             end-of-buffer
+                             quit))
     (command-error-default-function data context caller)))
 
 (defun hide-messages (func &rest args)
@@ -2576,6 +2689,7 @@ Show current agenda. Do not select other window, balance windows."
 
 (defun byte-compile-package ()
   "Byte compile current package."
+  (clean-whitespace)
   (if (string-match ".+emacs.d/packages+." (buffer-file-name))
       (byte-compile-file (expand-file-name (buffer-file-name)))))
 
@@ -2697,6 +2811,22 @@ before selection. This func to be run as before advice for move func."
   (interactive)
   (if (y-or-n-p "Quit?")
       (save-buffers-kill-terminal)))
+
+(advice-add 'dired-next-line :after
+            (lambda (&rest r)
+              (if (= (line-number-at-pos)
+                     (1+ (count-lines (point-min) (point-max))))
+                  (dired-previous-line 1))))
+
+(advice-add 'dired-previous-line :after
+            (lambda (&rest r)
+              (if (= (line-number-at-pos) 1)
+                  (dired-next-line 1))))
+
+(advice-add 'beg-of-line-or-buffer  :after
+            (lambda (&rest r)
+              (if (eq major-mode 'dired-mode)
+                  (dired-next-line 1))))
 
 (provide 'keyext)
 
