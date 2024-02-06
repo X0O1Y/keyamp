@@ -25,6 +25,8 @@ defaults write org.gnu.Emacs HideDocumentIcon YES
 
 [[screenshots/desktop.png]]
 
+[[screenshots/desktop2.png]]
+
 *** Titlebar
 #+begin_src elisp
 (when (display-graphic-p)

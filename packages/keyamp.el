@@ -545,11 +545,11 @@ is enabled.")
     ("]"  . rename-visited-file)
     ("\\" . bookmark-delete)
 
-    ("h" . scroll-down-command)
+    ("h" . View-scroll-half-page-backward)
     ("j" . toggle-truncate-lines)
     ("k" . make-backup-and-save)
     ("l" . display-line-numbers-mode)
-    (";" . scroll-up-command)
+    (";" . View-scroll-half-page-forward)
     ("'" . sync)
 
     ("n" . save-buffer)
@@ -594,7 +594,8 @@ is enabled.")
     ("<header-line> <mouse-3>" . make-frame-command)))
 
 (advice-add 'mouse-set-point :before
-            (lambda (&rest r) "copy selection with left click"
+            (lambda (&rest r) "save point and copy selection with left click"
+              (push-mark (point) t)
               (if (region-active-p)
                   (copy-region-as-kill (region-beginning) (region-end)))))
 
@@ -708,9 +709,11 @@ is enabled.")
 
 (with-sparse-keymap-x
  (keyamp--map x
-   '(("TAB" . scroll-up-command) ("<tab>" . scroll-up-command)))
+   '(("TAB"   . View-scroll-half-page-forward)
+     ("<tab>" . View-scroll-half-page-forward)))
  (keyamp--remap x
-   '((open-line . prev-eww-buffer) (newline . next-eww-buffer)))
+   '((open-line . prev-eww-buffer) (newline . next-eww-buffer)
+     (kill-word . eww-reload)))
  (keyamp--set-map x '(prev-eww-buffer next-eww-buffer)))
 
 (with-sparse-keymap-x
@@ -752,9 +755,12 @@ is enabled.")
  ;; I/K or DEL/SPC to move by lines. See deactivate-mark-before-move.
  ;; This keymap related both to Screen and to Repeat modes.
  (keyamp--map-leaders x '(previous-line . next-line))
+ (keyamp--map x
+   '(("TAB" . View-scroll-half-page-forward)
+     ("<tab>" . View-scroll-half-page-forward)))
  (keyamp--remap x
    '((previous-line . up-line)              (next-line . down-line)
-     (open-line     . previous-user-buffer) (newline . next-user-buffer)))
+     (open-line     . prev-user-buffer)     (newline   . next-user-buffer)))
  (keyamp--set-map x '(up-line down-line)))
 
 (with-sparse-keymap-x
@@ -850,13 +856,27 @@ is enabled.")
  (keyamp--set-map x '(back-word forw-word backward-punct forward-punct)))
 
 (with-sparse-keymap-x
- ;; Hold down H/; to initiate page up/down. Repeat with I/K.
  (keyamp--map-leaders x '(previous-line . next-line))
- (keyamp--map x '(("TAB" . next-line) ("<tab>" . next-line))) ; Reader touch
  (keyamp--remap x
    '((previous-line . scroll-down-command) (next-line . scroll-up-command)
      (down-line     . scroll-down-command) (up-line   . scroll-up-command)))
  (keyamp--set-map x '(scroll-down-command scroll-up-command)))
+
+(with-sparse-keymap-x
+ ;; Hold down H/; to initiate half page up/down. Repeat with I/K or DEL/SPC.
+ (keyamp--map-leaders x '(previous-line . next-line))
+ (keyamp--map x '(("TAB" . next-line) ("<tab>" . next-line))) ; reader touch
+ (keyamp--remap x
+   '((previous-line . View-scroll-half-page-backward)
+     (next-line     . View-scroll-half-page-forward)
+     (down-line     . View-scroll-half-page-forward)
+     (up-line       . View-scroll-half-page-backward)))
+ (unless (display-graphic-p) ; reader touch
+   (keyamp--remap x
+     '((down-line     . View-scroll-half-page-backward)
+       (up-line       . View-scroll-half-page-forward))))
+ (keyamp--set-map x '(View-scroll-half-page-backward
+                      View-scroll-half-page-forward)))
 
 (with-sparse-keymap-x
  (keyamp--map-leaders x '(next-line . next-line))
@@ -924,8 +944,7 @@ is enabled.")
 
 (with-sparse-keymap-x
  (keyamp--map-leaders x '(delete-backward . insert-space-before))
- ;; Repeat V to paste previous while stay in insert mode.
- (keyamp--map x '(("v" . delete-backward) ("м" . delete-backward)))
+ (keyamp--map x '(("v" . delete-backward) ("м" . delete-backward))) ; repeat in insert mode
  (keyamp--remap x '((delete-backward . paste-or-paste-previous)))
  (keyamp--set-map x '(paste-or-paste-previous)))
 
@@ -1011,7 +1030,7 @@ of quit minibuffer."
        (extend-selection . y-or-n-p-insert-y)))
 
    ;; The hook is last one run during minibuffer setup. Transient keymap x
-   ;; got highest priority.
+   ;; gets highest priority.
    (keyamp--remap x
      '((end-of-line-or-block . keyamp-insert-n) ; Engineer Engram layout,
        (backward-kill-word   . keyamp-insert-y) ; remap required for other
@@ -1307,7 +1326,10 @@ of quit minibuffer."
 
 (with-eval-after-load 'replace
   (keyamp--remap occur-mode-map
-    '((keyamp-insert . occur-mode-goto-occurrence))))
+    '((keyamp-insert . occur-mode-goto-occurrence)))
+
+  (keyamp--map query-replace-map
+    '(("d" . skip) ("k" . act) ("в" . skip) ("л" . act))))
 
 (with-eval-after-load 'shr
   (keyamp--remap shr-map
@@ -1341,11 +1363,14 @@ of quit minibuffer."
   (keyamp--map eww-mode-map
     '(("TAB" . eww-leader-map) ("<tab>" . eww-leader-map)))
   (keyamp--map (define-prefix-command 'eww-leader-map)
-               '(("TAB" . scroll-up-command) ("<tab>" . scroll-up-command)))
+    '(("TAB"   . View-scroll-half-page-forward)
+      ("<tab>" . View-scroll-half-page-forward)))
 
   (keyamp--remap eww-mode-map
-    '((kill-word . eww-reload)   (delete-backward . eww-readable)
-      (open-line . eww-back-url) (newline   . eww-next-url)))
+    '((kill-word          . eww-reload)     (delete-backward . justify-buffer)
+      (open-line          . eww-back-url)   (newline         . eww-next-url)
+      (backward-kill-word . eww-save-place) (undo            . eww-load-place)
+      (query-replace      . eww-reload-all)))
 
   (keyamp--remap eww-link-keymap
     '((keyamp-insert . eww-follow-link))))
@@ -1583,10 +1608,10 @@ of quit minibuffer."
       ("<double-mouse-1>" . gnus-summary-scroll-up)))
 
   (keyamp--remap gnus-summary-mode-map
-    '((keyamp-insert . gnus-summary-scroll-up)
-      (open-line     . gnus-summary-prev-group)
-      (newline       . gnus-summary-next-group)
-      (save-buffer   . gnus-summary-save-parts))))
+    '((keyamp-insert    . gnus-summary-scroll-up)
+      (open-line        . gnus-summary-prev-group)
+      (newline          . gnus-summary-next-group)
+      (save-buffer      . gnus-summary-save-parts))))
 
   (with-sparse-keymap-x
    (keyamp--map-leaders x '(open-line . newline))
@@ -1689,7 +1714,8 @@ of quit minibuffer."
 (with-sparse-keymap-x
  (keyamp--map-leaders x '(backward-char . forward-char))
  (keyamp--remap x
-   '((backward-char . flymake-goto-prev-error) (forward-char . flymake-goto-next-error)))
+   '((backward-char . flymake-goto-prev-error)
+     (forward-char  . flymake-goto-next-error)))
  (keyamp--set-map x '(flymake-goto-prev-error flymake-goto-next-error)))
 
 (with-eval-after-load 'python-mode
@@ -1711,10 +1737,10 @@ of quit minibuffer."
 
 (with-eval-after-load 'go-ts-mode
   (keyamp--map go-ts-mode-map
-    '(("TAB" . go-ts-leader-map) ("<tab>" . go-ts-leader-map)
-      ("S-<tab>" . ignore)       ("<backtab>" . ignore)))
+    '(("TAB" . go-ts-leader-map)     ("<tab>" . go-ts-leader-map)
+      ("S-<tab>" . ignore)           ("<backtab>" . ignore)))
   (keyamp--map (define-prefix-command 'go-ts-leader-map)
-    '(("TAB" . go-format-buffer) ("<tab>" . go-format-buffer)))
+    '(("TAB" . company-manual-begin) ("<tab>" . company-manual-begin)))
 
   (keyamp--remap go-ts-mode-map
     '((describe-foo-at-point . xref-find-definitions)
@@ -1821,12 +1847,12 @@ of quit minibuffer."
                  find-next-dir-file               t
                  find-prev-dir-file               t
                  forw-frame                       t
-
+                 gnus-summary-next-group          t
+                 gnus-summary-prev-group          t
                  next-buffer                      t
                  next-eww-buffer                  t
                  next-proj-buffer                 t
                  next-user-buffer                 t
-                 new-empty-buffer                 t
                  open-file-at-cursor              t
                  player                           t
                  previous-buffer                  t
@@ -1927,6 +1953,8 @@ of quit minibuffer."
                  text-scale-increase              t
                  text-scale-reset                 t
                  up-line                          t
+                 View-scroll-half-page-backward   t
+                 View-scroll-half-page-forward    t
                  vterm-send-down                  t
                  vterm-send-up                    t)))
 
@@ -1940,7 +1968,9 @@ of quit minibuffer."
 
 (defun keyamp-command-init ()
   "Set command mode."
-  (setq keyamp-insert-p nil)
+  (when keyamp-insert-p
+    (setq keyamp-insert-p nil)
+    (push-mark (point) t))
   (if keyamp--deactivate-command-mode-func
       (funcall keyamp--deactivate-command-mode-func))
   (setq keyamp--deactivate-command-mode-func
@@ -2008,7 +2038,6 @@ deactivate transient map."
   (interactive)
   (cond
    (Keyamp-idle-p        (execute-kbd-macro (kbd "<escape>")))
-
    ((or keyamp-insert-p
         keyamp-repeat-p
         keyamp-screen-p) (keyamp-command))

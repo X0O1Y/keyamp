@@ -398,7 +398,7 @@ If `universal-argument' is called first, do not delete inner text."
           (cut-bracket-pair)
         (cut-bracket-text)))
      ((looking-back "\\s(" 1)
-      (message "Left of cursor is opening bracket")
+      ;; (message "Left of cursor is opening bracket")
       (let (xpOpenBracketLeft
             (xpOpenBracketRight (point)) xisComment)
         (backward-char)
@@ -408,13 +408,13 @@ If `universal-argument' is called first, do not delete inner text."
         (setq xisComment (nth 4 (syntax-ppss)))
         (if xisComment
             (progn
-              (message "Cursor is in comment")
+              ;; (message "Cursor is in comment")
               (goto-char xpOpenBracketLeft)
               (if (forward-comment 1)
                   (kill-region (point) xpOpenBracketLeft)
                 (message "Error hSnRp: parsing comment failed")))
           (progn
-            (message "Right 1 char of cursor is not in comment")
+            ;; (message "Right 1 char of cursor is not in comment")
             (goto-char xpOpenBracketLeft)
             (forward-sexp)
             (if current-prefix-arg
@@ -776,29 +776,6 @@ one space or newline at each step, till no more white space."
           (insert "\n"))))
      (t (progn
           (message "Nothing done. Logic error 40873. Should not reach here"))))))
-
-(defun toggle-read-novel-mode ()
-  "Setup current frame to be suitable for reading long novel/article text.
-
-• Set frame width to 70;
-• Line wrap at word boundaries;
-• Line spacing is increased;
-• Proportional width font is used.
-
-Call again to toggle back."
-  (interactive)
-  (if (eq (frame-parameter (selected-frame) 'width) 80)
-      (progn
-        (set-frame-parameter (selected-frame) 'width 93)
-        (variable-pitch-mode 0)
-        (setq line-spacing nil)
-        (setq word-wrap nil))
-    (progn
-      (set-frame-parameter (selected-frame) 'width 80)
-      (variable-pitch-mode 1)
-      (setq line-spacing 0.5)
-      (setq word-wrap t)))
-  (redraw-frame (selected-frame)))
 
 (defun fill-or-unfill ()
   "Reformat current block or selection to short/long line.
@@ -1653,7 +1630,6 @@ You can override this function to get your idea of “user buffer”."
    ((string-equal major-mode "eww-mode") nil)
    ((string-equal major-mode "dired-mode") nil)
    ((string-equal major-mode "help-mode") nil)
-   ((string-equal major-mode "nov-mode") nil)
    ((string-equal major-mode "doc-view-mode") nil)
    ((string-equal major-mode "diary-mode") nil)
    ((string-equal (buffer-name) "tetris-scores") nil)
@@ -1661,6 +1637,8 @@ You can override this function to get your idea of “user buffer”."
    ((string-equal buffer-file-truename org-agenda-file-2) nil)
    ((string-equal buffer-file-truename org-agenda-file-3) nil)
    ((string-match ".+em/project+." default-directory) nil)
+   ((and buffer-file-truename
+       (string-match ".sql" buffer-file-truename)) nil)
    (t t)))
 
 (defun prev-user-buffer ()
@@ -1737,25 +1715,31 @@ You can override this function to get your idea of “user buffer”."
 
 (defvar places-eww nil "Alist url to place.")
 
-(defun eww-load-place ()
-  "Go to saved place in eww buffers."
-  (interactive)
+(defun eww-load-place-cache ()
+  "Load places cache from file into `places-eww'."
   (setq places-eww
         (with-temp-buffer
           (insert-file-contents "~/.emacs.d/places-eww")
-          (read (current-buffer))))
-  (mapcar
-   (lambda (xbuf)
-     (with-current-buffer xbuf
-       (when (eq major-mode 'eww-mode)
-         (let ((xp1 (point))
-               (xp2 (alist-get (replace-regexp-in-string
-                                (getenv "HOME") "~"
-                                (plist-get eww-data :url))
-                               places-eww 1 nil 'string-equal)))
-           (if (> (abs (- xp1 xp2)) 1000) ; if position changed significantly
-               (goto-char xp2))))))
-   (buffer-list)))
+          (read (current-buffer)))))
+
+(defun eww-load-place ()
+  "Go to saved place in eww buffers."
+  (interactive)
+  (eww-load-place-cache)
+  (when (eq major-mode 'eww-mode)
+    (let ((xp1 (point))
+          (xp2 (alist-get (replace-regexp-in-string
+                           (getenv "HOME") "~"
+                           (plist-get eww-data :url))
+                          places-eww 1 nil 'string-equal)))
+      (when (and (> (abs (- xp1 xp2)) 100) ; if position changed significantly
+                 (> xp2 xp1))              ; allow offset forward only
+        (goto-char xp2)))))
+
+(add-hook 'window-buffer-change-functions
+          (lambda (r) "After switch window."
+            (if (eq major-mode 'eww-mode)
+                (eww-load-place))))
 
 (defvar headers-eww nil "Alist url to header. Manual reference.")
 
@@ -1773,30 +1757,37 @@ You can override this function to get your idea of “user buffer”."
   "Make eww buffers readable. Run with `eww-after-render-hook'"
   (eww-readable)
   (eww-load-place)
-  (eww-update-header))
+  (eww-update-header)
+  (if (and (display-graphic-p)
+           (fboundp 'justify-buffer))
+      (run-with-timer 0.1 nil 'justify-buffer)))
 
-(defun eww-save-place ()
-  "Save place in eww buffers. Create new or update existing buffers."
-  (interactive)
-  (mapc
-   (lambda (xbuf)
-     (with-current-buffer xbuf
-       (when (eq major-mode 'eww-mode)
-         (let ((xurl (replace-regexp-in-string (getenv "HOME") "~"
-                                               (plist-get eww-data :url))))
-           (if (assoc xurl places-eww)
-               (if (> (point) 1000) ; only if point not in the beg
-                   (setf (alist-get xurl
-                                    places-eww 1 nil 'string-equal) (point)))
-             (push (cons xurl (point)) places-eww))))))
+(add-hook 'eww-after-render-hook 'eww-after-render)
 
-   (buffer-list))
+(defun eww-save-place-cache ()
+  "Save places cache to file."
   (with-temp-buffer
     (if (> (length places-eww) 0) ; only if something
         (progn
           (pp places-eww (current-buffer))
           (write-region (point-min) (point-max)
                         "~/.emacs.d/places-eww" nil 'quiet)))))
+
+(defun eww-save-place ()
+  "Save place for eww buffer. Create new or update existing."
+  (interactive)
+  (when (eq major-mode 'eww-mode)
+    (setq xurl (replace-regexp-in-string (getenv "HOME") "~"
+                                         (plist-get eww-data :url)))
+    (let ((xp1 (point))
+          (xp2 (alist-get xurl places-eww 1 nil 'string-equal)))
+      (if (assoc xurl places-eww)
+          (if (and (> xp1 1000) ; only if point not in the beg
+                   (> xp1 xp2)) ; allow offset forward only
+              (setf (alist-get xurl
+                               places-eww 1 nil 'string-equal) (point)))
+        (push (cons xurl (point)) places-eww))))
+  (eww-save-place-cache))
 
 (defun eww-buffer-p ()
   (interactive)
@@ -1878,7 +1869,8 @@ to t.
 It returns the buffer."
   (interactive)
   (let ((xbuf (generate-new-buffer "file")))
-    (switch-to-buffer-other-window xbuf)
+    ;; (switch-to-buffer-other-window xbuf)
+    (switch-to-buffer xbuf)
     (funcall initial-major-mode)
     xbuf))
 
@@ -2462,7 +2454,8 @@ Force switch to current buffer to update `other-buffer'."
         (ibuffer)
         (unless (or (member (buffer-name (cadr (buffer-list)))
                             ibuffer-never-show-predicates)
-                    (string-equal xm "eww-mode"))
+                    (string-equal xm "eww-mode")
+                    (string-equal xm "gnus-summary-mode"))
           (ibuffer-jump-to-buffer xbuf))))))
 
 (defun flyspell-goto-prev-error ()
@@ -2637,7 +2630,7 @@ Show current agenda. Do not select other window, balance windows."
     (setq xquery (string-trim
                   (concat (buffer-substring-no-properties xp1 xp2))) )
     (async-shell-command
-     (format "psql %s -c '%s' -q" xconn xquery) xbuf)))
+     (format "psql %s -c \"%s\" -q" xconn xquery) xbuf)))
 
 (defun who-called-defun (oldfun format &rest args)
   "Backtrace. For example, to find out who called `message':
@@ -2689,9 +2682,10 @@ Show current agenda. Do not select other window, balance windows."
 
 (defun byte-compile-package ()
   "Byte compile current package."
-  (clean-whitespace)
-  (if (string-match ".+emacs.d/packages+." (buffer-file-name))
-      (byte-compile-file (expand-file-name (buffer-file-name)))))
+  (when (string-match ".+emacs.d/packages+." (buffer-file-name))
+    (clean-whitespace)
+    (save-buffer)
+    (byte-compile-file (expand-file-name (buffer-file-name)))))
 
 (defun terminal ()
   "Run terminal emulator."
@@ -2794,6 +2788,8 @@ before selection. This func to be run as before advice for move func."
 
 (advice-add-macro '(scroll-down-command
                     scroll-up-command
+                    View-scroll-half-page-backward
+                    View-scroll-half-page-forward
                     isearch-repeat-backward
                     isearch-repeat-forward
                     prev-user-buffer
@@ -2801,7 +2797,9 @@ before selection. This func to be run as before advice for move func."
                     prev-proj-buffer
                     next-proj-buffer
                     find-previous-match
-                    find-next-match)
+                    find-next-match
+                    ;; delete-other-windows
+                    )
                   :after (lambda (&rest r) "recenter" (recenter)))
 
 (add-hook 'replace-update-post-hook 'recenter)
@@ -2827,6 +2825,12 @@ before selection. This func to be run as before advice for move func."
             (lambda (&rest r)
               (if (eq major-mode 'dired-mode)
                   (dired-next-line 1))))
+
+(defun set-location (Latitude Longtitude)
+  "Set location."
+  (setq calendar-location-name "Current"
+        calendar-latitude  (string-to-number Latitude)
+        calendar-longitude (string-to-number Longtitude)))
 
 (provide 'keyext)
 
