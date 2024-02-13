@@ -210,7 +210,9 @@ From character to character code."
   "Build reverse mapping for `input-method'.
 Use Russian input source for command mode. Respect Engineer Engram layout."
   (let ((xinput (symbol-name input-method))
-        (xmods '(nil (control))))
+        (xmods '(nil (control)))
+        (message-log-max nil)
+        (inhibit-message t))
     (activate-input-method xinput)
     (when (and current-input-method quail-keyboard-layout)
       (dolist (xmap (cdr (quail-map)))
@@ -260,7 +262,8 @@ It is possible to have QWERTY keyboard using ANY custom layout in Emacs only."
               (keymap-set key-translation-map
                           (car x)
                           (if (get 'keyamp-qwerty-to-current-layout 'state)
-                              (cdr x)))) xl)))
+                              (cdr x))))
+          xl)))
 
 
 ;; keymaps
@@ -314,6 +317,7 @@ is enabled.")
 (keyamp--map keyamp-map
   '(("TAB" . keyamp-leader-map)          ("<tab>"    . keyamp-leader-map)
                                          ("<escape>" . keyamp-escape)             ("S-<escape>" . ignore)
+
     ;; Control sequences for leaders. Russian converted from Engineer Engram.
     ;; The sequences are prefixes for key hold down in Karabiner.
     ("C-^" . keyamp-left-leader-map)     ("C-+"      . keyamp-left-leader-map)
@@ -323,8 +327,8 @@ is enabled.")
 ;; automatically using `keyamp-map-input-source'. If missing then same.
 (keyamp--map keyamp-command-map
   '(("RET" . keyamp-insert)              ("<return>"    . keyamp-insert)          ("S-<return>"    . ignore)
-    ("DEL" . keyamp-left-leader-map)     ("<backspace>" . keyamp-left-leader-map) ("S-<backspace>" . ignore)
-    ("SPC" . keyamp-right-leader-map)                                             ("S-SPC"         . ignore)
+    ("DEL" . keyamp-left-leader-map)     ("<backspace>" . keyamp-left-leader-map) ("S-<backspace>" . prev-proj-buffer)
+    ("SPC" . keyamp-right-leader-map)                                             ("S-SPC"         . next-proj-buffer)
 
     ;; left half
     ("`" . delete-forward-char)          ("ё" . delete-forward-char)              ("~" . keyamp-qwerty-to-current-layout)  ("Ë" . keyamp-qwerty-to-current-layout)
@@ -445,11 +449,12 @@ is enabled.")
                                          ("i i"   . show-in-desktop)
     ("i DEL" . count-words)              ("i SPC" . count-matches)
 
-    ("o"  . recentf-open-files)
+    ("o"  . make-frame-command)
     ("p"  . view-echo-area-messages)
     ("["  . toggle-frame-maximized)
     ("]"  . find-file)
     ("\\" . bookmark-rename)
+
     ("h"  . bookmark-jump)
 
     ("j s" . glyphless-display-mode)     ("j l" . narrow-to-region-or-block)
@@ -469,9 +474,9 @@ is enabled.")
     ("k DEL" . ispell-word)              ("k SPC" . flyspell-buffer)
 
     ("l" . describe-foo-at-point)
-    (";" . switch-to-buffer)
+    (";" . recentf-open-files)
     ("'" . toggle-debug-on-error)
-    ("n" . next-proj-buffer)
+    ("n" . switch-to-buffer)
     ("m" . downloads)
     ("," . open-last-closed)
     ("." . player)
@@ -522,7 +527,7 @@ is enabled.")
 
     ("g" . new-empty-buffer)
     ("z" . goto-char)
-    ("x" . prev-eww-buffer)
+    ("x" . next-eww-buffer)
     ("c" . copy-all)
     ("v" . tasks)
     ("b" . title-case-region-or-line)
@@ -566,6 +571,7 @@ is enabled.")
 ;; Core Remaps
 
 ;; Hold down ESC (karabiner) to post C-h and call `help-map'.
+;; See `keyamp-hold-indicate'.
 (keyamp--map-leaders help-map '(lookup-word-definition . lookup-google-translate))
 (keyamp--map help-map
   '(("ESC" . ignore)           ("<escape>" . ignore)           ("C-h" . nil) ; unmap for use by which key
@@ -586,12 +592,14 @@ is enabled.")
 (keyamp--map global-map
   '(("C-r" . open-file-at-cursor) ; hold down RET to post C-r (karabiner)
     ("C-t" . hippie-expand)       ; hold down RET in insert mode
+    ("<f13>" . ignore)            ; Kinesis advantage special key
     ("<double-mouse-1>" . extend-selection)
     ("<down-mouse-1>"   . keyamp-command)          ; left click for command mode
     ("<mouse-3>"        . paste-or-paste-previous) ; paste with right click
 
     ("<header-line> <mouse-1>" . prev-frame)
-    ("<header-line> <mouse-3>" . make-frame-command)))
+    ("<header-line> <mouse-3>" . make-frame-command)
+    ("<left-fringe> <mouse-1>" . ignore)))
 
 (advice-add 'mouse-set-point :before
             (lambda (&rest r) "save point and copy selection with left click"
@@ -661,11 +669,11 @@ is enabled.")
      (insert-space-before     . delete-frame)
      (backward-kill-word      . sun-moon)
      (undo                    . delete-window)
-     (kill-word               . make-frame-command)
+     (kill-word               . ignore)
      (cut-text-block          . calc)
      (exchange-point-and-mark . view-echo-area-messages)
      (shrink-whitespaces      . split-window-below)
-     (delete-backward         . delete-other-windows)
+     (delete-backward         . toggle-ibuffer)
      (set-mark-command        . new-empty-buffer)
      (cut-line-or-selection   . prev-eww-buffer)
      (copy-line-or-selection  . agenda)
@@ -704,16 +712,18 @@ is enabled.")
 
 (with-sparse-keymap-x
  (keyamp--remap x
-   '((open-line . prev-proj-buffer) (newline . next-proj-buffer)))
- (keyamp--set-map x '(prev-proj-buffer next-proj-buffer)))
+   '((open-line . prev-proj-buffer) (newline . next-proj-buffer)
+     (delete-backward . main-proj-buffer)))
+ (keyamp--set-map x '(prev-proj-buffer next-proj-buffer main-proj-buffer)))
 
 (with-sparse-keymap-x
  (keyamp--map x
    '(("TAB"   . View-scroll-half-page-forward)
      ("<tab>" . View-scroll-half-page-forward)))
  (keyamp--remap x
-   '((open-line . prev-eww-buffer) (newline . next-eww-buffer)
-     (kill-word . eww-reload)))
+   '((open-line       . prev-eww-buffer) (newline         . next-eww-buffer)
+     (delete-backward . eww-reload)      (keyamp-insert   . eww-reload)
+     (undo            . eww)))
  (keyamp--set-map x '(prev-eww-buffer next-eww-buffer)))
 
 (with-sparse-keymap-x
@@ -745,7 +755,7 @@ is enabled.")
   (keyamp--remap x
     '((open-line             . prev-user-buffer) (newline . next-user-buffer)
       (backward-left-bracket . dired-jump)))
-  (keyamp--set-map x '(dired-jump downloads player)))
+  (keyamp--set-map x '(dired-jump dired-find-file downloads player)))
 
 
 ;; Repeat mode. View commands.
@@ -865,7 +875,7 @@ is enabled.")
 (with-sparse-keymap-x
  ;; Hold down H/; to initiate half page up/down. Repeat with I/K or DEL/SPC.
  (keyamp--map-leaders x '(previous-line . next-line))
- (keyamp--map x '(("TAB" . next-line) ("<tab>" . next-line))) ; reader touch
+ (keyamp--map x '(("TAB" . next-line) ("<tab>" . next-line)))
  (keyamp--remap x
    '((previous-line . View-scroll-half-page-backward)
      (next-line     . View-scroll-half-page-forward)
@@ -873,8 +883,8 @@ is enabled.")
      (up-line       . View-scroll-half-page-backward)))
  (unless (display-graphic-p) ; reader touch
    (keyamp--remap x
-     '((down-line     . View-scroll-half-page-backward)
-       (up-line       . View-scroll-half-page-forward))))
+     '((down-line . View-scroll-half-page-backward)
+       (up-line   . View-scroll-half-page-forward))))
  (keyamp--set-map x '(View-scroll-half-page-backward
                       View-scroll-half-page-forward)))
 
@@ -961,6 +971,7 @@ is enabled.")
  (keyamp--set-map x '(org-shiftup org-shiftdown)))
 
 (with-sparse-keymap-x
+ (keyamp--map-leaders x '(agenda . todo))
  (keyamp--remap x '((undo . todo) (copy-line-or-selection . agenda)))
  (keyamp--set-map x '(todo insert-date)))
 
@@ -1023,8 +1034,7 @@ of quit minibuffer."
    (keyamp--map x
      '(("d" . select-block)     ("в" . select-block)
        ("k" . extend-selection) ("л" . extend-selection)
-       ;; Engineer Engram layout ! is QWERTY N and Russian Т
-       ("N" . keyamp-insert-!)  ("Т" . keyamp-insert-!)))
+       ("N" . keyamp-insert-!)  ("Т" . keyamp-insert-!))) ; Engineer Engram layout ! is QWERTY N and Russian Т
    (keyamp--remap y-or-n-p-map
      '((select-block     . y-or-n-p-insert-n)
        (extend-selection . y-or-n-p-insert-y)))
@@ -1033,7 +1043,7 @@ of quit minibuffer."
    ;; gets highest priority.
    (keyamp--remap x
      '((end-of-line-or-block . keyamp-insert-n) ; Engineer Engram layout,
-       (backward-kill-word   . keyamp-insert-y) ; remap required for other
+       (backward-kill-word   . keyamp-insert-y) ; remap required for others
        (keyamp-insert        . keyamp-minibuffer-insert)
        (keyamp-escape        . keyamp-minibuffer-escape)))
     (keyamp--set-map-hook x '(minibuffer-setup-hook) :command nil :repeat))
@@ -1123,7 +1133,7 @@ of quit minibuffer."
 
 (with-eval-after-load 'dired
   (keyamp--map dired-mode-map
-    '(("C-h" . dired-do-delete) ("C-r" . open-in-external-app)
+    '(("C-h" . dired-do-delete) ("C-r" . delete-other-windows)
       ("<mouse-1>" . mouse-set-point)
       ("<mouse-2>" . mouse-set-point) ; mouse-2 really mouse-1
       ("<double-mouse-1>" . dired-find-file)
@@ -1136,11 +1146,10 @@ of quit minibuffer."
       (backward-kill-word      . dired-do-chmod)
       (shrink-whitespaces      . dired-hide-details-mode)
       (open-line               . dired-maybe-insert-subdir)
-
       (delete-backward         . dired-toggle-mark)
       (newline                 . dired-sort)
       (toggle-comment          . revert-buffer)
-      (cut-line-or-selection   . dired-diff)
+      (cut-line-or-selection   . dired-kill-subdir)
       (paste-or-paste-previous . dired-create-directory)
       (copy-to-register-1      . dired-do-copy)
       (paste-from-register-1   . dired-do-rename)
@@ -1152,15 +1161,17 @@ of quit minibuffer."
 
 (with-eval-after-load 'wdired
   (keyamp--map wdired-mode-map
-    '(("C-h" . wdired-abort-changes) ("C-r" . wdired-finish-edit))))
+    '(("C-h" . wdired-abort-changes) ("C-r" . wdired-finish-edit)
+      ("C-q" . wdired-abort-changes) ("C-t" . wdired-finish-edit)))
+  (advice-add-macro '(wdired-abort-changes wdired-finish-edit)
+                    :after 'keyamp-command))
 
 (with-eval-after-load 'dired-utils
   (keyamp--map dired-mode-map
     '(("TAB" . dired-leader-map)               ("<tab>" . dired-leader-map)))
 
   (keyamp--map (define-prefix-command 'dired-leader-map)
-    '(("ESC" . ignore)                         ("<escape>" . ignore)
-      ("TAB" . dired-omit-mode)                ("<tab>"    . dired-omit-mode)
+    '(("TAB" . dired-omit-mode)                ("<tab>" . dired-omit-mode)
       ("q" . dired-image-remove-transparency)  ("e" . dired-optimize-png)
       ("u" . dired-2drawing)                   ("o" . dired-rotate-img-right)
       ("p" . dired-rotate-img-left)            ("a" . dired-image-autocrop)
@@ -1169,6 +1180,35 @@ of quit minibuffer."
       ("k" . dired-rename-space-to-underscore) ("l" . dired-2png)
       (";" . dired-scale-image)                ("\'" . dired-to-zip-encrypted)
       ("c" . dired-2jpg)                       ("/" . dired-to-zip))))
+
+(advice-add 'dired-next-line :after
+            (lambda (&rest r)
+              (if (= (line-number-at-pos) (1+ (count-lines (point-min) (point-max))))
+                  (dired-previous-line 1))))
+
+(advice-add 'dired-previous-line :after
+            (lambda (&rest r) (if (= (line-number-at-pos) 1) (dired-next-line 1))))
+
+(advice-add 'beg-of-line-or-buffer :after
+            (lambda (&rest r) "stay on row with file in dired"
+              (if (eq major-mode 'dired-mode) (dired-next-line 1))))
+
+(advice-add 'beg-of-line-or-block :after
+            (lambda (&rest r) "move by subdirs and stay on row with file in dired"
+              (if (and (eq major-mode 'dired-mode)
+                       (or (equal "D" (this-command-keys))
+                           (equal "d" (this-command-keys))
+                           (equal [backspace] (this-command-keys))
+                           (= 127 (aref (this-command-keys) 0))))
+                  (dired-previous-line 1))))
+
+(advice-add 'end-of-line-or-block :after
+            (lambda (&rest r) "move by subdirs and stay on row with file in dired"
+              (if (and (eq major-mode 'dired-mode)
+                       (or (equal "T" (this-command-keys))
+                           (equal "t" (this-command-keys))
+                           (equal " " (this-command-keys))))
+                  (dired-next-line 1))))
 
 (with-eval-after-load 'rect ; sane rectangle controls
   (keyamp--remap rectangle-mark-mode-map
@@ -1197,13 +1237,13 @@ of quit minibuffer."
       (insert-space-before     . delete-frame)
       (backward-kill-word      . sun-moon)
       (undo                    . delete-window)
-      (kill-word               . make-frame-command)
+      (kill-word               . ignore)
       (cut-text-block          . calc)
 
       (exchange-point-and-mark . view-echo-area-messages)
       (shrink-whitespaces      . split-window-below)
       (open-line               . prev-user-buffer)
-      (delete-backward         . delete-other-windows)
+      (delete-backward         . toggle-ibuffer)
       (newline                 . next-user-buffer)
       (set-mark-command        . new-empty-buffer)
       (cut-line-or-selection   . prev-eww-buffer)
@@ -1367,10 +1407,10 @@ of quit minibuffer."
       ("<tab>" . View-scroll-half-page-forward)))
 
   (keyamp--remap eww-mode-map
-    '((kill-word          . eww-reload)     (delete-backward . justify-buffer)
-      (open-line          . eww-back-url)   (newline         . eww-next-url)
-      (backward-kill-word . eww-save-place) (undo            . eww-load-place)
-      (query-replace      . eww-reload-all)))
+    '((open-line       . eww-back-url) (newline . eww-next-url)
+      (delete-backward . eww-reload)   (kill-word . eww-reload-all)
+      (keyamp-insert   . eww-reload)   (undo            . eww)
+      (shrink-whitespaces . eww-browse-with-external-browser)))
 
   (keyamp--remap eww-link-keymap
     '((keyamp-insert . eww-follow-link))))
@@ -1401,6 +1441,8 @@ of quit minibuffer."
        ispell-word))))
 
 (with-eval-after-load 'doc-view
+  (keyamp--map doc-view-mode-map
+    '(("C-r" . delete-other-windows)))
   (keyamp--remap doc-view-mode-map
     '((previous-line        . doc-view-previous-line-or-previous-page)
       (next-line            . doc-view-next-line-or-next-page)
@@ -1408,7 +1450,6 @@ of quit minibuffer."
       (forward-char         . doc-view-next-page)
       (undo                 . doc-view-previous-line-or-previous-page)
       (delete-backward      . doc-view-next-line-or-next-page)
-
       (open-line            . doc-view-previous-page)
       (newline              . doc-view-next-page)
       (back-word            . doc-view-shrink)
@@ -1567,7 +1608,7 @@ of quit minibuffer."
     '(("<double-mouse-1>" . gnus-topic-select-group)
       ("TAB" . gnus-topic-leader-map) ("<tab>" . gnus-topic-leader-map)))
   (keyamp--map (define-prefix-command 'gnus-topic-leader-map)
-    '(("TAB" . toggle-ibuffer)   ("<tab>" . toggle-ibuffer)))
+    '(("TAB" . toggle-ibuffer)        ("<tab>" . toggle-ibuffer)))
 
   (keyamp--remap gnus-topic-mode-map
     '((keyamp-insert        . gnus-topic-select-group)
@@ -1598,9 +1639,7 @@ of quit minibuffer."
     '((keyamp-insert . gnus-article-press-button)))
   (keyamp--remap gnus-article-mode-map
     '((undo             . backward-button)
-      (delete-backward  . forward-button)
-      (save-buffer      . gnus-summary-save-parts)
-      (next-proj-buffer . gnus-mime-save-part)))
+      (delete-backward  . forward-button)))
 
 (with-eval-after-load 'gnus-sum
   (keyamp--map gnus-summary-mode-map
@@ -1637,7 +1676,6 @@ of quit minibuffer."
       (number-to-register      . recentf-open-most-recent-file-2)
       (append-to-register-1    . recentf-open-most-recent-file-3)
       (toggle-case-fold-search . recentf-open-most-recent-file-4)
-
       (kmacro-helper           . recentf-open-most-recent-file-5)
       (eshell                  . recentf-open-most-recent-file-6)
       (kmacro-record           . recentf-open-most-recent-file-7)
@@ -1663,10 +1701,8 @@ of quit minibuffer."
 (with-eval-after-load 'tetris
   (keyamp--remap tetris-mode-map
     '((keyamp-escape        . tetris-pause-game)
-      (delete-backward      . tetris-rotate-prev)
-      (delete-other-windows . tetris-rotate-prev)
-      (newline              . tetris-rotate-next)
-      (next-user-buffer     . tetris-rotate-next)
+      (delete-backward      . tetris-rotate-prev) (delete-other-windows . tetris-rotate-prev)
+      (newline              . tetris-rotate-next) (next-user-buffer     . tetris-rotate-next)
       (next-line            . tetris-move-bottom)
       (backward-char        . tetris-move-down)))
 
@@ -1704,8 +1740,7 @@ of quit minibuffer."
       ("S-<tab>" . ignore)            ("<backtab>" . ignore)))
 
   (keyamp--map (define-prefix-command 'emacs-lisp-leader-map)
-    '(("ESC" . ignore) ("<escape>" . ignore)
-      ("TAB"   . emacs-lisp-complete-or-indent)
+    '(("TAB"   . emacs-lisp-complete-or-indent)
       ("<tab>" . emacs-lisp-complete-or-indent)
       ("d" . emacs-lisp-remove-paren-pair)
       ("k" . emacs-lisp-add-paren-around-symbol)
@@ -1753,6 +1788,13 @@ of quit minibuffer."
    (keyamp--map-leaders x '(xref-go-back . xref-find-definitions))
    (keyamp--set-map x '(xref-go-back xref-find-definitions)))
 
+(with-eval-after-load 'sh-script
+  (keyamp--map bash-ts-mode-map
+    '(("TAB" . bash-ts-mode-leader-map) ("<tab>" . bash-ts-mode-leader-map)
+      ("S-<tab>" . ignore)              ("<backtab>" . ignore)))
+  (keyamp--map (define-prefix-command 'bash-ts-mode-leader-map)
+    '(("TAB" . indent-for-tab-command) ("<tab>" . indent-for-tab-command))))
+
 (with-eval-after-load 'sqlite-mode
   (keyamp--remap sqlite-mode-map
     '((keyamp-insert   . sqlite-mode-list-data)
@@ -1762,74 +1804,6 @@ of quit minibuffer."
 
 (with-eval-after-load 'sql
   (keyamp--remap sql-mode-map '((eval-defun . exec-query))))
-
-(with-eval-after-load 'html-mode
-  (keyamp--map html-mode-map
-    '(("TAB" . html-leader-map)      ("<tab>" . html-leader-map)
-      ("RET" . html-open-local-link) ("<return>" . html-open-local-link)
-      ("C-r" . html-open-in-browser)))
-
-  (keyamp--map (define-prefix-command 'html-leader-map)
-    '(("TAB"    . html-insert-tag)                   ("<tab>"    . html-insert-tag)
-      ("RET"    . html-insert-br-tag)                ("<return>" . html-insert-br-tag)
-      ("<left>" . html-prev-opening-tag)             ("<right>"  . html-next-opening-tag)
-      ("<down>" . html-goto-matching-tag)            ("@"        . html-encode-ampersand-entity)
-      ("$"      . html-percent-decode-url)           ("&"        . html-decode-ampersand-entity)
-      ("q"      . html-make-citation)                ("w"        . nil)
-      ("w ,"    . html-rename-source-file-path)
-
-      ("w h"    . html-resize-img)                   ("w q"      . html-image-path-to-figure-tag)
-      ("w j"    . html-image-to-link)                ("w w"      . html-image-to-img-tag)
-      ("w c"    . html-convert-to-jpg)               ("w o"      . html-move-image-file)
-      ("e"      . html-remove-tag-pair)              ("r"        . html-mark-unicode)
-      ("y"      . html-lines-to-table)               ("u"        . html-emacs-to-windows-kbd-notation)
-      ("i"      . html-all-urls-to-link)             ("o"        . html-insert-pre-tag)
-      ("["      . html-percent-encode-url)
-
-      ("a <up>" . html-promote-header)               ("a <down>" . html-demote-header)
-      ("a e"    . html-remove-tags)                  ("a q"      . html-compact-def-list)
-      ("a ."    . html-remove-list-tags)             ("a f"      . html-remove-paragraph-tags)
-      ("a ,"    . html-format-to-multi-lines)        ("a l"      . html-disable-script-tag)
-      ("a k"    . html-markup-ruby)                  ("a a"      . html-update-title-h1)
-      ("a y"    . html-remove-table-tags)            ("a h"      . html-change-current-tag)
-      ("s"      . html-html-to-text)                 ("d"        . html-select-element)
-      ("f"      . html-blocks-to-paragraph)          ("h"        . html-lines-to-list)
-      ("j"      . html-any-to-link)                  ("k"        . nil)
-
-      ("k e"    . html-dehtmlize-pre-tags)           ("k h"      . html-bracket-to-markup)
-      ("k j"    . html-pre-tag-to-new-file)          ("k ;"      . html-htmlize-region)
-      ("k ,"    . html-rehtmlize-precode-buffer)     ("k k"      . html-toggle-syntax-color-tags)
-      ("l"      . html-insert-date-section)          ("x"        . html-lines-to-def-list)
-      ("c"      . html-join-tags)                    ("v"        . html-keyboard-shortcut-markup)
-      ("b"      . html-make-link-defunct)
-
-      ("m i"    . html-ampersand-chars-to-unicode)   ("m h"      . html-clone-file-in-link)
-      ("m d"    . html-url-to-dated-link)            ("m w"      . html-url-to-iframe-link)
-      ("m j"    . html-local-links-to-relative-path) ("m f"      . html-pdf-path-to-embed)
-      ("m ,"    . html-named-entity-to-char)         ("m k"      . html-local-links-to-fullpath)
-      (","      . html-extract-url)                  ("."        . html-word-to-anchor-tag)
-      ("/ h"    . html-open-in-chrome)               ("/ q"      . html-open-in-firefox)
-      ("/ ,"    . html-open-in-brave)                ("/ l"      . html-open-in-safari))))
-
-(with-eval-after-load 'js-mode
-  (keyamp--map js-mode-map
-    '(("TAB" . js-leader-map)         ("<tab>" . js-leader-map)))
-  (keyamp--map (define-prefix-command 'js-leader-map)
-    '(("TAB" . js-complete-or-indent) ("<tab>" . js-complete-or-indent)
-      ("h" . typescript-compile-file)
-      ("," . js-eval-line) ("." . js-eval-region)))
-  (keyamp--remap js-mode-map '((toggle-gnus . js-format-buffer))))
-
-(with-eval-after-load 'css-mode
-  (keyamp--map css-mode-map
-    '(("TAB" . css-leader-map) ("<tab>" . css-leader-map)))
-  (keyamp--map (define-prefix-command 'css-leader-map)
-    '(("," . css-insert-random-color-hsl)
-      ("TAB" . css-complete-or-indent) ("<tab>" . css-complete-or-indent)
-      ("'" . css-hex-color-to-hsl)     ("a" . css-complete-symbol)
-      ("h" . css-format-compact)       ("p" . css-format-compact-buffer)
-      ("o" . css-format-expand-buffer) ("k" . css-format-expand)))
-  (keyamp--remap css-mode-map '((open-line . css-smart-newline))))
 
 
 
@@ -1844,11 +1818,13 @@ of quit minibuffer."
                  dired-jump                       t
                  downloads                        t
                  exec-query                       t
+
                  find-next-dir-file               t
                  find-prev-dir-file               t
                  forw-frame                       t
                  gnus-summary-next-group          t
                  gnus-summary-prev-group          t
+                 main-proj-buffer                 t
                  next-buffer                      t
                  next-eww-buffer                  t
                  next-proj-buffer                 t
@@ -2031,6 +2007,16 @@ of quit minibuffer."
   (unless (eq this-command last-command)
     (force-mode-line-update t)))
 
+(defun keyamp-hold-indicate ()
+  "Indicate prefix key hold down. Run after idle time same as Karabiner
+held down threshold. E.g. hold down ESC Karabiner posts C-h in 0.2 s and
+Keyamp indicates the event after idle 0.2 s."
+  (cond
+   ((equal [8] (this-single-command-keys)) ; C-h
+    (setq mode-line-front-space keyamp-screen-indicator)
+    (set-face-background 'cursor keyamp-screen-cursor)
+    (force-mode-line-update t))))
+
 (defun keyamp-escape (&optional Keyamp-idle-p)
   "Return to command mode, clear selection or quit minibuffer.
 If run by idle timer then emulate escape keyboard press which required to
@@ -2060,10 +2046,12 @@ deactivate transient map."
 
     (keyamp-catch-tty-ESC)
     (keyamp-command)
-    (run-with-timer 1 nil 'keyamp-map-input-source 'russian-computer)
-    (run-with-timer 2 nil 'keyamp-push-quail-keyboard-layout)
+    (run-with-timer 5 nil 'keyamp-map-input-source 'russian-computer)
+    (run-with-timer 5 nil 'keyamp-push-quail-keyboard-layout)
     (setq keyamp-idle-timer
-          (run-with-idle-timer keyamp-idle-timeout t 'keyamp-escape t))))
+          (run-with-idle-timer keyamp-idle-timeout t 'keyamp-escape t))
+    (setq keyamp-indicate-timer
+          (run-with-idle-timer 0.2 t 'keyamp-hold-indicate))))
 
 (provide 'keyamp)
 

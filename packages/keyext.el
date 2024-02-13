@@ -65,18 +65,18 @@ Call this repeatedly will cycle all positions in `mark-ring'."
     (if (or (equal (point) (line-beginning-position))
             (eq last-command this-command)
             (equal "D" (this-command-keys)) ; shift i Engram
+            (equal "d" (this-command-keys)) ; repeat
             (equal [backspace] (this-command-keys))
-            (= 127 (aref (this-command-keys) 0))) ; DEL repeat
+            (unless (display-graphic-p)
+              (= 127 (aref (this-command-keys) 0)))) ; DEL repeat
         (when
             (re-search-backward "\n[\t\n ]*\n+" nil 1)
           (skip-chars-backward "\n\t ")
-          (forward-char)
-          (recenter))
+          (forward-char))
       (if visual-line-mode
           (beginning-of-visual-line)
-        (if (eq major-mode 'eshell-mode)
+        (if (eq major-mode 'eshell-mode) ; custom eshell bol
             (progn
-              ;; custom eshell bol
               (if (= (line-number-at-pos) (count-lines (point-min) (point-max)))
                   (progn
                     (beginning-of-line)
@@ -89,7 +89,6 @@ Call this repeatedly will cycle all positions in `mark-ring'."
 
 (defun end-of-line-or-block ()
   "Move cursor to end of line or next block.
-
 • When called first time, move cursor to end of line;
 • When called again, move cursor forward by jumping over any sequence
   of whitespaces containing 2 blank lines;
@@ -97,11 +96,10 @@ Call this repeatedly will cycle all positions in `mark-ring'."
   (interactive)
   (if (or (equal (point) (line-end-position))
           (eq last-command this-command)
-          (equal "T" (this-command-keys))  ; shift k Engram
+          (equal "T" (this-command-keys)) ; shift k Engram
+          (equal "t" (this-command-keys)) ; repeat
           (equal " " (this-command-keys))) ; SPC repeat
-      (progn
-        (re-search-forward "\n[\t\n ]*\n+" nil 1)
-        (recenter))
+      (re-search-forward "\n[\t\n ]*\n+" nil 1)
     (if visual-line-mode
         (end-of-visual-line)
       (end-of-line))))
@@ -1590,29 +1588,15 @@ experimental. But when cursor is on a any type of bracket
 (defun select-text-in-quote ()
   "Select text between the nearest left and right delimiters.
 Delimiters here includes the following chars: \" ` ' and anything in `brackets'.
+Limit selection by current line.
 This command ignores nesting. For example, if text is
     (a(b)c▮)
-the selected char is “c”, not “a(b)c”.
-
-Supports one extra level: second call for \"<f6▮>\" will select <f6>."
+the selected char is “c”, not “a(b)c”."
   (interactive)
   (let ((xskipChars (concat "^\"`'" (mapconcat #'identity keyext-brackets ""))))
-    (if (eq last-command this-command)
-        (progn
-          (deactivate-mark)
-          (skip-chars-backward xskipChars)
-          (backward-char)
-          (skip-chars-backward xskipChars)
-          (push-mark (point) t t)
-          (skip-chars-forward xskipChars)
-          (forward-char)
-          (skip-chars-forward xskipChars)
-          (forward-char)
-          (skip-chars-forward xskipChars))
-      (progn
-        (skip-chars-backward xskipChars)
-        (push-mark (point) t t)
-        (skip-chars-forward xskipChars)))))
+    (skip-chars-backward xskipChars (line-beginning-position))
+    (push-mark (point) t t)
+    (skip-chars-forward xskipChars (line-end-position))))
 
 
 ;; misc
@@ -1703,6 +1687,11 @@ You can override this function to get your idea of “user buffer”."
         (progn
           (setq i 100))))))
 
+(defun main-proj-buffer ()
+  "Go to main proj dired buffer."
+  (interactive)
+  (switch-to-buffer "app"))
+
 (defun eww-reload-all ()
   "Reload all eww buffers."
   (interactive)
@@ -1736,16 +1725,10 @@ You can override this function to get your idea of “user buffer”."
                  (> xp2 xp1))              ; allow offset forward only
         (goto-char xp2)))))
 
-(add-hook 'window-buffer-change-functions
-          (lambda (r) "After switch window."
-            (if (eq major-mode 'eww-mode)
-                (eww-load-place))))
-
 (defvar headers-eww nil "Alist url to header. Manual reference.")
 
 (defun eww-update-header ()
   "Update header line for some buffers."
-  (interactive)
   (let ((xh (alist-get (replace-regexp-in-string (getenv "HOME") "~"
                                                  (plist-get eww-data :url))
                        headers-eww nil nil 'string-equal)))
@@ -1761,8 +1744,6 @@ You can override this function to get your idea of “user buffer”."
   (if (and (display-graphic-p)
            (fboundp 'justify-buffer))
       (run-with-timer 0.1 nil 'justify-buffer)))
-
-(add-hook 'eww-after-render-hook 'eww-after-render)
 
 (defun eww-save-place-cache ()
   "Save places cache to file."
@@ -1786,8 +1767,9 @@ You can override this function to get your idea of “user buffer”."
                    (> xp1 xp2)) ; allow offset forward only
               (setf (alist-get xurl
                                places-eww 1 nil 'string-equal) (point)))
-        (push (cons xurl (point)) places-eww))))
-  (eww-save-place-cache))
+        (push (cons xurl (point)) places-eww)))
+    (eww-save-place-cache)
+    (push-mark (point) t nil)))
 
 (defun eww-buffer-p ()
   (interactive)
@@ -2048,9 +2030,11 @@ for confirmation."
 
 
 
-(defvar run-current-file-before-hook nil "Hook for `run-current-file'. Before the file is run.")
+(defvar run-current-file-before-hook nil
+  "Hook for `run-current-file'. Before the file is run.")
 
-(defvar run-current-file-after-hook nil "Hook for `run-current-file'. After the file is run.")
+(defvar run-current-file-after-hook nil
+  "Hook for `run-current-file'. After the file is run.")
 
 (defun run-current-go-file ()
   "Run or build current Go file.
@@ -2058,11 +2042,8 @@ To build, call `universal-argument' first."
   (interactive)
   (when (not buffer-file-name) (save-buffer))
   (when (buffer-modified-p) (save-buffer))
-  (let* (
-         (xoutputb "*run output*")
-         ;; (resize-mini-windows nil)
+  (let* ((xoutputb "*run output*")
          (xfname buffer-file-name)
-         ;; (xfSuffix (file-name-extension xfname))
          (xprogName "go")
          (xcmdStr
           (concat xprogName " \""   xfname "\" &")))
@@ -2076,14 +2057,11 @@ To build, call `universal-argument' first."
       (shell-command xcmdStr xoutputb))))
 
 (defconst run-current-file-map
-  '(("go" . "go run")
-    ("hs" . "runhaskell")
-    ("js" . "deno run")
+  '(("hs" . "runhaskell")
     ("pl" . "perl")
     ("py" . "python3")
     ("rb" . "ruby")
-    ("sh" . "bash")
-    ("ts" . "deno run"))
+    ("sh" . "bash"))
   "A association list that maps file extension to program name, used by
 `run-current-file'. Each item is (EXT . PROGRAM), both strings. EXT
 is file suffix (without the dot prefix), PROGRAM is program name or path,
@@ -2104,15 +2082,11 @@ If the file is modified or not saved, save it automatically before run."
         (setenv "NO_COLOR" "1") ; 2022-09-10 for deno. Default color has yellow parts, hard to see
         (when (not buffer-file-name) (save-buffer))
         (let* ((xoutBuffer "*run output*")
-               ;; (resize-mini-windows nil)
                (xextAppMap run-current-file-map)
                (xfname buffer-file-name)
                (xfExt (file-name-extension xfname))
                (xappCmdStr (cdr (assoc xfExt xextAppMap)))
                xcmdStr)
-          ;; FIXME: Rather than `shell-command' with an `&', better use
-          ;; `make-process' or `start-process' since we're not using the shell at all
-          ;; (worse, we need to use `shell-quote-argument' to circumvent the shell).
           (setq xcmdStr
                 (when xappCmdStr
                   (format "%s %s &"
@@ -2125,21 +2099,6 @@ If the file is modified or not saved, save it automatically before run."
             (load xfname))
            ((string-equal xfExt "go")
             (run-current-go-file))
-           ((string-match "\\.\\(ws?l\\|m\\|nb\\)\\'" xfExt)
-            (if (fboundp 'run-wolfram-script)
-                (progn
-                  (run-wolfram-script nil current-prefix-arg))
-              (if xappCmdStr
-                  (progn
-                    (message "Running")
-                    (shell-command xcmdStr xoutBuffer))
-                (error "%s: Unknown file extension: %s" real-this-command xfExt))))
-           ((string-equal xfExt "java")
-            (progn
-              (shell-command (format "javac %s" xfname) xoutBuffer)
-              (shell-command (format "java %s" (file-name-sans-extension
-                                                (file-name-nondirectory xfname)))
-                             xoutBuffer)))
            (t (if xappCmdStr
                   (progn
                     (message "Running %s" xcmdStr)
@@ -2323,7 +2282,7 @@ When called in Emacs Lisp, if Fname is given, open that."
             (if (string-equal major-mode "dired-mode")
                 (dired-get-marked-files)
               (list (buffer-file-name)))))
-    (setq xdoIt (if (<= (length xfileList) 5) t (y-or-n-p "Open more than 5 files? ")))
+    (setq xdoIt (if (<= (length xfileList) 50) t (y-or-n-p "Open more than 5 files? ")))
     (when xdoIt
       (cond
        ((string-equal system-type "windows-nt")
@@ -2487,22 +2446,6 @@ Force switch to current buffer to update `other-buffer'."
   "Email weather forecast."
   (call-process "~/.weather/run.sh" nil 0 nil))
 
-(defun books ()
-  "Read book."
-  (interactive)
-  (if (string-equal (buffer-name) current-book)
-      (progn
-        (switch-to-buffer (other-buffer))
-        (toggle-theme))
-    (progn
-      (if (get-buffer current-book)
-          (progn
-            (switch-to-buffer current-book)
-            (toggle-theme))
-        (progn
-          (find-file (concat "~/Books/" current-book))
-          (toggle-theme))))))
-
 (defun shopping ()
   "Toggle shopping list."
   (interactive)
@@ -2547,9 +2490,7 @@ Show current agenda. Do not select other window, balance windows."
   (interactive)
   (if Silent
       (call-process "~/.sync.sh" nil 0 nil)
-    (progn
-      (message "~/.sync.sh: started.")
-      (async-shell-command "~/.sync.sh" "*sync output*"))))
+    (async-shell-command "~/.sync.sh" "*sync output*")))
 
 (defun gpg-agent-helper ()
   "GPG agent helper. Force restart."
@@ -2613,7 +2554,7 @@ Show current agenda. Do not select other window, balance windows."
   (find-file "~/.sql"))
 
 (defun exec-query ()
-  "Execute potgres SQL statement separated by `;'."
+  "Execute potgres SQL statement separated by ;."
   (interactive)
   (let ((xconn (getenv "CONNINFO"))
         (xbuf (concat "*exec query*"))
@@ -2652,33 +2593,34 @@ Show current agenda. Do not select other window, balance windows."
 
 (defun command-error-function-silent (data context caller)
   "Ignore some signals; pass the rest to the default handler."
-  (unless (memq (car data) '(buffer-read-only
-                             text-read-only
-                             beginning-of-buffer
-                             end-of-buffer
-                             quit))
+  (unless (memq (car data)
+                '(buffer-read-only
+                  text-read-only
+                  beginning-of-buffer
+                  end-of-buffer
+                  quit))
     (command-error-default-function data context caller)))
 
-(defun hide-messages (func &rest args)
-  "Inhibit messages for FUNC. Run as advice."
+(defun hide-messages (fun &rest args)
+  "Inhibit messages for FUN. Run as advice."
   (let ((message-log-max nil)
         (inhibit-messages t))
-    (apply func args)))
+    (apply fun args)))
 
-(defun disable-kill-buffer-query-functions (kill-func &rest args)
+(defun disable-kill-buffer-query-functions (kill-fun &rest args)
   "Disable confirmation conditionally before buffer kill."
   (let ((x kill-buffer-query-functions))
     (when (string-match "run server" (buffer-name))
       (setq kill-buffer-query-functions nil))
     (unwind-protect
-        (apply kill-func args)
+        (apply kill-fun args)
       (setq kill-buffer-query-functions x))
     (setq kill-buffer-query-functions x)))
 
-(defun disable-func (func &rest args)
+(defun disable-fun (fun &rest args)
   "Conditionally disable FUNC. Run as advice."
   (unless (minibufferp)
-      (apply func args)))
+      (apply fun args)))
 
 (defun byte-compile-package ()
   "Byte compile current package."
@@ -2724,11 +2666,11 @@ This checks in turn:
           ((setq xsym (variable-at-point)) (describe-variable xsym))))
   (setq this-command 'split-window-below))
 
-(defun run-at-time-wrap (time func &rest args)
+(defun run-at-time-wrap (time fun &rest args)
   "Wrap for `run-at-time'."
   (if (and (equal (format-time-string "%H") (substring time 0 2))
            (equal (format-time-string "%M") (substring time 3 5)))
-      (apply func args)))
+      (apply fun args)))
 
 (defun dired-recursive-expand (dir)
   "Recursive expand dired dir."
@@ -2736,8 +2678,35 @@ This checks in turn:
   (mapc #'dired-maybe-insert-subdir
         (seq-filter #'file-directory-p (directory-files-recursively dir "" t))))
 
+(defun dired-trash-move-adjust (fun &rest args)
+  "Disable move to trash if move to trash is impossible. Use as :around advice."
+  (when (or (string-match "DiskO" (file-truename (dired-get-filename)))
+            (file-remote-p (car args)))
+    (setq delete-by-moving-to-trash nil))
+  (unwind-protect
+      (apply fun args)
+    (setq delete-by-moving-to-trash t))
+  (setq delete-by-moving-to-trash t))
+
+(defvar dired-external-extensions
+  '("mkv" "mp4" "avi" "mov" "mp3" "m4a" "ts" "flac" "MTS")
+  "Open these file extensions with `open-in-external-app'.")
+
+(defun dired-find-file-adjust (fun &rest args)
+  "Adjust open file method in dired. Use as :around advice."
+  (let ((x large-file-warning-threshold))
+    (if (and (display-graphic-p)
+             (member (file-name-extension
+                      (file-truename (dired-get-filename)))
+                     dired-external-extensions))
+        (progn
+          (setq large-file-warning-threshold nil)
+          (open-in-external-app))
+      (apply fun args))
+    (setq large-file-warning-threshold x)))
+
 (defun json-pretty ()
-  "Pretty buffer if json, echo message."
+  "Prettify buffer if json file."
   (interactive)
   (if (string-equal (file-name-extension buffer-file-name) "json")
       (progn
@@ -2766,7 +2735,7 @@ This checks in turn:
 
 (defun deactivate-mark-before-move (&rest r)
   "If region active deactivate mark conditionally and return to the line
-before selection. This func to be run as before advice for move func."
+before selection. This fun to be run as before advice for move fun."
   (interactive)
   (when (and (region-active-p)
              (or (eq last-command 'select-block)
@@ -2786,51 +2755,59 @@ before selection. This func to be run as before advice for move func."
           `(advice-add ,(list 'quote xcmd) ,How ,Function))
         (cadr SymList))))
 
-(advice-add-macro '(scroll-down-command
-                    scroll-up-command
-                    View-scroll-half-page-backward
-                    View-scroll-half-page-forward
-                    isearch-repeat-backward
-                    isearch-repeat-forward
-                    prev-user-buffer
-                    next-user-buffer
-                    prev-proj-buffer
-                    next-proj-buffer
-                    find-previous-match
-                    find-next-match
-                    ;; delete-other-windows
-                    )
-                  :after (lambda (&rest r) "recenter" (recenter)))
-
-(add-hook 'replace-update-post-hook 'recenter)
-
 (defun quit ()
   "Confirm and quit. Because restart without confirm."
   (interactive)
   (if (y-or-n-p "Quit?")
       (save-buffers-kill-terminal)))
 
-(advice-add 'dired-next-line :after
-            (lambda (&rest r)
-              (if (= (line-number-at-pos)
-                     (1+ (count-lines (point-min) (point-max))))
-                  (dired-previous-line 1))))
+(defun toggle-ispell-dict ()
+  "Toggle spell dictionaries.
+Default dictionary is nil. First run with hook sets en."
+  (if (string-equal ispell-current-dictionary "en")
+      (progn
+        (ispell-change-dictionary "ru")
+        (setq ispell-personal-dictionary "~/.emacs.d/settings/.aspell.ru.pws"))
+    (progn
+      (ispell-change-dictionary "en")
+      (setq ispell-personal-dictionary "~/.emacs.d/settings/.aspell.en.pws"))))
 
-(advice-add 'dired-previous-line :after
-            (lambda (&rest r)
-              (if (= (line-number-at-pos) 1)
-                  (dired-next-line 1))))
-
-(advice-add 'beg-of-line-or-buffer  :after
-            (lambda (&rest r)
-              (if (eq major-mode 'dired-mode)
-                  (dired-next-line 1))))
+(defun turn-spell-checking-on ()
+  "Turn flyspell mode on. Set dictionary."
+  (flyspell-mode)
+  (toggle-ispell-dict))
 
 (defun set-location (Latitude Longtitude)
   "Set location."
   (setq calendar-location-name "Current"
         calendar-latitude  (string-to-number Latitude)
         calendar-longitude (string-to-number Longtitude)))
+
+(defun toggle-frame-transparent ()
+  "Toggle current frame transparency."
+  (interactive)
+  (when (display-graphic-p)
+    (if (not (get 'toggle-frame-transparent 'state))
+        (progn
+          (put 'toggle-frame-transparent 'state t)
+          (set-frame-parameter (selected-frame) 'alpha '(85 85)))
+      (put 'toggle-frame-transparent 'state nil)
+      (set-frame-parameter (selected-frame) 'alpha '(100 100)))))
+
+(defun recentf-open-files-adjust ()
+  "Remove unnecessary legends from the buffer."
+  (with-current-buffer "*Open Recent*"
+    (let ((inhibit-read-only t))
+      (save-excursion
+        (display-line-numbers-mode 0)
+        (goto-char (point-min))
+        (kill-region (line-beginning-position) (line-beginning-position 2))
+        (kill-region (line-beginning-position) (line-beginning-position 2))
+        (goto-char (point-max))
+        (kill-region (line-beginning-position) (line-beginning-position 2))
+        (setq this-command 'recentf-open-files))
+      (forward-word)
+      (backward-char))))
 
 (provide 'keyext)
 

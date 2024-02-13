@@ -6399,6 +6399,13 @@
           ],
           "to_if_held_down": [
             {
+              "key_code": "h",
+              "modifiers": [
+                "command",
+                "option"
+              ]
+            },
+            {
               "key_code": "m",
               "modifiers": [
                 "command"
@@ -6606,6 +6613,39 @@
               ]
             }
           },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Termius"
+              ]
+            }
+          ],
+          "to": [
+            {
+              "key_code": "left_control",
+              "lazy": true
+            }
+          ],
+          "to_if_alone": [
+            {
+              "key_code": "h",
+              "modifiers": [
+                "command"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "left_control",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
           "to": [
             {
               "key_code": "left_control",
@@ -6623,6 +6663,39 @@
     {
       "description": "left_option",
       "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "left_option",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "to": [
+            {
+              "key_code": "left_option",
+              "lazy": true
+            }
+          ],
+          "to_if_alone": [
+            {
+              "key_code": "h",
+              "modifiers": [
+                "command"
+              ]
+            }
+          ],
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/System Settings"
+              ]
+            }
+          ]
+        },
         {
           "type": "basic",
           "from": {
@@ -6692,6 +6765,33 @@
               ]
             }
           },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/GuruPro"
+              ]
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "h",
+              "modifiers": [
+                "command"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "f3",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
           "to_after_key_up": [
             {
               "shell_command": "open -a GuruPro",
@@ -6704,6 +6804,33 @@
     {
       "description": "f4",
       "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "f4",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Weather"
+              ]
+            }
+          ],
+          "to": [
+            {
+              "key_code": "h",
+              "modifiers": [
+                "command"
+              ]
+            }
+          ]
+        },
         {
           "type": "basic",
           "from": {
@@ -6742,6 +6869,33 @@
               ]
             }
           },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Preview"
+              ]
+            }
+          ],
+          "to": [
+            {
+              "key_code": "h",
+              "modifiers": [
+                "command"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "f5",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
           "to_after_key_up": [
             {
               "shell_command": "open -a Preview",
@@ -6754,6 +6908,33 @@
     {
       "description": "f6",
       "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "f6",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/VLC"
+              ]
+            }
+          ],
+          "to": [
+            {
+              "key_code": "h",
+              "modifiers": [
+                "command"
+              ]
+            }
+          ]
+        },
         {
           "type": "basic",
           "from": {
@@ -6863,6 +7044,33 @@
               ]
             }
           },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Karabiner-Elements"
+              ]
+            }
+          ],
+          "to": [
+            {
+              "key_code": "h",
+              "modifiers": [
+                "command"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "f10",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
           "to_after_key_up": [
             {
               "shell_command": "defaults write -g InitialKeyRepeat -int 10 && defaults write -g KeyRepeat -int 2 && echo \"normal min 15 (225 ms) and 2 (30 ms)\""
@@ -6937,6 +7145,12 @@
                 "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
               },
               "repeat": false
+            },
+            {
+              "key_code": "h",
+              "modifiers": [
+                "command"
+              ]
             },
             {
               "shell_command": "open -a 'Emacs'"

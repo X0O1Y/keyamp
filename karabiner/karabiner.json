@@ -6302,126 +6302,6 @@
                         ]
                     },
                     {
-                        "description": "return_or_enter",
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Emacs"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "insert mode activated",
-                                        "type": "variable_if",
-                                        "value": 0
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "return_or_enter",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to_after_key_up": [
-                                    {
-                                        "key_code": "return_or_enter"
-                                    }
-                                ],
-                                "to_if_held_down": [
-                                    {
-                                        "halt": true,
-                                        "key_code": "m",
-                                        "modifiers": [
-                                            "control"
-                                        ],
-                                        "repeat": false
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Emacs"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "insert mode activated",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "return_or_enter",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to_after_key_up": [
-                                    {
-                                        "key_code": "return_or_enter"
-                                    }
-                                ],
-                                "to_if_held_down": [
-                                    {
-                                        "halt": true,
-                                        "key_code": "k",
-                                        "modifiers": [
-                                            "left_control"
-                                        ],
-                                        "repeat": false
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Emacs"
-                                        ],
-                                        "type": "frontmost_application_unless"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "return_or_enter",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to_after_key_up": [
-                                    {
-                                        "key_code": "return_or_enter"
-                                    }
-                                ],
-                                "to_if_held_down": [
-                                    {
-                                        "key_code": "m",
-                                        "modifiers": [
-                                            "command"
-                                        ]
-                                    },
-                                    {
-                                        "halt": true,
-                                        "repeat": false,
-                                        "shell_command": "open -a Emacs.app"
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
                         "description": "tab",
                         "manipulators": [
                             {
@@ -6602,60 +6482,6 @@
                         ]
                     },
                     {
-                        "description": "left_control",
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "left_control",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "left_control",
-                                        "lazy": true
-                                    }
-                                ],
-                                "to_if_alone": [
-                                    {
-                                        "shell_command": "open -a Termius"
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "left_option",
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "left_option",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "left_option",
-                                        "lazy": true
-                                    }
-                                ],
-                                "to_if_alone": [
-                                    {
-                                        "shell_command": "open -a 'System Settings'"
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
                         "description": "f1",
                         "manipulators": [
                             {
@@ -6691,6 +6517,33 @@
                         "description": "f3",
                         "manipulators": [
                             {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/GuruPro"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f3",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "h",
+                                        "modifiers": [
+                                            "command"
+                                        ]
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
                                 "from": {
                                     "key_code": "f3",
                                     "modifiers": {
@@ -6713,6 +6566,33 @@
                         "description": "f4",
                         "manipulators": [
                             {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Weather"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f4",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "h",
+                                        "modifiers": [
+                                            "command"
+                                        ]
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
                                 "from": {
                                     "key_code": "f4",
                                     "modifiers": {
@@ -6723,7 +6603,7 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "shell_command": "open -a Books"
+                                        "shell_command": "open -a Weather"
                                     }
                                 ],
                                 "to_if_held_down": [
@@ -6740,6 +6620,33 @@
                     {
                         "description": "f5",
                         "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Preview"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f5",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "h",
+                                        "modifiers": [
+                                            "command"
+                                        ]
+                                    }
+                                ],
+                                "type": "basic"
+                            },
                             {
                                 "from": {
                                     "key_code": "f5",
@@ -6762,6 +6669,33 @@
                     {
                         "description": "f6",
                         "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/VLC"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f6",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "h",
+                                        "modifiers": [
+                                            "command"
+                                        ]
+                                    }
+                                ],
+                                "type": "basic"
+                            },
                             {
                                 "from": {
                                     "key_code": "f6",
@@ -6862,6 +6796,33 @@
                         "description": "f10",
                         "manipulators": [
                             {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Karabiner-Elements"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f10",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "h",
+                                        "modifiers": [
+                                            "command"
+                                        ]
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
                                 "from": {
                                     "key_code": "f10",
                                     "modifiers": {
@@ -6882,71 +6843,6 @@
                                     {
                                         "halt": true,
                                         "shell_command": "open -a Karabiner-EventViewer"
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "f13",
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Brave Browser"
-                                        ],
-                                        "type": "frontmost_application_unless"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "f13",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "repeat": false,
-                                        "select_input_source": {
-                                            "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
-                                        }
-                                    },
-                                    {
-                                        "shell_command": "open -a 'Brave Browser'"
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Brave Browser"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "f13",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "repeat": false,
-                                        "select_input_source": {
-                                            "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
-                                        }
-                                    },
-                                    {
-                                        "shell_command": "open -a 'Emacs'"
                                     }
                                 ],
                                 "type": "basic"
@@ -7250,89 +7146,6 @@
                         ]
                     },
                     {
-                        "description": "pause",
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "pause",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "software_function": {
-                                            "iokit_power_management_sleep_system": {
-                                                "delay_milliseconds": 500
-                                            }
-                                        }
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "left_arrow",
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/VLC"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "left_arrow",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "j"
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "right_arrow",
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/VLC"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "right_arrow",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "l"
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
                         "description": "page_up",
                         "manipulators": [
                             {
@@ -7466,6 +7279,407 @@
                                     {
                                         "halt": true,
                                         "key_code": "end"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "pause",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "pause",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "software_function": {
+                                            "iokit_power_management_sleep_system": {
+                                                "delay_milliseconds": 500
+                                            }
+                                        }
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "left_arrow",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/VLC"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "left_arrow",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "j"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "right_arrow",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/VLC"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "right_arrow",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "l"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "left_control",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Termius"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "left_control",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "left_control",
+                                        "lazy": true
+                                    }
+                                ],
+                                "to_if_alone": [
+                                    {
+                                        "key_code": "h",
+                                        "modifiers": [
+                                            "command"
+                                        ]
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "left_control",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "left_control",
+                                        "lazy": true
+                                    }
+                                ],
+                                "to_if_alone": [
+                                    {
+                                        "shell_command": "open -a Termius"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "left_option",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/System Settings"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "left_option",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "left_option",
+                                        "lazy": true
+                                    }
+                                ],
+                                "to_if_alone": [
+                                    {
+                                        "key_code": "h",
+                                        "modifiers": [
+                                            "command"
+                                        ]
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "left_option",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "left_option",
+                                        "lazy": true
+                                    }
+                                ],
+                                "to_if_alone": [
+                                    {
+                                        "shell_command": "open -a 'System Settings'"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "f13",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Brave Browser"
+                                        ],
+                                        "type": "frontmost_application_unless"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f13",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "repeat": false,
+                                        "select_input_source": {
+                                            "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+                                        }
+                                    },
+                                    {
+                                        "shell_command": "open -a 'Brave Browser'"
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Brave Browser"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f13",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "repeat": false,
+                                        "select_input_source": {
+                                            "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+                                        }
+                                    },
+                                    {
+                                        "key_code": "h",
+                                        "modifiers": [
+                                            "command"
+                                        ]
+                                    },
+                                    {
+                                        "shell_command": "open -a 'Emacs'"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "return_or_enter",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Emacs"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 0
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "return_or_enter",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "return_or_enter"
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "m",
+                                        "modifiers": [
+                                            "control"
+                                        ],
+                                        "repeat": false
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Emacs"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "return_or_enter",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "return_or_enter"
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "k",
+                                        "modifiers": [
+                                            "left_control"
+                                        ],
+                                        "repeat": false
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Emacs"
+                                        ],
+                                        "type": "frontmost_application_unless"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "return_or_enter",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "return_or_enter"
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "key_code": "h",
+                                        "modifiers": [
+                                            "command",
+                                            "option"
+                                        ]
+                                    },
+                                    {
+                                        "key_code": "m",
+                                        "modifiers": [
+                                            "command"
+                                        ]
+                                    },
+                                    {
+                                        "halt": true,
+                                        "repeat": false,
+                                        "shell_command": "open -a Emacs.app"
                                     }
                                 ],
                                 "type": "basic"
