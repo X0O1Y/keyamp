@@ -6310,6 +6310,63 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
+                "/VLC"
+              ]
+            }
+          ],
+          "to_if_alone": [
+            {
+              "software_function": {
+                "set_mouse_cursor_position": {
+                  "x": "50%",
+                  "y": "50%",
+                  "screen": 0
+                }
+              }
+            },
+            {
+              "software_function": {
+                "cg_event_double_click": {
+                  "button": 0
+                }
+              }
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "h",
+              "modifiers": [
+                "command",
+                "option"
+              ]
+            },
+            {
+              "key_code": "m",
+              "modifiers": [
+                "command"
+              ]
+            },
+            {
+              "shell_command": "open -a Emacs.app",
+              "repeat": false,
+              "halt": true
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "return_or_enter",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
                 "/Emacs"
               ]
             },
@@ -6481,9 +6538,29 @@
               ]
             }
           },
-          "to": [
+          "to_if_alone": [
             {
-              "key_code": "return_or_enter"
+              "software_function": {
+                "set_mouse_cursor_position": {
+                  "x": "50%",
+                  "y": "50%",
+                  "screen": 0
+                }
+              }
+            },
+            {
+              "software_function": {
+                "cg_event_double_click": {
+                  "button": 0
+                }
+              }
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "shell_command": "open -a Emacs.app",
+              "repeat": false,
+              "halt": true
             }
           ],
           "conditions": [

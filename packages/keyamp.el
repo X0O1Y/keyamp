@@ -14,21 +14,22 @@
 
 ;;; Commentary:
 
-;; Keyamp provides 4 modes: insert, command, repeat, screen. Command
-;; mode based on persistent transient keymap.
+;; Keyamp provides 3 modes: insert, command and repeat.
+;; Command mode based on persistent transient keymap.
 
 ;; Repeat mode pushes transient remaps to keymap stack on top of
 ;; command mode for easy repeat of command chains during screen
 ;; positioning, cursor move and editing. Point color indicates
 ;; transient remap is active. ESDF and IJKL are mostly used, DEL/ESC
 ;; and RET/SPC control EVERYTHING. Home row and thumb cluster only.
-;; Screen mode is similar to repeat with separate color indicator.
+;; Repeat mode turned on/off *automatically* either by post command
+;; hook or with idle timer.
 
 ;; DEL and SPC are two leader keys, RET activates insert mode, ESC does
 ;; command one. Holding down each of the keys posts control sequence
 ;; depending on mode. Keyboard has SYMMETRIC layout: left side for
 ;; editing, «No» and «Escape» while right side for moving, «Yes» and
-;; «Enter». Any Emacs major or minor mode could be remaped to fit the
+;; «Enter». Any Emacs major or minor mode could be remapped to fit the
 ;; model, find examples in the package.
 
 ;; Karabiner integration allows to post control or leader sequences by
@@ -77,9 +78,9 @@
 (defalias 'up-line 'previous-line "For transient keymaps.")
 (defalias 'down-line 'next-line "For transient keymaps.")
 
-(advice-add 'up-line :before 'up-line-wrap)
-(advice-add 'down-line :after 'down-line-wrap)
-(advice-add 'up-line :after (lambda (&rest r) (beginning-of-visual-line)))
+(advice-add 'up-line   :before 'up-line-wrap)
+(advice-add 'down-line :after  'down-line-wrap)
+(advice-add 'up-line   :after (lambda (&rest r) (beginning-of-visual-line)))
 (advice-add 'down-line :after (lambda (&rest r) (beginning-of-visual-line)))
 
 (defun pop-local-mark-ring ()
@@ -96,6 +97,24 @@ Call this repeatedly will cycle all positions in `mark-ring'."
   (set-mark-command nil)
   (deactivate-mark)
   (message "%s" "Mark set"))
+
+(defun beg-of-line ()
+  "Move cursor to beginning of line."
+  (interactive)
+  (let ((xp (point)))
+    (if visual-line-mode
+        (beginning-of-visual-line)
+      (if (eq major-mode 'eshell-mode) ; custom eshell bol
+          (progn
+            (if (= (line-number-at-pos) (count-lines (point-min) (point-max)))
+                (progn
+                  (beginning-of-line)
+                  (forward-word)
+                  (forward-char))
+              (beginning-of-line)))
+        (back-to-indentation)
+        (when (eq xp (point))
+          (beginning-of-line))))))
 
 (defun beg-of-line-or-block ()
   "Move cursor to beginning of line or previous block.
@@ -131,6 +150,8 @@ Call this repeatedly will cycle all positions in `mark-ring'."
           (back-to-indentation)
           (when (eq xp (point))
             (beginning-of-line)))))))
+
+(defalias 'end-of-lyne 'end-of-line "For use with transient keymaps.")
 
 (defun end-of-line-or-block ()
   "Move cursor to end of line or next block.
@@ -274,8 +295,8 @@ and `right-brackets'."
       (setq xp1 (car xbds) xp2 (cdr xbds)))
     (narrow-to-region xp1 xp2)))
 
-(defalias 'back-word 'backward-word "For use in transient keymaps.")
-(defalias 'forw-word 'forward-word "For use in transient keymaps.")
+(defalias 'back-word 'backward-word "For use with transient keymaps.")
+(defalias 'forw-word 'forward-word "For use with transient keymaps.")
 
 
 ;; editing commands
@@ -378,12 +399,10 @@ What char is considered bracket or quote is determined by current syntax table."
 
 (defun cut-bracket-pair ()
   "Delete the matching brackets/quotes to the left of cursor.
-
 After call, mark is set at the matching bracket position, so you can
 `exchange-point-and-mark' to select it.
 This command assumes the left of point is a right bracket, and there
 is a matching one before it.
-
 What char is considered bracket or quote is determined by current syntax table."
   (interactive)
   (let ((xp0 (point)) xp1)
@@ -804,8 +823,8 @@ one space or newline at each step, till no more white space."
       (if xspace-neighbor-p
           (delete-spaces)
         (progn
-          (delete-blank-lines)
-          (insert "\n"))))
+          (delete-blank-lines) ; (insert "\n")
+          )))
      ((> xeol-count 2)
       (if xspace-neighbor-p
           (delete-spaces)
@@ -824,12 +843,10 @@ between short and long lines.
 This commands calls `fill-region' to do its work. Set `fill-column'
 for short line length."
   (interactive)
-
   ;; This command symbol has a property “'longline-p”, the possible
   ;; values are t and nil. This property is used to easily determine
   ;; whether to compact or uncompact, when this command is called
   ;; again.
-
   (let ((xisLongline
          (if (eq last-command this-command) (get this-command 'longline-p) t))
         (deactivate-mark nil)
@@ -907,11 +924,9 @@ Note: this command is different from emacs `fill-region' or `fill-paragraph'.
 This command never adds or delete non-whitespace chars. It only
 exchange whitespace sequence."
   (interactive)
-
   ;; This symbol has a property 'is-long-p, the possible values are t
   ;; and nil. This property is used to easily determine whether to
   ;; compact or uncompact, when this command is called again.
-
   (let (xisLong xp1 xp2)
     (setq xisLong (if (eq last-command this-command)
                       (get this-command 'is-long-p)
@@ -1452,12 +1467,6 @@ LBracket and RBracket are strings. WrapMethod must be either `line' or
 (defun insert-black-lenticular-bracket () (interactive) (insert-bracket-pair "【" "】"))
 (defun insert-tortoise-shell-bracket ()   (interactive) (insert-bracket-pair "〔" "〕"))
 
-(defun insert-string-assignment ()
-  "Insert =\"\""
-  (interactive)
-  (progn (insert "=\"\"")
-         (left-char)))
-
 (defun insert-space-before ()
   "Insert space before cursor."
   (interactive)
@@ -1589,9 +1598,16 @@ experimental. But when cursor is on a any type of bracket
             nil))))
     (progn
       (cond
+       ((= (point) (point-min))
+        (push-mark (point) t t)
+        (skip-chars-forward "-_a-zа-яA-ZА-Я0-9"))
        ((looking-at "\\s(")
         ;; (message "left bracket")
         (mark-sexp)) ; left bracket
+       ((looking-back ")" (- (point) 1))
+        ;; (message "right bracket")
+        (goto-matching-bracket)
+        (mark-sexp))
        ((looking-at "\\s)")
         ;; (message "right bracket")
         (backward-up-list) (mark-sexp))
@@ -1733,11 +1749,6 @@ You can override this function to get your idea of “user buffer”."
             (setq i (1+ i)))
         (progn
           (setq i 100))))))
-
-(defun main-proj-buffer ()
-  "Go to main proj dired buffer."
-  (interactive)
-  (switch-to-buffer "app"))
 
 (defun eww-reload-all ()
   "Reload all eww buffers."
@@ -1946,7 +1957,6 @@ Similar to `kill-buffer', with the following addition:
         ;; (string-equal major-mode "minibuffer-inactive-mode")
         (minibuffer-keyboard-quit)
       (progn
-
         ;; Offer to save buffers that are non-empty and modified, even
         ;; for non-file visiting buffer (because `kill-buffer' does
         ;; not offer to save buffers that are not associated with
@@ -2074,17 +2084,36 @@ for confirmation."
                   (find-file (concat xpath ".el"))
                 (delete-other-windows)))))))))
 
+(defun open-http-at-cursor (fun &rest args)
+  "Open http link at cursor."
+  (let* ((xinput
+          (if (region-active-p)
+              (buffer-substring-no-properties (region-beginning) (region-end))
+            (let ((xp0 (point)) xp1 xp2
+                  (xpathStops "^  \t\n\"`'|[]{}\\"))
+              (skip-chars-backward xpathStops)
+              (setq xp1 (point))
+              (goto-char xp0)
+              (skip-chars-forward xpathStops)
+              (setq xp2 (point))
+              (goto-char xp0)
+              (buffer-substring-no-properties xp1 xp2))))
+         xinput2 xpath)
+    (setq xpath (replace-regexp-in-string
+                 "^/C:/" "/" (replace-regexp-in-string
+                              "^file://" "" (replace-regexp-in-string
+                                             ":\\'" "" xinput))))
+    (if (and (string-match-p "\\`https?://" xpath)
+             (not (minibufferp)))
+        (progn
+          (if (y-or-n-p "Open url?")
+              (browse-url xpath)))
+      (apply fun args))))
+
 
 
-(defvar run-current-file-before-hook nil
-  "Hook for `run-current-file'. Before the file is run.")
-
-(defvar run-current-file-after-hook nil
-  "Hook for `run-current-file'. After the file is run.")
-
 (defun run-current-go-file ()
-  "Run or build current Go file.
-To build, call `universal-argument' first."
+  "Run or build current Go file. To build, call `universal-argument' first."
   (interactive)
   (when (not buffer-file-name) (save-buffer))
   (when (buffer-modified-p) (save-buffer))
@@ -2138,7 +2167,6 @@ If the file is modified or not saved, save it automatically before run."
                           xappCmdStr
                           (shell-quote-argument xfname))))
           (when (buffer-modified-p) (save-buffer))
-          (run-hooks 'run-current-file-before-hook)
           (cond
            ((string-equal xfExt "el")
             (load xfname))
@@ -2148,9 +2176,7 @@ If the file is modified or not saved, save it automatically before run."
                   (progn
                     (message "Running %s" xcmdStr)
                     (shell-command xcmdStr xoutBuffer))
-                (error "%s: Unknown file extension: %s" real-this-command xfExt))))
-
-          (run-hooks 'run-current-file-after-hook))
+                (error "%s: Unknown file extension: %s" real-this-command xfExt)))))
         (setenv "NO_COLOR"))
     (message "Abort run file")))
 
@@ -2212,33 +2238,6 @@ If the current buffer is not associated with a file nor dired, nothing's done."
     (progn
       (make-backup))))
 
-(defun delete-current-file-make-backup ()
-  "Delete current file, makes a backup~, close the buffer.
-If buffer is not a file, copy content to `kill-ring', delete buffer.
-Backup filename is “‹name›~‹dateTimeStamp›~”. Existing file of the
-same name is overwritten. If buffer is not a file, the backup file
-name starts with “xx_”.
-Call `open-last-closed' to open the backup file."
-  (interactive)
-  (if (string-equal 'dired-mode major-mode)
-      (message "In Dired. Nothing is done")
-    (let* ((xfname (buffer-file-name))
-           (xbackupPath
-            (concat (if xfname xfname (format "%sxx" default-directory))
-                    (format "~%s~" (format-time-string "%Y-%m-%d_%H%M%S")))))
-      (if xfname
-          (progn
-            (save-buffer xfname)
-            (copy-file xfname xbackupPath t)
-            (when (boundp 'recently-closed-buffers)
-              (push (cons nil xbackupPath) recently-closed-buffers))
-            (message "Deleted. Backup at \n%s\nCall `open-last-closed' to open." xbackupPath)
-            (delete-file xfname))
-        (progn
-          (widen)
-          (kill-new  (buffer-string))))
-      (kill-buffer (current-buffer)))))
-
 
 
 (defun toggle-search-whitespace ()
@@ -2287,9 +2286,6 @@ hyphen [-] and lowline [_], independent of syntax table."
   (isearch-cur-word)
   (isearch-repeat-backward))
 
-(declare-function w32-shell-execute "w32fns.c"
-                  (operation document &optional parameters show-flag)) ; (w32-shell-execute "open" default-directory)
-
 (defun show-in-desktop ()
   "Show current file in desktop.
  (Mac Finder, File Explorer, Linux file manager)
@@ -2329,13 +2325,6 @@ When called in Emacs Lisp, if Fname is given, open that."
                   (y-or-n-p (format "Open %s files?" (length xfileList)))))
     (when xdoIt
       (cond
-       ((string-equal system-type "windows-nt")
-        (mapc
-         (lambda (xfpath)
-           (shell-command (concat "PowerShell -Command \"Invoke-Item -LiteralPath\" "
-                                  "'" (shell-quote-argument
-                                       (expand-file-name xfpath)) "'")))
-         xfileList))
        ((and (string-equal major-mode 'dired-mode)
              (string-match "Sound" (dired-get-filename)))
         (emms-play-dired))
@@ -2352,36 +2341,7 @@ When called in Emacs Lisp, if Fname is given, open that."
                               (format "%s %s"
                                       "xdg-open"
                                       (shell-quote-argument xfpath))))
-              xfileList))
-       ((string-equal system-type "berkeley-unix")
-        (mapc (lambda (xfpath) (let ((process-connection-type nil))
-                                 (start-process "" nil "xdg-open" xfpath)))
               xfileList))))))
-
-(defun open-in-terminal ()
-  "Open the current dir in a new terminal window.
-On Microsoft Windows, it starts cross-platform PowerShell pwsh. You
-need to have it installed."
-  (interactive)
-  (cond
-   ((string-equal system-type "windows-nt")
-    (let ((xcmdstr
-           (format "pwsh -Command Start-Process pwsh -WorkingDirectory %s"
-                   (shell-quote-argument default-directory))))
-      (shell-command xcmdstr)))
-   ((string-equal system-type "darwin")
-    (shell-command (concat "open -a terminal "
-                           (shell-quote-argument
-                            (expand-file-name default-directory))
-                           " && echo Open in terminal")))
-   ((string-equal system-type "gnu/linux")
-    (let ((process-connection-type nil))
-      (start-process "" nil "x-terminal-emulator"
-                     (concat "--working-directory=" default-directory))))
-   ((string-equal system-type "berkeley-unix")
-    (let ((process-connection-type nil))
-      (start-process "" nil "x-terminal-emulator"
-                     (concat "--working-directory=" default-directory))))))
 
 (defun next-window-or-frame ()
   "Switch to next window or frame.
@@ -2425,7 +2385,8 @@ If there more than one frame, switch to next frame."
   (if (region-active-p)
       (cut-line-or-selection)
     (beg-of-line-or-block)
-    (kill-line)))
+    (kill-line))
+  (setq this-command 'eshell-clear-input))
 
 (defun screenshot ()
   "Take screenshot on macOS."
@@ -2450,11 +2411,6 @@ If there more than one frame, switch to next frame."
   "Reset text scale."
   (interactive)
   (text-scale-adjust 0))
-
-(defun cur-point ()
-  "Get position."
-  (interactive)
-  (message "%s" (point)))
 
 (defun toggle-ibuffer ()
   "Toggle ibuffer.
@@ -2625,8 +2581,6 @@ Show current agenda. Do not select other window, balance windows."
                     (point)))))
     (setq xquery (string-trim
                   (concat (buffer-substring-no-properties xp1 xp2))))
-    ;; (async-shell-command
-    ;; (format "psql %s -c \"%s\" -q" xconn xquery) xbuf)
     (switch-to-buffer-other-window (get-buffer-create xbuf))
     (goto-char (point-max))
     (push-mark (point) t nil)
@@ -2820,7 +2774,8 @@ before selection. This fun to be run as before advice for move fun."
       (delete-backward)))
 
 (defun lookup-around (fun &rest args)
-  "Lookup selection."
+  "Lookup selection if buffer is read only and last command `extend-selection'.
+Use as around advice e.g. for mouse left click after double click."
   (if (and (eq last-command 'extend-selection)
            buffer-read-only)
       (progn
@@ -2890,6 +2845,14 @@ Default dictionary is nil. First run with hook sets en."
       (forward-word)
       (backward-char))))
 
+(defun mouse-3 ()
+  "Mouse right click. If buffer read only then lookup word translation.
+Otherwise call `paste-or-paste-previous'."
+  (interactive)
+  (if buffer-read-only
+      (lookup-translation)
+    (paste-or-paste-previous)))
+
 
 
 (defgroup keyamp nil "Customization options for keyamp"
@@ -2900,20 +2863,20 @@ Default dictionary is nil. First run with hook sets en."
 
 (defconst keyamp-karabiner-cli
   "/Library/Application Support/org.pqrs/Karabiner-Elements/bin/karabiner_cli"
-  "Karabiner-Elements CLI executable. Optional for mode sync.")
+  "Karabiner-Elements CLI executable. Optional for sync.")
 
 (defconst keyamp-command-indicator "🟢" "Command mode.")
-(defconst keyamp-insert-indicator  "🟠" "Insert mode.")
-(defconst keyamp-repeat-indicator  "🔵" "Repeat mode.")
-(defconst keyamp-screen-indicator  "🟣" "Screen mode.")
+(defconst keyamp-insert-indicator  "🟠" "Insert mode or repeat edit.")
+(defconst keyamp-repeat-indicator  "🔵" "Repeat view.")
+(defconst keyamp-screen-indicator  "🟣" "Repeat screen.")
 
 (defconst keyamp-command-cursor "LawnGreen"      "Color command.")
 (defconst keyamp-insert-cursor  "Gold"           "Color insert.")
-(defconst keyamp-repeat-cursor  "DeepSkyBlue"    "Color repeat.")
-(defconst keyamp-screen-cursor  "LightSlateBlue" "Color screen.")
+(defconst keyamp-repeat-cursor  "DeepSkyBlue"    "Color repeat view.")
+(defconst keyamp-screen-cursor  "LightSlateBlue" "Color repeat screen.")
 
 (defconst keyamp-idle-timeout (* 3 60) "Idle timeout.")
-(defconst keyamp-hold-threshold 0.2 "Key hold down threshold.")
+(defconst keyamp-hold-threshold (/ 200 1000.0) "Key hold down threshold.")
 
 
 
@@ -2986,26 +2949,40 @@ If Direct-p is t, do not remap key to current keyboard layout."
    `(let ((,xkeymapName ,KeymapName))
       ,@(mapcar
          (lambda (xpair)
-           `(keymap-set
-             ,xkeymapName ,(concat "<remap> <" (format "%s" (car xpair)) ">") ,(list 'quote (cdr xpair))))
+           `(keymap-set ,xkeymapName
+                        ,(concat "<remap> <" (format "%s" (car xpair)) ">")
+                        ,(list 'quote (cdr xpair))))
          (cadr CmdCmdAlist)))))
 
-(defvar keyamp--deactivate-transient-fun nil
-  "Transient keymap deactivate function.")
+(defvar keyamp--deactivate-repeat-mode-fun nil "Repeat mode deactivate function.")
+(defvar keyamp--repeat-mode-idle-timer nil "Repeat mode idle timer.")
 
-(defmacro keyamp--set-map (KeymapName CmdList &optional CommandMode InsertMode How)
+(defun keyamp-cancel-repeat-mode-idle-timer ()
+  "Cancel `keyamp--repeat-mode-idle-timer'."
+  (if (timerp keyamp--repeat-mode-idle-timer)
+      (cancel-timer keyamp--repeat-mode-idle-timer)))
+
+(defmacro keyamp--set-map
+    (KeymapName CmdList &optional CommandMode InsertMode How TimeOut)
   "Map `set-transient-map' using `advice-add' over a list CMDLIST.
-Advice default HOW :after might be changed by specific HOW.
-Activate command or insert mode optionally."
+• Advice default HOW :after might be changed by specific HOW;
+• Activate COMMANDMODE or INSERTMODE mode optionally;
+• Deactivate repeat mode after idle for TIMEOUT seconds."
   (let ((xkeymapName (make-symbol "keymap-name")))
     `(let ((,xkeymapName ,KeymapName))
        ,@(mapcar
           (lambda (xcmd)
             `(advice-add ,(list 'quote xcmd) (if ,How ,How :after)
                          (lambda (&rest r) "repeat"
-                           (if (and ,CommandMode keyamp-insert-p) (keyamp-command))
-                           (setq keyamp--deactivate-transient-fun
+                           (if (and ,CommandMode keyamp-insert-p)
+                               (keyamp-command))
+                           (setq keyamp--deactivate-repeat-mode-fun
                                  (set-transient-map ,xkeymapName))
+                           (keyamp-cancel-repeat-mode-idle-timer)
+                           (if (and ,TimeOut (not keyamp-insert-p))
+                               (setq keyamp--repeat-mode-idle-timer
+                                       (run-with-idle-timer
+                                        ,TimeOut nil 'keyamp-escape)))
                            (if ,InsertMode (keyamp-insert)))))
           (cadr CmdList)))))
 
@@ -3019,8 +2996,10 @@ Activate command, insert or repeat mode optionally."
           (lambda (xhook)
             `(add-hook ,(list 'quote xhook)
                        (lambda () "Repeat."
-                         (if (and ,CommandMode keyamp-insert-p) (keyamp-command))
-                         (if (and ,InsertMode (not keyamp-insert-p)) (keyamp-insert))
+                         (if (and ,CommandMode keyamp-insert-p)
+                             (keyamp-command))
+                         (if (and ,InsertMode (not keyamp-insert-p))
+                             (keyamp-insert))
                          (set-transient-map ,xkeymapName)
                          (if ,RepeatMode (setq this-command 'keyamp--repeat-dummy)))))
           (cadr HookList)))))
@@ -3226,11 +3205,11 @@ is enabled.")
     ("]"  . write-file)                  ("ъ" . write-file)                       ("}" . ignore)                           ("Ъ" . ignore)
     ("\\" . bookmark-set)                                                         ("|" . ignore)
 
-    ("h" . beg-of-line-or-block)         ("р" . beg-of-line-or-block)             ("H"  . ignore)                          ("Р" . ignore)
+    ("h" . beg-of-line)                  ("р" . beg-of-line)                      ("H"  . ignore)                          ("Р" . ignore)
     ("j" . backward-char)                ("о" . backward-char)                    ("J"  . isearch-cur-word-backward)       ("О" . isearch-cur-word-backward)
     ("k" . next-line)                    ("л" . next-line)                        ("K"  . end-of-line-or-block)            ("Л" . end-of-line-or-block)
     ("l" . forward-char)                 ("д" . forward-char)                     ("L"  . isearch-cur-word-forward)        ("Д" . isearch-cur-word-forward)
-    (";" . end-of-line-or-block)         ("ж" . end-of-line-or-block)             (":"  . ignore)                          ("Ж" . ignore)
+    (";" . end-of-lyne)                  ("ж" . end-of-lyne)                      (":"  . ignore)                          ("Ж" . ignore)
     ("'" . alternate-buffer)             ("э" . alternate-buffer)                 ("\"" . prev-frame)                      ("Э" . prev-frame)
 
     ("n" . isearch-forward)              ("т" . isearch-forward)                  ("N" . isearch-backward)                 ("Т" . isearch-backward)
@@ -3388,8 +3367,8 @@ is enabled.")
     ("6" . pass-generate)
     ("7" . increment-register)
     ("8" . insert-register)
-    ("9" . toggle-theme)
-    ("0" . org-insert-source-code)
+    ("9" . org-insert-source-code)
+    ("0" . toggle-theme)
     ("-" . snake)
     ("=" . text-scale-increase)
 
@@ -3424,7 +3403,7 @@ is enabled.")
 
 ;; Hold down ESC to post C-h (karabiner) and call `help-map'.
 ;; See `keyamp-hold-indicate'.
-(keyamp--map-leaders help-map '(lookup-word-definition . lookup-google-translate))
+(keyamp--map-leaders help-map '(lookup-word-definition . lookup-translation))
 (keyamp--map help-map
   '(("ESC" . ignore)           ("<escape>" . ignore)           ("C-h" . nil) ; unmap for use by which key
     ("RET" . lookup-web)       ("<return>" . lookup-web)
@@ -3442,23 +3421,45 @@ is enabled.")
     ("x" . apropos-value)      ("," . lookup-etymology)))
 
 (keyamp--map global-map
-  '(("C-r" . open-file-at-cursor) ; hold down RET to post C-r (karabiner)
-    ("C-t" . hippie-expand)       ; hold down RET in insert mode
-    ("<f13>" . ignore)            ; Kinesis advantage special key
-    ("<double-mouse-1>" . extend-selection)
-    ("<mouse-3>"        . paste-or-paste-previous) ; paste with right click
+  '(("C-r"                     . open-file-at-cursor) ; hold down RET to post C-r (karabiner)
+    ("C-t"                     . hippie-expand)       ; hold down RET in insert mode
+    ("<f13>"                   . ignore)              ; special key not f13 really
+    ("<next>"                  . View-scroll-half-page-forward)
+    ("<prior>"                 . View-scroll-half-page-backward)
+    ("<home>"                  . scroll-down-command)
+    ("<end>"                   . scroll-up-command)
+    ("<double-mouse-1>"        . extend-selection)
+    ("<mouse-3>"               . mouse-3)
     ("<header-line> <mouse-1>" . prev-frame)
     ("<header-line> <mouse-3>" . make-frame-command)
     ("<left-fringe> <mouse-1>" . ignore)))
 
-(advice-add 'mouse-set-point :before
-            (lambda (&rest r) "copy selection with left click"
-              (if (region-active-p)
-                  (copy-region-as-kill (region-beginning) (region-end)))))
+(advice-add 'keyamp-insert :around 'open-http-at-cursor)
+(advice-add 'keyamp-insert :around 'lookup-around)
 
-(advice-add 'mouse-set-point :after
-            (lambda (&rest r) "left click activates command mode"
-              (if keyamp-insert-p (keyamp-command))))
+(when (display-graphic-p)
+  (advice-add 'mouse-set-point :around 'lookup-around)
+
+  (advice-add 'mouse-drag-region :before
+              (lambda (&rest r) "copy selection with left click"
+                (if (region-active-p)
+                    (copy-region-as-kill (region-beginning) (region-end)))))
+
+  (advice-add 'mouse-set-point :after
+              (lambda (&rest r) "activate command mode with left click"
+                (if keyamp-insert-p (keyamp-command))))
+
+  (advice-add 'mouse-set-point :before
+              (lambda (&rest r) "no recenter after left click, hack"
+                (if pixel-scroll-mode (pixel-scroll-pixel-up 1))))
+
+  (advice-add 'mac-mwheel-scroll :before
+              (lambda (&rest r) "activate command mode after wheel scroll"
+                (if keyamp-insert-p (keyamp-command))))
+
+  (advice-add 'mac-mwheel-scroll :before
+              (lambda (&rest r) "deactivate selection before wheel scroll"
+                (if (region-active-p) (deactivate-mark)))))
 
 ;; Avoid karabiner mode sync lag. Hack.
 (keyamp--remap keyamp-command-map '((hippie-expand . open-file-at-cursor)))
@@ -3485,7 +3486,7 @@ is enabled.")
 ;; Hit TAB to repeat after typing in search string and set following transient
 ;; map. Backtab of Shift TAB to repeat backward.
 (keyamp--map isearch-mode-map
-  '(("<escape>"  . isearch-cancel)          ("C-^" . ignore) ; conflict
+  '(("<escape>"  . isearch-cancel)          ("C-^"         . ignore) ; conflict
     ("TAB"       . isearch-repeat-forward)  ("<tab>"       . isearch-repeat-forward)
     ("<backtab>" . isearch-repeat-backward) ("S-<tab>"     . isearch-repeat-backward)
     ("DEL"       . isearch-del-char)        ("<backspace>" . isearch-del-char)))
@@ -3507,7 +3508,7 @@ is enabled.")
      search-current-word     isearch-yank-kill)))
 
 
-;; Screen mode.
+;; Repeat mode. Screen commands.
 
 (with-sparse-keymap-x
  ;; Leader layer to become transient main. Base map for next leaders adjustment
@@ -3555,19 +3556,18 @@ is enabled.")
  (keyamp--set-map x
    '(prev-user-buffer     next-user-buffer
      delete-other-windows delete-window
-     split-window-below   alternate-buffer
-     open-last-closed     save-close-current-buffer)))
+     split-window-below   alternate-buffer) nil nil nil 10))
 
 (with-sparse-keymap-x
  ;; Hit RET right away to hide split window.
  (keyamp--remap x '((keyamp-insert . delete-other-windows)))
- (keyamp--set-map x '(split-window-below)))
+ (keyamp--set-map x '(split-window-below) nil nil nil 3))
 
 (with-sparse-keymap-x
  (keyamp--remap x
    '((open-line . prev-proj-buffer) (newline . next-proj-buffer)
-     (delete-backward . main-proj-buffer)))
- (keyamp--set-map x '(prev-proj-buffer next-proj-buffer main-proj-buffer)))
+     (delete-backward . speedbar)))
+ (keyamp--set-map x '(prev-proj-buffer next-proj-buffer)))
 
 (with-sparse-keymap-x
  (keyamp--map x
@@ -3580,13 +3580,13 @@ is enabled.")
  (keyamp--set-map x '(prev-eww-buffer next-eww-buffer)))
 
 (with-sparse-keymap-x
- (keyamp--map x '(("TAB" . agenda) ("<tab>" . agenda)))
+ (keyamp--map x '(("TAB" . tasks) ("<tab>" . tasks)))
  (keyamp--remap x '((open-line . prev-user-buffer) (newline . tasks)))
- (keyamp--set-map x '(tasks)))
+ (keyamp--set-map x '(tasks) nil nil nil 10))
 
 (with-sparse-keymap-x
  (keyamp--remap x '((open-line . prev-user-buffer) (newline . config)))
- (keyamp--set-map x '(config)))
+ (keyamp--set-map x '(config) nil nil nil 10))
 
 (with-sparse-keymap-x
  (keyamp--map-leaders x '(open-line . newline))
@@ -3594,7 +3594,6 @@ is enabled.")
  (keyamp--set-map x '(previous-buffer next-buffer)))
 
 (with-sparse-keymap-x
- ;; When a lot of frames hold down [ to activate frame selection with DEL/SPC.
  (keyamp--map-leaders x '(open-line . newline))
  (keyamp--remap x '((open-line . prev-frame) (newline . forw-frame)))
  (keyamp--set-map x '(prev-frame forw-frame)))
@@ -3609,7 +3608,12 @@ is enabled.")
  (keyamp--remap x
    '((open-line             . prev-user-buffer) (newline . next-user-buffer)
      (backward-left-bracket . dired-jump)))
- (keyamp--set-map x '(dired-jump downloads player)))
+ (keyamp--set-map x '(dired-jump downloads player) nil nil nil 2))
+
+(with-sparse-keymap-x
+ ;; Hold down comma to call `save-close-current-buffer'. Then comma to repeat.
+ (keyamp--remap x '((next-window-or-frame . save-close-current-buffer)))
+ (keyamp--set-map x '(save-close-current-buffer) nil nil nil 2))
 
 
 ;; Repeat mode. View commands.
@@ -3628,15 +3632,29 @@ is enabled.")
  (keyamp--set-map x '(up-line down-line)))
 
 (with-sparse-keymap-x
- ;; Initiate by SPC then double DEL or DEL then SPC hold down. Or H/; while
- ;; second press H for beginning of the buffer, third for end of the buffer.
+ ;; Initiate by SPC then double DEL or DEL then SPC hold down. Double H/; so
+ ;; third press H for beginning of the buffer, 4th for end of the buffer.
  ;; Similarly for ; in opposite direction. I/K or DEL/SPC to move by blocks.
  (keyamp--map-leaders x '(previous-line . next-line))
  (keyamp--remap x
-   '((previous-line        . beg-of-line-or-block)
-     (next-line            . end-of-line-or-block)
-     (beg-of-line-or-block . beg-of-line-or-buffer)
-     (end-of-line-or-block . end-of-line-or-buffer)))
+   '((previous-line . beg-of-line-or-block)
+     (next-line     . end-of-line-or-block)
+     (beg-of-line   . beg-of-line-or-buffer)
+     (end-of-lyne   . end-of-line-or-buffer)))
+
+ (advice-add 'beg-of-line :after
+             (lambda (&rest r) "second press activates repeat"
+               (if (eq last-command this-command)
+                   (progn
+                     (setq this-command 'beg-of-line-or-block)
+                     (set-transient-map x)))))
+
+ (advice-add 'end-of-lyne :after
+             (lambda (&rest r) "second press activates repeat"
+               (if (eq last-command this-command)
+                   (progn
+                     (setq this-command 'end-of-line-or-block)
+                     (set-transient-map x)))))
 
  ;; Hit sticky shift then hold down I/K to move by blocks.
  (keyamp--map x
@@ -3653,10 +3671,14 @@ is enabled.")
  (keyamp--map-leaders x '(previous-line . next-line))
  (keyamp--remap x
    '((previous-line . beg-of-line-or-block)
-     (next-line     . end-of-line-or-block)))
+     (next-line     . end-of-line-or-block)
+     (beg-of-line   . beg-of-line-or-buffer)
+     (end-of-lyne   . end-of-line-or-buffer)))
  (keyamp--set-map x
    '(ibuffer-backward-filter-group   ibuffer-forward-filter-group
-     gnus-topic-goto-prev-topic-line gnus-topic-goto-next-topic-line)))
+     ibuffer-toggle-filter-group
+     gnus-topic-goto-prev-topic-line gnus-topic-goto-next-topic-line
+     gnus-topic-select-group)))
 
 (with-sparse-keymap-x
  ;; SPC SPC prefix command.
@@ -3670,6 +3692,7 @@ is enabled.")
  (keyamp--remap x '((keyamp-escape . return-before)))
  (keyamp--set-map x '(extend-selection)))
 
+;; Delete selection right before insertion.
 (advice-add 'keyamp-insert :before 'delete-before)
 
 (with-sparse-keymap-x
@@ -3714,20 +3737,16 @@ is enabled.")
    terminal                        eshell) :before 'return-before)
 
 (with-sparse-keymap-x
- ;; Hold down comma to call `save-close-current-buffer'. Then comma to repeat.
- (keyamp--remap x '((next-window-or-frame . save-close-current-buffer)))
- (keyamp--set-map x '(save-close-current-buffer)))
-
-(with-sparse-keymap-x
  ;; Left/right arrows repeat by DEL/SPC. Start with e.g. TAB DEL/SPC.
  (keyamp--map-leaders x '(backward-char . forward-char))
  (keyamp--remap x '((backward-char . left-char) (forward-char . right-char)))
- (keyamp--set-map x '(left-char right-char)))
+ (keyamp--set-map x '(left-char right-char) nil nil nil 1))
 
 (with-sparse-keymap-x
  ;; Repeat brackets move with DEL/SPC.
  (keyamp--map-leaders x '(backward-left-bracket . forward-right-bracket))
- (keyamp--set-map x '(backward-left-bracket forward-right-bracket)))
+ (keyamp--set-map x '(backward-left-bracket forward-right-bracket)
+                    nil nil nil 1))
 
 (with-sparse-keymap-x
  ;; Repeat move by words with J/L or DEL/SPC. Second press word move key
@@ -3737,7 +3756,14 @@ is enabled.")
  (keyamp--remap x
    '((backward-char . back-word)      (forward-char . forw-word)
      (back-word     . backward-punct) (forw-word    . forward-punct)))
- (keyamp--set-map x '(back-word forw-word backward-punct forward-punct)))
+ (keyamp--set-map x '(back-word forw-word) nil nil nil 1))
+
+(with-sparse-keymap-x
+ ;; Repeat move by punct with J/L or DEL/SPC.
+ (keyamp--map-leaders x '(backward-char . forward-char))
+ (keyamp--remap x
+   '((backward-char . backward-punct) (forward-char . forward-punct)))
+ (keyamp--set-map x '(backward-punct forward-punct) nil nil nil 1))
 
 (with-sparse-keymap-x
  (keyamp--map-leaders x '(previous-line . next-line))
@@ -3759,8 +3785,8 @@ is enabled.")
    (keyamp--remap x
      '((down-line . View-scroll-half-page-backward)
        (up-line   . View-scroll-half-page-forward))))
- (keyamp--set-map x '(View-scroll-half-page-backward
-                      View-scroll-half-page-forward)))
+ (keyamp--set-map x
+   '(View-scroll-half-page-backward View-scroll-half-page-forward)))
 
 (with-sparse-keymap-x
  (keyamp--map-leaders x '(next-line . next-line))
@@ -3776,30 +3802,21 @@ is enabled.")
  (keyamp--map-leaders x '(backward-button . forward-button))
  (keyamp--set-map x '(backward-button forward-button)))
 
-(with-sparse-keymap-x
- (keyamp--map x
-   '(("TAB" . isearch-cur-word-forward) ("<tab>" . isearch-cur-word-forward)))
- (keyamp--set-map x '(keyamp-insert)))
-
-(advice-add 'isearch-cur-word-forward
-            :before (lambda (&rest r) "`keyamp-command' if in insert"
-                      (if keyamp-insert-p (keyamp-command))))
-
 
 ;; Repeat mode. Edit commands.
 
 (with-sparse-keymap-x
  (keyamp--map-leaders x '(delete-forward-char . delete-forward-char))
- (keyamp--set-map x '(delete-forward-char)))
+ (keyamp--set-map x '(delete-forward-char) nil nil nil 1))
 
 (with-sparse-keymap-x
  (keyamp--map-leaders x '(delete-backward . insert-space-before))
- (keyamp--set-map x '(delete-backward insert-space-before)))
+ (keyamp--set-map x '(delete-backward insert-space-before) nil nil nil 1))
 
 (with-sparse-keymap-x
  (keyamp--map-leaders x '(open-line . newline))
  (keyamp--remap x '((open-line . backward-kill-word) (newline . kill-word)))
- (keyamp--set-map x '(backward-kill-word kill-word)))
+ (keyamp--set-map x '(backward-kill-word kill-word) nil nil nil 2))
 
 (with-sparse-keymap-x
  (keyamp--map-leaders x '(undo . delete-backward))
@@ -3813,33 +3830,30 @@ is enabled.")
 (with-sparse-keymap-x
  (keyamp--map-leaders x '(delete-backward . delete-backward))
  (keyamp--remap x '((delete-backward . shrink-whitespaces)))
- (keyamp--set-map x '(shrink-whitespaces)))
+ (keyamp--set-map x '(shrink-whitespaces) nil nil nil 1))
 
 (with-sparse-keymap-x
  (keyamp--map-leaders x '(delete-backward . delete-backward))
  (keyamp--remap x '((delete-backward . toggle-comment)))
- (keyamp--set-map x '(toggle-comment)))
+ (keyamp--set-map x '(toggle-comment) nil nil nil 1))
 
 (with-sparse-keymap-x
  (keyamp--map-leaders x '(delete-backward . delete-backward))
  (keyamp--remap x '((delete-backward . cut-line-or-selection)))
- (keyamp--set-map x '(cut-line-or-selection)))
+ (keyamp--set-map x '(cut-line-or-selection) nil nil nil 1))
 
 (with-sparse-keymap-x
  (keyamp--map-leaders x '(delete-backward . delete-backward))
  (keyamp--remap x '((delete-backward . copy-line-or-selection)))
- (keyamp--set-map x '(copy-line-or-selection)))
+ (keyamp--set-map x '(copy-line-or-selection) nil nil nil 1))
 
 (advice-add-macro
  '(copy-line-or-selection copy-to-register-1) :after
- (lambda (&rest r) "Return to the point before selection after fun."
+ (lambda (&rest r) "return to the point before selection after fun"
    (when (or (eq last-command 'extend-selection)
              (eq last-command 'select-text-in-quote))
      (set-mark-command t)
-     (set-mark-command t)
-     (if keyamp--deactivate-transient-fun
-         (funcall keyamp--deactivate-transient-fun))
-     (setq this-command 'return-after))))
+     (set-mark-command t))))
 
 (with-sparse-keymap-x
  ;; Repeat in insert mode.
@@ -3848,7 +3862,7 @@ is enabled.")
 
 (with-sparse-keymap-x
  (keyamp--remap x '((delete-backward . toggle-letter-case)))
- (keyamp--set-map x '(toggle-letter-case)))
+ (keyamp--set-map x '(toggle-letter-case) nil nil nil 1))
 
 (with-sparse-keymap-x
  (keyamp--map-leaders x '(delete-backward . undo))
@@ -3856,16 +3870,16 @@ is enabled.")
    '((undo                   . org-shiftup)
      (delete-backward        . org-shiftdown)
      (copy-line-or-selection . agenda)))
- (keyamp--set-map x '(org-shiftup org-shiftdown)))
+ (keyamp--set-map x '(org-shiftup org-shiftdown) nil nil nil 1))
 
 (with-sparse-keymap-x
  (keyamp--map-leaders x '(agenda . todo))
  (keyamp--remap x '((undo . todo) (copy-line-or-selection . agenda)))
- (keyamp--set-map x '(todo insert-date)))
+ (keyamp--set-map x '(todo insert-date) nil nil nil 1))
 
 (with-sparse-keymap-x
  (keyamp--remap x '((delete-backward . cycle-hyphen-lowline-space)))
- (keyamp--set-map x '(cycle-hyphen-lowline-space)))
+ (keyamp--set-map x '(cycle-hyphen-lowline-space) nil nil nil 1))
 
 
 ;; Modes Remaps.
@@ -3922,7 +3936,8 @@ of quit minibuffer."
    (keyamp--map x
      '(("d" . select-block)     ("в" . select-block)
        ("k" . extend-selection) ("л" . extend-selection)
-       ("N" . keyamp-insert-!)  ("Т" . keyamp-insert-!))) ; Engineer Engram layout ! is QWERTY N and Russian Т
+       ;; Engineer Engram layout ! is QWERTY N and Russian Т
+       ("N" . keyamp-insert-!)  ("Т" . keyamp-insert-!)))
    (keyamp--remap y-or-n-p-map
      '((select-block     . y-or-n-p-insert-n)
        (extend-selection . y-or-n-p-insert-y)))
@@ -3930,17 +3945,16 @@ of quit minibuffer."
    ;; The hook is last one run during minibuffer setup. Transient keymap x
    ;; gets highest priority.
    (keyamp--remap x
-     '((end-of-line-or-block . keyamp-insert-n) ; Engineer Engram layout,
-       (backward-kill-word   . keyamp-insert-y) ; remap required for others
-       (keyamp-insert        . keyamp-minibuffer-insert)
-       (keyamp-escape        . keyamp-minibuffer-escape)))
+     '((end-of-lyne        . keyamp-insert-n) ; Engineer Engram layout,
+       (backward-kill-word . keyamp-insert-y) ; remap required for others
+       (keyamp-insert      . keyamp-minibuffer-insert)
+       (keyamp-escape      . keyamp-minibuffer-escape)))
     (keyamp--set-map-hook x '(minibuffer-setup-hook) :command nil :repeat))
 
    ;; Right after paste in minibuffer mostly confirm and exit follow.
    (advice-add 'paste-or-paste-previous :after
                (lambda (&rest r) "activate insert mode if in minibuffer"
-                 (when (and (minibufferp)
-                            (not keyamp-insert-p))
+                 (when (and (minibufferp) (not keyamp-insert-p))
                    (keyamp-insert))))
 
   (keyamp--remap minibuffer-local-map
@@ -3963,7 +3977,6 @@ of quit minibuffer."
               (goto-char (point-max)))))
 
 (with-eval-after-load 'icomplete
-
   (defun keyamp-icomplete-exit ()
     "Exit if file completion. It means use content of minibuffer as it is,
   no select completion candidates. Else force complete and exit, that
@@ -4022,10 +4035,9 @@ of quit minibuffer."
 (with-eval-after-load 'dired
   (keyamp--map dired-mode-map
     '(("C-h" . dired-do-delete) ("C-r" . delete-other-windows)
-      ("<mouse-1>" . mouse-set-point)
-      ("<mouse-2>" . mouse-set-point) ; mouse-2 really mouse-1
-      ("<double-mouse-1>" . dired-find-file)
-      ("<mouse-3>" . open-in-external-app)))
+      ("<mouse-1>"        . mouse-set-point)
+      ("<mouse-2>"        . mouse-set-point) ; mouse-2 really mouse-1
+      ("<double-mouse-1>" . dired-find-file)))
 
   (keyamp--remap dired-mode-map
     '((keyamp-insert           . dired-find-file)
@@ -4045,7 +4057,7 @@ of quit minibuffer."
 
   (with-sparse-keymap-x
    (keyamp--map-leaders x '(dired-toggle-mark . dired-toggle-mark))
-   (keyamp--set-map x '(dired-toggle-mark))))
+   (keyamp--set-map x '(dired-toggle-mark) nil nil nil 1)))
 
 (with-eval-after-load 'wdired
   (keyamp--map wdired-mode-map
@@ -4070,12 +4082,13 @@ of quit minibuffer."
       ("c" . dired-2jpg)                       ("/" . dired-to-zip))))
 
 (advice-add 'dired-next-line :after
-            (lambda (&rest r)
+            (lambda (&rest r) "stay on row with file"
               (if (= (line-number-at-pos) (1+ (count-lines (point-min) (point-max))))
                   (dired-previous-line 1))))
 
 (advice-add 'dired-previous-line :after
-            (lambda (&rest r) (if (= (line-number-at-pos) 1) (dired-next-line 1))))
+            (lambda (&rest r) "stay on row with file"
+              (if (= (line-number-at-pos) 1) (dired-next-line 1))))
 
 (advice-add 'beg-of-line-or-buffer :after
             (lambda (&rest r) "stay on row with file in dired"
@@ -4120,6 +4133,8 @@ of quit minibuffer."
   ;; Same as base map for Screen, always available in ibuffer.
   (keyamp--remap ibuffer-mode-map
     '((keyamp-insert           . ibuffer-visit-buffer)
+      (end-of-lyne             . ibuffer-forward-filter-group)
+      (beg-of-line             . ibuffer-backward-filter-group)
       (end-of-line-or-block    . ibuffer-forward-filter-group)
       (beg-of-line-or-block    . ibuffer-backward-filter-group)
       (insert-space-before     . delete-frame)
@@ -4151,14 +4166,11 @@ of quit minibuffer."
 
   (with-sparse-keymap-x
    (keyamp--remap x
-     '((previous-line        . ibuffer-backward-filter-group)
-       (next-line            . ibuffer-forward-filter-group)
-       (undo                 . ibuffer-backward-filter-group)
-       (delete-backward      . ibuffer-forward-filter-group)
-       (beg-of-line-or-block . beg-of-line-or-buffer)
-       (end-of-line-or-block . end-of-line-or-buffer)))
+     '((previous-line . ibuffer-backward-filter-group)
+       (next-line     . ibuffer-forward-filter-group)))
    (keyamp--set-map x
-     '(ibuffer-backward-filter-group ibuffer-forward-filter-group))))
+     '(ibuffer-backward-filter-group ibuffer-forward-filter-group
+       ibuffer-toggle-filter-group))))
 
 (with-eval-after-load 'ibuffer
   (keyamp--map ibuffer-name-map '(("<mouse-1>" . mouse-set-point))))
@@ -4166,7 +4178,7 @@ of quit minibuffer."
 (with-sparse-keymap-x
  (keyamp--map-leaders x '(delete-backward . delete-backward))
  (keyamp--remap x '((delete-backward . ibuffer-do-delete)))
- (keyamp--set-map x '(ibuffer-do-delete)))
+ (keyamp--set-map x '(ibuffer-do-delete) nil nil nil 1))
 
 (with-eval-after-load 'company
   (keyamp--map company-active-map
@@ -4206,7 +4218,7 @@ of quit minibuffer."
       "Activate insert mode and insert SPC."
       (interactive)
       (unless keyamp-insert-p (keyamp-insert))
-      (insert-space-before))
+      (insert " "))
     (keyamp--map-leaders x '(undo . keyamp-insert-and-SPC))
     (keyamp--set-map x '(company-search-abort company-complete-selection)))
 
@@ -4282,6 +4294,7 @@ of quit minibuffer."
     '(("TAB" . org-leader-map) ("<tab>" . org-leader-map)))
   (keyamp--map (define-prefix-command 'org-leader-map)
     '(("TAB" . org-cycle)      ("<tab>" . org-cycle)))
+  (keyamp--remap org-mode-map '((eval-last-sexp . insert-date)))
 
   (with-sparse-keymap-x
    (keyamp--map x '(("TAB" . org-cycle) ("<tab>" . org-cycle)))
@@ -4302,8 +4315,7 @@ of quit minibuffer."
 
   (keyamp--remap eww-link-keymap '((keyamp-insert . eww-follow-link)))
 
-  (advice-add 'eww-reload :around 'lookup-around)
-  (advice-add 'mouse-set-point :around 'lookup-around))
+  (advice-add 'eww-reload      :around 'lookup-around))
 
 (with-eval-after-load 'emms
   (with-sparse-keymap-x
@@ -4325,35 +4337,26 @@ of quit minibuffer."
        (open-line       . flyspell-goto-prev-error)
        (newline         . flyspell-goto-next-error)))
    (keyamp--set-map x
-     '(flyspell-buffer
-       flyspell-goto-prev-error
-       flyspell-goto-next-error
-       ispell-word))))
+     '(flyspell-buffer          ispell-word
+       flyspell-goto-prev-error flyspell-goto-next-error))))
 
 (with-eval-after-load 'doc-view
-  (keyamp--map doc-view-mode-map
-    '(("C-r" . delete-other-windows)))
+  (keyamp--map doc-view-mode-map '(("C-r" . delete-other-windows)))
   (keyamp--remap doc-view-mode-map
-    '((previous-line        . doc-view-previous-line-or-previous-page)
-      (next-line            . doc-view-next-line-or-next-page)
-      (backward-char        . doc-view-previous-page)
-      (forward-char         . doc-view-next-page)
-      (undo                 . doc-view-previous-line-or-previous-page)
-      (delete-backward      . doc-view-next-line-or-next-page)
-      (open-line            . doc-view-previous-page)
-      (newline              . doc-view-next-page)
-      (back-word            . doc-view-shrink)
-      (forw-word            . doc-view-enlarge)
-      (backward-char        . doc-view-scroll-down-or-previous-page)
-      (end-of-line-or-block . doc-view-scroll-up-or-next-page)))
+    '((previous-line   . doc-view-previous-line-or-previous-page)
+      (next-line       . doc-view-next-line-or-next-page)
+      (backward-char   . doc-view-previous-page)
+      (forward-char    . doc-view-next-page)
+      (back-word       . doc-view-shrink)
+      (forw-word       . doc-view-enlarge)
+      (beg-of-line     . doc-view-scroll-down-or-previous-page)
+      (end-of-lyne     . doc-view-scroll-up-or-next-page)))
 
   (with-sparse-keymap-x
    (keyamp--map-leaders x '(previous-line . next-line))
     (keyamp--remap x
-      '((previous-line   . doc-view-scroll-down-or-previous-page)
-        (next-line       . doc-view-scroll-up-or-next-page)
-        (undo            . doc-view-scroll-down-or-previous-page)
-        (delete-backward . doc-view-scroll-up-or-next-page)))
+      '((previous-line . doc-view-scroll-down-or-previous-page)
+        (next-line     . doc-view-scroll-up-or-next-page)))
     (keyamp--set-map x
       '(doc-view-scroll-down-or-previous-page doc-view-scroll-up-or-next-page))))
 
@@ -4376,22 +4379,16 @@ of quit minibuffer."
    (keyamp--set-map x '(image-decrease-size image-increase-size))))
 
 (with-eval-after-load 'esh-mode
-  (advice-add 'mac-mwheel-scroll :before
-              (lambda (&rest r) "activate command mode in eshell"
-                (if (and (eq major-mode 'eshell-mode)
-                         keyamp-insert-p)
-                  (keyamp-command))))
-
   (keyamp--map eshell-mode-map
     '(("C-h" . eshell-interrupt-process)
-      ("TAB" . eshell-leader-map) ("<tab>" . eshell-leader-map)
-      ("S-<tab>" . ignore)        ("<backtab>" . ignore)))
+      ("TAB" . eshell-leader-map)   ("<tab>" . eshell-leader-map)
+      ("S-<tab>" . ignore)          ("<backtab>" . ignore)))
   (keyamp--map (define-prefix-command 'eshell-leader-map)
     '(("TAB" . completion-at-point) ("<tab>" . completion-at-point)))
 
   (keyamp--remap eshell-mode-map
     '((cut-line-or-selection . eshell-clear-input)
-      (cut-text-block        . eshell-clear)
+      (next-eww-buffer       . eshell-clear)
       (select-block          . eshell-previous-input)
       (quoted-insert         . eshell-interrupt-process)))
 
@@ -4506,20 +4503,23 @@ of quit minibuffer."
 
   (keyamp--remap gnus-topic-mode-map
     '((keyamp-insert        . gnus-topic-select-group)
-      (beg-of-line-or-block . gnus-topic-goto-prev-topic-line)
-      (end-of-line-or-block . gnus-topic-goto-next-topic-line)))
+      (end-of-lyne          . gnus-topic-goto-next-topic-line)
+      (beg-of-line          . gnus-topic-goto-prev-topic-line)
+      (end-of-line-or-block . gnus-topic-goto-next-topic-line)
+      (beg-of-line-or-block . gnus-topic-goto-prev-topic-line)))
 
   (with-sparse-keymap-x
    (keyamp--map-leaders x '(previous-line . next-line))
    (keyamp--remap x
-     '((previous-line        . gnus-topic-goto-prev-topic-line)
-       (next-line            . gnus-topic-goto-next-topic-line)
-       (beg-of-line-or-block . gnus-beg-of-line-or-buffer)
-       (end-of-line-or-block . gnus-end-of-line-or-buffer)))
+     '((previous-line . gnus-topic-goto-prev-topic-line)
+       (next-line     . gnus-topic-goto-next-topic-line)
+       (beg-of-line   . gnus-beg-of-line-or-buffer)
+       (end-of-lyne   . gnus-end-of-line-or-buffer)))
 
    (keyamp--set-map x
      '(gnus-topic-goto-prev-topic-line gnus-topic-goto-next-topic-line
-       gnus-beg-of-line-or-buffer      gnus-end-of-line-or-buffer))))
+       gnus-beg-of-line-or-buffer      gnus-end-of-line-or-buffer
+       gnus-topic-select-group))))
 
 (with-eval-after-load 'gnus-group
   (keyamp--remap gnus-group-mode-map
@@ -4541,10 +4541,10 @@ of quit minibuffer."
       ("<double-mouse-1>" . gnus-summary-scroll-up)))
 
   (keyamp--remap gnus-summary-mode-map
-    '((keyamp-insert    . gnus-summary-scroll-up)
-      (open-line        . gnus-summary-prev-group)
-      (newline          . gnus-summary-next-group)
-      (save-buffer      . gnus-summary-save-parts))))
+    '((keyamp-insert . gnus-summary-scroll-up)
+      (open-line     . gnus-summary-prev-group)
+      (newline       . gnus-summary-next-group)
+      (save-buffer   . gnus-summary-save-parts))))
 
   (with-sparse-keymap-x
    (keyamp--map-leaders x '(open-line . newline))
@@ -4594,11 +4594,11 @@ of quit minibuffer."
 
 (with-eval-after-load 'tetris
   (keyamp--remap tetris-mode-map
-    '((keyamp-escape        . tetris-pause-game)
-      (delete-backward      . tetris-rotate-prev) (delete-other-windows . tetris-rotate-prev)
-      (newline              . tetris-rotate-next) (next-user-buffer     . tetris-rotate-next)
-      (next-line            . tetris-move-bottom)
-      (backward-char        . tetris-move-down)))
+    '((keyamp-escape   . tetris-pause-game)
+      (delete-backward . tetris-rotate-prev) (delete-other-windows . tetris-rotate-prev)
+      (newline         . tetris-rotate-next) (next-user-buffer     . tetris-rotate-next)
+      (next-line       . tetris-move-bottom)
+      (backward-char   . tetris-move-down)))
 
   (with-sparse-keymap-x
    (keyamp--map-leaders x '(tetris-move-left . tetris-move-right))
@@ -4645,7 +4645,8 @@ of quit minibuffer."
  (keyamp--remap x
    '((backward-char . flymake-goto-prev-error)
      (forward-char  . flymake-goto-next-error)))
- (keyamp--set-map x '(flymake-goto-prev-error flymake-goto-next-error)))
+ (keyamp--set-map x '(flymake-goto-prev-error flymake-goto-next-error)
+                    nil nil nil 1))
 
 (with-eval-after-load 'python-mode
   (keyamp--map python-mode-map
@@ -4688,9 +4689,12 @@ of quit minibuffer."
 
 (with-eval-after-load 'sh-script
   (keyamp--map bash-ts-mode-map
-    '(("TAB" . bash-ts-mode-leader-map) ("<tab>" . bash-ts-mode-leader-map)
-      ("S-<tab>" . ignore)              ("<backtab>" . ignore)))
+    '(("TAB" . bash-ts-mode-leader-map) ("<tab>" . bash-ts-mode-leader-map)))
   (keyamp--map (define-prefix-command 'bash-ts-mode-leader-map)
+    '(("TAB" . indent-for-tab-command)  ("<tab>" . indent-for-tab-command)))
+  (keyamp--map sh-mode-map ; shebang prevents ts mode auto load
+    '(("TAB" . sh-mode-map-leader-map) ("<tab>" . sh-mode-map-leader-map)))
+  (keyamp--map (define-prefix-command 'sh-mode-map-leader-map)
     '(("TAB" . indent-for-tab-command)  ("<tab>" . indent-for-tab-command))))
 
 (with-eval-after-load 'sqlite-mode
@@ -4702,6 +4706,12 @@ of quit minibuffer."
 
 (with-eval-after-load 'sql
   (keyamp--remap sql-mode-map '((eval-defun . exec-query))))
+
+(with-eval-after-load 'speedbar
+  (keyamp--remap speedbar-file-key-map
+    '((keyamp-insert   . speedbar-edit-line)
+      (newline         . speedbar-up-directory)
+      (delete-backward . speedbar-toggle-line-expansion))))
 
 
 
@@ -4722,7 +4732,6 @@ of quit minibuffer."
                  forw-frame                       t
                  gnus-summary-next-group          t
                  gnus-summary-prev-group          t
-                 main-proj-buffer                 t
                  next-buffer                      t
                  next-eww-buffer                  t
                  next-proj-buffer                 t
@@ -4750,10 +4759,17 @@ of quit minibuffer."
   #s(hash-table test equal data
                 (delete-backward                  t
                  delete-forward-char              t
+                 dired-toggle-mark                t
+                 ibuffer-do-delete                t
+                 insert-date                      t
                  insert-space-before              t
                  kill-region                      t
+                 org-shiftdown                    t
+                 org-shiftup                      t
                  shrink-whitespaces               t
+                 toggle-letter-case               t
                  toggle-comment                   t
+                 todo                             t
                  undo                             t
                  undo-redo                        t)))
 
@@ -4794,8 +4810,10 @@ of quit minibuffer."
                  gnus-end-of-line-or-buffer       t
                  gnus-topic-goto-next-topic-line  t
                  gnus-topic-goto-prev-topic-line  t
+                 gnus-topic-select-group          t
                  ibuffer-backward-filter-group    t
                  ibuffer-forward-filter-group     t
+                 ibuffer-toggle-filter-group      t
 
                  icomplete-backward-completions   t
                  icomplete-forward-completions    t
@@ -4831,26 +4849,30 @@ of quit minibuffer."
 
 
 
-(defvar keyamp-insert-p t   "Non-nil insert is on.")
+(defvar keyamp-insert-p t   "Non-nil means insert is on.")
 (defvar keyamp-repeat-p nil "Non-nil means repeat is on.")
-(defvar keyamp-screen-p nil "Non-nil means screen is on.")
 
-(defvar keyamp--deactivate-command-mode-func nil)
+(defvar keyamp--deactivate-command-mode-fun nil)
 
 (defun keyamp-command-init ()
   "Set command mode."
+  (if keyamp-repeat-p
+      (setq keyamp-repeat-p nil))
+  (if keyamp--deactivate-repeat-mode-fun
+      (funcall keyamp--deactivate-repeat-mode-fun))
   (when keyamp-insert-p
     (setq keyamp-insert-p nil)
     (push-mark (point) t))
-  (if keyamp--deactivate-command-mode-func
-      (funcall keyamp--deactivate-command-mode-func))
-  (setq keyamp--deactivate-command-mode-func
-        (set-transient-map keyamp-command-map (lambda () t))))
+  (if keyamp--deactivate-command-mode-fun
+      (funcall keyamp--deactivate-command-mode-fun))
+  (setq keyamp--deactivate-command-mode-fun
+        (set-transient-map keyamp-command-map (lambda () t)))
+  (keyamp-indicate))
 
 (defun keyamp-insert-init ()
   "Enter insert mode."
   (setq keyamp-insert-p t)
-  (funcall keyamp--deactivate-command-mode-func))
+  (funcall keyamp--deactivate-command-mode-fun))
 
 (defun keyamp-set-var-karabiner (key val)
   "Set karabiner variable KEY to value VAL via shell command."
@@ -4875,55 +4897,51 @@ of quit minibuffer."
   (keyamp-insert-init)
   (run-hooks 'keyamp-insert-hook))
 
-(advice-add 'keyamp-insert :around 'lookup-around)
-
 (defun keyamp-indicate ()
   "Indicate keyamp state. Run with `post-command-hook'."
   (cond
    ((gethash this-command keyamp-screen-commands-hash)
     (setq mode-line-front-space keyamp-screen-indicator)
     (set-face-background 'cursor keyamp-screen-cursor)
-    (setq keyamp-repeat-p nil)
-    (setq keyamp-screen-p t))
+    (setq keyamp-repeat-p t))
    ((or (eq real-this-command 'repeat)
         (and (gethash this-command keyamp-repeat-commands-hash)
              (not keyamp-insert-p)))
     (setq mode-line-front-space keyamp-repeat-indicator)
     (set-face-background 'cursor keyamp-repeat-cursor)
-    (setq keyamp-repeat-p t)
-    (setq keyamp-screen-p nil))
-   ((or (gethash this-command keyamp-edit-commands-hash)
-        keyamp-insert-p)
+    (setq keyamp-repeat-p t))
+   ((gethash this-command keyamp-edit-commands-hash)
     (setq mode-line-front-space keyamp-insert-indicator)
-    (set-face-background 'cursor keyamp-insert-cursor))
+    (set-face-background 'cursor keyamp-insert-cursor)
+    (setq keyamp-repeat-p t))
+   (keyamp-insert-p
+    (setq mode-line-front-space keyamp-insert-indicator)
+    (set-face-background 'cursor keyamp-insert-cursor)
+    (modify-all-frames-parameters '((cursor-type . bar))))
    (t
     (setq mode-line-front-space keyamp-command-indicator)
     (set-face-background 'cursor keyamp-command-cursor)
     (setq keyamp-repeat-p nil)
-    (setq keyamp-screen-p nil)))
+    (modify-all-frames-parameters '((cursor-type . box)))))
   (unless (eq this-command last-command)
     (force-mode-line-update t)))
 
 (defun keyamp-hold-down ()
   "Do something after key hold down. Run after idle time same as Karabiner
-held down threshold. E.g. hold down ESC Karabiner posts C-h in 0.2 s and
-Keyamp indicates the event after been idle for 0.2 s."
+held down threshold. E.g. hold down ESC Karabiner posts C-h and Keyamp
+indicates the event after been idle for the same period of time."
   (cond
    ((equal [8] (this-single-command-keys)) ; C-h
     (setq mode-line-front-space keyamp-screen-indicator)
     (set-face-background 'cursor keyamp-screen-cursor)
     (force-mode-line-update t))))
 
-(defun keyamp-escape (&optional Keyamp-idle-p)
-  "Return to command mode, clear selection or quit minibuffer.
-If run by idle timer then emulate escape keyboard press which required to
-deactivate transient map."
+(defun keyamp-escape ()
+  "Return to command mode, clear selection or quit minibuffer."
   (interactive)
   (cond
-   (Keyamp-idle-p        (execute-kbd-macro (kbd "<escape>")))
-   ((or keyamp-insert-p
-        keyamp-repeat-p
-        keyamp-screen-p) (keyamp-command))
+   ((or keyamp-repeat-p
+        keyamp-insert-p) (keyamp-command))
    ((region-active-p)    (deactivate-mark))
    ((minibufferp)        (abort-recursive-edit))))
 
@@ -4939,6 +4957,9 @@ deactivate transient map."
     (add-hook 'isearch-mode-end-hook 'keyamp-command)
     (add-hook 'debugger-mode-hook    'keyamp-command)
     (add-hook 'post-command-hook     'keyamp-indicate)
+    (add-hook 'keyamp-insert-hook    'keyamp-cancel-repeat-mode-idle-timer)
+    (add-hook 'keyamp-command-hook   'keyamp-cancel-repeat-mode-idle-timer)
+    (add-hook 'isearch-mode-hook     'keyamp-cancel-repeat-mode-idle-timer)
     (add-function :after after-focus-change-function #'keyamp-command)
 
     (keyamp-catch-tty-ESC)
@@ -4946,7 +4967,7 @@ deactivate transient map."
     (run-with-timer 5 nil 'keyamp-map-input-source 'russian-computer)
     (run-with-timer 5 nil 'keyamp-push-quail-keyboard-layout)
     (setq keyamp-idle-timer
-          (run-with-idle-timer keyamp-idle-timeout t 'keyamp-escape t))
+          (run-with-idle-timer keyamp-idle-timeout t 'keyamp-escape))
     (setq keyamp-hold-down-timer
           (run-with-idle-timer keyamp-hold-threshold t 'keyamp-hold-down))))
 
