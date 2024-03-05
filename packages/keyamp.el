@@ -338,6 +338,23 @@ When `universal-argument' is called first, copy whole buffer
               (end-of-line)
               (forward-char))))))))
 
+(defun copy-shell-input (fun &rest args)
+  "Copy shell input. Around advice for `copy-line-or-selection'. Prompt is └ ❯ ."
+  (cond
+   ((and (eq major-mode 'vterm-mode)
+         (string-equal "└ ❯ " (buffer-substring-no-properties
+                               (line-beginning-position)
+                               (+ 4 (line-beginning-position)))))
+    (copy-region-as-kill (+ 6 (line-beginning-position)) (line-end-position)))
+   ((and (eq major-mode 'eshell-mode)
+         (string-equal "└ ❯ " (buffer-substring-no-properties
+                               (line-beginning-position)
+                               (+ 4 (line-beginning-position)))))
+    (copy-region-as-kill (+ 4 (line-beginning-position)) (line-end-position)))
+   (t (apply fun args))))
+
+(advice-add 'copy-line-or-selection :around 'copy-shell-input)
+
 (defun cut-line-or-selection ()
   "Cut current line or selection."
   (interactive)
@@ -2005,13 +2022,6 @@ Prompt for a choice."
     (mapc (lambda (xf) (insert (cdr xf) "\n"))
           recently-closed-buffers)))
 
-(defvar open-file-at-cursor-pre-hook nil
-"Hook for `open-file-at-cursor'. Functions in the hook will be called
-in order, each given the path as arg. The first return non-nil, its
-value is given to `open-file-at-cursor' as input. This is useful for
-transforming certain url into file path (your website url), so instead
-of opening in browser, it opens in Emacs as file.")
-
 (defun open-file-at-cursor ()
   "Open the file path under cursor.
 If there is selection, use it for path.
@@ -2021,8 +2031,6 @@ Path may have a trailing “:‹n›” that indicates line number, or “:‹n�
 with line and column number. If so, jump to that line number.
 If path does not have a file extension, automatically try with “.el”
 for elisp files.
-
-See also `open-file-at-cursor-pre-hook'.
 
 This command is similar to `find-file-at-point' but without prompting
 for confirmation."
@@ -2039,14 +2047,8 @@ for confirmation."
               (setq xp2 (point))
               (goto-char xp0)
               (buffer-substring-no-properties xp1 xp2))))
-         xinput2 xpath
-         )
-    (setq xinput2
-          (if (> (length open-file-at-cursor-pre-hook) 0)
-              (let ((xx (run-hook-with-args-until-success 'open-file-at-cursor-pre-hook xinput)))
-                (if xx xx xinput))
-            xinput))
-    (setq xpath (replace-regexp-in-string "^/C:/" "/" (replace-regexp-in-string "^file://" "" (replace-regexp-in-string ":\\'" "" xinput2))))
+         xpath)
+    (setq xpath (replace-regexp-in-string "^/C:/" "/" (replace-regexp-in-string "^file://" "" (replace-regexp-in-string ":\\'" "" xinput))))
     (if (string-match-p "\\`https?://" xpath)
         (browse-url xpath)
       (progn ; not starting http://
@@ -2098,7 +2100,7 @@ for confirmation."
               (setq xp2 (point))
               (goto-char xp0)
               (buffer-substring-no-properties xp1 xp2))))
-         xinput2 xpath)
+         xpath)
     (setq xpath (replace-regexp-in-string
                  "^/C:/" "/" (replace-regexp-in-string
                               "^file://" "" (replace-regexp-in-string
@@ -2388,6 +2390,16 @@ If there more than one frame, switch to next frame."
     (kill-line))
   (setq this-command 'eshell-clear-input))
 
+(defun vterm-up ()
+  "Send `<up>' to the libvterm."
+  (interactive)
+  (vterm-send-key "<up>"))
+
+(defun vterm-down ()
+  "Send `<down>' to the libvterm."
+  (interactive)
+  (vterm-send-key "<down>"))
+
 (defun screenshot ()
   "Take screenshot on macOS."
   (interactive)
@@ -2538,26 +2550,6 @@ Show current agenda. Do not select other window, balance windows."
   (if (get-buffer "*Group*")
       (switch-to-buffer "*Group*")
     (gnus)))
-
-(defun server ()
-  "Run project server. Switch to console if already running."
-  (interactive)
-  (let ((xpath (getenv "RUN_SERVER"))
-        (xbuf "*run server*"))
-    (if (get-buffer xbuf)
-        (switch-to-buffer-other-window xbuf)
-      (async-shell-command
-       (if (> (length (getenv "CONNINFO")) 0)
-           (format "cd %s && go run main.go -d $CONNINFO " xpath)
-         (format "cd %s && go run main.go" xpath)) xbuf))))
-
-(defun test ()
-  "Run project tests."
-  (interactive)
-  (let ((xbuf "*run server*"))
-    (if (get-buffer xbuf)
-        (kill-buffer xbuf)))
-  (async-shell-command "$RUN_TEST" "*run test*"))
 
 (defun sql ()
   "Open SQL client."
@@ -2837,10 +2829,10 @@ Default dictionary is nil. First run with hook sets en."
       (save-excursion
         (display-line-numbers-mode 0)
         (goto-char (point-min))
-        (kill-region (line-beginning-position) (line-beginning-position 2))
-        (kill-region (line-beginning-position) (line-beginning-position 2))
+        (delete-region (line-beginning-position) (line-beginning-position 2))
+        (delete-region (line-beginning-position) (line-beginning-position 2))
         (goto-char (point-max))
-        (kill-region (line-beginning-position) (line-beginning-position 2))
+        (delete-region (line-beginning-position) (line-beginning-position 2))
         (setq this-command 'recentf-open-files))
       (forward-word)
       (backward-char))))
@@ -3031,10 +3023,10 @@ Activate command, insert or repeat mode optionally."
 (defun keyamp-quail-get-translation (From)
   "Get translation Engineer Engram to russian-computer.
 From character to character code."
-  (let ((xto (alist-get From keyamp-engineer-engram-to-russian-computer
+  (let ((to (alist-get From keyamp-engineer-engram-to-russian-computer
              nil nil 'string-equal)))
-    (when (stringp xto)
-      (string-to-char xto))))
+    (when (stringp to)
+      (string-to-char to))))
 
 (defun keyamp-map-input-source (input-method)
   "Build reverse mapping for `input-method'.
@@ -3226,8 +3218,8 @@ is enabled.")
 (keyamp--map (define-prefix-command 'keyamp-leader-map)
   '(("ESC" . previous-line)              ("<escape>"    . previous-line)
     ("RET" . next-line)                  ("<return>"    . next-line)
-    ("DEL" . left-char)                  ("<backspace>" . left-char)
-    ("SPC" . right-char)
+    ("DEL" . backward-char)              ("<backspace>" . backward-char)
+    ("SPC" . forward-char)
     ("`"   . delete-forward-char)
     ("e"   . undo)
     ("v"   . paste-or-paste-previous)))
@@ -3436,6 +3428,7 @@ is enabled.")
 
 (advice-add 'keyamp-insert :around 'open-http-at-cursor)
 (advice-add 'keyamp-insert :around 'lookup-around)
+(advice-add 'keyamp-insert :before 'delete-before)
 
 (when (display-graphic-p)
   (advice-add 'mouse-set-point :around 'lookup-around)
@@ -3612,6 +3605,7 @@ is enabled.")
 
 (with-sparse-keymap-x
  ;; Hold down comma to call `save-close-current-buffer'. Then comma to repeat.
+ (keyamp--remap x '((open-line . prev-user-buffer) (newline . next-user-buffer)))
  (keyamp--remap x '((next-window-or-frame . save-close-current-buffer)))
  (keyamp--set-map x '(save-close-current-buffer) nil nil nil 2))
 
@@ -3633,14 +3627,12 @@ is enabled.")
 
 (with-sparse-keymap-x
  ;; Initiate by SPC then double DEL or DEL then SPC hold down. Double H/; so
- ;; third press H for beginning of the buffer, 4th for end of the buffer.
+ ;; third press H for beginning of the buffer, fourth for end of the buffer.
  ;; Similarly for ; in opposite direction. I/K or DEL/SPC to move by blocks.
  (keyamp--map-leaders x '(previous-line . next-line))
  (keyamp--remap x
-   '((previous-line . beg-of-line-or-block)
-     (next-line     . end-of-line-or-block)
-     (beg-of-line   . beg-of-line-or-buffer)
-     (end-of-lyne   . end-of-line-or-buffer)))
+   '((previous-line . beg-of-line-or-block)  (next-line   . end-of-line-or-block)
+     (beg-of-line   . beg-of-line-or-buffer) (end-of-lyne . end-of-line-or-buffer)))
 
  (advice-add 'beg-of-line :after
              (lambda (&rest r) "second press activates repeat"
@@ -3666,21 +3658,6 @@ is enabled.")
      beg-of-line-or-buffer end-of-line-or-buffer)))
 
 (with-sparse-keymap-x
- ;; Use I/K to move nodes in ibuffer and gnus. Target functions remapped
- ;; accordingly. Initiate also by SPC then double DEL or DEL then SPC hold down.
- (keyamp--map-leaders x '(previous-line . next-line))
- (keyamp--remap x
-   '((previous-line . beg-of-line-or-block)
-     (next-line     . end-of-line-or-block)
-     (beg-of-line   . beg-of-line-or-buffer)
-     (end-of-lyne   . end-of-line-or-buffer)))
- (keyamp--set-map x
-   '(ibuffer-backward-filter-group   ibuffer-forward-filter-group
-     ibuffer-toggle-filter-group
-     gnus-topic-goto-prev-topic-line gnus-topic-goto-next-topic-line
-     gnus-topic-select-group)))
-
-(with-sparse-keymap-x
  ;; SPC SPC prefix command.
  ;; Double SPC to run `extend-selection', then next SPC press to
  ;; deactivate mark and run `down-line'. That is, hold down SPC to start move
@@ -3691,9 +3668,6 @@ is enabled.")
  (keyamp--map-leaders x '(View-scroll-half-page-backward . down-line))
  (keyamp--remap x '((keyamp-escape . return-before)))
  (keyamp--set-map x '(extend-selection)))
-
-;; Delete selection right before insertion.
-(advice-add 'keyamp-insert :before 'delete-before)
 
 (with-sparse-keymap-x
  ;; DEL DEL prefix command.
@@ -3734,10 +3708,11 @@ is enabled.")
    prev-user-buffer                next-user-buffer
    View-scroll-half-page-backward  View-scroll-half-page-forward
    tasks                           novel
-   terminal                        eshell) :before 'return-before)
+   terminal                        eshell)
+ :before 'return-before)
 
 (with-sparse-keymap-x
- ;; Left/right arrows repeat by DEL/SPC. Start with e.g. TAB DEL/SPC.
+ ;; Left/right arrows repeat by DEL/SPC.
  (keyamp--map-leaders x '(backward-char . forward-char))
  (keyamp--remap x '((backward-char . left-char) (forward-char . right-char)))
  (keyamp--set-map x '(left-char right-char) nil nil nil 1))
@@ -3751,7 +3726,7 @@ is enabled.")
 (with-sparse-keymap-x
  ;; Repeat move by words with J/L or DEL/SPC. Second press word move key
  ;; calls punctuation move. Press O then hold down J or U/L for
- ;; convenient word move hold down, that is, start in opposite direction.
+ ;; word move hold down, start in opposite direction.
  (keyamp--map-leaders x '(backward-char . forward-char))
  (keyamp--remap x
    '((backward-char . back-word)      (forward-char . forw-word)
@@ -3931,25 +3906,21 @@ of quit minibuffer."
    ;; SPC (`extend-selection') and DEL/SPC or I/K again to continue move
    ;; backward/forward. Similarly double DEL to activate history move.
    (keyamp--map-leaders x '(select-block . extend-selection))
-
-   ;; Hit D or DEL for No, K or SPC for Yes right away to answer y or n.
-   (keyamp--map x
-     '(("d" . select-block)     ("в" . select-block)
-       ("k" . extend-selection) ("л" . extend-selection)
-       ;; Engineer Engram layout ! is QWERTY N and Russian Т
-       ("N" . keyamp-insert-!)  ("Т" . keyamp-insert-!)))
-   (keyamp--remap y-or-n-p-map
-     '((select-block     . y-or-n-p-insert-n)
-       (extend-selection . y-or-n-p-insert-y)))
-
-   ;; The hook is last one run during minibuffer setup. Transient keymap x
-   ;; gets highest priority.
    (keyamp--remap x
-     '((end-of-lyne        . keyamp-insert-n) ; Engineer Engram layout,
-       (backward-kill-word . keyamp-insert-y) ; remap required for others
+     '((end-of-lyne        . keyamp-insert-n) ; Literal answers y or n
+       (backward-kill-word . keyamp-insert-y) ; Engineer Engram layout
+       (isearch-backward   . keyamp-insert-!) ; remap required for others
        (keyamp-insert      . keyamp-minibuffer-insert)
        (keyamp-escape      . keyamp-minibuffer-escape)))
+    ;; The hook is last one run during minibuffer setup and set the keymap.
     (keyamp--set-map-hook x '(minibuffer-setup-hook) :command nil :repeat))
+
+  ;; Hit D/DEL for No, K/SPC for Yes to answer non-literal y or n.
+   (keyamp--remap y-or-n-p-map
+     '((select-block     . y-or-n-p-insert-n)
+       (delete-backward  . y-or-n-p-insert-n)
+       (extend-selection . y-or-n-p-insert-y)
+       (next-line        . y-or-n-p-insert-y)))
 
    ;; Right after paste in minibuffer mostly confirm and exit follow.
    (advice-add 'paste-or-paste-previous :after
@@ -4009,7 +3980,7 @@ of quit minibuffer."
   (with-sparse-keymap-x
    (keyamp--remap x
      '((previous-line . previous-line-or-history-element)
-       (next-line     . next-line-or-history-element)))
+       (next-line     . icomplete-forward-completions)))
     (keyamp--set-map-hook x '(icomplete-minibuffer-setup-hook) nil nil :repeat))
 
   (with-sparse-keymap-x
@@ -4068,18 +4039,18 @@ of quit minibuffer."
 
 (with-eval-after-load 'dired-utils
   (keyamp--map dired-mode-map
-    '(("TAB" . dired-leader-map)               ("<tab>" . dired-leader-map)))
-
+    '(("TAB" . dired-leader-map)                 ("<tab>" . dired-leader-map)))
   (keyamp--map (define-prefix-command 'dired-leader-map)
-    '(("TAB" . dired-omit-mode)                ("<tab>" . dired-omit-mode)
-      ("q" . dired-image-remove-transparency)  ("e" . dired-optimize-png)
-      ("u" . dired-2drawing)                   ("o" . dired-rotate-img-right)
-      ("p" . dired-rotate-img-left)            ("a" . dired-image-autocrop)
-      ("s" . dired-open-marked)                ("d" . dired-show-metadata)
-      ("f" . dired-remove-all-metadata)        ("h" . dired-rotate-img-180)
-      ("k" . dired-rename-space-to-underscore) ("l" . dired-2png)
-      (";" . dired-scale-image)                ("\'" . dired-to-zip-encrypted)
-      ("c" . dired-2jpg)                       ("/" . dired-to-zip))))
+    '(("TAB" . dired-omit-mode)                  ("<tab>" . dired-omit-mode)
+      ("q"   . dired-image-remove-transparency)  ("e"     . dired-optimize-png)
+      ("u"   . dired-2drawing)                   ("o"     . dired-rotate-img-right)
+      ("p"   . dired-rotate-img-left)            ("a"     . dired-image-autocrop)
+      ("s"   . dired-open-marked)                ("d"     . dired-show-metadata)
+      ("f"   . dired-remove-all-metadata)        ("h"     . dired-rotate-img-180)
+      ("k"   . dired-rename-space-to-underscore) ("l"     . dired-2png)
+      (";"   . dired-scale-image)                ("\'"    . dired-zip-enc)
+      ("c"   . dired-2jpg)                       ("/"     . dired-zip)
+                                                 ("."     . dired-unzip))))
 
 (advice-add 'dired-next-line :after
             (lambda (&rest r) "stay on row with file"
@@ -4165,12 +4136,19 @@ of quit minibuffer."
     '((keyamp-insert . ibuffer-toggle-filter-group)))
 
   (with-sparse-keymap-x
+   (keyamp--map-leaders x '(previous-line . next-line))
+   (keyamp--remap x '((previous-line . up-line) (next-line . down-line)))
+   (keyamp--set-map x '(ibuffer-toggle-filter-group)))
+
+  (with-sparse-keymap-x
+   (keyamp--map-leaders x '(previous-line . next-line))
    (keyamp--remap x
      '((previous-line . ibuffer-backward-filter-group)
-       (next-line     . ibuffer-forward-filter-group)))
+       (next-line     . ibuffer-forward-filter-group)
+       (beg-of-line   . beg-of-line-or-buffer)
+       (end-of-lyne   . end-of-line-or-buffer)))
    (keyamp--set-map x
-     '(ibuffer-backward-filter-group ibuffer-forward-filter-group
-       ibuffer-toggle-filter-group))))
+     '(ibuffer-backward-filter-group ibuffer-forward-filter-group))))
 
 (with-eval-after-load 'ibuffer
   (keyamp--map ibuffer-name-map '(("<mouse-1>" . mouse-set-point))))
@@ -4287,7 +4265,8 @@ of quit minibuffer."
   (keyamp--map emms-playlist-mode-map
     '(("<double-mouse-1>" . emms-playlist-mode-play-smart)))
   (keyamp--remap emms-playlist-mode-map
-    '((keyamp-insert . emms-playlist-mode-play-smart))))
+    '((keyamp-insert         . emms-playlist-mode-play-smart)
+      (forward-right-bracket . player))))
 
 (with-eval-after-load 'org
   (keyamp--map org-mode-map
@@ -4414,7 +4393,8 @@ of quit minibuffer."
    (keyamp--map-leaders x '(previous-line . next-line))
    (keyamp--remap x
      '((previous-line . eshell-previous-input)
-       (next-line     . eshell-next-input)))
+       (next-line     . eshell-next-input)
+       (keyamp-insert . eshell-send-input)))
 
    (keyamp--map x
      '(("TAB"   . eshell-previous-matching-input)
@@ -4454,7 +4434,7 @@ of quit minibuffer."
     '(("TAB" . vterm-send-tab) ("<tab>" . vterm-send-tab)))
 
   (keyamp--remap vterm-mode-map
-    '((select-block            . vterm-send-up)
+    '((select-block            . vterm-up)
       (prev-eww-buffer         . vterm-clear)
       (paste-or-paste-previous . vterm-yank)
       (paste-from-register-1   . vterm-yank-pop)))
@@ -4462,8 +4442,9 @@ of quit minibuffer."
   (with-sparse-keymap-x
    (keyamp--map-leaders x '(previous-line . next-line))
    (keyamp--remap x
-     '((previous-line . vterm-send-up)
-       (next-line     . vterm-send-down)))
+     '((previous-line . vterm-up)
+       (next-line     . vterm-down)
+       (keyamp-insert . vterm-send-return)))
 
    (keyamp--map x
      '(("v" . paste-or-paste-previous) ("м" . paste-or-paste-previous)
@@ -4472,7 +4453,7 @@ of quit minibuffer."
        ("9" . eshell)))
 
     (keyamp--set-map x '(vterm-send-return))
-    (keyamp--set-map x '(vterm-send-up vterm-send-down) :command)
+    (keyamp--set-map x '(vterm-up vterm-down) :command)
     (keyamp--set-map-hook x '(vterm-mode-hook) nil :insert)))
 
 (with-eval-after-load 'info
@@ -4502,11 +4483,14 @@ of quit minibuffer."
     '(("TAB" . toggle-ibuffer)        ("<tab>" . toggle-ibuffer)))
 
   (keyamp--remap gnus-topic-mode-map
-    '((keyamp-insert        . gnus-topic-select-group)
-      (end-of-lyne          . gnus-topic-goto-next-topic-line)
-      (beg-of-line          . gnus-topic-goto-prev-topic-line)
-      (end-of-line-or-block . gnus-topic-goto-next-topic-line)
-      (beg-of-line-or-block . gnus-topic-goto-prev-topic-line)))
+    '((keyamp-insert . gnus-topic-select-group)
+      (end-of-lyne   . gnus-topic-goto-next-topic-line)
+      (beg-of-line   . gnus-topic-goto-prev-topic-line)))
+
+  (with-sparse-keymap-x
+   (keyamp--map-leaders x '(previous-line . next-line))
+   (keyamp--remap x '((previous-line . up-line) (next-line . down-line)))
+   (keyamp--set-map x '(gnus-topic-select-group)))
 
   (with-sparse-keymap-x
    (keyamp--map-leaders x '(previous-line . next-line))
@@ -4518,8 +4502,7 @@ of quit minibuffer."
 
    (keyamp--set-map x
      '(gnus-topic-goto-prev-topic-line gnus-topic-goto-next-topic-line
-       gnus-beg-of-line-or-buffer      gnus-end-of-line-or-buffer
-       gnus-topic-select-group))))
+       gnus-beg-of-line-or-buffer      gnus-end-of-line-or-buffer) nil nil nil 2)))
 
 (with-eval-after-load 'gnus-group
   (keyamp--remap gnus-group-mode-map
@@ -4594,11 +4577,13 @@ of quit minibuffer."
 
 (with-eval-after-load 'tetris
   (keyamp--remap tetris-mode-map
-    '((keyamp-escape   . tetris-pause-game)
-      (delete-backward . tetris-rotate-prev) (delete-other-windows . tetris-rotate-prev)
-      (newline         . tetris-rotate-next) (next-user-buffer     . tetris-rotate-next)
-      (next-line       . tetris-move-bottom)
-      (backward-char   . tetris-move-down)))
+    '((keyamp-escape        . tetris-pause-game)
+      (delete-backward      . tetris-rotate-prev)
+      (delete-other-windows . tetris-rotate-prev)
+      (newline              . tetris-rotate-next)
+      (next-user-buffer     . tetris-rotate-next)
+      (next-line            . tetris-move-bottom)
+      (backward-char        . tetris-move-down)))
 
   (with-sparse-keymap-x
    (keyamp--map-leaders x '(tetris-move-left . tetris-move-right))
@@ -4613,7 +4598,7 @@ of quit minibuffer."
     '(("TAB"       . find-output-leader-map) ("<tab>"   . find-output-leader-map)
       ("<backtab>" . find-previous-match)    ("S-<tab>" . find-previous-match)))
   (keyamp--map (define-prefix-command 'find-output-leader-map)
-    '(("TAB" . find-next-match) ("<tab>" . find-next-match)))
+    '(("TAB" . find-next-match)              ("<tab>" . find-next-match)))
 
   (keyamp--remap find-output-mode-map
     '((keyamp-insert . find--jump-to-place)))
@@ -4673,11 +4658,12 @@ of quit minibuffer."
     '(("TAB" . company-manual-begin) ("<tab>" . company-manual-begin)))
 
   (keyamp--remap go-ts-mode-map
-    '((describe-foo-at-point . xref-find-definitions)
-      (describe-variable     . xref-find-references)
-      (mark-defun            . go-mark-defun)
-      (eval-defun            . go-vet-project)
-      (eval-last-sexp        . server))))
+    '((describe-foo-at-point       . xref-find-definitions)
+      (describe-variable           . xref-find-references)
+      (mark-defun                  . go-mark-defun)
+      (eval-defun                  . go-vet-project)
+      (elisp-eval-region-or-buffer . test)
+      (eval-last-sexp              . server))))
 
 (with-sparse-keymap-x
  (keyamp--map-leaders x '(xref-go-back . xref-find-definitions))
@@ -4708,10 +4694,15 @@ of quit minibuffer."
   (keyamp--remap sql-mode-map '((eval-defun . exec-query))))
 
 (with-eval-after-load 'speedbar
+  (keyamp--remap speedbar-mode-map
+    '((newline            . speedbar-refresh)))
+  (keyamp--map speedbar-file-key-map
+    '(("<mouse-2>"        . speedbar-toggle-line-expansion)
+      ("<double-mouse-1>" . speedbar-edit-line)))
   (keyamp--remap speedbar-file-key-map
-    '((keyamp-insert   . speedbar-edit-line)
-      (newline         . speedbar-up-directory)
-      (delete-backward . speedbar-toggle-line-expansion))))
+    '((keyamp-insert      . speedbar-edit-line)
+      (undo               . speedbar-up-directory)
+      (delete-backward    . speedbar-toggle-line-expansion))))
 
 
 
@@ -4730,8 +4721,6 @@ of quit minibuffer."
                  find-next-dir-file               t
                  find-prev-dir-file               t
                  forw-frame                       t
-                 gnus-summary-next-group          t
-                 gnus-summary-prev-group          t
                  next-buffer                      t
                  next-eww-buffer                  t
                  next-proj-buffer                 t
@@ -4808,6 +4797,8 @@ of quit minibuffer."
                  forw-word                        t
                  gnus-beg-of-line-or-buffer       t
                  gnus-end-of-line-or-buffer       t
+                 gnus-summary-next-group          t
+                 gnus-summary-prev-group          t
                  gnus-topic-goto-next-topic-line  t
                  gnus-topic-goto-prev-topic-line  t
                  gnus-topic-select-group          t
@@ -4844,8 +4835,8 @@ of quit minibuffer."
                  up-line                          t
                  View-scroll-half-page-backward   t
                  View-scroll-half-page-forward    t
-                 vterm-send-down                  t
-                 vterm-send-up                    t)))
+                 vterm-down                       t
+                 vterm-up                         t)))
 
 
 
@@ -4897,27 +4888,32 @@ of quit minibuffer."
   (keyamp-insert-init)
   (run-hooks 'keyamp-insert-hook))
 
+(setq-default cursor-in-non-selected-windows nil)
+
 (defun keyamp-indicate ()
   "Indicate keyamp state. Run with `post-command-hook'."
   (cond
    ((gethash this-command keyamp-screen-commands-hash)
     (setq mode-line-front-space keyamp-screen-indicator)
     (set-face-background 'cursor keyamp-screen-cursor)
+    (modify-all-frames-parameters '((cursor-type . box)))
     (setq keyamp-repeat-p t))
    ((or (eq real-this-command 'repeat)
         (and (gethash this-command keyamp-repeat-commands-hash)
              (not keyamp-insert-p)))
     (setq mode-line-front-space keyamp-repeat-indicator)
     (set-face-background 'cursor keyamp-repeat-cursor)
+    (modify-all-frames-parameters '((cursor-type . box)))
     (setq keyamp-repeat-p t))
    ((gethash this-command keyamp-edit-commands-hash)
     (setq mode-line-front-space keyamp-insert-indicator)
     (set-face-background 'cursor keyamp-insert-cursor)
+    (modify-all-frames-parameters '((cursor-type . box)))
     (setq keyamp-repeat-p t))
    (keyamp-insert-p
     (setq mode-line-front-space keyamp-insert-indicator)
-    (set-face-background 'cursor keyamp-insert-cursor)
-    (modify-all-frames-parameters '((cursor-type . bar))))
+    (set-face-background 'cursor keyamp-command-cursor)
+    (modify-all-frames-parameters '((cursor-type . hbar))))
    (t
     (setq mode-line-front-space keyamp-command-indicator)
     (set-face-background 'cursor keyamp-command-cursor)
