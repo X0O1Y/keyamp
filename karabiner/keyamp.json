@@ -6919,6 +6919,40 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
+                "/Brave Browser"
+              ]
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "shell_command": "open -a Weather"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "c"
+            },
+            {
+              "shell_command": "sleep 0.2 && /Applications/emacsclient --no-wait --eval '(eww-paste-and-go)' && sleep 0.05 && open -a 'Emacs'",
+              "repeat": false,
+              "halt": true
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "f4",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
                 "/Weather"
               ]
             }
@@ -6945,13 +6979,6 @@
           "to_after_key_up": [
             {
               "shell_command": "open -a Weather"
-            }
-          ],
-          "to_if_held_down": [
-            {
-              "shell_command": "open -a Weather",
-              "repeat": false,
-              "halt": true
             }
           ]
         }
@@ -7263,6 +7290,120 @@
     {
       "description": "f14",
       "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "f14",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "input_sources": [
+                {
+                  "input_source_id": "com.apple.keylayout.RussianWin"
+                }
+              ],
+              "type": "input_source_if"
+            }
+          ],
+          "to": [
+            {
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(message \" ABC\")'"
+            },
+            {
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              },
+              "repeat": false
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "f14",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "input_sources": [
+                {
+                  "input_source_id": "com.apple.keylayout.ABC"
+                }
+              ],
+              "type": "input_source_if"
+            }
+          ],
+          "to": [
+            {
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(message \" ABC\")'"
+            },
+            {
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              },
+              "repeat": false
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "f14",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "input_sources": [
+                {
+                  "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+                }
+              ],
+              "type": "input_source_if"
+            }
+          ],
+          "to": [
+            {
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(message \" АБВ\")'"
+            },
+            {
+              "select_input_source": {
+                "input_source_id": "com.apple.keylayout.RussianWin"
+              },
+              "repeat": false
+            }
+          ]
+        },
         {
           "type": "basic",
           "from": {

@@ -203,23 +203,17 @@ return to the end of buffer."
           (if (not (eq major-mode 'eshell-mode))
               (forward-line -1)))))))
 
-(defvar keyext-brackets
-  '("“”" "()" "[]" "{}" "<>" "＜＞" "（）" "［］" "｛｝" "⦅⦆" "〚〛" "⦃⦄"
-    "‹›" "«»" "「」" "〈〉" "《》" "【】" "〔〕" "⦗⦘" "『』" "〖〗" "〘〙" "｢｣"
-    "⟦⟧" "⟨⟩" "⟪⟫" "⟮⟯" "⟬⟭" "⌈⌉" "⌊⌋" "⦇⦈" "⦉⦊" "❛❜" "❝❞" "❨❩"
-    "❪❫" "❴❵" "❬❭" "❮❯" "❰❱" "❲❳" "〈〉" "⦑⦒" "⧼⧽" "﹙﹚" "﹛﹜" "﹝﹞"
-    "⁽⁾" "₍₎" "⦋⦌" "⦍⦎" "⦏⦐" "⁅⁆" "⸢⸣" "⸤⸥" "⟅⟆" "⦓⦔" "⦕⦖" "⸦⸧"
-    "⸨⸩" "｟｠" "``")
+(defvar brackets '("()" "[]" "{}" "<>")
 "A list of strings, each element is a string of 2 chars, the left
 bracket and a matching right bracket. Used by `select-text-in-quote'
 and others.")
 
 (defconst left-brackets
-  (mapcar (lambda (x) (substring x 0 1)) keyext-brackets)
+  (mapcar (lambda (x) (substring x 0 1)) brackets)
   "List of left bracket chars. Each element is a string.")
 
 (defconst right-brackets
-  (mapcar (lambda (x) (substring x 1 2)) keyext-brackets)
+  (mapcar (lambda (x) (substring x 1 2)) brackets)
   "List of right bracket chars. Each element is a string.")
 
 (defconst punctuation-regex "[!?\".,`'#$%&*+:;=@^|~]+"
@@ -530,51 +524,14 @@ is the right bracket
 ToChars is similar, with a special value of \" none \", replace by empty string."
   (interactive
    (let ((xbrackets
-          '(
-            "\" double quote \""
+          '("\" double quote \""
             "' single quote '"
             "( paren )"
             "{ brace }"
             "[ square ]"
             "< greater >"
-            "` emacs '"
             "` backtick `"
-            "~ tilde ~"
-            "= equal ="
-            "[[ double square ]]"
-            "“ curly double quote ”"
-            "‘ curly single quote ’"
-            "‹ french angle ›"
-            "« french double angle »"
-            "「 corner 」"
-            "『 white corner 』"
-            "【 lenticular 】"
-            "〖 white lenticular 〗"
-            "〈 angle 〉"
-            "《 double angle 》"
-            "〔 tortoise 〕"
-            "〘 white tortoise 〙"
-            "〚 white square 〛"
-            "⦅ white paren ⦆"
-            "⦃ WHITE CURLY BRACKET ⦄"
-            "〈 pointing angle 〉"
-            "⦑ ANGLE WITH DOT ⦒"
-            "⧼ CURVED ANGLE ⧽"
-            "⟦ math square ⟧"
-            "⟨ math angle ⟩"
-            "⟪ math DOUBLE ANGLE ⟫"
-            "⟮ math FLATTENED PARENTHESIS ⟯"
-            "⟬ math WHITE TORTOISE SHELL ⟭"
-            "❛ HEAVY SINGLE QUOTATION MARK ORNAMENT ❜"
-            "❝ HEAVY DOUBLE TURNED COMMA QUOTATION MARK ORNAMENT ❞"
-            "❨ MEDIUM PARENTHESIS ORNAMENT ❩"
-            "❪ MEDIUM FLATTENED PARENTHESIS ORNAMENT ❫"
-            "❴ MEDIUM CURLY ORNAMENT ❵"
-            "❬ MEDIUM POINTING ANGLE ORNAMENT ❭"
-            "❮ HEAVY POINTING ANGLE QUOTATION MARK ORNAMENT ❯"
-            "❰ HEAVY POINTING ANGLE ORNAMENT ❱"
-            " none "
-            )))
+            " none " )))
      (list
       (completing-read "Replace this:" xbrackets)
       (completing-read "To:" xbrackets))))
@@ -698,7 +655,7 @@ HTTP, URL, they are left as is.
 
 When called in a Elisp program, Begin End are region boundaries."
   (interactive)
-  (let* ((xskipChars "^\"<>(){}[]“”‘’‹›«»「」『』【】〖〗《》〈〉〔〕")
+  (let* ((xskipChars "^\"<>(){}[]")
          (xp0 (point))
          (xp1 (if Begin
                   Begin
@@ -1222,7 +1179,7 @@ The region to work on is by this order:
         (setq xp1 Begin xp2 End)
       (if (region-active-p)
           (setq xp1 (region-beginning) xp2 (region-end))
-        (let ((xskipChars "^\"<>(){}[]“”‘’‹›«»「」『』【】〖〗《》〈〉〔〕（）"))
+        (let ((xskipChars "^\"<>(){}[]"))
           (skip-chars-backward xskipChars (line-beginning-position))
           (setq xp1 (point))
           (skip-chars-forward xskipChars (line-end-position))
@@ -1344,19 +1301,13 @@ If there is selection, delete it first."
          (if current-prefix-arg
              (completing-read
               "Style:"
-              '(
-                "ISO date • 2018-04-12"
+              '("ISO date • 2018-04-12"
                 "ISO full • 2018-04-12T22:46:11-07:00"
                 "ISO space • 2018-04-12 22:46:11-07:00"
                 "org mode <2018-04-12 Thu>"
                 "all digits • 20180412224611"
                 "date and digits • 2018-04-12_224611"
-                "weekday • 2018-04-12 Thursday"
-                "USA date + weekday • Thursday, April 12, 2018"
-                "USA short + weekday • Thu, Apr 12, 2018"
-                "USA mdy full • April 12, 2018"
-                "USA mdy short • Apr 12, 2018"
-                ))
+                "weekday • 2018-04-12 Thursday"))
            "org mode <2018-04-12 Thu>"
            )))
     (when (region-active-p) (delete-region (region-beginning) (region-end)))
@@ -1375,10 +1326,6 @@ If there is selection, delete it first."
         (format-time-string "%Y-%m-%d %T")
         (funcall (lambda (xx) (format "%s:%s" (substring xx 0 3) (substring xx 3 5))) (format-time-string "%z"))))
       ((string-match "^weekday" xstyle) (format-time-string "%Y-%m-%d %A"))
-      ((string-match "^USA date + weekday" xstyle) (format-time-string "%A, %B %d, %Y"))
-      ((string-match "^USA short + weekday" xstyle) (format-time-string "%a, %b %d, %Y"))
-      ((string-match "^USA mdy full" xstyle) (format-time-string "%B %d, %Y"))
-      ((string-match "^USA mdy short" xstyle) (format-time-string "%b %d, %Y"))
       (t (format-time-string "%Y-%m-%d"))))))
 
 (defun insert-bracket-pair (LBracket RBracket &optional WrapMethod)
@@ -1462,27 +1409,16 @@ LBracket and RBracket are strings. WrapMethod must be either `line' or
             (insert LBracket)
             (goto-char (+ xp2 (length LBracket)))))))))
 
-(defun insert-paren ()                    (interactive) (insert-bracket-pair "(" ")"))
-(defun insert-square-bracket ()           (interactive) (insert-bracket-pair "[" "]"))
-(defun insert-brace ()                    (interactive) (insert-bracket-pair "{" "}"))
-
-(defun insert-backtick-quote ()           (interactive) (insert-bracket-pair "`" "`"))
-(defun insert-backtick-triple-quote ()    (interactive) (insert-bracket-pair "```\n" "\n```"))
-
-(defun insert-double-curly-quote ()       (interactive) (insert-bracket-pair "“" "”"))
-(defun insert-curly-single-quote ()       (interactive) (insert-bracket-pair "‘" "’"))
-(defun insert-single-angle-quote ()       (interactive) (insert-bracket-pair "‹" "›"))
-(defun insert-double-angle-quote ()       (interactive) (insert-bracket-pair "«" "»"))
-(defun insert-ascii-double-quote ()       (interactive) (insert-bracket-pair "\"" "\""))
-(defun insert-ascii-single-quote ()       (interactive) (insert-bracket-pair "'" "'"))
-(defun insert-emacs-quote ()              (interactive) (insert-bracket-pair "`" "'"))
-(defun insert-corner-bracket ()           (interactive) (insert-bracket-pair "「" "」"))
-(defun insert-white-corner-bracket ()     (interactive) (insert-bracket-pair "『" "』"))
-(defun insert-angle-bracket ()            (interactive) (insert-bracket-pair "〈" "〉"))
-(defun insert-double-angle-bracket ()     (interactive) (insert-bracket-pair "《" "》"))
-(defun insert-white-lenticular-bracket () (interactive) (insert-bracket-pair "〖" "〗"))
-(defun insert-black-lenticular-bracket () (interactive) (insert-bracket-pair "【" "】"))
-(defun insert-tortoise-shell-bracket ()   (interactive) (insert-bracket-pair "〔" "〕"))
+(defun insert-paren ()                 (interactive) (insert-bracket-pair "(" ")"))
+(defun insert-square-bracket ()        (interactive) (insert-bracket-pair "[" "]"))
+(defun insert-brace ()                 (interactive) (insert-bracket-pair "{" "}"))
+(defun insert-backtick-quote ()        (interactive) (insert-bracket-pair "`" "`"))
+(defun insert-backtick-triple-quote () (interactive) (insert-bracket-pair "```\n" "\n```"))
+(defun insert-double-curly-quote ()    (interactive) (insert-bracket-pair "“" "”"))
+(defun insert-double-angle-quote ()    (interactive) (insert-bracket-pair "«" "»"))
+(defun insert-ascii-double-quote ()    (interactive) (insert-bracket-pair "\"" "\""))
+(defun insert-ascii-single-quote ()    (interactive) (insert-bracket-pair "'" "'"))
+(defun insert-emacs-quote ()           (interactive) (insert-bracket-pair "`" "'"))
 
 (defun insert-space-before ()
   "Insert space before cursor."
@@ -1673,7 +1609,7 @@ This command ignores nesting. For example, if text is
 the selected char is “c”, not “a(b)c”."
   (interactive)
   (push-mark (point) t nil)
-  (let ((xskipChars (concat "^\"`'" (mapconcat #'identity keyext-brackets ""))))
+  (let ((xskipChars (concat "^\"`'" (mapconcat #'identity brackets ""))))
     (skip-chars-backward xskipChars)
     (push-mark (point) t t)
     (skip-chars-forward xskipChars)))
@@ -1777,75 +1713,6 @@ You can override this function to get your idea of “user buffer”."
          (eww-reload))))
    (buffer-list)))
 
-(defvar places-eww nil "Alist url to place.")
-
-(defun eww-load-place-cache ()
-  "Load places cache from file into `places-eww'."
-  (setq places-eww
-        (with-temp-buffer
-          (insert-file-contents "~/.emacs.d/places-eww")
-          (read (current-buffer)))))
-
-(defun eww-load-place ()
-  "Go to saved place in eww buffers."
-  (interactive)
-  (eww-load-place-cache)
-  (when (eq major-mode 'eww-mode)
-    (let ((xp1 (point))
-          (xp2 (alist-get (replace-regexp-in-string
-                           (getenv "HOME") "~"
-                           (plist-get eww-data :url))
-                          places-eww 1 nil 'string-equal)))
-      (when (and (> (abs (- xp1 xp2)) 100) ; if position changed significantly
-                 (> xp2 xp1))              ; allow offset forward only
-        (goto-char xp2)))))
-
-(defvar headers-eww nil "Alist url to header. Manual reference.")
-
-(defun eww-update-header ()
-  "Update header line for some buffers."
-  (let ((xh (alist-get (replace-regexp-in-string (getenv "HOME") "~"
-                                                 (plist-get eww-data :url))
-                       headers-eww nil nil 'string-equal)))
-    (when xh
-      (setq header-line-format nil)
-      (rename-buffer (concat "*" (string-trim xh) "*")))))
-
-(defun eww-after-render ()
-  "Make eww buffers readable. Run with `eww-after-render-hook'"
-  (eww-readable)
-  (eww-load-place)
-  (eww-update-header)
-  (if (and (display-graphic-p)
-           (fboundp 'justify-buffer))
-      (run-with-timer 0.1 nil 'justify-buffer)))
-
-(defun eww-save-place-cache ()
-  "Save places cache to file."
-  (with-temp-buffer
-    (if (> (length places-eww) 0) ; only if something
-        (progn
-          (pp places-eww (current-buffer))
-          (write-region (point-min) (point-max)
-                        "~/.emacs.d/places-eww" nil 'quiet)))))
-
-(defun eww-save-place ()
-  "Save place for eww buffer. Create new or update existing."
-  (interactive)
-  (when (eq major-mode 'eww-mode)
-    (setq xurl (replace-regexp-in-string (getenv "HOME") "~"
-                                         (plist-get eww-data :url)))
-    (let ((xp1 (point))
-          (xp2 (alist-get xurl places-eww 1 nil 'string-equal)))
-      (if (assoc xurl places-eww)
-          (if (and (> xp1 1000) ; only if point not in the beg
-                   (> xp1 xp2)) ; allow offset forward only
-              (setf (alist-get xurl
-                               places-eww 1 nil 'string-equal) (point)))
-        (push (cons xurl (point)) places-eww)))
-    (eww-save-place-cache)
-    (push-mark (point) t nil)))
-
 (defun eww-buffer-p ()
   (interactive)
   (cond
@@ -1913,7 +1780,8 @@ With prefix arg, find the previous file."
   (when buffer-file-name
     (let* ((file (expand-file-name buffer-file-name))
            (files (cl-remove-if (lambda (file) (cl-first (file-attributes file)))
-                                (sort (directory-files (file-name-directory file) t nil t) 'string<)))
+                                (sort (directory-files
+                                       (file-name-directory file) t nil t) 'string<)))
            (pos (mod (+ (cl-position file files :test 'equal) -1)
                      (length files))))
       (find-file (nth pos files)))))
@@ -1937,9 +1805,6 @@ The max number to track is controlled by the variable
 
 (defvar recently-closed-buffers-max 40
   "The maximum length for `recently-closed-buffers'.")
-
-;; (declare-function minibuffer-keyboard-quit "delsel" ())
-;; (declare-function org-edit-src-save "org-src" ())
 
 (defun save-close-current-buffer ()
   "Save and close current buffer. If the buffer is not a file, save it
@@ -1970,8 +1835,7 @@ Similar to `kill-buffer', with the following addition:
 • If the buffer is a file, add the path to the list `recently-closed-buffers'."
   (interactive)
   (let ((xisOrgModeSourceFile (string-match "^*Org Src" (buffer-name))))
-    (if (active-minibuffer-window) ; if the buffer is minibuffer
-        ;; (string-equal major-mode "minibuffer-inactive-mode")
+    (if (active-minibuffer-window)
         (minibuffer-keyboard-quit)
       (progn
         ;; Offer to save buffers that are non-empty and modified, even
@@ -1982,7 +1846,8 @@ Similar to `kill-buffer', with the following addition:
                    (user-buffer-p)
                    (not (string-equal major-mode "dired-mode"))
                    (if (equal (buffer-file-name) nil)
-                       (if (string-equal "" (save-restriction (widen) (buffer-string))) nil t)
+                       (if (string-equal "" (save-restriction
+                                              (widen) (buffer-string))) nil t)
                      t))
           (if (y-or-n-p (format "Buffer %s modified; Save?" (buffer-name)))
               (save-buffer)
@@ -1995,7 +1860,8 @@ Similar to `kill-buffer', with the following addition:
         ;; save to a list of closed buffer
         (when (buffer-file-name)
           (setq recently-closed-buffers
-                (cons (cons (buffer-name) (buffer-file-name)) recently-closed-buffers))
+                (cons (cons (buffer-name) (buffer-file-name))
+                      recently-closed-buffers))
           (when (> (length recently-closed-buffers) recently-closed-buffers-max)
             (setq recently-closed-buffers (butlast recently-closed-buffers 1))))
         (kill-buffer (current-buffer))))))
@@ -2039,7 +1905,7 @@ for confirmation."
           (if (region-active-p)
               (buffer-substring-no-properties (region-beginning) (region-end))
             (let ((xp0 (point)) xp1 xp2
-                  (xpathStops "^  \t\n\"`'‘’“”|[]{}「」<>〔〕〈〉《》【】〖〗«»‹›❮❯❬❭〘〙·。\\"))
+                  (xpathStops "^  \t\n\"`'“”|[]{}<>\\"))
               (skip-chars-backward xpathStops)
               (setq xp1 (point))
               (goto-char xp0)
@@ -2134,10 +2000,8 @@ for confirmation."
       (shell-command xcmdStr xoutputb))))
 
 (defconst run-current-file-map
-  '(("hs" . "runhaskell")
-    ("pl" . "perl")
+  '(("pl" . "perl")
     ("py" . "python3")
-    ("rb" . "ruby")
     ("sh" . "bash"))
   "A association list that maps file extension to program name, used by
 `run-current-file'. Each item is (EXT . PROGRAM), both strings. EXT
@@ -2415,7 +2279,7 @@ and reverse-search-history in bashrc."
   "Take screenshot on macOS."
   (interactive)
   (when (string-equal system-type "darwin")
-    (call-process "screencapture" nil nil nil "-W" "-U" "dummy")))
+    (call-process "screencapture" nil 0 nil "-W" "-U" "dummy")))
 
 (defun clock ()
   "World clock."
@@ -2476,10 +2340,6 @@ Force switch to current buffer to update `other-buffer'."
         (lon (number-to-string calendar-longitude)))
     (browse-url (concat url "/?" lat "," lon ",9"))))
 
-(defun weather-helper ()
-  "Email weather forecast."
-  (call-process "~/.weather/run.sh" nil 0 nil))
-
 (defun shopping ()
   "Toggle shopping list."
   (interactive)
@@ -2513,60 +2373,28 @@ Show current agenda. Do not select other window, balance windows."
   (if (eq major-mode 'org-agenda-mode)
       (org-agenda-todo)))
 
-(defun sudo ()
-  "Use Tramp to `sudo' current file."
-  (interactive)
-  (when buffer-file-name
-    (find-alternate-file (concat "/sudo::" buffer-file-name))))
-
-(defun sync (&optional Silent)
-  "Sync private cloud."
-  (interactive)
-  (if Silent
-      (call-process "~/.sync.sh" nil 0 nil)
-    (async-shell-command "~/.sync.sh" "*sync output*")))
-
-(defun gpg-agent-helper ()
-  "GPG agent helper. Force restart."
-  (call-process "~/.gpg-agent.sh" nil 0 nil))
-
-(defun mu-sync ()
-  "Mu sync."
-  (call-process "~/.mbsync.sh" nil 0 nil))
-
-(defun tmux-helper ()
-  "Tmux helper. Force update display resolution."
-  (call-process "~/.tmux.sh" nil 0 nil))
-
-(defun mosh-helper ()
-  "Mosh helper. Cleanup detached sessions."
-  (interactive)
-  (call-process "~/.mosh.sh" nil 0 nil))
-
-(defun stow ()
-  "Stow packages."
-  (interactive)
-  (call-process "~/.stow.sh")
-  (message "%s" "Stow complete"))
-
-(defun screensaver ()
-  "Start screensaver in tmux."
-  (call-process "tmux" nil nil nil "clock-mode"))
-
 (defun toggle-gnus ()
   "Toggle gnus."
   (interactive)
-  (if (get-buffer "*Group*")
-      (switch-to-buffer "*Group*")
-    (gnus)))
+  (if onlinep
+      (progn
+        (when (display-graphic-p)
+          (setq xframe (make-frame-command))
+          (other-frame 1))
+        (if (get-buffer "*Group*")
+            (switch-to-buffer "*Group*")
+          (gnus)))
+    (message "%s" "Offline")))
 
 (defun sql ()
   "Open SQL client."
   (interactive)
   (find-file "~/.sql"))
 
+(defvar sql-type "sqlite")
+
 (defun exec-query ()
-  "Execute potgres SQL statement separated by ;."
+  "Execute SQL statement separated by ; or selected region."
   (interactive)
   (let ((xconn (getenv "CONNINFO"))
         (xbuf (concat "*exec query*"))
@@ -2585,66 +2413,17 @@ Show current agenda. Do not select other window, balance windows."
     (switch-to-buffer-other-window (get-buffer-create xbuf))
     (goto-char (point-max))
     (push-mark (point) t nil)
-    (insert (shell-command-to-string
-             (format "psql %s -c \"%s\" -q" xconn xquery)))
+    (when (string-equal sql-type "psql")
+      (insert (shell-command-to-string
+               (format "psql %s -c \"%s\" -q" xconn xquery))))
+    (when (string-equal sql-type "sqlite")
+      ;; attach database can't parse ~
+      (setq xquery (replace-regexp-in-string "~" (getenv "HOME") xquery))
+      (insert (shell-command-to-string
+               (format "sqlite3 <<EOF\n%s\nEOF" xquery))))
     (insert (concat (make-string 79 45) "\n"))
     (set-mark-command t)
     (other-window 1)))
-
-(defun who-called-defun (oldfun format &rest args)
-  "Backtrace. For example, to find out who called `message':
-(advice-add \='message :around #\='who-called-defun)"
-  (let ((trace nil) (n 1) (frame nil))
-    (while (setf frame (backtrace-frame n))
-      (setf n (1+ n)
-            trace (cons (cadr frame) trace)))
-    (apply oldfun (concat "<<%S>>\n" format) (cons trace args))))
-
-(defun suppress-messages (oldfun &rest args)
-  "Suppress messages from function. For example:
-(advice-add \='ibuffer-update :around \='suppress-messages)"
-  (cl-flet ((silence (&rest args1) (ignore)))
-    (advice-add 'message :around #'silence)
-    (unwind-protect
-         (apply oldfun args)
-      (advice-remove 'message #'silence))))
-
-(defun command-error-function-silent (data context caller)
-  "Ignore some signals; pass the rest to the default handler."
-  (unless (memq (car data)
-                '(buffer-read-only
-                  text-read-only
-                  beginning-of-buffer
-                  end-of-buffer
-                  quit))
-    (command-error-default-function data context caller)))
-
-(defun hide-messages (fun &rest args)
-  "Inhibit messages from FUN. Run as advice."
-  (let ((message-log-max nil)
-        (inhibit-messages t))
-    (apply fun args)))
-
-(defun disable-kill-buffer-query-functions (kill-fun &rest args)
-  "Disable confirmation conditionally before buffer kill."
-  (let ((x kill-buffer-query-functions))
-    (when (string-match "run server" (buffer-name))
-      (setq kill-buffer-query-functions nil))
-    (unwind-protect
-        (apply kill-fun args)
-      (setq kill-buffer-query-functions x))
-    (setq kill-buffer-query-functions x)))
-
-(defun disable-minibuffer-fun (fun &rest args)
-  "Conditionally disable FUN. Run as advice."
-  (unless (minibufferp) (apply fun args)))
-
-(defun byte-compile-package ()
-  "Byte compile current package."
-  (when (string-match ".+emacs.d/packages+." (buffer-file-name))
-    (clean-whitespace)
-    (save-buffer)
-    (byte-compile-file (expand-file-name (buffer-file-name)))))
 
 (defun terminal ()
   "Run terminal emulator."
@@ -2664,7 +2443,7 @@ Show current agenda. Do not select other window, balance windows."
 (defun pass-generate ()
   "Generate and copy pass."
   (interactive)
-  (let ((xpass (read-from-minibuffer "Generate pass path: ")))
+  (let ((xpass (read-from-minibuffer "Generate pass path: " "http/")))
     (shell-command (concat "pass generate -c " xpass))))
 
 (defun describe-foo-at-point ()
@@ -2688,18 +2467,6 @@ This checks in turn:
           ((setq xsym (variable-at-point)) (describe-variable xsym))))
   (setq this-command 'split-window-below))
 
-(defun run-at-time-wrap (time fun &rest args)
-  "Wrap for `run-at-time'."
-  (if (and (equal (format-time-string "%H") (substring time 0 2))
-           (equal (format-time-string "%M") (substring time 3 5)))
-      (apply fun args)))
-
-(defun dired-recursive-expand (dir)
-  "Recursive expand dired dir."
-  (interactive (list default-directory))
-  (mapc #'dired-maybe-insert-subdir
-        (seq-filter #'file-directory-p (directory-files-recursively dir "" t))))
-
 (defun dired-trash-move-adjust (fun &rest args)
   "Disable move to trash if move to trash is impossible. Use as :around advice."
   (when (or (string-match "DiskO" (file-truename (dired-get-filename)))
@@ -2710,8 +2477,10 @@ This checks in turn:
     (setq delete-by-moving-to-trash t))
   (setq delete-by-moving-to-trash t))
 
+(advice-add 'dired-delete-file :around 'dired-trash-move-adjust)
+
 (defvar dired-external-extensions
-  '("mkv" "mp4" "avi" "mov" "mp3" "m4a" "ts" "flac" "mts" "torrent")
+  '("mkv" "mp4" "avi" "mov" "mp3" "m4a" "ts" "flac" "mts" "torrent" "app")
   "Open these file extensions with `open-in-external-app'.")
 
 (defun dired-find-file-adjust (fun &rest args)
@@ -2726,6 +2495,8 @@ This checks in turn:
           (open-in-external-app))
       (apply fun args))
     (setq large-file-warning-threshold x)))
+
+(advice-add 'dired-find-file :around 'dired-find-file-adjust)
 
 (defun json-pretty ()
   "Prettify buffer if json file."
@@ -2744,7 +2515,7 @@ This checks in turn:
         (org-insert-structure-template "src")
         (insert "bash")
         (newline))
-    (message "%s" "Not in org-mode")))
+    (message "%s" "Not org-mode")))
 
 (defun dired-toggle-mark ()
   "Toggle mark for the current file."
@@ -2791,41 +2562,11 @@ Use as around advice e.g. for mouse left click after double click."
       (translate)
     (apply fun args)))
 
-(defmacro advice-add-macro (SymList How Fun)
-  "Map `advice-add' over a list SYMLIST to FUN."
-  `(progn
-     ,@(mapcar
-        (lambda (xcmd)
-          `(advice-add ,(list 'quote xcmd) ,How ,Fun))
-        (cadr SymList))))
-
 (defun quit ()
   "Confirm and quit. Because restart without confirm."
   (interactive)
   (if (y-or-n-p-with-timeout "Quit?" 2 nil)
       (save-buffers-kill-terminal)))
-
-(defun toggle-ispell-dict ()
-  "Toggle spell dictionaries.
-Default dictionary is nil. First run with hook sets en."
-  (if (string-equal ispell-current-dictionary "en")
-      (progn
-        (ispell-change-dictionary "ru")
-        (setq ispell-personal-dictionary "~/.emacs.d/settings/.aspell.ru.pws"))
-    (progn
-      (ispell-change-dictionary "en")
-      (setq ispell-personal-dictionary "~/.emacs.d/settings/.aspell.en.pws"))))
-
-(defun turn-spell-checking-on ()
-  "Turn flyspell mode on. Set dictionary."
-  (flyspell-mode)
-  (toggle-ispell-dict))
-
-(defun set-location (Latitude Longtitude)
-  "Set location."
-  (setq calendar-location-name "Current"
-        calendar-latitude  (string-to-number Latitude)
-        calendar-longitude (string-to-number Longtitude)))
 
 (defun toggle-frame-transparent ()
   "Toggle current frame transparency."
@@ -2838,35 +2579,13 @@ Default dictionary is nil. First run with hook sets en."
       (put 'toggle-frame-transparent 'state nil)
       (set-frame-parameter (selected-frame) 'alpha '(100 100)))))
 
-(defun recentf-open-files-adjust ()
-  "Remove unnecessary legends from the buffer."
-  (with-current-buffer "*Open Recent*"
-    (let ((inhibit-read-only t))
-      (save-excursion
-        (display-line-numbers-mode 0)
-        (goto-char (point-min))
-        (delete-region (line-beginning-position) (line-beginning-position 2))
-        (delete-region (line-beginning-position) (line-beginning-position 2))
-        (goto-char (point-max))
-        (delete-region (line-beginning-position) (line-beginning-position 2))
-        (setq this-command 'recentf-open-files))
-      (forward-word)
-      (backward-char))))
-
 (defun mouse-3 ()
-  "Mouse right click. If buffer read only then lookup word translation.
+  "Mouse right click. If buffer read only then lookup translation.
 Otherwise call `paste-or-paste-previous'."
   (interactive)
   (if buffer-read-only
       (translate)
     (paste-or-paste-previous)))
-
-(defvar onlinep nil "Online status predicate.")
-
-(defun onlinep ()
-  "Update online status predicate."
-  (setq onlinep
-        (= 0 (call-process "ping" nil nil nil "-c" "1" "-W" "1" "ya.ru"))))
 
 
 
@@ -3031,6 +2750,14 @@ Activate command, insert or repeat mode optionally."
   "Make sparse keymap x for next use in BODY."
   `(let ((x (make-sparse-keymap))) ,@body))
 
+(defmacro advice-add-macro (SymList How Fun)
+  "Map `advice-add' HOW over a list SYMLIST to FUN."
+  `(progn
+     ,@(mapcar
+        (lambda (xcmd)
+          `(advice-add ,(list 'quote xcmd) ,How ,Fun))
+        (cadr SymList))))
+
 
 
 (defconst keyamp-engineer-engram-to-russian-computer
@@ -3186,7 +2913,7 @@ is enabled.")
 
     ("q" . insert-space-before)          ("й" . insert-space-before)              ("Q" . ignore)                           ("Й" . ignore)
     ("w" . backward-kill-word)           ("ц" . backward-kill-word)               ("W" . ignore)                           ("Ц" . ignore)
-    ("e" . undo)                         ("у" . undo)                             ("E" . todo)                             ("У" . todo)
+    ("e" . undo-only)                    ("у" . undo-only)                             ("E" . todo)                             ("У" . todo)
     ("r" . kill-word)                    ("к" . kill-word)                        ("R" . ignore)                           ("К" . ignore)
     ("t" . cut-text-block)               ("е" . cut-text-block)                   ("T" . ignore)                           ("Е" . ignore)
 
@@ -3244,7 +2971,7 @@ is enabled.")
     ("DEL" . backward-char)              ("<backspace>" . backward-char)
     ("SPC" . forward-char)
     ("`"   . delete-forward-char)
-    ("e"   . undo)
+    ("e"   . undo-only)
     ("v"   . paste-or-paste-previous)))
 
 (keyamp--map (define-prefix-command 'keyamp-left-leader-map)
@@ -3285,8 +3012,8 @@ is enabled.")
     ("7" . jump-to-register)
     ("8" . sql)
     ("9" . screenshot)
-    ("0" . proced)
-    ("-" . ignore)
+    ("0" . eww)
+    ("-" . proced)
     ("=" . ignore)
 
     ("y" . find-name-dired)
@@ -3534,13 +3261,13 @@ is enabled.")
  (keyamp--map-leaders x '(open-line . newline))
  (keyamp--map x
    '(("TAB" . alternate-buffer) ("<tab>" . alternate-buffer)
-     ("C-h" . delete-window)    ("C-r"   . delete-other-windows)))
+     ("C-r" . delete-other-windows)))
 
  (keyamp--remap x
    '((delete-forward-char     . next-buffer)
      (insert-space-before     . delete-frame)
      (backward-kill-word      . sun-moon)
-     (undo                    . delete-window)
+     (undo-only               . delete-window)
      (kill-word               . ignore)
      (cut-text-block          . calc)
      (exchange-point-and-mark . view-echo-area-messages)
@@ -3593,8 +3320,9 @@ is enabled.")
    '(("TAB"   . View-scroll-half-page-forward)
      ("<tab>" . View-scroll-half-page-forward)))
  (keyamp--remap x
-   '((open-line       . prev-eww-buffer) (newline . next-eww-buffer)
-     (delete-backward . eww-reload)      (undo    . eww)))
+   '((open-line       . prev-eww-buffer) (newline   . next-eww-buffer)
+     (delete-backward . eww-reload)      (undo-only . eww)
+     (keyamp-insert   . eww-reload)))
  (keyamp--set-map x '(prev-eww-buffer next-eww-buffer)))
 
 (with-sparse-keymap-x
@@ -3686,9 +3414,10 @@ is enabled.")
  (keyamp--map x '(("TAB" . terminal) ("<tab>" . terminal)))
  (keyamp--map-leaders x '(up-line . next-user-buffer))
  (keyamp--remap x
-   '((previous-line . beg-of-line-or-block) (next-line . select-block)
-     (keyamp-escape . return-before)
-     (keyamp-insert . copy-line-or-selection)))
+   '((previous-line       . beg-of-line-or-block) (next-line . select-block)
+     (keyamp-escape       . return-before)
+     (keyamp-insert       . copy-line-or-selection)
+     (open-file-at-cursor . exec-query)))
  (keyamp--set-map x '(select-block)))
 
 (with-sparse-keymap-x
@@ -3728,6 +3457,8 @@ is enabled.")
    tasks                           novel
    terminal                        eshell)
  :before 'return-before)
+
+(advice-add 'exec-query :after 'return-before) ; go back after query
 
 (with-sparse-keymap-x
  ;; Left/right arrows repeat by DEL/SPC.
@@ -3774,7 +3505,7 @@ is enabled.")
      (next-line     . View-scroll-half-page-forward)
      (down-line     . View-scroll-half-page-forward)
      (up-line       . View-scroll-half-page-backward)))
- (unless (display-graphic-p) ; reader touch
+ (unless (display-graphic-p) ; touch reader
    (keyamp--remap x
      '((down-line . View-scroll-half-page-backward)
        (up-line   . View-scroll-half-page-forward))))
@@ -3812,9 +3543,9 @@ is enabled.")
  (keyamp--set-map x '(backward-kill-word kill-word) nil nil nil 2))
 
 (with-sparse-keymap-x
- (keyamp--map-leaders x '(undo . delete-backward))
+ (keyamp--map-leaders x '(undo-only  . delete-backward))
  (keyamp--remap x '((delete-backward . undo-redo)))
- (keyamp--set-map x '(undo undo-redo)))
+ (keyamp--set-map x '(undo-only undo-redo)))
 
 (with-sparse-keymap-x
  (keyamp--remap x '((delete-backward . cut-text-block)))
@@ -3858,16 +3589,16 @@ is enabled.")
  (keyamp--set-map x '(toggle-letter-case) nil nil nil 1))
 
 (with-sparse-keymap-x
- (keyamp--map-leaders x '(delete-backward . undo))
+ (keyamp--map-leaders x '(delete-backward . undo-only))
  (keyamp--remap x
-   '((undo                   . org-shiftup)
+   '((undo-only              . org-shiftup)
      (delete-backward        . org-shiftdown)
      (copy-line-or-selection . agenda)))
  (keyamp--set-map x '(org-shiftup org-shiftdown) nil nil nil 1))
 
 (with-sparse-keymap-x
  (keyamp--map-leaders x '(agenda . todo))
- (keyamp--remap x '((undo . todo) (copy-line-or-selection . agenda)))
+ (keyamp--remap x '((undo-only . todo) (copy-line-or-selection . agenda)))
  (keyamp--set-map x '(todo insert-date) nil nil nil 1))
 
 (with-sparse-keymap-x
@@ -3903,10 +3634,8 @@ of quit minibuffer."
   "Insert y literally only if asked."
   (interactive)
   (if (and (minibufferp)
-           (or (string-match "y, n, !"
-                             (buffer-substring (point-min) (point-max)))
-               (string-match "yn!q"
-                          (buffer-substring (point-min) (point-max)))))
+           (string-match "y, n, !\\|yn!q"
+                         (buffer-substring (point-min) (point-max))))
       (progn
         (keyamp-insert-init)
         (execute-kbd-macro (kbd "y")))
@@ -3923,7 +3652,7 @@ of quit minibuffer."
 
 (with-eval-after-load 'minibuffer
   (with-sparse-keymap-x
-   ;; On minibuffer start up press DEL or I to list history backwards or
+   ;; On minibuffer startup press DEL or I to list history backwards or
    ;; SPC or K to list completion candidates forward. After that
    ;; I/K or DEL/SPC to list either history or completion candidates
    ;; accordingly choice made. RET to confirm and exit, ESC to quit.
@@ -4040,16 +3769,20 @@ of quit minibuffer."
 
   (keyamp--remap dired-mode-map
     '((keyamp-insert           . dired-find-file)
+      (backward-left-bracket   . dired-jump)
+      (forward-right-bracket   . open-in-external-app)
       (insert-space-before     . dired-omit-mode)
       (kill-word               . dired-unmark-all-marks)
       (backward-kill-word      . dired-do-chmod)
       (shrink-whitespaces      . dired-hide-details-mode)
-      (open-line               . dired-maybe-insert-subdir)
+      (open-line               . prev-user-buffer)
       (delete-backward         . dired-toggle-mark)
-      (newline                 . dired-sort)
+      (newline                 . next-user-buffer)
       (toggle-comment          . revert-buffer)
       (cut-line-or-selection   . dired-kill-subdir)
+      (cut-text-block          . dired-maybe-insert-subdir)
       (paste-or-paste-previous . dired-create-directory)
+      (toggle-letter-case      . dired-sort)
       (copy-to-register-1      . dired-do-copy)
       (paste-from-register-1   . dired-do-rename)
       (mark-whole-buffer       . dired-toggle-marks)))
@@ -4138,7 +3871,7 @@ of quit minibuffer."
       (beg-of-line-or-block    . ibuffer-backward-filter-group)
       (insert-space-before     . delete-frame)
       (backward-kill-word      . sun-moon)
-      (undo                    . delete-window)
+      (undo-only               . delete-window)
       (kill-word               . ignore)
       (cut-text-block          . calc)
       (exchange-point-and-mark . view-echo-area-messages)
@@ -4223,7 +3956,7 @@ of quit minibuffer."
       (interactive)
       (unless keyamp-insert-p (keyamp-insert))
       (insert " "))
-    (keyamp--map-leaders x '(undo . keyamp-insert-and-SPC))
+    (keyamp--map-leaders x '(undo-only . keyamp-insert-and-SPC))
     (keyamp--set-map x '(company-search-abort company-complete-selection)))
 
   (advice-add 'company-search-candidates :after 'keyamp-insert-init)
@@ -4287,13 +4020,6 @@ of quit minibuffer."
   (keyamp--remap widget-link-keymap
     '((keyamp-insert . widget-button-press))))
 
-(with-eval-after-load 'emms-playlist-mode
-  (keyamp--map emms-playlist-mode-map
-    '(("<double-mouse-1>" . emms-playlist-mode-play-smart)))
-  (keyamp--remap emms-playlist-mode-map
-    '((keyamp-insert         . emms-playlist-mode-play-smart)
-      (forward-right-bracket . player))))
-
 (with-eval-after-load 'org
   (keyamp--map org-mode-map
     '(("TAB" . org-leader-map) ("<tab>" . org-leader-map)))
@@ -4313,10 +4039,9 @@ of quit minibuffer."
       ("<tab>" . View-scroll-half-page-forward)))
 
   (keyamp--remap eww-mode-map
-    '((open-line       . eww-back-url) (newline   . eww-next-url)
-      (delete-backward . eww-reload)   (kill-word . eww-reload-all)
-      (undo            . eww)
-      (shrink-whitespaces . eww-browse-with-external-browser)))
+    '((open-line       . eww-back-url) (newline            . eww-next-url)
+      (delete-backward . eww-reload)   (kill-word          . eww-reload-all)
+      (undo-only       . eww)          (shrink-whitespaces . eww-browse-with-external-browser)))
 
   (keyamp--remap eww-link-keymap '((keyamp-insert . eww-follow-link))))
 
@@ -4327,10 +4052,20 @@ of quit minibuffer."
      '((open-line       . emms-seek-backward-or-previous)
        (delete-backward . emms-pause)
        (newline         . emms-seek-forward-or-next)))
-
    (keyamp--set-map x
      '(emms-seek-backward-or-previous emms-seek-forward-or-next
-       emms-pause))))
+       emms-pause                     emms-play-dired
+       emms-playlist-mode-play-smart))))
+
+(with-eval-after-load 'emms-playlist-mode
+  (keyamp--map emms-playlist-mode-map
+    '(("<double-mouse-1>" . emms-playlist-mode-play-smart)))
+  (keyamp--remap emms-playlist-mode-map
+    '((keyamp-insert         . emms-playlist-mode-play-smart)
+      (open-line             . prev-user-buffer)
+      (newline               . next-user-buffer)
+      (backward-left-bracket . dired-jump)
+      (forward-right-bracket . player))))
 
 (with-eval-after-load 'flyspell
   (with-sparse-keymap-x
@@ -4346,14 +4081,14 @@ of quit minibuffer."
 (with-eval-after-load 'doc-view
   (keyamp--map doc-view-mode-map '(("C-r" . delete-other-windows)))
   (keyamp--remap doc-view-mode-map
-    '((previous-line   . doc-view-previous-line-or-previous-page)
-      (next-line       . doc-view-next-line-or-next-page)
-      (backward-char   . doc-view-previous-page)
-      (forward-char    . doc-view-next-page)
-      (back-word       . doc-view-shrink)
-      (forw-word       . doc-view-enlarge)
-      (beg-of-line     . doc-view-scroll-down-or-previous-page)
-      (end-of-lyne     . doc-view-scroll-up-or-next-page)))
+    '((previous-line . doc-view-previous-line-or-previous-page)
+      (next-line     . doc-view-next-line-or-next-page)
+      (backward-char . doc-view-previous-page)
+      (forward-char  . doc-view-next-page)
+      (back-word     . doc-view-shrink)
+      (forw-word     . doc-view-enlarge)
+      (beg-of-line   . doc-view-scroll-down-or-previous-page)
+      (end-of-lyne   . doc-view-scroll-up-or-next-page)))
 
   (with-sparse-keymap-x
    (keyamp--map-leaders x '(previous-line . next-line))
@@ -4369,7 +4104,7 @@ of quit minibuffer."
       (forward-char    . image-next-file)
       (previous-line   . image-decrease-size)
       (next-line       . image-increase-size)
-      (undo            . image-dired)
+      (undo-only       . image-dired)
       (delete-backward . image-rotate)))
 
   (with-sparse-keymap-x
@@ -4383,9 +4118,9 @@ of quit minibuffer."
 
 (with-eval-after-load 'esh-mode
   (keyamp--map eshell-mode-map
-    '(("C-h" . eshell-interrupt-process)
-      ("TAB" . eshell-leader-map)   ("<tab>" . eshell-leader-map)
-      ("S-<tab>" . ignore)          ("<backtab>" . ignore)))
+    '(("C-h"     . eshell-interrupt-process)
+      ("TAB"     . eshell-leader-map)        ("<tab>" . eshell-leader-map)
+      ("S-<tab>" . ignore)                   ("<backtab>" . ignore)))
   (keyamp--map (define-prefix-command 'eshell-leader-map)
     '(("TAB" . completion-at-point) ("<tab>" . completion-at-point)))
 
@@ -4487,7 +4222,7 @@ of quit minibuffer."
     '((keyamp-insert   . Info-follow-nearest-node)
       (open-line       . Info-backward-node)
       (newline         . Info-forward-node)
-      (undo            . Info-up)
+      (undo-only       . Info-up)
       (delete-backward . Info-next-reference)))
 
   (with-sparse-keymap-x
@@ -4496,7 +4231,7 @@ of quit minibuffer."
 
 (with-eval-after-load 'help-mode
   (keyamp--remap help-mode-map
-    '((undo            . backward-button)
+    '((undo-only       . backward-button)
       (delete-backward . forward-button)
       (open-line       . help-go-back)
       (newline         . help-go-forward))))
@@ -4532,7 +4267,7 @@ of quit minibuffer."
 
 (with-eval-after-load 'gnus-group
   (keyamp--remap gnus-group-mode-map
-    '((undo            . gnus-group-enter-server-mode)
+    '((undo-only       . gnus-group-enter-server-mode)
       (delete-backward . gnus-group-get-new-news)
       (open-line       . prev-user-buffer)
       (newline         . next-user-buffer))))
@@ -4541,7 +4276,7 @@ of quit minibuffer."
   (keyamp--remap gnus-mime-button-map
     '((keyamp-insert . gnus-article-press-button)))
   (keyamp--remap gnus-article-mode-map
-    '((undo             . backward-button)
+    '((undo-only        . backward-button)
       (delete-backward  . forward-button))))
 
 (with-eval-after-load 'gnus-sum
@@ -4553,6 +4288,8 @@ of quit minibuffer."
     '((keyamp-insert . gnus-summary-scroll-up)
       (open-line     . gnus-summary-prev-group)
       (newline       . gnus-summary-next-group)
+      (left-char     . gnus-summary-next-group) ; touch reader
+      (right-char    . gnus-summary-prev-group) ; vise versa
       (save-buffer   . gnus-summary-save-parts)))
 
   (with-sparse-keymap-x
@@ -4560,6 +4297,9 @@ of quit minibuffer."
    (keyamp--remap x
      '((open-line . gnus-summary-prev-group)
        (newline   . gnus-summary-next-group)))
+   (keyamp--map x
+     '(("TAB"   . View-scroll-half-page-forward)
+       ("<tab>" . View-scroll-half-page-forward)))
    (keyamp--set-map x
      '(gnus-summary-prev-group gnus-summary-next-group))
    (keyamp--set-map-hook x '(gnus-summary-prepared-hook))))
@@ -4725,8 +4465,21 @@ of quit minibuffer."
       ("<double-mouse-1>" . speedbar-edit-line)))
   (keyamp--remap speedbar-file-key-map
     '((keyamp-insert      . speedbar-edit-line)
-      (undo               . speedbar-up-directory)
+      (undo-only          . speedbar-up-directory)
       (delete-backward    . speedbar-toggle-line-expansion))))
+
+(with-eval-after-load 'calendar
+  (keyamp--remap calendar-mode-map
+    '((beg-of-line     . calendar-scroll-right)
+      (end-of-lyne     . calendar-scroll-left)
+      (keyamp-insert   . calendar-goto-today)
+      (delete-backward . calendar-goto-today)
+      (undo-only       . delete-window)))
+  (with-sparse-keymap-x
+   (keyamp--map-leaders x '(calendar-scroll-right . calendar-scroll-left))
+   (keyamp--map x '(("TAB" . calendar-other-month) ("<tab>" . calendar-other-month)))
+   (keyamp--set-map x
+     '(calendar-scroll-left calendar-scroll-right calendar-goto-today))))
 
 
 
@@ -4734,6 +4487,7 @@ of quit minibuffer."
   #s(hash-table test equal data
                 (agenda                           t
                  alternate-buffer                 t
+                 alternate-buf-or-frame           t
                  async-shell-command              t
                  config                           t
                  delete-other-windows             t
@@ -4783,8 +4537,7 @@ of quit minibuffer."
                  toggle-letter-case               t
                  toggle-comment                   t
                  todo                             t
-                 undo                             t
-                 undo-redo                        t)))
+                 undo                             t)))
 
 (defconst keyamp-repeat-commands-hash
   #s(hash-table test equal data
@@ -4794,6 +4547,9 @@ of quit minibuffer."
                  beg-of-line-or-block             t
                  beg-of-line-or-buffer            t
                  backward-left-bracket            t
+                 calendar-goto-today              t
+                 calendar-scroll-left             t
+                 calendar-scroll-right            t
                  company-select-previous          t
                  company-select-next              t
                  company-next-page                t
@@ -4805,6 +4561,8 @@ of quit minibuffer."
                  emms-pause                       t
                  emms-seek-backward-or-previous   t
                  emms-seek-forward-or-next        t
+                 emms-play-dired                  t
+                 emms-playlist-mode-play-smart    t
                  end-of-line-or-block             t
                  end-of-line-or-buffer            t
                  eshell-next-input                t
@@ -4955,7 +4713,9 @@ indicates the event after been idle for the same period of time."
    ((equal [8] (this-single-command-keys)) ; C-h
     (setq mode-line-front-space keyamp-screen-indicator)
     (set-face-background 'cursor keyamp-screen-cursor)
-    (force-mode-line-update t))))
+    (force-mode-line-update t))
+   ((equal [17] (this-single-command-keys)) ; C-q
+    (set-face-background 'cursor keyamp-insert-cursor))))
 
 (defun keyamp-escape ()
   "Return to command mode, clear selection or quit minibuffer."
