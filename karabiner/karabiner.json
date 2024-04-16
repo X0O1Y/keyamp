@@ -6748,88 +6748,6 @@
                         ]
                     },
                     {
-                        "description": "f4",
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Brave Browser"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "f4",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to_after_key_up": [
-                                    {
-                                        "shell_command": "open -a Weather"
-                                    }
-                                ],
-                                "to_if_held_down": [
-                                    {
-                                        "key_code": "c"
-                                    },
-                                    {
-                                        "halt": true,
-                                        "repeat": false,
-                                        "shell_command": "sleep 0.2 && /Applications/emacsclient --no-wait --eval '(eww-paste-and-go)' && sleep 0.05 && open -a 'Emacs'"
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Weather"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "f4",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "h",
-                                        "modifiers": [
-                                            "command"
-                                        ]
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "from": {
-                                    "key_code": "f4",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to_after_key_up": [
-                                    {
-                                        "shell_command": "open -a Weather"
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
                         "description": "f5",
                         "manipulators": [
                             {
@@ -6872,6 +6790,57 @@
                                     {
                                         "halt": true,
                                         "shell_command": "open -a Preview"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "f6",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/mpv"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f6",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "tab",
+                                        "modifiers": [
+                                            "command"
+                                        ],
+                                        "repeat": false
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "f6",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to_after_key_up": [
+                                    {
+                                        "halt": true,
+                                        "shell_command": "open -a /opt/homebrew/bin/mpv"
                                     }
                                 ],
                                 "type": "basic"
@@ -6956,6 +6925,63 @@
                         ]
                     },
                     {
+                        "description": "f10",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Karabiner-Elements"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f10",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "h",
+                                        "modifiers": [
+                                            "command"
+                                        ]
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "f10",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to_after_key_up": [
+                                    {
+                                        "shell_command": "defaults write -g InitialKeyRepeat -int 10 && defaults write -g KeyRepeat -int 2 && echo \"normal min 15 (225 ms) and 2 (30 ms)\""
+                                    },
+                                    {
+                                        "shell_command": "open -a Karabiner-Elements"
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "shell_command": "open -a Karabiner-EventViewer"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
                         "description": "f13",
                         "manipulators": [
                             {
@@ -7020,243 +7046,6 @@
                                     },
                                     {
                                         "shell_command": "open -a 'Emacs'"
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "f14",
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Emacs"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "input_sources": [
-                                            {
-                                                "input_source_id": "com.apple.keylayout.RussianWin"
-                                            }
-                                        ],
-                                        "type": "input_source_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "f14",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(message \" ABC\")'"
-                                    },
-                                    {
-                                        "repeat": false,
-                                        "select_input_source": {
-                                            "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
-                                        }
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Emacs"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "input_sources": [
-                                            {
-                                                "input_source_id": "com.apple.keylayout.ABC"
-                                            }
-                                        ],
-                                        "type": "input_source_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "f14",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(message \" ABC\")'"
-                                    },
-                                    {
-                                        "repeat": false,
-                                        "select_input_source": {
-                                            "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
-                                        }
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Emacs"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "input_sources": [
-                                            {
-                                                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
-                                            }
-                                        ],
-                                        "type": "input_source_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "f14",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(message \" АБВ\")'"
-                                    },
-                                    {
-                                        "repeat": false,
-                                        "select_input_source": {
-                                            "input_source_id": "com.apple.keylayout.RussianWin"
-                                        }
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "input_sources": [
-                                            {
-                                                "input_source_id": "com.apple.keylayout.RussianWin"
-                                            }
-                                        ],
-                                        "type": "input_source_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "f14",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "repeat": false,
-                                        "select_input_source": {
-                                            "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
-                                        }
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "input_sources": [
-                                            {
-                                                "input_source_id": "com.apple.keylayout.ABC"
-                                            }
-                                        ],
-                                        "type": "input_source_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "f14",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "repeat": false,
-                                        "select_input_source": {
-                                            "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
-                                        }
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "input_sources": [
-                                            {
-                                                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
-                                            }
-                                        ],
-                                        "type": "input_source_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "f14",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "repeat": false,
-                                        "select_input_source": {
-                                            "input_source_id": "com.apple.keylayout.RussianWin"
-                                        }
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "f15",
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "f15",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "select_input_source": {
-                                            "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
-                                        }
-                                    },
-                                    {
-                                        "halt": true,
-                                        "key_code": "tab",
-                                        "modifiers": [
-                                            "command"
-                                        ],
-                                        "repeat": false
                                     }
                                 ],
                                 "type": "basic"
@@ -7602,19 +7391,259 @@
                         ]
                     },
                     {
-                        "description": "f10",
+                        "description": "f14",
                         "manipulators": [
                             {
                                 "conditions": [
                                     {
                                         "file_paths": [
-                                            "/Karabiner-Elements"
+                                            "/Emacs"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "input_sources": [
+                                            {
+                                                "input_source_id": "com.apple.keylayout.RussianWin"
+                                            }
+                                        ],
+                                        "type": "input_source_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f14",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(message \"ABC\")'"
+                                    },
+                                    {
+                                        "repeat": false,
+                                        "select_input_source": {
+                                            "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+                                        }
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Emacs"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "input_sources": [
+                                            {
+                                                "input_source_id": "com.apple.keylayout.ABC"
+                                            }
+                                        ],
+                                        "type": "input_source_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f14",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(message \"ABC\")'"
+                                    },
+                                    {
+                                        "repeat": false,
+                                        "select_input_source": {
+                                            "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+                                        }
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Emacs"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "input_sources": [
+                                            {
+                                                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+                                            }
+                                        ],
+                                        "type": "input_source_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f14",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(message \"АБВ\")'"
+                                    },
+                                    {
+                                        "repeat": false,
+                                        "select_input_source": {
+                                            "input_source_id": "com.apple.keylayout.RussianWin"
+                                        }
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "input_sources": [
+                                            {
+                                                "input_source_id": "com.apple.keylayout.RussianWin"
+                                            }
+                                        ],
+                                        "type": "input_source_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f14",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "repeat": false,
+                                        "select_input_source": {
+                                            "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+                                        }
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "input_sources": [
+                                            {
+                                                "input_source_id": "com.apple.keylayout.ABC"
+                                            }
+                                        ],
+                                        "type": "input_source_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f14",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "repeat": false,
+                                        "select_input_source": {
+                                            "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+                                        }
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "input_sources": [
+                                            {
+                                                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+                                            }
+                                        ],
+                                        "type": "input_source_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f14",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "repeat": false,
+                                        "select_input_source": {
+                                            "input_source_id": "com.apple.keylayout.RussianWin"
+                                        }
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "f4",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Brave Browser"
                                         ],
                                         "type": "frontmost_application_if"
                                     }
                                 ],
                                 "from": {
-                                    "key_code": "f10",
+                                    "key_code": "f4",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to_after_key_up": [
+                                    {
+                                        "shell_command": "open -a Weather"
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "key_code": "c"
+                                    },
+                                    {
+                                        "halt": true,
+                                        "repeat": false,
+                                        "shell_command": "sleep 0.2 && /Applications/emacsclient --no-wait --eval '(url-paste-and-go)' && sleep 0.05 && open -a 'Emacs' && osascript -e \"tell application \\\"Finder\\\" to set visible of process \\\"Brave\\\" to false\""
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Weather"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f4",
                                     "modifiers": {
                                         "optional": [
                                             "any"
@@ -7633,7 +7662,7 @@
                             },
                             {
                                 "from": {
-                                    "key_code": "f10",
+                                    "key_code": "f4",
                                     "modifiers": {
                                         "optional": [
                                             "any"
@@ -7642,16 +7671,7 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "shell_command": "defaults write -g InitialKeyRepeat -int 10 && defaults write -g KeyRepeat -int 2 && echo \"normal min 15 (225 ms) and 2 (30 ms)\""
-                                    },
-                                    {
-                                        "shell_command": "open -a Karabiner-Elements"
-                                    }
-                                ],
-                                "to_if_held_down": [
-                                    {
-                                        "halt": true,
-                                        "shell_command": "open -a Karabiner-EventViewer"
+                                        "shell_command": "open -a Weather"
                                     }
                                 ],
                                 "type": "basic"
@@ -7659,40 +7679,11 @@
                         ]
                     },
                     {
-                        "description": "f6",
+                        "description": "f15",
                         "manipulators": [
                             {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/mpv"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    }
-                                ],
                                 "from": {
-                                    "key_code": "f6",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "halt": true,
-                                        "key_code": "tab",
-                                        "modifiers": [
-                                            "command"
-                                        ],
-                                        "repeat": false
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "from": {
-                                    "key_code": "f6",
+                                    "key_code": "f15",
                                     "modifiers": {
                                         "optional": [
                                             "any"
@@ -7701,8 +7692,15 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "halt": true,
-                                        "shell_command": "open -a /opt/homebrew/bin/mpv"
+                                        "select_input_source": {
+                                            "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+                                        }
+                                    },
+                                    {
+                                        "key_code": "tab",
+                                        "modifiers": [
+                                            "command"
+                                        ]
                                     }
                                 ],
                                 "type": "basic"

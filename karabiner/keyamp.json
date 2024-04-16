@@ -6770,7 +6770,7 @@
               "key_code": "c"
             },
             {
-              "shell_command": "sleep 0.2 && /Applications/emacsclient --no-wait --eval '(eww-paste-and-go)' && sleep 0.05 && open -a 'Emacs'",
+              "shell_command": "sleep 0.2 && /Applications/emacsclient --no-wait --eval '(url-paste-and-go)' && sleep 0.05 && open -a 'Emacs' && osascript -e \"tell application \\\"Finder\\\" to set visible of process \\\"Brave\\\" to false\"",
               "repeat": false,
               "halt": true
             }
@@ -7157,7 +7157,7 @@
           ],
           "to": [
             {
-              "shell_command": "/Applications/emacsclient --no-wait --eval '(message \" ABC\")'"
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(message \"ABC\")'"
             },
             {
               "select_input_source": {
@@ -7195,7 +7195,7 @@
           ],
           "to": [
             {
-              "shell_command": "/Applications/emacsclient --no-wait --eval '(message \" ABC\")'"
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(message \"ABC\")'"
             },
             {
               "select_input_source": {
@@ -7233,7 +7233,7 @@
           ],
           "to": [
             {
-              "shell_command": "/Applications/emacsclient --no-wait --eval '(message \" АБВ\")'"
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(message \"АБВ\")'"
             },
             {
               "select_input_source": {
@@ -7345,7 +7345,7 @@
               ]
             }
           },
-          "to": [
+          "to_after_key_up": [
             {
               "select_input_source": {
                 "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
@@ -7355,9 +7355,7 @@
               "key_code": "tab",
               "modifiers": [
                 "command"
-              ],
-              "halt": true,
-              "repeat": false
+              ]
             }
           ]
         }
