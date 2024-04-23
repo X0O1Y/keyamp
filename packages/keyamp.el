@@ -70,16 +70,17 @@
   (if (= (line-number-at-pos) 1)
       (forward-line (count-lines (point-min) (point-max)))))
 
-(defun down-line-wrap ()
+(defun down-line-wrap (fun &rest r)
   "On the last line go to the first line of buffer."
-  (if (>= (line-number-at-pos) (+ 1 (count-lines (point-min) (point-max))))
-      (forward-line (- (count-lines (point-min) (point-max))))))
+  (if (= (line-number-at-pos) (+ 1 (count-lines (point-min) (point-max))))
+      (forward-line (- (count-lines (point-min) (point-max))))
+    (apply fun r)))
 
 (defalias 'up-line 'previous-line "For transient keymaps.")
 (defalias 'down-line 'next-line "For transient keymaps.")
 
 (advice-add 'up-line   :before 'up-line-wrap)
-(advice-add 'down-line :after  'down-line-wrap)
+(advice-add 'down-line :around 'down-line-wrap)
 (advice-add 'up-line   :after (lambda (&rest r) (beginning-of-visual-line)))
 (advice-add 'down-line :after (lambda (&rest r) (beginning-of-visual-line)))
 
@@ -165,8 +166,8 @@ Call this repeatedly will cycle all positions in `mark-ring'."
   (interactive)
   (if (or (equal (point) (line-end-position))
           (eq last-command this-command)
-          (equal "T" (this-command-keys)) ; shift k Engram
-          (equal "t" (this-command-keys)) ; repeat
+          (equal "T" (this-command-keys))  ; shift k Engram
+          (equal "t" (this-command-keys))  ; repeat
           (equal " " (this-command-keys))) ; SPC repeat
       (re-search-forward "\n[\t\n ]*\n+" nil 1)
     (if visual-line-mode
@@ -330,7 +331,7 @@ When `universal-argument' is called first, copy whole buffer
               (end-of-line)
               (forward-char))))))))
 
-(defun copy-shell-input (fun &rest args)
+(defun copy-shell-input (fun &rest r)
   "Copy shell input. Around advice for `copy-line-or-selection'. Prompt is └ $ .
 Copy selected region if selected."
   (cond
@@ -346,7 +347,7 @@ Copy selected region if selected."
                                (line-beginning-position)
                                (+ 4 (line-beginning-position)))))
     (copy-region-as-kill (+ 4 (line-beginning-position)) (line-end-position)))
-   (t (apply fun args))))
+   (t (apply fun r))))
 
 (advice-add 'copy-line-or-selection :around 'copy-shell-input)
 
@@ -1426,10 +1427,11 @@ The start char can be any char in Unicode."
 
 ;; text selection
 
-(defun select-block ()
+(defvar select-block-defer-timer nil "Defer `select-block' timer.")
+
+(defun select-block-raw ()
   "Select the current/next block plus 1 blank line.
 If region is active, extend selection downward by block."
-  (interactive)
   (if (region-active-p)
       (re-search-forward "\n[ \t]*\n[ \t]*\n*" nil 1)
     (progn
@@ -1439,6 +1441,18 @@ If region is active, extend selection downward by block."
         (goto-char (match-end 0)))
       (push-mark (point) t t)
       (re-search-forward "\n[ \t]*\n" nil 1))))
+
+(defun select-block ()
+  "Defer `select-block-raw'."
+  (interactive)
+  (setq select-block-defer-timer
+        (run-with-timer 0.05 nil 'select-block-raw)))
+
+(advice-add 'up-line :before
+            (lambda () "cancel `select-block-defer-timer'"
+              (if (and (eq last-command 'select-block)
+                       (timerp select-block-defer-timer))
+                  (cancel-timer select-block-defer-timer))))
 
 (defun select-line ()
   "Select current line. If region is active, extend selection downward by line.
@@ -1461,7 +1475,10 @@ If `visual-line-mode' is on, consider line as visual line."
       (push-mark (line-beginning-position) t t)
       (end-of-line))))
 
-(defun extend-selection ()
+(defvar extend-selection-defer-timer nil "Defer `extend-selection' timer.")
+(defvar cur-highlight-regexp nil "Current highlight regexp.")
+
+(defun extend-selection-raw ()
   "Select the current word, bracket/quote expression, or expand selection.
 Subsequent calls expands the selection.
 
@@ -1473,7 +1490,6 @@ When there is no selection,
 When there is a selection, the selection extension behavior is still
 experimental. But when cursor is on a any type of bracket
 (parenthesis, quote), it extends selection to outer bracket."
-  (interactive)
   (push-mark (point) t nil)
   (if (region-active-p)
       (progn
@@ -1575,7 +1591,29 @@ experimental. But when cursor is on a any type of bracket
         (mark-sexp)
         (exchange-point-and-mark))
        ;;
-       ))))
+       )))
+  (when (and (region-active-p)
+             (< 0 (length (buffer-substring-no-properties
+                           (region-beginning) (region-end)))))
+    (setq cur-highlight-regexp
+          (buffer-substring-no-properties
+           (region-beginning) (region-end)))
+    (highlight-regexp cur-highlight-regexp 'highlight-extend-selection)))
+
+(defun extend-selection ()
+  "Defer `extend-selection-raw'."
+  (interactive)
+  (setq extend-selection-defer-timer
+        (run-with-timer 0.05 nil 'extend-selection-raw)))
+
+(advice-add 'down-line :before
+            (lambda () "cancel `extend-selection-defer-timer'"
+              (if (and (eq last-command 'extend-selection)
+                       (timerp extend-selection-defer-timer))
+                  (cancel-timer extend-selection-defer-timer))))
+
+(add-hook 'deactivate-mark-hook
+          (lambda () (unhighlight-regexp cur-highlight-regexp)))
 
 (defun select-text-in-quote ()
   "Select text between the nearest left and right delimiters.
@@ -1614,7 +1652,7 @@ command, so that next buffer shown is a user buffer."
    ((string-equal buffer-file-truename org-agenda-file-3) nil)
    ((string-match ".+em/project+." default-directory) nil)
    ((and buffer-file-truename
-       (string-match ".sql" buffer-file-truename)) nil)
+         (string-match ".sql" buffer-file-truename)) nil)
    (t t)))
 
 (defun prev-user-buffer ()
@@ -1785,8 +1823,8 @@ The max number to track is controlled by the variable
 
 (defun save-close-current-buffer ()
   "Save and close current buffer. If the buffer is not a file, save it
-to `user-emacs-directory' temp and named
-file_‹datetime›_‹randomhex›.txt."
+to `user-emacs-directory' temp and named file_‹datetime›_‹randomhex›.txt.
+Switch to the same buffer type after close, e.g. user or project."
   (interactive)
   (if (buffer-file-name)
       (when (buffer-modified-p) (save-buffer))
@@ -1799,13 +1837,18 @@ file_‹datetime›_‹randomhex›.txt."
                    (concat user-emacs-directory "temp/")
                    (format-time-string "%Y%m%d-%H%M%S")
                    (random #xfffff)))))))
-  (close-current-buffer)
-  (unless (user-buffer-p)
-    (prev-user-buffer)))
+  (let ((xtype (if (project-buffer-p) "proj" "user")))
+    (close-current-buffer)
+    (cond
+     ((string-equal xtype "proj")
+      (unless (project-buffer-p)
+        (prev-proj-buffer)))
+     ((string-equal xtype "user")
+      (unless (user-buffer-p)
+        (prev-user-buffer))))))
 
 (defun close-current-buffer ()
   "Close the current buffer.
-
 Similar to `kill-buffer', with the following addition:
 - Prompt user to save if the buffer has been modified even if the
   buffer is not associated with a file.
@@ -1940,10 +1983,12 @@ for confirmation."
   (let ((xurl (funcall interprogram-paste-function)))
     (if (string-match-p "\\`https?://www.youtube.com" xurl)
         (movie xurl)
-      (eww xurl)))
-  (setq this-command 'url-paste-and-go))
+      (eww xurl)
+      (setq last-command 'eww-follow-link))))
 
 
+
+(defvar run-output nil "Display name for output buffer.")
 
 (defun run-current-go-file ()
   "Run, build or test current Go file. To build, call `universal-argument'
@@ -1953,6 +1998,7 @@ first. To test, file name must contain _test suffix."
   (when (buffer-modified-p) (save-buffer))
   (let* ((xoutputb "*run output*")
          (xfname buffer-file-name)
+         (xbuf (buffer-name))
          (xprogName "go")
          (xcmdStr
           (concat xprogName " \""   xfname "\" &")))
@@ -1962,7 +2008,6 @@ first. To test, file name must contain _test suffix."
                          (t "%s run \"%s\" &"))
                    xprogName xfname))
     (progn
-      (message "Running %s" xfname)
       (message "%s" xcmdStr)
       (shell-command xcmdStr xoutputb))))
 
@@ -1991,6 +2036,7 @@ If the file is modified or not saved, save it automatically before run."
         (let* ((xoutBuffer "*run output*")
                (xextAppMap run-current-file-map)
                (xfname buffer-file-name)
+               (xbuf (buffer-name))
                (xfExt (file-name-extension xfname))
                (xappCmdStr (cdr (assoc xfExt xextAppMap)))
                xcmdStr)
@@ -2009,7 +2055,10 @@ If the file is modified or not saved, save it automatically before run."
                   (progn
                     (message "Running %s" xcmdStr)
                     (shell-command xcmdStr xoutBuffer))
-                (error "%s: Unknown file extension: %s" real-this-command xfExt))))))
+                (error "%s: Unknown file extension: %s" real-this-command xfExt))))
+          ;; (setq run-output (replace-regexp-in-string (getenv "HOME") "~" xfname))
+          (setq run-output (concat "run " xbuf))
+          (enlarge-window-split)))
     (message "Abort run file")))
 
 (defun clean-whitespace ()
@@ -2030,8 +2079,6 @@ Works on whole buffer or selection, respects `narrow-to-region'."
         (while (re-search-forward "\n\n\n+" nil 1) (replace-match "\n\n"))
         (goto-char (point-max))
         (while (eq (char-before) 32) (delete-char -1))))))
-
-(defalias 'clean-whitespace-auto 'clean-whitespace "For use in Elisp code.")
 
 (defun make-backup ()
   "Make a backup copy of current file or dired marked files.
@@ -2196,17 +2243,39 @@ If there more than one frame, switch to next frame."
            (< 16 (window-height)))
       (enlarge-window (round (fceiling (* 0.3 (window-height)))))))
 
-(defun get-cwd ()
-  "Get current working directory from adjacent window."
+(defun change-wd-p ()
+  "Ensure terminal input contains a command to change working directory
+before actually send the command."
+  (let ((xprompt "└ $ ") (xprompt2 "└ $ % "))
+    (if (and (string-equal xprompt (buffer-substring-no-properties
+                                    (line-beginning-position)
+                                    (+ (length xprompt) (line-beginning-position))))
+             (or (string-equal (buffer-substring-no-properties
+                                (+ (length xprompt) (line-beginning-position))
+                                (line-end-position))
+                               (car kill-ring))
+                 (string-equal (buffer-substring-no-properties
+                                (+ (length xprompt2) (line-beginning-position))
+                                (line-end-position))
+                               (car kill-ring))))
+        t)))
+
+(defun change-wd ()
+  "Change working directory, get from the adjacent window."
   (interactive)
   (unless (one-window-p)
     (other-window 1)
     (copy-file-path t)
     (other-window 1)
-    (cond ((eq major-mode 'eshell-mode)
-           (paste-or-paste-previous))
-          ((eq major-mode 'vterm-mode)
-           (vterm-yank)))))
+    (cond
+     ((eq major-mode 'eshell-mode)
+      (yank)
+      (if (change-wd-p)
+          (eshell-send-input)))
+     ((eq major-mode 'vterm-mode)
+      (vterm-yank)
+      (if (change-wd-p)
+          (vterm-send-return))))))
 
 (defun eshell-split ()
   "Split eshell window below."
@@ -2216,6 +2285,7 @@ If there more than one frame, switch to next frame."
       (split-window-below))
   (enlarge-window-split)
   (other-window 1)
+  (execute-kbd-macro (kbd "<escape>"))
   (execute-kbd-macro (kbd "6")))
 
 (defun kmacro-helper ()
@@ -2240,13 +2310,30 @@ If there more than one frame, switch to next frame."
     (kill-line))
   (setq this-command 'eshell-clear-input))
 
-(defun eshell-search-input ()
+(defvar eshell-search-input-defer-timer nil "Defer `eshell-search-input' timer.")
+
+(defun eshell-search-input-raw ()
   "Eshell history ido complete."
-  (interactive)
   (let ((xhist (delete-dups (ring-elements eshell-history-ring))))
     (push "" xhist)
-    (insert (ido-completing-read "Search input: " xhist)))
-  (setq this-command 'eshell-search-input))
+    (insert (ido-completing-read "Search input: " xhist))))
+
+(defun eshell-search-input ()
+  "Defer `eshell-search-input-raw'. The `eshell-search-input-defer-timer' might
+be canceled to substitute the logic. See `eshell-next-input' around advice."
+  (interactive)
+  (setq eshell-search-input-defer-timer
+        (run-with-timer 0.2 nil 'eshell-search-input-raw)))
+
+(advice-add 'eshell-next-input :around
+            (lambda (fun &rest r) "`other-window' after quick double SPC"
+              (if (timerp eshell-search-input-defer-timer)
+                  (progn
+                    (cancel-timer eshell-search-input-defer-timer)
+                    (unless (one-window-p)
+                      (other-window 1)
+                      (setq this-command 'other-window)))
+                (apply fun r))))
 
 (defun terminal-split ()
   "Split terminal window below."
@@ -2398,6 +2485,8 @@ Show current agenda. Do not select other window, balance windows."
 (defun exec-query ()
   "Execute SQL statement separated by semicolon or selected region."
   (interactive)
+  (unless (eq major-mode 'sql-mode)
+    (error "Not SQL"))
   (let ((xconn (getenv "CONNINFO"))
         (xbuf (concat "*exec query*"))
         xquery xp1 xp2 (xsepRegex ";"))
@@ -2474,13 +2563,13 @@ This checks in turn:
           ((setq xsym (variable-at-point)) (describe-variable xsym))))
   (setq this-command 'split-window-below))
 
-(defun dired-trash-move-adjust (fun &rest args)
+(defun dired-trash-move-adjust (fun &rest r)
   "Disable move to trash if move to trash is impossible. Use as :around advice."
   (when (or (string-match "DiskO" (file-truename (dired-get-filename)))
-            (file-remote-p (car args)))
+            (file-remote-p (car r)))
     (setq delete-by-moving-to-trash nil))
   (unwind-protect
-      (apply fun args)
+      (apply fun r)
     (setq delete-by-moving-to-trash t))
   (setq delete-by-moving-to-trash t))
 
@@ -2496,7 +2585,7 @@ This checks in turn:
 
 (setq external-extensions (append external-extensions video-extensions))
 
-(defun dired-find-file-adjust (fun &rest args)
+(defun dired-find-file-adjust (fun &rest r)
   "Adjust open file method in dired. Use as :around advice."
   (let ((x large-file-warning-threshold))
     (if (and (display-graphic-p)
@@ -2506,7 +2595,7 @@ This checks in turn:
         (progn
           (setq large-file-warning-threshold nil)
           (open-in-external-app))
-      (apply fun args))
+      (apply fun r))
     (setq large-file-warning-threshold x)))
 
 (advice-add 'dired-find-file :around 'dired-find-file-adjust)
@@ -2558,7 +2647,7 @@ before selection. This fun to be run as before advice for move fun."
           (eq last-command 'select-text-in-quote))
       (delete-backward)))
 
-(defun lookup-around (fun &rest args)
+(defun lookup-around (fun &rest r)
   "Lookup selection if buffer is read only and last command `extend-selection'.
 Use as around advice e.g. for mouse left click after double click."
   (if (and (eq last-command 'extend-selection)
@@ -2566,14 +2655,14 @@ Use as around advice e.g. for mouse left click after double click."
       (progn
         (return-before)
         (lookup-web))
-    (apply fun args)))
+    (apply fun r)))
 
-(defun translate-around (fun &rest args)
+(defun translate-around (fun &rest r)
   "Translate selection if buffer is read only and in eww."
   (if (and (eq major-mode 'eww-mode)
            buffer-read-only)
       (translate)
-    (apply fun args)))
+    (apply fun r)))
 
 (defun quit ()
   "Confirm and quit. Because restart without confirm."
@@ -2953,7 +3042,7 @@ is enabled.")
 
     ("q" . insert-space-before)          ("й" . insert-space-before)              ("Q" . ignore)                           ("Й" . ignore)
     ("w" . backward-kill-word)           ("ц" . backward-kill-word)               ("W" . ignore)                           ("Ц" . ignore)
-    ("e" . undo-only)                    ("у" . undo-only)                             ("E" . todo)                             ("У" . todo)
+    ("e" . undo-only)                    ("у" . undo-only)                        ("E" . todo)                             ("У" . todo)
     ("r" . kill-word)                    ("к" . kill-word)                        ("R" . ignore)                           ("К" . ignore)
     ("t" . cut-text-block)               ("е" . cut-text-block)                   ("T" . ignore)                           ("Е" . ignore)
 
@@ -2975,7 +3064,7 @@ is enabled.")
     ("8" . copy-to-register)                                                      ("*" . goto-matching-bracket) ; QWERTY * → = Engineer Engram, QWERTY / → = RU PC Karabiner
     ("9" . radio)                                                                 ("(" . ignore)
     ("0" . eshell)                                                                (")" . ignore)
-    ("-" . enlarge-window)                                                                ("_" . ignore)
+    ("-" . enlarge-window)                                                        ("_" . ignore)
     ("=" . goto-matching-bracket)                                                 ("+" . ignore)
 
     ("y"  . isearch-cur-word-forward)    ("н" . isearch-cur-word-forward)         ("Y" . ignore)                           ("Н" . ignore)
@@ -3099,9 +3188,7 @@ is enabled.")
     ("j ESC" . ignore)                   ("j <escape>" . ignore)
     ("k ESC" . ignore)                   ("k <escape>" . ignore)
 
-    ("<mouse-1>" . ignore)
-    ("<mouse-2>" . ignore)
-    ("<mouse-3>" . ignore)))
+    ("<mouse-1>" . ignore) ("<mouse-2>" . ignore) ("<mouse-3>" . ignore)))
 
 (keyamp--map (define-prefix-command 'keyamp-right-leader-map)
   '(("TAB" . toggle-gnus)                ("<tab>"       . toggle-gnus)
@@ -3184,9 +3271,7 @@ is enabled.")
     ("d ESC" . ignore)                   ("d <escape>" . ignore)
     ("f ESC" . ignore)                   ("f <escape>" . ignore)
 
-    ("<mouse-1>" . ignore)
-    ("<mouse-2>" . ignore)
-    ("<mouse-3>" . ignore)))
+    ("<mouse-1>" . ignore) ("<mouse-2>" . ignore) ("<mouse-3>" . ignore)))
 
 
 ;; Core Remaps
@@ -3292,10 +3377,10 @@ is enabled.")
  ;; RET to search again.
  (keyamp--map-leaders x '(isearch-repeat-backward . isearch-repeat-forward))
  (keyamp--map x
-   '(("i" . isearch-ring-retreat)     ("ш" . isearch-ring-retreat)
-     ("j" . isearch-repeat-backward)  ("о" . isearch-repeat-backward)
-     ("k" . isearch-ring-advance)     ("л" . isearch-ring-advance)
-     ("l" . isearch-repeat-forward)   ("д" . isearch-repeat-forward)))
+   '(("i" . isearch-ring-retreat)    ("ш" . isearch-ring-retreat)
+     ("j" . isearch-repeat-backward) ("о" . isearch-repeat-backward)
+     ("k" . isearch-ring-advance)    ("л" . isearch-ring-advance)
+     ("l" . isearch-repeat-forward)  ("д" . isearch-repeat-forward)))
 
  (keyamp--set-map x
    '(isearch-ring-retreat    isearch-ring-advance
@@ -3310,7 +3395,7 @@ is enabled.")
  ;; by transient maps which might be set by following target commands subsets.
  (keyamp--map-leaders x '(open-line . newline))
  (keyamp--map x
-   '(("TAB" . alternate-buffer) ("<tab>" . alternate-buffer)
+   '(("TAB" . toggle-ibuffer) ("<tab>" . toggle-ibuffer)
      ("C-r" . delete-other-windows)))
 
  (keyamp--remap x
@@ -3330,12 +3415,14 @@ is enabled.")
      (backward-left-bracket   . dired-jump)
      (forward-right-bracket   . player)
      (kmacro-play             . config)
-     (copy-to-register        . sql)))
+     (copy-to-register        . sql)
+     (terminal                . terminal-split)
+     (eshell                  . eshell-split)))
 
  (keyamp--set-map x
    '(prev-user-buffer           next-user-buffer
      delete-other-windows       split-window-below
-     alternate-buffer           delete-window
+     delete-window
      open-last-closed           save-close-current-buffer
      prev-proj-buffer           next-proj-buffer
      prev-eww-buffer            next-eww-buffer
@@ -3351,7 +3438,7 @@ is enabled.")
  (keyamp--set-map x
    '(prev-user-buffer     next-user-buffer
      delete-other-windows delete-window
-     split-window-below   alternate-buffer)))
+     split-window-below)))
 
 (with-sparse-keymap-x
  ;; Hit RET right away to hide split window.
@@ -3360,7 +3447,7 @@ is enabled.")
 
 (with-sparse-keymap-x
  (keyamp--remap x
-   '((open-line . prev-proj-buffer) (newline . next-proj-buffer)
+   '((open-line       . prev-proj-buffer) (newline . next-proj-buffer)
      (delete-backward . speedbar)))
  (keyamp--set-map x '(prev-proj-buffer next-proj-buffer)))
 
@@ -3405,8 +3492,10 @@ is enabled.")
 (with-sparse-keymap-x
  ;; Hold down comma to call `save-close-current-buffer'. Then comma to repeat.
  (keyamp--remap x
-   '((open-line . prev-user-buffer) (newline . next-user-buffer)
-     (next-window-or-frame . save-close-current-buffer)))
+   '((open-line            . prev-user-buffer)
+     (newline              . next-user-buffer)
+     (next-window-or-frame . save-close-current-buffer)
+     (keyamp-insert        . delete-other-windows)))
  (keyamp--set-map x '(save-close-current-buffer)))
 
 (with-sparse-keymap-x
@@ -3414,23 +3503,44 @@ is enabled.")
  (keyamp--set-map x '(shrink-window enlarge-window) nil nil nil 2))
 
 (with-sparse-keymap-x
- ;; Close frame with Q after change focus.
+ ;; Delete frame with Q after change focus.
  (keyamp--remap x '((insert-space-before . delete-frame)))
  (add-function :after after-focus-change-function
                (lambda () (set-transient-map x))))
 
 (with-sparse-keymap-x
- (keyamp--map-leaders x '(other-window . other-window))
+ ;; SPC to switch other window after split as a result of the commands.
+ ;; DEL to delete other window.
+ (keyamp--map-leaders x '(delete-other-windows . other-window))
  (keyamp--remap x '((keyamp-insert . delete-other-windows)))
  (keyamp--set-map x
-   '(describe-foo-at-point describe-variable describe-function describe-key)))
+   '(describe-foo-at-point   describe-variable
+     describe-function       describe-key
+     describe-mode           describe-char
+     describe-face           list-matching-lines
+     agenda                  player
+     run-current-file        exec-query
+     view-echo-area-messages sun-moon
+     clock                   async-shell-command)))
 
-;; DEL L SPC to describe foo, next RET jump to source file or hit SPC/DEL
-;; to move by buttons.
-(advice-add 'other-window :after
-            (lambda (&rest r) (when (and (eq major-mode 'help-mode) (= (point) 1))
-                                (forward-button 1)
-                                (setq this-command 'forward-button))))
+(defvar keyamp-escape-double-timer nil "Timer to manage <escape> double hit.")
+
+(advice-add 'keyamp-escape :after
+            (lambda () "quick <escape> double press for `other-window'"
+              (when (and (timerp keyamp-escape-double-timer)
+                         (not (one-window-p))
+                         (eq last-command this-command))
+                (cancel-timer keyamp-escape-double-timer)
+                (other-window 1))
+              (setq keyamp-escape-double-timer
+                    (run-with-timer 0.3 nil
+                                    (lambda ()
+                                      (setq keyamp-escape-double-timer t))))))
+
+(with-sparse-keymap-x
+ (keyamp--map-leaders x '(alternate-buffer . alternate-buffer))
+ (keyamp--remap x '((backward-left-bracket . dired-jump)))
+ (keyamp--set-map x '(alternate-buffer)))
 
 
 ;; Repeat mode. View commands.
@@ -3442,8 +3552,13 @@ is enabled.")
  (keyamp--map x
    '(("TAB"   . View-scroll-half-page-forward)
      ("<tab>" . View-scroll-half-page-forward)))
- (keyamp--remap x '((previous-line . up-line) (next-line . down-line)))
- (keyamp--set-map x '(up-line down-line)))
+ (keyamp--remap x
+   '((previous-line         . up-line) (next-line . down-line)
+     (backward-left-bracket . dired-jump)))
+ (keyamp--set-map x '(up-line down-line))
+ (advice-add 'translate :after
+             (lambda () (if (eq major-mode 'eww-mode)
+                            (set-transient-map x)))))
 
 (with-sparse-keymap-x
  ;; Initiate by SPC then double DEL or DEL then SPC hold down. Press H then
@@ -3477,23 +3592,24 @@ is enabled.")
 
 (with-sparse-keymap-x
  ;; DEL DEL prefix command.
- ;; Triple DEL (hold down) to move lines up and activate Screen mode.
- ;; Or hit DEL DEL SPC to next user buffer and repeat by SPC.
+ ;; Triple DEL (hold down) to move lines up. Or hit DEL DEL SPC to
+ ;; next user buffer and continue repeat by SPC.
  (keyamp--map x '(("TAB" . terminal-split) ("<tab>" . terminal-split)))
  (keyamp--map-leaders x '(up-line . next-user-buffer))
  (keyamp--remap x
-   '((previous-line       . beg-of-line-or-block) (next-line . select-block)
+   '((previous-line       . beg-of-line-or-block)
+     (next-line           . select-block)
      (keyamp-escape       . return-before)
-     (keyamp-insert       . copy-line-or-selection)
      (open-file-at-cursor . exec-query)))
  (keyamp--set-map x '(select-block)))
 
 (with-sparse-keymap-x
  ;; SPC SPC prefix command.
  ;; Double SPC to run `extend-selection', then next SPC press to
- ;; deactivate mark and run `down-line'. That is, hold down SPC to start move
- ;; down lines with SPC while DEL does up lines. Similarly for `select-line'
- ;; and move by blocks. Hack.
+ ;; deactivate mark and run `down-line'. That is, hold down SPC to
+ ;; start move down lines with SPC while DEL does up lines. The core
+ ;; function deffered for a small amount of time and hold down move
+ ;; works smoothly without actual activation of a region.
  (keyamp--map x '(("TAB" . eshell-split) ("<tab>" . eshell-split)))
  (keyamp--map-leaders x '(prev-user-buffer . down-line))
  (keyamp--remap x '((keyamp-escape . return-before)))
@@ -3502,15 +3618,16 @@ is enabled.")
 (with-sparse-keymap-x
  ;; DEL SPC prefix command.
  ;; DEL SPC SPC to call `end-of-line-or-block'. Hold down SPC to repeat.
- (keyamp--map x '(("TAB" . ignore) ("<tab>" . ignore)))
- (keyamp--map-leaders x '(novel . end-of-line-or-block))
+ ;; Defer must be too hight because of hold down timeout after first SPC.
+ (keyamp--map x '(("TAB" . agenda) ("<tab>" . agenda)))
+ (keyamp--map-leaders x '(prev-eww-buffer . end-of-line-or-block))
  (keyamp--remap x '((keyamp-escape . return-before)))
  (keyamp--set-map x '(select-text-in-quote)))
 
 (with-sparse-keymap-x
  ;; SPC DEL prefix command.
  ;; SPC DEL DEL to call `beg-of-line-or-block'. Hold down DEL to repeat.
- (keyamp--map x '(("TAB" . ignore) ("<tab>" . ignore)))
+ (keyamp--map x '(("TAB" . calc) ("<tab>" . calc)))
  (keyamp--map-leaders x '(beg-of-line-or-block . tasks))
  (keyamp--remap x '((keyamp-escape . return-before)))
  (keyamp--set-map x '(select-line)))
@@ -3522,9 +3639,10 @@ is enabled.")
    up-line                         down-line
    beg-of-line-or-block            end-of-line-or-block
    prev-user-buffer                next-user-buffer
-   tasks                           novel
+   tasks                           prev-eww-buffer
    terminal                        eshell
-   terminal-split                  eshell-split)
+   terminal-split                  eshell-split
+   agenda                          calc)
  :before 'return-before)
 
 (advice-add 'exec-query :after 'return-before) ; go back after query
@@ -3602,11 +3720,17 @@ is enabled.")
      (next-line             . recenter-top-bottom)))
  (keyamp--set-map x '(recenter-top-bottom)) nil nil nil 2)
 
+(with-sparse-keymap-x
+ (keyamp--remap x '((goto-matching-bracket . toggle-frame-transparent)))
+ (keyamp--set-map x '(toggle-frame-transparent)))
+
 
 ;; Repeat mode. Edit commands.
 
 (with-sparse-keymap-x
- (keyamp--map-leaders x '(delete-forward-char . delete-forward-char))
+ ;; After hit delete backward/forward char, shrink whitespaces or insert
+ ;; space before while in command mode, DEL/SPC start to do delete/space.
+ (keyamp--map-leaders x '(delete-forward-char . insert-space-before))
  (keyamp--set-map x '(delete-forward-char) nil nil nil 1))
 
 (with-sparse-keymap-x
@@ -3682,9 +3806,15 @@ is enabled.")
  (keyamp--set-map x '(cycle-hyphen-lowline-space) nil nil nil 1))
 
 (with-sparse-keymap-x
- ;; SPC S SPC to clean whitespaces and save the buffer.
- (keyamp--map-leaders x '(save-buffer . save-buffer))
+ ;; SPC S SPC to clean whitespaces and save the buffer or DEL to close.
+ (keyamp--map-leaders x '(save-close-current-buffer . save-buffer))
+ (keyamp--remap x '((backward-left-bracket . dired-jump)))
  (keyamp--set-map x '(clean-whitespace) nil nil nil 3))
+
+(with-sparse-keymap-x
+ (keyamp--map-leaders x '(save-close-current-buffer . dired-jump))
+ (keyamp--remap x '((backward-left-bracket . dired-jump)))
+ (keyamp--set-map x '(save-buffer) nil nil nil 3))
 
 
 ;; Modes Remaps.
@@ -3725,11 +3855,8 @@ of quit minibuffer."
 (defun keyamp-insert-! ()
   "Insert ! literally."
   (interactive)
-  (if (y-or-n-p "Confirm all?")
-      (progn
-        (keyamp-insert-init)
-        (execute-kbd-macro (kbd "!")))
-    (message "Abort")))
+  (keyamp-insert-init)
+  (execute-kbd-macro (kbd "!")))
 
 (with-eval-after-load 'minibuffer
   (with-sparse-keymap-x
@@ -3738,11 +3865,11 @@ of quit minibuffer."
    ;; I/K or DEL/SPC to list either history or completion candidates
    ;; accordingly choice made. RET to confirm and exit, ESC to quit.
    ;; To switch from history to candidates listing press ESC then double
-   ;; SPC (`extend-selection') and DEL/SPC or I/K again to continue move
+   ;; SPC `extend-selection' and DEL/SPC or I/K again to continue move
    ;; backward/forward. Similarly double DEL to activate history move.
    (keyamp--map-leaders x '(select-block . extend-selection))
    (keyamp--remap x
-     '((end-of-lyne        . keyamp-insert-n) ; Literal answers y or n
+     '((end-of-lyne        . keyamp-insert-n) ; literal answers y or n
        (backward-kill-word . keyamp-insert-y) ; Engineer Engram layout
        (isearch-backward   . keyamp-insert-!) ; remap required for others
        (keyamp-insert      . keyamp-minibuffer-insert)
@@ -3750,7 +3877,7 @@ of quit minibuffer."
     ;; The hook is last one run during minibuffer setup and set the keymap.
     (keyamp--set-map-hook x '(minibuffer-setup-hook) :command nil :repeat))
 
-  ;; Hit D/DEL for No, K/SPC for Yes to answer non-literal y or n.
+   ;; Hit D/DEL for No, K/SPC for Yes to answer non-literal y or n.
    (keyamp--remap y-or-n-p-map
      '((select-block     . y-or-n-p-insert-n)
        (delete-backward  . y-or-n-p-insert-n)
@@ -3871,7 +3998,9 @@ of quit minibuffer."
 
   (with-sparse-keymap-x
    (keyamp--map-leaders x '(dired-toggle-mark . dired-toggle-mark))
-   (keyamp--set-map x '(dired-toggle-mark) nil nil nil 1)))
+   (keyamp--set-map x '(dired-toggle-mark) nil nil nil 1))
+
+  (advice-add 'dired-toggle-marks :before 'dired-unmark-all-marks))
 
 (with-eval-after-load 'wdired
   (keyamp--map wdired-mode-map
@@ -3932,7 +4061,7 @@ of quit minibuffer."
 (with-eval-after-load 'ibuf-ext
   (keyamp--map ibuffer-mode-map
     '(("C-h" . ibuffer-do-delete)  ("<double-mouse-1>" . ibuffer-visit-buffer)
-      ("TAB" . ibuffer-leader-map) ("<tab>" . ibuffer-leader-map)))
+      ("TAB" . ibuffer-leader-map) ("<tab>"            . ibuffer-leader-map)))
   (keyamp--map (define-prefix-command 'ibuffer-leader-map)
     '(("TAB" . toggle-ibuffer)     ("<tab>" . toggle-ibuffer)))
 
@@ -4230,7 +4359,7 @@ of quit minibuffer."
       (next-eww-buffer       . eshell-clear)
       (select-block          . eshell-previous-input)
       (quoted-insert         . eshell-interrupt-process)
-      (toggle-comment        . eshell-list-history)))
+      (toggle-comment        . ignore)))
 
   (with-sparse-keymap-x
    (keyamp--map x '(("v" . paste-or-paste-previous) ("м" . paste-or-paste-previous)))
@@ -4256,9 +4385,13 @@ of quit minibuffer."
        (next-line     . eshell-next-input)
        (keyamp-insert . eshell-send-input)))
    (keyamp--map x
-     '(("TAB" . get-cwd) ("<tab>" . get-cwd)))
-   (keyamp--set-map x
-     '(eshell-previous-input eshell-next-input eshell-search-input) :command))
+     '(("TAB" . change-wd) ("<tab>" . change-wd)))
+   (keyamp--set-map x '(eshell-previous-input eshell-search-input) :command)
+   (advice-add 'eshell-next-input :after
+               (lambda (&rest r) "repeat"
+                 (when (eq this-command 'eshell-next-input)
+                   (if keyamp-insert-p (keyamp-command))
+                   (set-transient-map x)))))
 
   (with-sparse-keymap-x
    ;; Insert mode is primary for eshell. The keymap ready after eshell start,
@@ -4271,10 +4404,9 @@ of quit minibuffer."
        (next-line     . eshell-search-input)))
 
    (keyamp--map x
-     '(("TAB" . get-cwd)                 ("<tab>" . get-cwd)
+     '(("TAB" . change-wd)               ("<tab>" . change-wd)
        ("i"   . previous-line)           ("ш"     . previous-line)
        ("v"   . paste-or-paste-previous) ("м"     . paste-or-paste-previous)
-       (","   . other-window)            ("б"     . other-window)
        ("'"   . alternate-buffer)        ("э"     . alternate-buffer)
        ("["   . alternate-buf-or-frame)  ("х"     . alternate-buf-or-frame)
        ("5"   . terminal)))
@@ -4357,10 +4489,9 @@ of quit minibuffer."
        (next-line     . vterm-history-search)))
 
    (keyamp--map x
-     '(("TAB" . get-cwd)                 ("<tab>" . get-cwd)
+     '(("TAB" . change-wd)               ("<tab>" . change-wd)
        ("i"   . previous-line)           ("ш"     . previous-line)
        ("v"   . paste-or-paste-previous) ("м"     . paste-or-paste-previous)
-       (","   . other-window)            ("б"     . other-window)
        ("'"   . alternate-buffer)        ("э"     . alternate-buffer)
        ("["   . alternate-buf-or-frame)  ("х"     . alternate-buf-or-frame)
        ("0"   . eshell)))
@@ -4403,7 +4534,15 @@ of quit minibuffer."
     '((undo-only       . backward-button)
       (delete-backward . forward-button)
       (open-line       . help-go-back)
-      (newline         . help-go-forward))))
+      (newline         . help-go-forward)))
+
+  ;; DEL L and DEL/SPC to describe foo, next RET jump to source file or hit
+  ;; DEL/SPC to move by buttons.
+  (advice-add 'other-window :after
+              (lambda (&rest r)
+                (when (and (eq major-mode 'help-mode) (= (point) 1))
+                  (forward-button 1)
+                  (setq this-command 'forward-button)))))
 
 (with-eval-after-load 'gnus-topic
   (keyamp--map gnus-topic-mode-map
@@ -4711,7 +4850,7 @@ of quit minibuffer."
 
 (with-eval-after-load 'go-ts-mode
   (keyamp--map go-ts-mode-map
-    '(("TAB" . go-ts-leader-map)     ("<tab>" . go-ts-leader-map)
+    '(("TAB"     . go-ts-leader-map) ("<tab>"     . go-ts-leader-map)
       ("S-<tab>" . ignore)           ("<backtab>" . ignore)))
   (keyamp--map (define-prefix-command 'go-ts-leader-map)
     '(("TAB" . company-manual-begin) ("<tab>" . company-manual-begin)))
@@ -4839,13 +4978,10 @@ of quit minibuffer."
 (defconst keyamp-screen-commands-hash
   #s(hash-table test equal data
                 (agenda                           t
-                 alternate-buffer                 t
-                 alternate-buf-or-frame           t
                  async-shell-command              t
                  config                           t
                  delete-other-windows             t
                  delete-window                    t
-                 dired-jump                       t
                  downloads                        t
                  exec-query                       t
                  find-next-dir-file               t
@@ -4866,8 +5002,6 @@ of quit minibuffer."
                  run-current-file                 t
                  save-close-current-buffer        t
                  server                           t
-                 shrink-window                    t
-                 enlarge-window                   t
                  split-window-below               t
                  sun-moon                         t
                  sync                             t
@@ -4895,7 +5029,9 @@ of quit minibuffer."
 
 (defconst keyamp-repeat-commands-hash
   #s(hash-table test equal data
-                (backward-punct                   t
+                (alternate-buffer                 t
+                 alternate-buf-or-frame           t
+                 backward-punct                   t
                  backward-button                  t
                  back-word                        t
                  beg-of-line-or-block             t
@@ -4972,6 +5108,8 @@ of quit minibuffer."
                  isearch-cur-word-backward        t
                  select-line                      t
                  select-text-in-quote             t
+                 shrink-window                    t
+                 enlarge-window                   t
                  text-scale-decrease              t
                  text-scale-increase              t
                  text-scale-reset                 t
@@ -4980,7 +5118,9 @@ of quit minibuffer."
                  View-scroll-half-page-forward    t
                  vterm-down                       t
                  vterm-send-return                t
-                 vterm-up                         t)))
+                 vterm-up                         t
+                 xref-go-back                     t
+                 xref-find-definitions            t)))
 
 
 
@@ -5071,61 +5211,6 @@ of quit minibuffer."
   (unless (eq this-command last-command)
     (force-mode-line-update t)))
 
-(defvar keyamp-repeat-prefix-list
-  '([32]            ; SPC
-    [31]            ; C-_
-    [67109912]      ; C-И
-    [127]           ; DEL
-    [backspace]     ; <backspace>
-    [30]            ; C-^
-    [67108907]      ; C-+
-    [9]             ; TAB
-    [tab]           ; <tab>
-    [127 100]       ; DEL d
-    [backspace 100] ; <backspace> d
-    [30 100]        ; C-^ d
-    [67108907 100]  ; C-+ d
-    [127 104]       ; DEL h
-    [backspace 104] ; <backspace> h
-    [30 104]        ; C-^ h
-    [67108907 104]  ; C-+ h
-    [127 116]       ; DEL t
-    [backspace 116] ; <backspace> t
-    [30 116]        ; C-^ t
-    [67108907 116]  ; C-+ t
-    )
-  "List of prefixes to indicate as repeat. Engram layout.")
-
-(defvar keyamp-insert-prefix-list
-  '([17]           ; C-q
-    [32 111]       ; SPC o
-    [31 111]       ; C-_ o
-    [67109912 111] ; C-И o
-    [32 101]       ; SPC e
-    [31 101]       ; C-_ e
-    [67109912 101] ; C-И e
-    [32 97]        ; SPC a
-    [31 97]        ; C-_ a
-    [67109912 97]  ; C-И a
-    )
-  "List of prefixes to indicate as insert. Engram layout.")
-
-(defun keyamp-indicate-prefix ()
-  "Indicate prefix. Run after idle time same as Karabiner
-held down threshold. E.g. hold down ESC Karabiner posts C-h and Keyamp
-indicates the event after been idle for the same period of time."
-  (cond
-   ((member (this-single-command-keys) keyamp-repeat-prefix-list)
-    (setq mode-line-front-space keyamp-repeat-indicator)
-    (set-face-background 'cursor keyamp-repeat-cursor))
-   ((equal (this-single-command-keys) [8]) ; C-h
-    (setq mode-line-front-space keyamp-screen-indicator)
-    (set-face-background 'cursor keyamp-screen-cursor))
-   ((member (this-single-command-keys) keyamp-insert-prefix-list)
-    (setq mode-line-front-space keyamp-insert-indicator)
-    (set-face-background 'cursor keyamp-insert-cursor)))
-  (force-mode-line-update t))
-
 (defun keyamp-escape ()
   "Return to command mode, clear selection or quit minibuffer."
   (interactive)
@@ -5158,9 +5243,7 @@ indicates the event after been idle for the same period of time."
     (run-with-timer keyamp-defer-load-time nil
                     'keyamp-push-quail-keyboard-layout)
     (setq keyamp-idle-timer
-          (run-with-idle-timer keyamp-idle-timeout t 'keyamp-escape))
-    (setq keyamp-indicate-prefix-timer
-          (run-with-idle-timer keyamp-hold-threshold t 'keyamp-indicate-prefix))))
+          (run-with-idle-timer keyamp-idle-timeout t 'keyamp-escape))))
 
 (provide 'keyamp)
 
