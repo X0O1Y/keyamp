@@ -7068,59 +7068,12 @@
               ]
             }
           },
-          "conditions": [
+          "to_after_key_up": [
             {
-              "type": "frontmost_application_unless",
-              "file_paths": [
-                "/Brave Browser"
-              ]
-            }
-          ],
-          "to": [
-            {
-              "select_input_source": {
-                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
-              },
-              "repeat": false
-            },
-            {
-              "shell_command": "open -a 'Brave Browser'"
-            }
-          ]
-        },
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "f13",
-            "modifiers": {
-              "optional": [
-                "any"
-              ]
-            }
-          },
-          "conditions": [
-            {
-              "type": "frontmost_application_if",
-              "file_paths": [
-                "/Brave Browser"
-              ]
-            }
-          ],
-          "to": [
-            {
-              "select_input_source": {
-                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
-              },
-              "repeat": false
-            },
-            {
-              "key_code": "h",
+              "key_code": "tab",
               "modifiers": [
                 "command"
               ]
-            },
-            {
-              "shell_command": "open -a 'Emacs'"
             }
           ]
         }
@@ -7345,17 +7298,59 @@
               ]
             }
           },
-          "to_after_key_up": [
+          "conditions": [
+            {
+              "type": "frontmost_application_unless",
+              "file_paths": [
+                "/Brave Browser"
+              ]
+            }
+          ],
+          "to": [
             {
               "select_input_source": {
                 "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
-              }
+              },
+              "repeat": false
             },
             {
-              "key_code": "tab",
+              "shell_command": "open -a 'Brave Browser'"
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "f15",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Brave Browser"
+              ]
+            }
+          ],
+          "to": [
+            {
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              },
+              "repeat": false
+            },
+            {
+              "key_code": "h",
               "modifiers": [
                 "command"
               ]
+            },
+            {
+              "shell_command": "open -a 'Emacs'"
             }
           ]
         }
