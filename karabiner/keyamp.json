@@ -1203,7 +1203,7 @@
           ],
           "to_if_held_down": [
             {
-              "key_code": "b",
+              "key_code": "equal_sign",
               "modifiers": [
                 "left_shift",
                 "left_control"
@@ -6630,11 +6630,66 @@
         {
           "type": "basic",
           "from": {
-            "key_code": "f1"
+            "key_code": "f1",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
           },
+          "conditions": [
+            {
+              "type": "frontmost_application_unless",
+              "file_paths": [
+                "/Brave Browser"
+              ]
+            }
+          ],
           "to": [
             {
-              "key_code": "display_brightness_decrement"
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              },
+              "repeat": false
+            },
+            {
+              "shell_command": "open -a 'Brave Browser'"
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "f1",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Brave Browser"
+              ]
+            }
+          ],
+          "to": [
+            {
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              },
+              "repeat": false
+            },
+            {
+              "key_code": "h",
+              "modifiers": [
+                "command"
+              ]
+            },
+            {
+              "shell_command": "open -a 'Emacs'"
             }
           ]
         }
@@ -6648,9 +6703,16 @@
           "from": {
             "key_code": "f2"
           },
-          "to": [
+          "to_after_key_up": [
             {
               "key_code": "display_brightness_increment"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "display_brightness_decrement",
+              "repeat": true,
+              "halt": true
             }
           ]
         }
@@ -7068,12 +7130,59 @@
               ]
             }
           },
-          "to_after_key_up": [
+          "conditions": [
             {
-              "key_code": "tab",
+              "type": "frontmost_application_unless",
+              "file_paths": [
+                "/Brave Browser"
+              ]
+            }
+          ],
+          "to": [
+            {
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              },
+              "repeat": false
+            },
+            {
+              "shell_command": "open -a 'Brave Browser'"
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "f13",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Brave Browser"
+              ]
+            }
+          ],
+          "to": [
+            {
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              },
+              "repeat": false
+            },
+            {
+              "key_code": "h",
               "modifiers": [
                 "command"
               ]
+            },
+            {
+              "shell_command": "open -a 'Emacs'"
             }
           ]
         }
@@ -7298,59 +7407,12 @@
               ]
             }
           },
-          "conditions": [
+          "to_after_key_up": [
             {
-              "type": "frontmost_application_unless",
-              "file_paths": [
-                "/Brave Browser"
-              ]
-            }
-          ],
-          "to": [
-            {
-              "select_input_source": {
-                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
-              },
-              "repeat": false
-            },
-            {
-              "shell_command": "open -a 'Brave Browser'"
-            }
-          ]
-        },
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "f15",
-            "modifiers": {
-              "optional": [
-                "any"
-              ]
-            }
-          },
-          "conditions": [
-            {
-              "type": "frontmost_application_if",
-              "file_paths": [
-                "/Brave Browser"
-              ]
-            }
-          ],
-          "to": [
-            {
-              "select_input_source": {
-                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
-              },
-              "repeat": false
-            },
-            {
-              "key_code": "h",
+              "key_code": "tab",
               "modifiers": [
                 "command"
               ]
-            },
-            {
-              "shell_command": "open -a 'Emacs'"
             }
           ]
         }
