@@ -302,6 +302,9 @@ and `right-brackets'."
         (exchange-point-and-mark))
     (set-mark-command nil)))
 
+(defalias 'half-page-backward 'View-scroll-half-page-backward)
+(defalias 'half-page-forward 'View-scroll-half-page-forward)
+
 
 ;; editing commands
 
@@ -2352,7 +2355,8 @@ before actually send the cd command."
 (defun kmacro-helper ()
   "Keyboard macro helper. Ad hoc redefine."
   (interactive)
-  (toggle-debug-on-error))
+  ;; (toggle-debug-on-error)
+  (client))
 
 (defalias 'kmacro-play 'call-last-kbd-macro)
 
@@ -2456,11 +2460,9 @@ Force switch to current buffer to update `other-buffer'."
       (progn
         (switch-to-buffer xbuf)
         (ibuffer)
-        (unless (or (member (buffer-name (cadr (buffer-list)))
-                            ibuffer-never-show-predicates)
-                    (string-equal xm "eww-mode")
-                    (string-equal xm "gnus-summary-mode"))
-          (ibuffer-jump-to-buffer xbuf))))))
+        (condition-case nil
+            (ibuffer-jump-to-buffer xbuf)
+          (error nil))))))
 
 (defun flyspell-goto-prev-error ()
   "Go to prev error."
@@ -2586,7 +2588,7 @@ Show current agenda. Do not select other window, balance windows."
 (defun novel ()
   "Read novel."
   (interactive)
-  (switch-to-buffer "*Novel*"))
+  (switch-to-buffer "*novel*"))
 
 (defun hippie-expand-undo ()
   "Undo the expansion."
@@ -2910,6 +2912,13 @@ Activate command, insert or repeat mode optionally."
        (keyamp--map ,xkeymapName
          '(("DEL" . ,(car (cadr CmdCons))) ("<backspace>" . ,(car (cadr CmdCons)))
            ("SPC" . ,(cdr (cadr CmdCons))))))))
+
+(defmacro keyamp--map-tab (KeymapName Cmd)
+  "Map TAB and <tab> keys to CMD using `keyamp--map'."
+  (declare (indent defun))
+  (let ((xkeymapName (make-symbol "keymap-name")))
+    `(let ((,xkeymapName ,KeymapName))
+       (keyamp--map ,xkeymapName '(("TAB" . ,Cmd) ("<tab>" . ,Cmd))))))
 
 (defmacro with-sparse-keymap-x (&rest body)
   "Make sparse keymap x for next use in BODY."
@@ -3318,11 +3327,11 @@ is enabled.")
     ("]"  . rename-visited-file)
     ("\\" . bookmark-delete)
 
-    ("h" . View-scroll-half-page-backward)
+    ("h" . half-page-backward)
     ("j" . toggle-truncate-lines)
     ("k" . make-backup-and-save)
     ("l" . display-line-numbers-mode)
-    (";" . View-scroll-half-page-forward)
+    (";" . half-page-forward)
     ("'" . toggle-frame-maximized)
 
     ("n" . save-buffer)
@@ -3342,36 +3351,39 @@ is enabled.")
 
 ;; Hold down ESC to post C-h (karabiner) and call `help-map'.
 (keyamp--map-leaders help-map '(lookup-word-definition . translate))
+(keyamp--map-tab help-map lookup-wikipedia)
 (keyamp--map help-map
-  '(("ESC" . ignore)           ("<escape>" . ignore)           ("C-h" . nil) ; unmap for use by which key
-    ("RET" . lookup-web)       ("<return>" . lookup-web)
-    ("TAB" . lookup-wikipedia) ("<tab>"    . lookup-wikipedia)
-    ("e" . describe-char)      ("i" . info)
-    ("s" . info-lookup-symbol) ("j" . describe-function)
-    ("d" . man)                ("k" . describe-key)
-    ("f" . elisp-index-search) ("l" . describe-variable)
-    ("q" . describe-syntax)    ("p" . apropos-documentation)                               ("<f1>" . ignore) ("<help>" . ignore) ("C-w" . ignore) ("C-c" . ignore)
-    ("w" . describe-bindings)  ("o" . lookup-all-dictionaries)                             ("C-o"  . ignore) ("C-\\"   . ignore) ("C-n" . ignore) ("C-f" . ignore)
-    ("r" . describe-mode)      ("u" . lookup-all-synonyms)                                 ("C-s"  . ignore) ("C-e"    . ignore) ("'"   . ignore) ("6"   . ignore)
-    ("a" . describe-face)      (";" . lookup-wiktionary)                                   ("9"    . ignore) ("L"      . ignore) ("n"   . ignore) ("p"   . ignore) ("v" . ignore)
-    ("g" . apropos-command)    ("h" . describe-coding-system)                              ("?"    . ignore) ("A"      . ignore) ("U"   . ignore) ("S"   . ignore)
-    ("z" . apropos-variable)   ("." . lookup-word-dict-org)
-    ("x" . apropos-value)      ("," . lookup-etymology)))
+  '(("ESC" . ignore)             ("<escape>" . ignore)                                              ("C-h" . nil) ; unmap for use by which key
+    ("RET" . lookup-web)         ("<return>" . lookup-web)
+    ("e"   . describe-char)      ("i"        . info)
+    ("s"   . info-lookup-symbol) ("j"        . describe-function)
+    ("d"   . man)                ("k"        . describe-key)
+    ("f"   . elisp-index-search) ("l"        . describe-variable)
+    ("q"   . describe-syntax)    ("p"        . apropos-documentation)                               ("<f1>" . ignore) ("<help>" . ignore) ("C-w" . ignore) ("C-c" . ignore)
+    ("w"   . describe-bindings)  ("o"        . lookup-all-dictionaries)                             ("C-o"  . ignore) ("C-\\"   . ignore) ("C-n" . ignore) ("C-f" . ignore)
+    ("r"   . describe-mode)      ("u"        . lookup-all-synonyms)                                 ("C-s"  . ignore) ("C-e"    . ignore) ("'"   . ignore) ("6"   . ignore)
+    ("a"   . describe-face)      (";"        . lookup-wiktionary)                                   ("9"    . ignore) ("L"      . ignore) ("n"   . ignore) ("p"   . ignore) ("v" . ignore)
+    ("g"   . apropos-command)    ("h"        . describe-coding-system)                              ("?"    . ignore) ("A"      . ignore) ("U"   . ignore) ("S"   . ignore)
+    ("z"   . apropos-variable)   ("."        . lookup-word-dict-org)
+    ("x"   . apropos-value)      (","        . lookup-etymology)))
 
 (keyamp--map global-map
   '(("C-r"     . open-file-at-cursor) ; hold down RET to post C-r (karabiner)
     ("C-t"     . hippie-expand)       ; hold down RET in insert mode
     ("<f13>"   . ignore)              ; special key not f13 really
-    ("<next>"  . View-scroll-half-page-forward)
-    ("<prior>" . View-scroll-half-page-backward)
+    ("<next>"  . half-page-forward)
+    ("<prior>" . half-page-backward)
     ("<home>"  . scroll-down-command)
     ("<end>"   . scroll-up-command)
 
-    ("<double-mouse-1>"        . extend-selection)
-    ("<mouse-3>"               . mouse-3)
-    ("<header-line> <mouse-1>" . prev-frame)
-    ("<header-line> <mouse-3>" . make-frame-command)
-    ("<left-fringe> <mouse-1>" . ignore)))
+    ("<double-mouse-1>"         . extend-selection)
+    ("<mouse-3>"                . mouse-3)
+    ("<header-line>  <mouse-1>" . prev-frame)
+    ("<header-line>  <mouse-3>" . make-frame-command)
+    ("<left-fringe>  <mouse-1>" . alternate-buffer)
+    ("<left-fringe>  <mouse-3>" . new-empty-buffer)
+    ("<right-fringe> <mouse-1>" . alternate-buffer)
+    ("<right-fringe> <mouse-3>" . new-empty-buffer)))
 
 (with-eval-after-load 'lookup (advice-add 'keyamp-insert :around 'lookup-around))
 (advice-add 'keyamp-insert :around 'translate-around)
@@ -3457,9 +3469,8 @@ is enabled.")
  ;; Leader layer to become transient main. Base map for next leaders adjustment
  ;; by transient maps which might be set by following target commands subsets.
  (keyamp--map-leaders x '(open-line . newline))
- (keyamp--map x
-   '(("TAB" . toggle-ibuffer) ("<tab>" . toggle-ibuffer)
-     ("C-r" . delete-other-windows)))
+ (keyamp--map-tab x toggle-ibuffer)
+ (keyamp--map x '(("C-r" . delete-other-windows)))
 
  (keyamp--remap x
    '((delete-forward-char     . next-buffer)
@@ -3514,9 +3525,7 @@ is enabled.")
  (keyamp--set-map x '(prev-proj-buffer next-proj-buffer)))
 
 (with-sparse-keymap-x
- (keyamp--map x
-   '(("TAB"   . View-scroll-half-page-forward)
-     ("<tab>" . View-scroll-half-page-forward)))
+ (keyamp--map-tab x half-page-forward)
  (keyamp--remap x
    '((open-line       . prev-eww-buffer) (newline       . next-eww-buffer)
      (delete-backward . eww-reload)      (keyamp-insert . eww-reload)
@@ -3550,7 +3559,7 @@ is enabled.")
      (backward-left-bracket . dired-jump)))
  (keyamp--set-map x
    '(dired-jump downloads dired-find-file ibuffer-visit-buffer open-last-closed
-     bookmark-jump switch-to-buffer widget-button-press)))
+     bookmark-jump widget-button-press)))
 
 (with-sparse-keymap-x
  ;; Hold down comma to call `save-close-current-buffer'. Then comma to repeat.
@@ -3610,8 +3619,7 @@ is enabled.")
     (setq this-command 'toggle-ibuffer))
   (setq keyamp-escape-double-timer
         (run-with-timer (/ keyamp-double-press-timeout 1000.0) nil
-                        (lambda ()
-                          (setq keyamp-escape-double-timer t)))))
+                        (lambda () (setq keyamp-escape-double-timer t)))))
 
 (advice-add 'keyamp-escape :after 'keyamp-escape-double)
 
@@ -3626,19 +3634,14 @@ is enabled.")
  ;; Initiate by triple DEL/SPC (hold down).
  ;; I/K or DEL/SPC to move by lines. See `return-before'.
  (keyamp--map-leaders x '(previous-line . next-line))
- (keyamp--map x
-   '(("TAB"       . View-scroll-half-page-forward)
-     ("<tab>"     . View-scroll-half-page-forward)
-     ("<backtab>" . View-scroll-half-page-backward)
-     ("S-<tab>"   . View-scroll-half-page-backward)))
+ (keyamp--map-tab x half-page-forward)
  (keyamp--remap x
    '((previous-line           . up-line) (next-line . down-line)
      (backward-left-bracket   . dired-jump)
      (paste-or-paste-previous . tasks)))
  (keyamp--set-map x '(up-line down-line))
  (advice-add 'translate :after
-             (lambda () (if (eq major-mode 'eww-mode)
-                            (set-transient-map x)))))
+             (lambda () (if (eq major-mode 'eww-mode) (set-transient-map x)))))
 
 (with-sparse-keymap-x
  ;; Initiate by SPC then double DEL or DEL then SPC hold down. Press H then
@@ -3748,31 +3751,31 @@ is enabled.")
  (keyamp--set-map x '(backward-punct forward-punct) nil nil nil 1))
 
 (with-sparse-keymap-x
- (keyamp--map-leaders x '(previous-line . next-line))
- (keyamp--remap x
-   '((previous-line . scroll-down-command) (next-line . scroll-up-command)
-     (down-line     . scroll-down-command) (up-line   . scroll-up-command)))
- (keyamp--set-map x '(scroll-down-command scroll-up-command)))
-
-(with-sparse-keymap-x
  ;; Hold down H/; to initiate half page up/down. Repeat with I/K or DEL/SPC.
  (keyamp--map-leaders x '(previous-line . next-line))
- (keyamp--map x '(("TAB" . next-line) ("<tab>" . next-line)))
+ (keyamp--map-tab x scroll-up-command)
  (keyamp--remap x
-   '((previous-line . View-scroll-half-page-backward)
-     (next-line     . View-scroll-half-page-forward)
-     (down-line     . View-scroll-half-page-forward)
-     (up-line       . View-scroll-half-page-backward)))
+   '((previous-line . half-page-backward) (next-line . half-page-forward)
+     (down-line     . half-page-forward)  (up-line   . half-page-backward)))
  (unless (display-graphic-p) ; touch reader
-   (keyamp--remap x
-     '((down-line . View-scroll-half-page-backward)
-       (up-line   . View-scroll-half-page-forward))))
- (keyamp--set-map x
-   '(View-scroll-half-page-backward View-scroll-half-page-forward)))
+   (keyamp--remap x '((down-line . half-page-backward) (up-line . half-page-forward))))
+ (keyamp--set-map x '(half-page-backward half-page-forward)))
 
-(advice-add 'View-scroll-half-page-forward :around
+(advice-add 'half-page-forward :around
             (lambda (fun &rest r) "ibuffer exception"
               (if (eq major-mode 'ibuffer-mode) (toggle-gnus) (apply fun r))))
+
+(with-sparse-keymap-x
+ ;; Initially TAB makes half page forward, following presses do full page.
+ ;; Arrows always do half page and keep TAB transient, see previous keymap.
+ (keyamp--map-leaders x '(previous-line . next-line))
+ (keyamp--map-tab x next-line)
+ (keyamp--remap x
+   '((previous-line . scroll-down-command) (next-line . scroll-up-command)
+     (down-line     . half-page-forward)   (up-line   . half-page-backward)))
+ (unless (display-graphic-p) ; touch reader
+   (keyamp--remap x '((down-line . half-page-backward) (up-line . half-page-forward))))
+ (keyamp--set-map x '(scroll-down-command scroll-up-command)))
 
 (with-sparse-keymap-x
  (keyamp--map-leaders x '(next-line . next-line))
@@ -3781,7 +3784,7 @@ is enabled.")
 
 (with-sparse-keymap-x
  (keyamp--map-leaders x '(text-scale-decrease . text-scale-increase))
- (keyamp--map x '(("TAB" . text-scale-reset) ("<tab>" . text-scale-reset)))
+ (keyamp--map-tab x text-scale-reset)
  (keyamp--set-map x '(text-scale-decrease text-scale-increase text-scale-reset)))
 
 (with-sparse-keymap-x
@@ -3970,8 +3973,7 @@ of quit minibuffer."
       (next-line     . next-line-or-history-element)
       (select-block  . previous-line-or-history-element)))
 
-  (keyamp--map minibuffer-local-completion-map
-    '(("TAB" . minibuffer-complete) ("<tab>" . minibuffer-complete)))
+  (keyamp--map-tab minibuffer-local-completion-map minibuffer-complete)
 
   (keyamp--remap minibuffer-mode-map
     '((previous-line . previous-line-or-history-element)
@@ -3989,11 +3991,19 @@ of quit minibuffer."
   is, select and use first completion candidate. In case file
   completion, for most cases no need to complete, because there is NO
   right candidate. Otherwise, in all cases one MUST select a candidate.
-  Simply hit TAB TAB to minibuffer-complete file name if the name exists."
+  Simply hit TAB to minibuffer-complete file name if the name exists."
     (interactive)
     (if (eq (icomplete--category) 'file)
         (exit-minibuffer)
       (icomplete-force-complete-and-exit)))
+
+  (add-hook 'minibuffer-setup-hook
+            (lambda () "activate insert mode if file completion"
+              (when (eq (icomplete--category) 'file)
+                (keyamp-insert)
+                (if keyamp--deactivate-repeat-mode-fun
+                    (funcall keyamp--deactivate-repeat-mode-fun))
+                (setq this-command 'keyamp-insert))) 96)
 
   (keyamp--map icomplete-minibuffer-map
     '(("RET" . keyamp-exit-minibuffer) ("<return>" . keyamp-exit-minibuffer)))
@@ -4016,7 +4026,7 @@ of quit minibuffer."
    (keyamp--remap x
      '((previous-line . previous-line-or-history-element)
        (next-line     . icomplete-forward-completions)))
-    (keyamp--set-map-hook x '(icomplete-minibuffer-setup-hook) nil nil :repeat))
+   (keyamp--set-map-hook x '(icomplete-minibuffer-setup-hook) nil nil :repeat))
 
   (with-sparse-keymap-x
    (keyamp--map-leaders x '(previous-line . next-line))
@@ -4052,7 +4062,7 @@ of quit minibuffer."
     '((keyamp-insert           . dired-find-file)
       (backward-left-bracket   . dired-jump)
       (forward-right-bracket   . open-in-external-app)
-      (insert-space-before     . dired-omit-mode)
+      (insert-space-before     . ignore)
       (del-word                . dired-unmark-all-marks)
       (backward-del-word       . dired-do-chmod)
       (shrink-whitespaces      . dired-hide-details-mode)
@@ -4083,20 +4093,16 @@ of quit minibuffer."
                     :after 'keyamp-command))
 
 (with-eval-after-load 'dired-utils
-  (keyamp--map dired-mode-map
-    '(("TAB" . dired-leader-map)                 ("<tab>" . dired-leader-map)))
-  (keyamp--map (define-prefix-command 'dired-leader-map)
-    '(("TAB" . dired-omit-mode) ("<tab>" . dired-omit-mode)
-
-      ("q" . dired-image-remove-transparency)  ("e"  . dired-optimize-png)
-      ("u" . dired-2drawing)                   ("o"  . dired-rotate-img-right)
-      ("p" . dired-rotate-img-left)            ("a"  . dired-image-autocrop)
-      ("s" . dired-open-marked)                ("d"  . dired-show-metadata)
-      ("f" . dired-remove-all-metadata)        ("h"  . dired-rotate-img-180)
-      ("k" . dired-rename-space-to-underscore) ("l"  . dired-2png)
-      (";" . dired-scale-image)                ("\'" . dired-zip-enc)
-      ("c" . dired-2jpg)                       ("/"  . dired-zip)
-                                               ("."  . dired-unzip))))
+  (keyamp--map-tab dired-mode-map dired-leader-map)
+  (keyamp--map-tab (define-prefix-command 'dired-leader-map) dired-omit-mode)
+  (keyamp--map dired-leader-map
+    '(("e"  . dired-optimize-png)     ("u" . dired-2drawing)
+      ("o"  . dired-rotate-img-right) ("p" . dired-rotate-img-left)
+      ("a"  . dired-image-autocrop)   ("s" . dired-open-marked)
+      ("d"  . dired-show-metadata)    ("h" . dired-rotate-img-180)
+      ("l"  . dired-2png)             (";" . dired-scale-image)
+      ("\'" . dired-zip-enc)          ("c" . dired-2jpg)
+      ("/"  . dired-zip)              ("." . dired-unzip))))
 
 (advice-add 'beg-of-line-or-buffer :after
             (lambda (&rest r) "stay on row with file in dired"
@@ -4132,9 +4138,9 @@ of quit minibuffer."
       (clean-whitespace        . delete-whitespace-rectangle))))
 
 (with-eval-after-load 'ibuf-ext
+  (keyamp--map-tab ibuffer-mode-map toggle-gnus)
   (keyamp--map ibuffer-mode-map
-    '(("C-h" . ibuffer-do-delete)  ("<double-mouse-1>" . ibuffer-visit-buffer)
-      ("TAB" . toggle-gnus)        ("<tab>"            . toggle-gnus)))
+    '(("C-h" . ibuffer-do-delete) ("<double-mouse-1>" . ibuffer-visit-buffer)))
 
   ;; Same as base map for Screen, constantly available in ibuffer.
   (keyamp--remap ibuffer-mode-map
@@ -4191,11 +4197,10 @@ of quit minibuffer."
 (with-sparse-keymap-x
  (keyamp--map-leaders x '(delete-backward . delete-backward))
  (keyamp--remap x '((delete-backward . ibuffer-do-delete)))
- (keyamp--set-map x '(ibuffer-do-delete) nil nil nil 1))
+ (keyamp--set-map x '(ibuffer-do-delete) nil nil nil 3))
 
 (with-eval-after-load 'company
-  (keyamp--map company-active-map
-    '(("TAB" . company-complete-common) ("<tab>" . company-complete-common)))
+  (keyamp--map-tab company-active-map company-complete-common)
 
   (with-sparse-keymap-x
    (keyamp--map-leaders x '(previous-line . next-line))
@@ -4236,10 +4241,9 @@ of quit minibuffer."
 
   (advice-add 'company-search-candidates :after 'keyamp-insert-init)
 
+  (keyamp--map-tab company-search-map company-search-repeat-forward)
   (keyamp--map company-search-map
     '(("<escape>"  . company-search-abort)
-      ("TAB"       . company-search-repeat-forward)
-      ("<tab>"     . company-search-repeat-forward)
       ("<backtab>" . company-search-repeat-backward)
       ("S-<tab>"   . company-search-repeat-backward)))
 
@@ -4292,14 +4296,9 @@ of quit minibuffer."
     '((keyamp-insert . widget-button-press))))
 
 (with-eval-after-load 'org
-  (keyamp--map org-mode-map
-    '(("TAB" . org-cycle) ("<tab>" . org-cycle)))
+  (keyamp--map-tab org-mode-map org-cycle)
   (keyamp--remap org-mode-map
-    '((eval-last-sexp . insert-date) (insert-date . org-time-stamp)))
-
-  (with-sparse-keymap-x
-   (keyamp--map x '(("TAB" . org-cycle) ("<tab>" . org-cycle)))
-   (keyamp--set-map x '(org-cycle))))
+    '((eval-last-sexp . insert-date) (insert-date . org-time-stamp))))
 
 (with-eval-after-load 'org-agenda
   (keyamp--remap org-agenda-mode-map
@@ -4310,9 +4309,7 @@ of quit minibuffer."
   (keyamp--remap org-mouse-map '((org-open-at-mouse . mouse-set-point))))
 
 (with-eval-after-load 'eww
-  (keyamp--map eww-mode-map
-    '(("TAB"   . View-scroll-half-page-forward)
-      ("<tab>" . View-scroll-half-page-forward)))
+  (keyamp--map-tab eww-mode-map half-page-forward)
   (keyamp--remap eww-mode-map
     '((open-line             . eww-back-url)
       (newline               . eww-next-url)
@@ -4426,11 +4423,8 @@ of quit minibuffer."
    (keyamp--set-map x '(image-decrease-size image-increase-size))))
 
 (with-eval-after-load 'esh-mode
-  (keyamp--map eshell-mode-map
-    '(("C-h"     . eshell-interrupt-process)
-      ("TAB"     . completion-at-point)      ("<tab>" . completion-at-point)
-      ("S-<tab>" . ignore)                   ("<backtab>" . ignore)))
-
+  (keyamp--map-tab eshell-mode-map completion-at-point)
+  (keyamp--map eshell-mode-map '(("C-h" . eshell-interrupt-process)))
   (keyamp--remap eshell-mode-map
     '((cut-line-or-selection . eshell-clear-input)
       (next-eww-buffer       . eshell-clear)
@@ -4461,8 +4455,7 @@ of quit minibuffer."
      '((previous-line . eshell-previous-input)
        (next-line     . eshell-next-input)
        (keyamp-insert . eshell-send-input)))
-   (keyamp--map x
-     '(("TAB" . change-wd) ("<tab>" . change-wd)))
+   (keyamp--map-tab x change-wd)
    (keyamp--set-map x '(eshell-previous-input eshell-search-input) :command)
    (advice-add 'eshell-next-input :after
                (lambda (&rest r) "repeat"
@@ -4480,14 +4473,14 @@ of quit minibuffer."
      '((previous-line . eshell-previous-input)
        (next-line     . eshell-search-input)))
 
+   (keyamp--map-tab x change-wd)
    (keyamp--map x
-     '(("TAB" . change-wd)               ("<tab>" . change-wd)
-       ("i"   . previous-line)           ("ш"     . previous-line)
-       ("v"   . paste-or-paste-previous) ("м"     . paste-or-paste-previous)
-       ("'"   . alternate-buf-or-frame)  ("э"     . alternate-buf-or-frame)
-       ("["   . alternate-buffer)        ("х"     . alternate-buffer)
-       (","   . next-window-or-frame)    ("б"     . next-window-or-frame)
-       ("5"   . terminal)                ("0"     . eshell)))
+     '(("i" . previous-line)           ("ш" . previous-line)
+       ("v" . paste-or-paste-previous) ("м" . paste-or-paste-previous)
+       ("'" . alternate-buf-or-frame)  ("э" . alternate-buf-or-frame)
+       ("[" . alternate-buffer)        ("х" . alternate-buffer)
+       ("," . next-window-or-frame)    ("б" . next-window-or-frame)
+       ("5" . terminal)                ("0" . eshell)))
 
    (keyamp--set-map x '(eshell-send-input eshell-interrupt-process) nil :insert)
    (keyamp--set-map-hook x '(eshell-mode-hook) nil :insert)
@@ -4534,12 +4527,11 @@ of quit minibuffer."
 (advice-add 'completion-at-point :after 'keyamp-insert-init)
 
 (with-eval-after-load 'vterm
+  (keyamp--map-tab vterm-mode-map vterm-send-tab)
   (keyamp--map vterm-mode-map
     '(("C-h" . term-interrupt-subjob) ("C-q" . term-interrupt-subjob)
       ("C-r" . delete-other-windows)  ("C-t" . delete-other-windows)
-      ("C-u" . vterm-send-next-key)
-      ("TAB" . vterm-send-tab)        ("<tab>" . vterm-send-tab)
-      ("<backtab>" . ignore)          ("S-<tab>" . ignore)))
+      ("C-u" . vterm-send-next-key)))
 
   (keyamp--remap vterm-mode-map
     '((select-block            . vterm-up)
@@ -4562,15 +4554,14 @@ of quit minibuffer."
    (keyamp--remap x
      '((previous-line . vterm-up)
        (next-line     . vterm-history-search)))
-
+   (keyamp--map-tab x change-wd)
    (keyamp--map x
-     '(("TAB" . change-wd)               ("<tab>" . change-wd)
-       ("i"   . previous-line)           ("ш"     . previous-line)
-       ("v"   . paste-or-paste-previous) ("м"     . paste-or-paste-previous)
-       ("'"   . alternate-buf-or-frame)  ("э"     . alternate-buf-or-frame)
-       ("["   . alternate-buffer)        ("х"     . alternate-buffer)
-       (","   . next-window-or-frame)    ("б"     . next-window-or-frame)
-       ("5"   . terminal)                ("0"     . eshell)))
+     '(("i" . previous-line)           ("ш" . previous-line)
+       ("v" . paste-or-paste-previous) ("м" . paste-or-paste-previous)
+       ("'" . alternate-buf-or-frame)  ("э" . alternate-buf-or-frame)
+       ("[" . alternate-buffer)        ("х" . alternate-buffer)
+       ("," . next-window-or-frame)    ("б" . next-window-or-frame)
+       ("5" . terminal)                ("0" . eshell)))
 
    (keyamp--set-map x
      '(vterm-send-return term-interrupt-subjob) nil :insert)
@@ -4621,17 +4612,16 @@ of quit minibuffer."
                   (setq this-command 'forward-button)))))
 
 (with-eval-after-load 'gnus-topic
-  (keyamp--map gnus-topic-mode-map
-    '(("<double-mouse-1>" . gnus-topic-select-group)
-      ("TAB" . toggle-ibuffer) ("<tab>" . toggle-ibuffer)))
+  (keyamp--map-tab gnus-topic-mode-map toggle-ibuffer)
+  (keyamp--map gnus-topic-mode-map '(("<double-mouse-1>" . gnus-topic-select-group)))
 
   (keyamp--remap gnus-topic-mode-map
-    '((previous-line       . up-line)
-      (next-line           . down-line)
-      (keyamp-insert       . gnus-topic-select-group)
-      (end-of-lyne         . gnus-topic-goto-next-topic-line)
-      (beg-of-line         . gnus-topic-goto-prev-topic-line)
-      (make-frame-command  . delete-frame)))
+    '((previous-line      . up-line)
+      (next-line          . down-line)
+      (keyamp-insert      . gnus-topic-select-group)
+      (end-of-lyne        . gnus-topic-goto-next-topic-line)
+      (beg-of-line        . gnus-topic-goto-prev-topic-line)
+      (make-frame-command . delete-frame)))
 
   (with-sparse-keymap-x
    (keyamp--map-leaders x '(previous-line . next-line))
@@ -4697,9 +4687,7 @@ of quit minibuffer."
    (keyamp--remap x
      '((open-line . gnus-summary-prev-group)
        (newline   . gnus-summary-next-group)))
-   (keyamp--map x
-     '(("TAB"   . View-scroll-half-page-forward)
-       ("<tab>" . View-scroll-half-page-forward)))
+   (keyamp--map-tab x half-page-forward)
    (keyamp--set-map x
      '(gnus-summary-prev-group gnus-summary-next-group gnus-delete-window-article))
    (keyamp--set-map-hook x '(gnus-summary-prepared-hook)))
@@ -4768,33 +4756,29 @@ of quit minibuffer."
        tetris-move-bottom tetris-move-down))))
 
 (with-eval-after-load 'js-mode
-  (keyamp--map js-mode-map
-    '(("TAB" . js-leader-map)         ("<tab>" . js-leader-map)))
-  (keyamp--map (define-prefix-command 'js-leader-map)
-    '(("TAB" . js-complete-or-indent) ("<tab>" . js-complete-or-indent)
-      ("h" . typescript-compile-file)
-      ("," . js-eval-line) ("." . js-eval-region)))
+  (keyamp--map-tab js-mode-map js-leader-map)
+  (keyamp--map-tab (define-prefix-command 'js-leader-map) js-complete-or-indent)
+  (keyamp--map js-leader-map
+    '(("h" . typescript-compile-file) ("," . js-eval-line) ("." . js-eval-region)))
   (keyamp--remap js-mode-map '((terminal-split . js-format-buffer))))
 
 (with-eval-after-load 'css-mode
-  (keyamp--map css-mode-map
-    '(("TAB" . css-leader-map) ("<tab>" . css-leader-map)))
-  (keyamp--map (define-prefix-command 'css-leader-map)
-    '(("," . css-insert-random-color-hsl)
-      ("TAB" . css-complete-or-indent) ("<tab>" . css-complete-or-indent)
-      ("'" . css-hex-color-to-hsl)     ("a" . css-complete-symbol)
+  (keyamp--map-tab css-mode-map css-leader-map)
+  (keyamp--map-tab (define-prefix-command 'css-leader-map) css-complete-or-indent)
+  (keyamp--map css-leader-map
+    '(("'" . css-hex-color-to-hsl)     ("a" . css-complete-symbol)
       ("h" . css-format-compact)       ("p" . css-format-compact-buffer)
       ("o" . css-format-expand-buffer) ("k" . css-format-expand)))
   (keyamp--remap css-mode-map '((open-line . css-smart-newline))))
 
 (with-eval-after-load 'html-mode
+  (keyamp--map-tab html-mode-map html-leader-map)
   (keyamp--map html-mode-map
-    '(("TAB" . html-leader-map)      ("<tab>" . html-leader-map)
-      ("RET" . html-open-local-link) ("<return>" . html-open-local-link)
+    '(("RET" . html-open-local-link) ("<return>" . html-open-local-link)
       ("C-r" . html-open-in-browser)))
-  (keyamp--map (define-prefix-command 'html-leader-map)
-    '(("TAB" . html-insert-tag)    ("<tab>"    . html-insert-tag)
-      ("RET" . html-insert-br-tag) ("<return>" . html-insert-br-tag)
+  (keyamp--map-tab (define-prefix-command 'html-leader-map) html-insert-tag)
+  (keyamp--map html-leader-map
+    '(("RET" . html-insert-br-tag) ("<return>" . html-insert-br-tag)
 
       ("<left>"  . html-prev-opening-tag)
       ("<right>" . html-next-opening-tag)
@@ -4869,14 +4853,13 @@ of quit minibuffer."
       ("/ l" . html-open-in-safari))))
 
 (with-eval-after-load 'find-replace
+  (keyamp--map-tab find-output-mode-map find-next-match)
   (keyamp--map find-output-mode-map
-    '(("TAB"       . find-next-match)     ("<tab>"   . find-next-match)
-      ("<backtab>" . find-previous-match) ("S-<tab>" . find-previous-match)))
+    '(("<backtab>" . find-previous-match) ("S-<tab>" . find-previous-match)))
   (keyamp--remap find-output-mode-map '((keyamp-insert . find--jump-to-place)))
 
   (with-sparse-keymap-x
    (keyamp--map-leaders x '(backward-char . forward-char))
-   (keyamp--map x '(("TAB" . find-next-match) ("<tab>" . find-next-match)))
    (keyamp--remap x
      '((previous-line . find-previous-file)  (next-line    . find-next-file)
        (backward-char . find-previous-match) (forward-char . find-next-match)))
@@ -4885,9 +4868,7 @@ of quit minibuffer."
        find-previous-match find-next-file))))
 
 (with-eval-after-load 'emacs-lisp-mode
-  (keyamp--map emacs-lisp-mode-map
-    '(("TAB" . emacs-lisp-indent) ("<tab>" . emacs-lisp-indent)
-      ("S-<tab>" . ignore)        ("<backtab>" . ignore)))
+  (keyamp--map-tab emacs-lisp-mode-map emacs-lisp-indent)
   (keyamp--remap emacs-lisp-mode-map
     '((terminal-split . emacs-lisp-remove-paren-pair))))
 
@@ -4902,9 +4883,9 @@ of quit minibuffer."
                     nil nil nil 1))
 
 (with-eval-after-load 'python-mode
+  (keyamp--map-tab python-mode-map python-indent-or-complete)
   (keyamp--map python-mode-map
-    '(("TAB" . python-indent-or-complete) ("<tab>"     . python-indent-or-complete)
-      ("RET" . python-return-and-indent)  ("<return>"  . python-return-and-indent)
+    '(("RET" . python-return-and-indent)  ("<return>"  . python-return-and-indent)
       ("S-<tab>" . python-de-indent)      ("<backtab>" . python-de-indent)))
 
   (keyamp--remap python-mode-map
@@ -4912,17 +4893,15 @@ of quit minibuffer."
       (terminal-split . python-format-buffer))))
 
 (with-eval-after-load 'go-ts-mode
-  (keyamp--map go-ts-mode-map
-    '(("TAB"     . company-manual-begin) ("<tab>"     . company-manual-begin)
-      ("S-<tab>" . ignore)               ("<backtab>" . ignore)))
-
+  (keyamp--map-tab go-ts-mode-map company-manual-begin)
   (keyamp--remap go-ts-mode-map
     '((describe-foo-at-point       . xref-find-definitions)
       (describe-variable           . xref-find-references)
       (mark-defun                  . go-mark-defun)
       (eval-defun                  . go-vet-project)
       (elisp-eval-region-or-buffer . test)
-      (eval-last-sexp              . server))))
+      (eval-last-sexp              . server)
+      (reformat-lines              . eglot-reconnect))))
 
 (with-sparse-keymap-x
  (keyamp--map-leaders x '(xref-go-back . xref-find-definitions))
@@ -4933,10 +4912,8 @@ of quit minibuffer."
     '((keyamp-insert . xref-show-location-at-point))))
 
 (with-eval-after-load 'sh-script
-  (keyamp--map bash-ts-mode-map
-    '(("TAB" . indent-for-tab-command) ("<tab>" . indent-for-tab-command)))
-  (keyamp--map sh-mode-map ; shebang prevents ts mode auto load
-    '(("TAB" . indent-for-tab-command)  ("<tab>" . indent-for-tab-command))))
+  (keyamp--map-tab bash-ts-mode-map indent-for-tab-command)
+  (keyamp--map-tab sh-mode-map indent-for-tab-command))
 
 (with-eval-after-load 'sqlite-mode
   (keyamp--remap sqlite-mode-map
@@ -4972,7 +4949,7 @@ of quit minibuffer."
       (undo            . delete-window)))
   (with-sparse-keymap-x
    (keyamp--map-leaders x '(calendar-scroll-right . calendar-scroll-left))
-   (keyamp--map x '(("TAB" . calendar-other-month) ("<tab>" . calendar-other-month)))
+   (keyamp--map-tab x calendar-other-month)
    (keyamp--set-map x
      '(calendar-scroll-left calendar-scroll-right calendar-goto-today))))
 
@@ -5170,8 +5147,8 @@ of quit minibuffer."
                  text-scale-increase              t
                  text-scale-reset                 t
                  up-line                          t
-                 View-scroll-half-page-backward   t
-                 View-scroll-half-page-forward    t
+                 half-page-backward               t
+                 half-page-forward                t
                  vterm-down                       t
                  vterm-send-return                t
                  vterm-up                         t
