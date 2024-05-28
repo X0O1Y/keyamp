@@ -19,8 +19,8 @@
 
 ;; Repeat mode pushes transient remaps to keymap stack on top of
 ;; command mode for easy repeat of command chains during screen
-;; positioning, cursor move and editing. Point color indicates
-;; transient remap is active. ESDF and IJKL are mostly used, DEL/ESC
+;; positioning, cursor move and editing. Cursor shape indicates
+;; active transient keymap. ESDF and IJKL are mostly used, DEL/ESC
 ;; and RET/SPC control EVERYTHING. Home row and thumb cluster only.
 ;; Repeat mode turned on/off *automatically* either by post command
 ;; hook or with idle timer.
@@ -1487,22 +1487,27 @@ If region is active, extend selection downward by block."
   "Select current line. If region is active, extend selection downward by line.
 If `visual-line-mode' is on, consider line as visual line."
   (interactive)
-  (push-mark (point) t nil)
-  (if (region-active-p)
+  (when (bolp)
+    (if (eq major-mode 'ibuffer-mode)
+        (ibuffer-backward-filter-group)
+      (beg-of-line-or-block)))
+  (unless (bolp)
+    (push-mark (point) t nil)
+    (if (region-active-p)
+        (if visual-line-mode
+            (let ((xp1 (point)))
+              (end-of-visual-line 1)
+              (when (eq xp1 (point))
+                (end-of-visual-line 2)))
+          (forward-line 1)
+          (end-of-line))
       (if visual-line-mode
-          (let ((xp1 (point)))
-            (end-of-visual-line 1)
-            (when (eq xp1 (point))
-              (end-of-visual-line 2)))
-        (forward-line 1)
-        (end-of-line))
-    (if visual-line-mode
-        (progn
-          (beginning-of-visual-line)
-          (push-mark (point) t t)
-          (end-of-visual-line))
-      (push-mark (line-beginning-position) t t)
-      (end-of-line))))
+          (progn
+            (beginning-of-visual-line)
+            (push-mark (point) t t)
+            (end-of-visual-line))
+        (push-mark (line-beginning-position) t t)
+        (end-of-line)))))
 
 (defvar extend-selection-defer-timer nil "Defer `extend-selection' timer.")
 (defvar cur-highlight-regexp nil "Current highlight regexp.")
@@ -1654,14 +1659,20 @@ This command ignores nesting. For example, if text is
     (a(b)c▮)
 the selected char is “c”, not “a(b)c”."
   (interactive)
-  (push-mark (point) t nil)
-  (let ((xskipChars (concat "^\"`'" (mapconcat #'identity brackets ""))))
-    (skip-chars-backward xskipChars)
-    (setq xskipChar (buffer-substring-no-properties (- (point) 1) (point)))
-    (if (member xskipChar left-brackets)
-        (setq xskipChar (cdr (assoc xskipChar pair-brackets))))
-    (push-mark (point) t t)
-    (skip-chars-forward (concat "^" xskipChar))))
+  (when (bolp)
+    (if (eq major-mode 'ibuffer-mode)
+        (ibuffer-forward-filter-group)
+      (end-of-line) ; go next block right away
+      (end-of-line-or-block)))
+  (unless (bolp)
+    (push-mark (point) t nil)
+    (let ((xskipChars (concat "^\"`'" (mapconcat #'identity brackets ""))))
+      (skip-chars-backward xskipChars)
+      (setq xskipChar (buffer-substring-no-properties (- (point) 1) (point)))
+      (if (member xskipChar left-brackets)
+          (setq xskipChar (cdr (assoc xskipChar pair-brackets))))
+      (push-mark (point) t t)
+      (skip-chars-forward (concat "^" xskipChar)))))
 
 
 ;; misc
@@ -2620,7 +2631,8 @@ This checks in turn:
                        (let ((obj (read (current-buffer))))
                          (and (symbolp obj) (fboundp obj) obj))))))
       (describe-function xsym))
-     ((setq xsym (variable-at-point)) (describe-variable xsym))))
+     ((setq xsym (variable-at-point))
+      (describe-variable xsym))))
   (setq this-command 'split-window-below))
 
 (defun dired-trash-move-adjust (fun &rest r)
@@ -2756,17 +2768,13 @@ Use as around advice e.g. for mouse left click after double click."
 
 (defconst keyamp-karabiner-cli
   "/Library/Application Support/org.pqrs/Karabiner-Elements/bin/karabiner_cli"
-  "Karabiner-Elements CLI executable. Optional for state sync.")
+  "Karabiner-Elements CLI executable. Optional for mode sync.")
 
+;; Indicate mode in terminal
 (defconst keyamp-command-indicator "🟢" "Command mode.")
 (defconst keyamp-insert-indicator  "🟠" "Repeat edit.")
 (defconst keyamp-repeat-indicator  "🔵" "Repeat view.")
 (defconst keyamp-screen-indicator  "🟣" "Repeat screen.")
-
-(defconst keyamp-command-cursor "LawnGreen"      "Color command or insert.")
-(defconst keyamp-insert-cursor  "Gold"           "Color repeat edit.")
-(defconst keyamp-repeat-cursor  "DeepSkyBlue"    "Color repeat view.")
-(defconst keyamp-screen-cursor  "LightSlateBlue" "Color repeat screen.")
 
 (defconst keyamp-idle-timeout (* 3 60)
   "Idle timeout for keymaps without self timeout.")
@@ -3698,16 +3706,13 @@ is enabled.")
 
 (with-sparse-keymap-x
  ;; DEL SPC prefix command.
- ;; DEL SPC SPC to call `end-of-line-or-block'. Hold down SPC to repeat.
- ;; Defer must be too hight because of hold down timeout after first SPC.
- (keyamp--map-leaders x '(prev-eww-buffer . end-of-line-or-block))
+ (keyamp--map-leaders x '(beg-of-line-or-block . end-of-line-or-block))
  (keyamp--remap x '((keyamp-escape . return-before)))
  (keyamp--set-map x '(select-text-in-quote)))
 
 (with-sparse-keymap-x
  ;; SPC DEL prefix command.
- ;; SPC DEL DEL to call `beg-of-line-or-block'. Hold down DEL to repeat.
- (keyamp--map-leaders x '(beg-of-line-or-block . tasks))
+ (keyamp--map-leaders x '(beg-of-line-or-block . end-of-line-or-block))
  (keyamp--remap x '((keyamp-escape . return-before)))
  (keyamp--set-map x '(select-line)))
 
@@ -4170,8 +4175,7 @@ of quit minibuffer."
       (copy-to-register        . sql)))
 
   (keyamp--map ibuffer-mode-filter-group-map
-    '(("C-h" . help-command) ("<mouse-1>" . mouse-set-point)
-      ("<double-mouse-1>" . ibuffer-toggle-filter-group)))
+    '(("C-h" . help-command) ("<mouse-1>" . ibuffer-toggle-filter-group)))
 
   (keyamp--remap ibuffer-mode-filter-group-map
     '((keyamp-insert . ibuffer-toggle-filter-group)))
@@ -4215,8 +4219,10 @@ of quit minibuffer."
 
    (keyamp--set-map x
      '(company-select-previous company-select-next company-previous-page
-       company-next-page company-show-doc-buffer company-search-abort))
+       company-next-page company-show-doc-buffer company-search-abort
+       company-manual-begin))
 
+   (advice-add 'company-manual-begin :before 'keyamp-command)
    (add-hook 'keyamp-command-hook
              (lambda ()
                (when company-candidates
@@ -4499,7 +4505,7 @@ of quit minibuffer."
                  (when (eq major-mode 'eshell-mode)
                    (set-transient-map x)
                    (setq mode-line-front-space keyamp-repeat-indicator)
-                   (set-face-background 'cursor keyamp-repeat-cursor)
+                   (modify-all-frames-parameters '((cursor-type . hollow)))
                    (setq keyamp-repeat-p t)
                    (setq this-command 'keyamp--repeat-dummy)))))
 
@@ -4572,7 +4578,7 @@ of quit minibuffer."
                  (when (eq major-mode 'vterm-mode)
                    (set-transient-map x)
                    (setq mode-line-front-space keyamp-repeat-indicator)
-                   (set-face-background 'cursor keyamp-repeat-cursor)
+                   (modify-all-frames-parameters '((cursor-type . hollow)))
                    (setq keyamp-repeat-p t)
                    (setq this-command 'keyamp--repeat-dummy))))
 
@@ -4870,7 +4876,7 @@ of quit minibuffer."
 (with-eval-after-load 'emacs-lisp-mode
   (keyamp--map-tab emacs-lisp-mode-map emacs-lisp-indent)
   (keyamp--remap emacs-lisp-mode-map
-    '((terminal-split . emacs-lisp-remove-paren-pair))))
+    '((reformat-lines . emacs-lisp-remove-paren-pair))))
 
 (with-sparse-keymap-x
  (keyamp--map-leaders x '(backward-char . forward-char))
@@ -5003,7 +5009,7 @@ of quit minibuffer."
                  (when (eq major-mode 'calc-mode)
                    (set-transient-map x)
                    (setq mode-line-front-space keyamp-repeat-indicator)
-                   (set-face-background 'cursor keyamp-repeat-cursor)
+                   (modify-all-frames-parameters '((cursor-type . hollow)))
                    (setq keyamp-repeat-p t)
                    (setq this-command 'keyamp--repeat-dummy))))))
 
@@ -5075,9 +5081,10 @@ of quit minibuffer."
                  calendar-goto-today              t
                  calendar-scroll-left             t
                  calendar-scroll-right            t
+                 company-manual-begin             t
+                 company-next-page                t
                  company-select-previous          t
                  company-select-next              t
-                 company-next-page                t
                  company-previous-page            t
                  copy-line-or-selection           t
                  dired-mark                       t
@@ -5212,36 +5219,31 @@ of quit minibuffer."
   (cond
    ((equal prefix-arg (list 4)) ; universal-argument
     (setq mode-line-front-space keyamp-insert-indicator)
-    (set-face-background 'cursor keyamp-insert-cursor)
-    (modify-all-frames-parameters '((cursor-type . box))))
+    (modify-all-frames-parameters '((cursor-type . bar))))
    ((gethash this-command keyamp-screen-commands-hash)
     (setq mode-line-front-space keyamp-screen-indicator)
-    (set-face-background 'cursor keyamp-screen-cursor)
-    (modify-all-frames-parameters '((cursor-type . box)))
+    (modify-all-frames-parameters '((cursor-type . nil)))
     (setq keyamp-repeat-p t))
    ((or (eq real-this-command 'repeat)
         (and (gethash this-command keyamp-repeat-commands-hash)
              (not keyamp-insert-p)))
     (setq mode-line-front-space keyamp-repeat-indicator)
-    (set-face-background 'cursor keyamp-repeat-cursor)
-    (modify-all-frames-parameters '((cursor-type . box)))
+    (modify-all-frames-parameters '((cursor-type . hollow)))
     (setq keyamp-repeat-p t))
    ((and (gethash this-command keyamp-edit-commands-hash)
          (not keyamp-insert-p))
     (setq mode-line-front-space keyamp-insert-indicator)
-    (set-face-background 'cursor keyamp-insert-cursor)
-    (modify-all-frames-parameters '((cursor-type . box)))
+    (modify-all-frames-parameters '((cursor-type . bar)))
     (setq keyamp-repeat-p t))
    (keyamp-insert-p
     (setq mode-line-front-space keyamp-insert-indicator)
-    (set-face-background 'cursor keyamp-command-cursor)
     (modify-all-frames-parameters '((cursor-type . hbar))))
    (t
     (setq mode-line-front-space keyamp-command-indicator)
-    (set-face-background 'cursor keyamp-command-cursor)
     (setq keyamp-repeat-p nil)
     (modify-all-frames-parameters '((cursor-type . box)))))
-  (unless (eq this-command last-command)
+  (when (and (not (eq this-command last-command))
+             (not (display-graphic-p)))
     (force-mode-line-update t)))
 
 (defun keyamp-escape ()
