@@ -1488,9 +1488,10 @@ If region is active, extend selection downward by block."
 If `visual-line-mode' is on, consider line as visual line."
   (interactive)
   (when (bolp)
-    (if (eq major-mode 'ibuffer-mode)
-        (ibuffer-backward-filter-group)
-      (beg-of-line-or-block)))
+    (cond
+     ((eq major-mode 'ibuffer-mode) (ibuffer-backward-filter-group))
+     ((eq major-mode 'gnus-group-mode) (gnus-topic-goto-previous-topic 1))
+     (t (beg-of-line-or-block))))
   (unless (bolp)
     (push-mark (point) t nil)
     (if (region-active-p)
@@ -1660,10 +1661,11 @@ This command ignores nesting. For example, if text is
 the selected char is “c”, not “a(b)c”."
   (interactive)
   (when (bolp)
-    (if (eq major-mode 'ibuffer-mode)
-        (ibuffer-forward-filter-group)
-      (end-of-line) ; go next block right away
-      (end-of-line-or-block)))
+    (cond
+     ((eq major-mode 'ibuffer-mode) (ibuffer-forward-filter-group))
+     ((eq major-mode 'gnus-group-mode) (gnus-topic-goto-next-topic-line))
+     (t (end-of-line)
+        (end-of-line-or-block))))
   (unless (bolp)
     (push-mark (point) t nil)
     (let ((xskipChars (concat "^\"`'" (mapconcat #'identity brackets ""))))
@@ -1988,7 +1990,7 @@ for confirmation."
         (if (string-match-p "\\`https?://www.youtube.com" xpath)
             (movie xpath)
           (browse-url xpath))
-      (progn ; not starting http://
+      (progn
         (if (string-match "#" xpath)
             (let ((xfpath (substring xpath 0 (match-beginning 0)))
                   (xfractPart (substring xpath (1+ (match-beginning 0)))))
@@ -2010,15 +2012,10 @@ for confirmation."
                   (when (y-or-n-p (format "No file %s. Create?" xfpath))
                     (find-file xfpath))))
             (if (file-exists-p xpath)
-                (progn ; open f.ts instead of f.js
-                  (let ((xext (file-name-extension xpath))
-                        (xfnamecore (file-name-sans-extension xpath)))
-                    (if (and (string-equal xext "js")
-                             (file-exists-p (concat xfnamecore ".ts")))
-                        (find-file (concat xfnamecore ".ts"))
-                      (if (> (length xpath) 0)
-                          (find-file xpath)
-                        (delete-other-windows)))))
+                (if (and (> (length xpath) 0)
+                         (not (string-equal xpath "//")))
+                    (find-file xpath)
+                  (delete-other-windows))
               (if (file-exists-p (concat xpath ".el"))
                   (find-file (concat xpath ".el"))
                 (delete-other-windows)))))))))
@@ -2587,7 +2584,7 @@ Show current agenda. Do not select other window, balance windows."
         (let ((xres (shell-command-to-string
                      (format "sqlite3 <<EOF\n%s\nEOF" xquery))))
           (if (> (length xres) 0) (insert xres) (insert "No rows\n"))))
-      (insert (concat (make-string 79 45) "\n")))
+      (insert (concat (make-string 89 45) "\n")))
     (set-mark-command t)
     (other-window 1)))
 
@@ -3056,8 +3053,7 @@ It is possible to have QWERTY keyboard using ANY custom layout in Emacs only."
               (keymap-set key-translation-map
                           (car x)
                           (if (get 'keyamp-qwerty-to-current-layout 'state)
-                              (cdr x))))
-          xl)))
+                              (cdr x)))) xl)))
 
 
 ;; keymaps
@@ -3489,7 +3485,7 @@ is enabled.")
      (cut-text-block          . calc)
      (jump-mark               . view-echo-area-messages)
      (shrink-whitespaces      . split-window-below)
-     (delete-backward         . toggle-ibuffer)
+     (delete-backward         . delete-other-windows)
      (set-mark-command        . new-empty-buffer)
      (cut-line-or-selection   . prev-eww-buffer)
      (copy-line-or-selection  . agenda)
@@ -3747,7 +3743,7 @@ is enabled.")
  ;; Repeat move by words with DEL/SPC.
  (keyamp--map-leaders x '(back-word . forw-word))
  (keyamp--remap x '((backward-char . back-word) (forward-char . forw-word)))
- (keyamp--set-map x '(back-word forw-word) nil nil nil 1))
+ (keyamp--set-map x '(back-word forw-word) nil nil nil 0.5))
 
 (with-sparse-keymap-x
  ;; Repeat move by punct with U/O or DEL/SPC.
@@ -4163,7 +4159,7 @@ of quit minibuffer."
       (jump-mark               . view-echo-area-messages)
       (shrink-whitespaces      . split-window-below)
       (open-line               . prev-user-buffer)
-      (delete-backward         . toggle-ibuffer)
+      (delete-backward         . delete-other-windows)
       (newline                 . next-user-buffer)
       (set-mark-command        . new-empty-buffer)
       (cut-line-or-selection   . prev-eww-buffer)
@@ -4227,7 +4223,7 @@ of quit minibuffer."
              (lambda ()
                (when company-candidates
                  (setq keyamp--deactivate-repeat-mode-fun
-                           (set-transient-map x))
+                       (set-transient-map x))
                  (setq this-command 'keyamp--repeat-dummy)))))
 
   (with-sparse-keymap-x
@@ -4235,6 +4231,8 @@ of quit minibuffer."
    ;; then activate insert mode and insert SPC. DEL to undo the completion.
    (advice-add-macro '(company-search-abort company-complete-selection)
                      :after (lambda (&rest r) "`keyamp-command'"
+                              (if keyamp--deactivate-repeat-mode-fun
+                                  (funcall keyamp--deactivate-repeat-mode-fun))
                               (if keyamp-insert-p (keyamp-command))))
 
    (defun keyamp-insert-and-SPC ()
@@ -4622,12 +4620,14 @@ of quit minibuffer."
   (keyamp--map gnus-topic-mode-map '(("<double-mouse-1>" . gnus-topic-select-group)))
 
   (keyamp--remap gnus-topic-mode-map
-    '((previous-line      . up-line)
-      (next-line          . down-line)
-      (keyamp-insert      . gnus-topic-select-group)
-      (end-of-lyne        . gnus-topic-goto-next-topic-line)
-      (beg-of-line        . gnus-topic-goto-prev-topic-line)
-      (make-frame-command . delete-frame)))
+    '((previous-line        . up-line)
+      (next-line            . down-line)
+      (keyamp-insert        . gnus-topic-select-group)
+      (end-of-lyne          . gnus-topic-goto-next-topic-line)
+      (beg-of-line          . gnus-topic-goto-prev-topic-line)
+      (end-of-line-or-block . gnus-topic-goto-next-topic-line)
+      (beg-of-line-or-block . gnus-topic-goto-prev-topic-line)
+      (make-frame-command   . delete-frame)))
 
   (with-sparse-keymap-x
    (keyamp--map-leaders x '(previous-line . next-line))
@@ -4637,10 +4637,12 @@ of quit minibuffer."
   (with-sparse-keymap-x
    (keyamp--map-leaders x '(previous-line . next-line))
    (keyamp--remap x
-     '((previous-line . gnus-topic-goto-prev-topic-line)
-       (next-line     . gnus-topic-goto-next-topic-line)
-       (beg-of-line   . gnus-beg-of-line-or-buffer)
-       (end-of-lyne   . gnus-end-of-line-or-buffer)))
+     '((previous-line        . gnus-topic-goto-prev-topic-line)
+       (next-line            . gnus-topic-goto-next-topic-line)
+       (beg-of-line          . gnus-beg-of-line-or-buffer)
+       (end-of-lyne          . gnus-end-of-line-or-buffer)
+       (end-of-line-or-block . gnus-beg-of-line-or-buffer)
+       (beg-of-line-or-block . gnus-end-of-line-or-buffer)))
 
    (keyamp--set-map x
      '(gnus-topic-goto-prev-topic-line gnus-topic-goto-next-topic-line
@@ -4648,10 +4650,23 @@ of quit minibuffer."
 
 (with-eval-after-load 'gnus-group
   (keyamp--remap gnus-group-mode-map
-    '((undo            . gnus-group-enter-server-mode)
-      (delete-backward . gnus-group-get-new-news)
-      (open-line       . prev-user-buffer)
-      (newline         . next-user-buffer))))
+    '((backward-del-word       . sun-moon)
+      (undo                    . delete-window)
+      (del-word                . gnus-group-enter-server-mode)
+      (cut-text-block          . calc)
+      (jump-mark               . view-echo-area-messages)
+      (shrink-whitespaces      . split-window-below)
+      (open-line               . prev-user-buffer)
+      (delete-backward         . gnus-group-get-new-news)
+      (newline                 . next-user-buffer)
+      (set-mark-command        . new-empty-buffer)
+      (cut-line-or-selection   . prev-eww-buffer)
+      (copy-line-or-selection  . agenda)
+      (paste-or-paste-previous . tasks)
+      (backward-left-bracket   . downloads)
+      (forward-right-bracket   . player)
+      (kmacro-helper           . config)
+      (copy-to-register        . sql))))
 
 (with-eval-after-load 'gnus-art
   (keyamp--remap gnus-mime-button-map
@@ -4933,7 +4948,7 @@ of quit minibuffer."
     '((eval-defun . exec-query) (sql . toggle-sql-type)))
   (with-sparse-keymap-x
    (keyamp--remap x '((copy-to-register . toggle-sql-type)))
-   (keyamp--set-map x '(sql toggle-sql-type))))
+   (keyamp--set-map x '(sql toggle-sql-type exec-query))))
 
 (with-eval-after-load 'speedbar
   (keyamp--remap speedbar-mode-map
@@ -4962,12 +4977,12 @@ of quit minibuffer."
 (with-eval-after-load 'simple
   (keyamp--remap messages-buffer-mode-map
     '((undo            . delete-window)
-      (delete-backward . toggle-ibuffer)
+      (delete-backward . delete-other-windows)
       (open-line       . prev-user-buffer)
       (newline         . next-user-buffer)))
   (keyamp--remap special-mode-map
     '((undo            . delete-window)
-      (delete-backward . toggle-ibuffer)
+      (delete-backward . delete-other-windows)
       (open-line       . prev-user-buffer)
       (newline         . next-user-buffer))))
 
@@ -5222,13 +5237,15 @@ of quit minibuffer."
     (modify-all-frames-parameters '((cursor-type . bar))))
    ((gethash this-command keyamp-screen-commands-hash)
     (setq mode-line-front-space keyamp-screen-indicator)
-    (modify-all-frames-parameters '((cursor-type . nil)))
+    (modify-all-frames-parameters '((cursor-type . hollow)))
     (setq keyamp-repeat-p t))
    ((or (eq real-this-command 'repeat)
         (and (gethash this-command keyamp-repeat-commands-hash)
              (not keyamp-insert-p)))
     (setq mode-line-front-space keyamp-repeat-indicator)
-    (modify-all-frames-parameters '((cursor-type . hollow)))
+    (modify-all-frames-parameters '((cursor-type . (hbar . 24))))
+    (if (eq major-mode 'eww-mode) ; reading
+        (modify-all-frames-parameters '((cursor-type . nil))))
     (setq keyamp-repeat-p t))
    ((and (gethash this-command keyamp-edit-commands-hash)
          (not keyamp-insert-p))
