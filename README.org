@@ -114,15 +114,8 @@ Emacs in pocket with unicode support. [[https://apps.apple.com/us/app/termius-te
   mosh-server new -s -c 256 -l LANG=en_US.UTF-8 -- tmux -u new -As0 'emacs'
 #+end_src
 
-- Use [[https://github.com/justbur/emacs-which-key][which-key]] for binding completion
-- Emacs in [[https://ish.app/][iSH]] - offline local access on iOS from Termius
-- Nord theme for Emacs and Termius
-- Color mode indicators
-
 * Split keyboard
 
 - Kinesis Advantage2 [[http://www.keyboard-layout-editor.com/#/gists/6a1a62133ab9f741589bd556cb946792][layout]] and [[file:layouts/qwerty2.txt][config]]:
 
 [[screenshots/advantage2.png]]
-
-- Vimium mappings: [[file:layouts/vimium-options.json][vimium-options.json]]
