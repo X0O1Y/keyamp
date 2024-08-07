@@ -1179,6 +1179,83 @@
                         ]
                     },
                     {
+                        "description": "open_bracket",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Emacs"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 0
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "open_bracket",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "open_bracket"
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "key_code": "equal_sign",
+                                        "modifiers": [
+                                            "left_shift",
+                                            "left_control"
+                                        ]
+                                    },
+                                    {
+                                        "halt": true,
+                                        "key_code": "open_bracket",
+                                        "repeat": false
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Emacs"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "open_bracket",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "open_bracket"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
                         "description": "close_bracket",
                         "manipulators": [
                             {
@@ -3351,7 +3428,7 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "key_code": "7"
+                                        "key_code": "1"
                                     }
                                 ],
                                 "to_if_held_down": [
@@ -3364,7 +3441,7 @@
                                     },
                                     {
                                         "halt": true,
-                                        "key_code": "7",
+                                        "key_code": "1",
                                         "repeat": false
                                     }
                                 ],
@@ -3636,7 +3713,7 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "key_code": "5"
+                                        "key_code": "2"
                                     }
                                 ],
                                 "to_if_held_down": [
@@ -3649,7 +3726,7 @@
                                     },
                                     {
                                         "halt": true,
-                                        "key_code": "5",
+                                        "key_code": "2",
                                         "repeat": false
                                     }
                                 ],
@@ -3921,7 +3998,7 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "key_code": "1"
+                                        "key_code": "3"
                                     }
                                 ],
                                 "to_if_held_down": [
@@ -3934,7 +4011,7 @@
                                     },
                                     {
                                         "halt": true,
-                                        "key_code": "1",
+                                        "key_code": "3",
                                         "repeat": false
                                     }
                                 ],
@@ -4206,7 +4283,7 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "key_code": "3"
+                                        "key_code": "4"
                                     }
                                 ],
                                 "to_if_held_down": [
@@ -4219,7 +4296,7 @@
                                     },
                                     {
                                         "halt": true,
-                                        "key_code": "3",
+                                        "key_code": "4",
                                         "repeat": false
                                     }
                                 ],
@@ -4491,7 +4568,7 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "key_code": "9"
+                                        "key_code": "5"
                                     }
                                 ],
                                 "to_if_held_down": [
@@ -4504,7 +4581,7 @@
                                     },
                                     {
                                         "halt": true,
-                                        "key_code": "9",
+                                        "key_code": "5",
                                         "repeat": false
                                     }
                                 ],
@@ -4776,7 +4853,7 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "key_code": "8"
+                                        "key_code": "6"
                                     }
                                 ],
                                 "to_if_held_down": [
@@ -4789,7 +4866,7 @@
                                     },
                                     {
                                         "halt": true,
-                                        "key_code": "8",
+                                        "key_code": "6",
                                         "repeat": false
                                     }
                                 ],
@@ -5061,7 +5138,7 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "key_code": "2"
+                                        "key_code": "7"
                                     }
                                 ],
                                 "to_if_held_down": [
@@ -5074,7 +5151,7 @@
                                     },
                                     {
                                         "halt": true,
-                                        "key_code": "2",
+                                        "key_code": "7",
                                         "repeat": false
                                     }
                                 ],
@@ -5346,7 +5423,7 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "key_code": "0"
+                                        "key_code": "8"
                                     }
                                 ],
                                 "to_if_held_down": [
@@ -5359,7 +5436,7 @@
                                     },
                                     {
                                         "halt": true,
-                                        "key_code": "0",
+                                        "key_code": "8",
                                         "repeat": false
                                     }
                                 ],
@@ -5631,7 +5708,7 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "key_code": "4"
+                                        "key_code": "9"
                                     }
                                 ],
                                 "to_if_held_down": [
@@ -5644,7 +5721,7 @@
                                     },
                                     {
                                         "halt": true,
-                                        "key_code": "4",
+                                        "key_code": "9",
                                         "repeat": false
                                     }
                                 ],
@@ -5916,7 +5993,7 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "key_code": "6"
+                                        "key_code": "0"
                                     }
                                 ],
                                 "to_if_held_down": [
@@ -5929,7 +6006,7 @@
                                     },
                                     {
                                         "halt": true,
-                                        "key_code": "6",
+                                        "key_code": "0",
                                         "repeat": false
                                     }
                                 ],
@@ -6436,6 +6513,66 @@
                         ]
                     },
                     {
+                        "description": "left_control",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Terminal"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "left_control",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "left_control",
+                                        "lazy": true
+                                    }
+                                ],
+                                "to_if_alone": [
+                                    {
+                                        "key_code": "h",
+                                        "modifiers": [
+                                            "command"
+                                        ]
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "left_control",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "left_control",
+                                        "lazy": true
+                                    }
+                                ],
+                                "to_if_alone": [
+                                    {
+                                        "shell_command": "open -a Terminal"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
                         "description": "left_option",
                         "manipulators": [
                             {
@@ -6489,6 +6626,100 @@
                                 "to_if_alone": [
                                     {
                                         "shell_command": "open -a 'System Settings'"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "f1",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Brave Browser"
+                                        ],
+                                        "type": "frontmost_application_unless"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f1",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "repeat": false,
+                                        "select_input_source": {
+                                            "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+                                        }
+                                    },
+                                    {
+                                        "shell_command": "open -a 'Brave Browser'"
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Brave Browser"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f1",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "repeat": false,
+                                        "select_input_source": {
+                                            "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+                                        }
+                                    },
+                                    {
+                                        "key_code": "h",
+                                        "modifiers": [
+                                            "command"
+                                        ]
+                                    },
+                                    {
+                                        "shell_command": "open -a 'Emacs'"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "f2",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "f2"
+                                },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "display_brightness_increment"
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "display_brightness_decrement",
+                                        "repeat": true
                                     }
                                 ],
                                 "type": "basic"
@@ -6761,6 +6992,28 @@
                         ]
                     },
                     {
+                        "description": "f7",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "f7",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to_after_key_up": [
+                                    {
+                                        "halt": true,
+                                        "shell_command": "~/.pbcopy.sh"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
                         "description": "f8",
                         "manipulators": [
                             {
@@ -6774,7 +7027,7 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(emms-pause)'"
+                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(play-pause)'"
                                     }
                                 ],
                                 "to_if_held_down": [
@@ -6802,13 +7055,13 @@
                                 },
                                 "to_after_key_up": [
                                     {
-                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(emms-seek-forward-or-next)'"
+                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(play-next)'"
                                     }
                                 ],
                                 "to_if_held_down": [
                                     {
                                         "halt": true,
-                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(emms-seek-backward-or-previous)'"
+                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(play-prev)'"
                                     }
                                 ],
                                 "type": "basic"
@@ -6866,6 +7119,77 @@
                                     {
                                         "halt": true,
                                         "shell_command": "open -a Karabiner-EventViewer"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "f13",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Brave Browser"
+                                        ],
+                                        "type": "frontmost_application_unless"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f13",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "repeat": false,
+                                        "select_input_source": {
+                                            "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+                                        }
+                                    },
+                                    {
+                                        "shell_command": "open -a 'Brave Browser'"
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": [
+                                            "/Brave Browser"
+                                        ],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f13",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "repeat": false,
+                                        "select_input_source": {
+                                            "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+                                        }
+                                    },
+                                    {
+                                        "key_code": "h",
+                                        "modifiers": [
+                                            "command"
+                                        ]
+                                    },
+                                    {
+                                        "shell_command": "open -a 'Emacs'"
                                     }
                                 ],
                                 "type": "basic"
@@ -7072,6 +7396,35 @@
                                         "select_input_source": {
                                             "input_source_id": "com.apple.keylayout.RussianWin"
                                         }
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "f15",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "f15",
+                                    "modifiers": {
+                                        "optional": [
+                                            "any"
+                                        ]
+                                    }
+                                },
+                                "to_after_key_up": [
+                                    {
+                                        "select_input_source": {
+                                            "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+                                        }
+                                    },
+                                    {
+                                        "key_code": "tab",
+                                        "modifiers": [
+                                            "command"
+                                        ]
                                     }
                                 ],
                                 "type": "basic"
@@ -7410,354 +7763,6 @@
                                                 "delay_milliseconds": 500
                                             }
                                         }
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "f13",
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Brave Browser"
-                                        ],
-                                        "type": "frontmost_application_unless"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "f13",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "repeat": false,
-                                        "select_input_source": {
-                                            "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
-                                        }
-                                    },
-                                    {
-                                        "shell_command": "open -a 'Brave Browser'"
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Brave Browser"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "f13",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "repeat": false,
-                                        "select_input_source": {
-                                            "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
-                                        }
-                                    },
-                                    {
-                                        "key_code": "h",
-                                        "modifiers": [
-                                            "command"
-                                        ]
-                                    },
-                                    {
-                                        "shell_command": "open -a 'Emacs'"
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "f15",
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "f15",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to_after_key_up": [
-                                    {
-                                        "key_code": "tab",
-                                        "modifiers": [
-                                            "command"
-                                        ]
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "f2",
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "f2"
-                                },
-                                "to_after_key_up": [
-                                    {
-                                        "key_code": "display_brightness_increment"
-                                    }
-                                ],
-                                "to_if_held_down": [
-                                    {
-                                        "halt": true,
-                                        "key_code": "display_brightness_decrement",
-                                        "repeat": true
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "f1",
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Brave Browser"
-                                        ],
-                                        "type": "frontmost_application_unless"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "f1",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "repeat": false,
-                                        "select_input_source": {
-                                            "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
-                                        }
-                                    },
-                                    {
-                                        "shell_command": "open -a 'Brave Browser'"
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Brave Browser"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "f1",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "repeat": false,
-                                        "select_input_source": {
-                                            "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
-                                        }
-                                    },
-                                    {
-                                        "key_code": "h",
-                                        "modifiers": [
-                                            "command"
-                                        ]
-                                    },
-                                    {
-                                        "shell_command": "open -a 'Emacs'"
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "open_bracket",
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Emacs"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "insert mode activated",
-                                        "type": "variable_if",
-                                        "value": 0
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "open_bracket",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to_after_key_up": [
-                                    {
-                                        "key_code": "open_bracket"
-                                    }
-                                ],
-                                "to_if_held_down": [
-                                    {
-                                        "key_code": "equal_sign",
-                                        "modifiers": [
-                                            "left_shift",
-                                            "left_control"
-                                        ]
-                                    },
-                                    {
-                                        "halt": true,
-                                        "key_code": "open_bracket",
-                                        "repeat": false
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Emacs"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "insert mode activated",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "open_bracket",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to_after_key_up": [
-                                    {
-                                        "key_code": "open_bracket"
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "f7",
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "f7",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to_after_key_up": [
-                                    {
-                                        "halt": true,
-                                        "shell_command": "~/.pbcopy.sh"
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "left_control",
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": [
-                                            "/Terminal"
-                                        ],
-                                        "type": "frontmost_application_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "left_control",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "left_control",
-                                        "lazy": true
-                                    }
-                                ],
-                                "to_if_alone": [
-                                    {
-                                        "key_code": "h",
-                                        "modifiers": [
-                                            "command"
-                                        ]
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "from": {
-                                    "key_code": "left_control",
-                                    "modifiers": {
-                                        "optional": [
-                                            "any"
-                                        ]
-                                    }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "left_control",
-                                        "lazy": true
-                                    }
-                                ],
-                                "to_if_alone": [
-                                    {
-                                        "shell_command": "open -a Terminal"
                                     }
                                 ],
                                 "type": "basic"

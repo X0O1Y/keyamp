@@ -41,52 +41,36 @@ defaults write org.gnu.Emacs HideDocumentIcon YES
   (display-time-mode))
 #+end_src
 
-*** Modeline on top
+*** Modeline in minibuffer
 #+begin_src elisp
-(defvar selected-window nil "Selected window.")
-
-(defun selected-window-save ()
-  "Keep `selected-window'."
-  (setq selected-window (selected-window)))
-
-;; display mode indicator for selected window only
-(when terminal-p
-  (add-hook 'post-command-hook 'selected-window-save)
-  (add-hook 'buffer-list-update-hook (lambda () (force-mode-line-update t))))
-
-(setq-default mode-line-format nil
-              header-line-format
-              (list
-               ""
+(setq-default mode-line-format   nil
+              header-line-format nil
+              minibuffer-line-format
+              (list " "
                ;; mode indicator
-               (when terminal-p
-                 '(:eval
-                   (if (eq selected-window (selected-window))
-                       'mode-line-front-space
-                     "")))
+               '(:eval (propertize mode-line-front-space
+                                   'face 'modeline-front-space))
+               " "
                ;; buffer name
-               '(:eval (propertize " %b"
+               '(:eval (propertize (mode-line-buffer-name)
                                    'face
                                    (if (and (buffer-modified-p) (buffer-file-name))
-                                       'font-lock-string-face
-                                     'font-lock-builtin-face)
+                                       'font-lock-string-face-buf-name
+                                     'font-lock-builtin-face-buf-name)
                                    'help-echo
                                    (buffer-file-name)))
-
-               ;; branch
-               '(:eval (when
-                           (and vc-mode
-                                (not (or (string-equal (substring vc-mode 5) "master")
-                                         (string-equal (substring vc-mode 5) "main"))))
-                         (list " @" (substring vc-mode 5))))
+               ;; vc branch
+               '(:eval (propertize (mode-line-vc) 'face 'font-lock-type-face))
                ;; align right spacer
                '(:eval (propertize
                         " " 'display
                         `((space :align-to
                                  (- (+ right right-fringe right-margin)
-                                    ,(+ (length (format-mode-line "%l:%c "))))))))
+                                    1
+                                    ,(+ (length (mode-line-buffer-position))))))))
                ;; position in buffer
-               '(:eval (propertize "%l:%c " 'face 'font-lock-builtin-face))))
+               '(:eval (propertize (mode-line-buffer-position)
+                                   'face 'font-lock-builtin-face))))
 #+end_src
 
 * Virtual keyboard

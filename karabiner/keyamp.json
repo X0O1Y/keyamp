@@ -3421,7 +3421,7 @@
           ],
           "to_after_key_up": [
             {
-              "key_code": "7"
+              "key_code": "1"
             }
           ],
           "to_if_held_down": [
@@ -3433,7 +3433,7 @@
               ]
             },
             {
-              "key_code": "7",
+              "key_code": "1",
               "repeat": false,
               "halt": true
             }
@@ -3706,7 +3706,7 @@
           ],
           "to_after_key_up": [
             {
-              "key_code": "5"
+              "key_code": "2"
             }
           ],
           "to_if_held_down": [
@@ -3718,7 +3718,7 @@
               ]
             },
             {
-              "key_code": "5",
+              "key_code": "2",
               "repeat": false,
               "halt": true
             }
@@ -3991,7 +3991,7 @@
           ],
           "to_after_key_up": [
             {
-              "key_code": "1"
+              "key_code": "3"
             }
           ],
           "to_if_held_down": [
@@ -4003,7 +4003,7 @@
               ]
             },
             {
-              "key_code": "1",
+              "key_code": "3",
               "repeat": false,
               "halt": true
             }
@@ -4276,7 +4276,7 @@
           ],
           "to_after_key_up": [
             {
-              "key_code": "3"
+              "key_code": "4"
             }
           ],
           "to_if_held_down": [
@@ -4288,7 +4288,7 @@
               ]
             },
             {
-              "key_code": "3",
+              "key_code": "4",
               "repeat": false,
               "halt": true
             }
@@ -4561,7 +4561,7 @@
           ],
           "to_after_key_up": [
             {
-              "key_code": "9"
+              "key_code": "5"
             }
           ],
           "to_if_held_down": [
@@ -4573,7 +4573,7 @@
               ]
             },
             {
-              "key_code": "9",
+              "key_code": "5",
               "repeat": false,
               "halt": true
             }
@@ -4846,7 +4846,7 @@
           ],
           "to_after_key_up": [
             {
-              "key_code": "8"
+              "key_code": "6"
             }
           ],
           "to_if_held_down": [
@@ -4858,7 +4858,7 @@
               ]
             },
             {
-              "key_code": "8",
+              "key_code": "6",
               "repeat": false,
               "halt": true
             }
@@ -5131,7 +5131,7 @@
           ],
           "to_after_key_up": [
             {
-              "key_code": "2"
+              "key_code": "7"
             }
           ],
           "to_if_held_down": [
@@ -5143,7 +5143,7 @@
               ]
             },
             {
-              "key_code": "2",
+              "key_code": "7",
               "repeat": false,
               "halt": true
             }
@@ -5416,7 +5416,7 @@
           ],
           "to_after_key_up": [
             {
-              "key_code": "0"
+              "key_code": "8"
             }
           ],
           "to_if_held_down": [
@@ -5428,7 +5428,7 @@
               ]
             },
             {
-              "key_code": "0",
+              "key_code": "8",
               "repeat": false,
               "halt": true
             }
@@ -5701,7 +5701,7 @@
           ],
           "to_after_key_up": [
             {
-              "key_code": "4"
+              "key_code": "9"
             }
           ],
           "to_if_held_down": [
@@ -5713,7 +5713,7 @@
               ]
             },
             {
-              "key_code": "4",
+              "key_code": "9",
               "repeat": false,
               "halt": true
             }
@@ -5986,7 +5986,7 @@
           ],
           "to_after_key_up": [
             {
-              "key_code": "6"
+              "key_code": "0"
             }
           ],
           "to_if_held_down": [
@@ -5998,7 +5998,7 @@
               ]
             },
             {
-              "key_code": "6",
+              "key_code": "0",
               "repeat": false,
               "halt": true
             }
@@ -7020,7 +7020,7 @@
           },
           "to_after_key_up": [
             {
-              "shell_command": "/Applications/emacsclient --no-wait --eval '(emms-pause)'"
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(play-pause)'"
             }
           ],
           "to_if_held_down": [
@@ -7048,12 +7048,12 @@
           },
           "to_after_key_up": [
             {
-              "shell_command": "/Applications/emacsclient --no-wait --eval '(emms-seek-forward-or-next)'"
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(play-next)'"
             }
           ],
           "to_if_held_down": [
             {
-              "shell_command": "/Applications/emacsclient --no-wait --eval '(emms-seek-backward-or-previous)'",
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(play-prev)'",
               "halt": true
             }
           ]
@@ -7408,6 +7408,11 @@
             }
           },
           "to_after_key_up": [
+            {
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              }
+            },
             {
               "key_code": "tab",
               "modifiers": [
