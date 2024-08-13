@@ -1701,9 +1701,9 @@ With prefix arg, find the previous file."
       (find-file (nth pos files)))))
 
 (defun new-empty-buffer ()
-  "Create a new empty buffer. New buffer is named file, file<2>, etc."
+  "Create a new empty buffer. New buffer is named buffer, buffer<2>, etc."
   (interactive)
-  (let ((xbuf (generate-new-buffer "file")))
+  (let ((xbuf (generate-new-buffer "buffer")))
     (switch-to-buffer xbuf)
     (funcall initial-major-mode)
     xbuf))
@@ -2118,8 +2118,7 @@ before actually send the cd command."
 
 (defun set-wd ()
   "Set working directory."
-  (unless (string-equal
-           (expand-file-name default-directory) (car kill-ring))
+  (unless (string-equal (expand-file-name default-directory) (car kill-ring))
     (cond
      ((eq major-mode 'eshell-mode)
       (insert "pushd . && ")
@@ -2299,9 +2298,7 @@ and reverse-search-history in bashrc."
                (setq xframe (make-frame-command)) (other-frame 1))
              (if (get-buffer "*Group*")
                  (switch-to-buffer "*Group*")
-               (gnus)
-               ;; (gnus-nnews-inbox)
-               ))
+               (gnus) (unless (display-graphic-p) (gnus-nnews-inbox))))
     (message "%s" "Offline")))
 
 (defun sql ()
@@ -2354,6 +2351,13 @@ and reverse-search-history in bashrc."
     (set-mark-command t)
     (other-window 1))
   (return-before))
+
+(defun eval-region-or-sexp ()
+  "Eval region or last sexp."
+  (interactive)
+  (if (region-active-p)
+      (command-execute 'eval-region)
+    (command-execute 'eval-last-sexp)))
 
 (defun terminal ()
   "Run terminal emulator."
@@ -2460,7 +2464,9 @@ Use as around advice e.g. for mouse left click after double click."
 
 (defun translate-around (fun &rest r)
   "Translate selection if buffer is read only and in eww."
-  (if (and (eq major-mode 'eww-mode) buffer-read-only) (translate) (apply fun r)))
+  (if (and (eq major-mode 'eww-mode) buffer-read-only)
+      (progn (translate) (setq this-command 'down-line))
+    (apply fun r)))
 
 (defun quit ()
   "Confirm and quit. Because restart without confirm."
@@ -2512,22 +2518,20 @@ Use as around advice e.g. for mouse left click after double click."
 
 (defun shrink-completion-win ()
   "Shrink completion window."
-  (let ((xbuf "*Completions*"))
-    (when (get-buffer-window xbuf)
-      (select-window (get-buffer-window xbuf))
-      (shrink-win)
-      (select-window (get-buffer-window completion-reference-buffer)))))
+  (when-let ((xwin (get-buffer-window "*Completions*")))
+    (select-window xwin)
+    (shrink-win)
+    (select-window (get-buffer-window completion-reference-buffer))))
 
 (defun completion-at-point-after (&rest r)
   "Setup after run completion at point."
-  (let ((xbuf "*Completions*"))
-    (when (get-buffer xbuf)
-      (with-current-buffer xbuf
-        (save-excursion
-          (let ((inhibit-read-only t))
-            (goto-char (point-min))
-            (kill-line 4))))
-      (shrink-completion-win)))
+  (when-let* ((xbuf "*Completions*") (xwin (get-buffer-window xbuf)))
+    (with-current-buffer xbuf
+      (save-excursion
+        (let ((inhibit-read-only t))
+          (goto-char (point-min))
+          (kill-line 4))))
+    (shrink-completion-win))
   (setq this-command 'completion-at-point))
 
 (advice-add 'completion-at-point :after 'completion-at-point-after)
@@ -2535,11 +2539,10 @@ Use as around advice e.g. for mouse left click after double click."
 (defun delete-completion-win ()
   "Delete completion window."
   (interactive)
-  (let ((xbuf "*Completions*"))
-    (if (get-buffer-window xbuf)
-        (progn (select-window (get-buffer-window xbuf))
-               (delete-window)
-               (select-window (get-buffer-window completion-reference-buffer))))))
+  (if-let ((xwin (get-buffer-window "*Completions*")))
+      (progn (select-window xwin)
+             (delete-window)
+             (select-window (get-buffer-window completion-reference-buffer)))))
 
 (defun scroll-one-pixel (&rest r)
   "Scroll one pixel up. Disables recentering cursor temporary."
@@ -2636,7 +2639,8 @@ If Direct-p is t, do not remap key to current keyboard layout."
             `(advice-add ,(list 'quote xcmd) (if ,How ,How :after)
                          (lambda (&rest r) "auto repeat"
                            (when (or (eq real-this-command 'repeat)
-                                     (eq this-command 'kill-region)
+                                     (eq this-command 'kill-region) ; exception
+                                     (eq this-command 'undo)        ; exception
                                      (eq this-command ,(list 'quote xcmd)))
                              (if (and ,CommandMode keyamp-insert-p)
                                  (keyamp-command))
@@ -2735,13 +2739,8 @@ Activate command, insert or repeat mode optionally."
 (defun keyamp-exe-remap (Key From To)
   "Remap key from FROM command to TO command by default, but if remapped
 already, then use existing remap instead. Execute resulting command."
-  (let ((x (keymap-lookup overriding-local-map
-                          (keyamp--convert-kbd-str Key))))
+  (let ((x (keymap-lookup overriding-local-map (keyamp--convert-kbd-str Key))))
     (keyamp-command-execute (cond ((or (equal x From) (not x)) To) (x x)))))
-
-;; overriding-local-map
-;; minor-mode-overriding-map-alist
-;; overriding-terminal-local-map
 
 
 ;; Double press
@@ -3125,7 +3124,7 @@ is enabled.")
 
     ("D"     . repeat)                     ("В"     . repeat)
     ("d e"   . org-shiftup)                ("d i"   . async-shell-command)
-    ("d d"   . eval-last-sexp)             ("d k"   . run-current-file)
+    ("d d"   . eval-region-or-sexp)        ("d k"   . run-current-file)
     ("d DEL" . stow)                       ("d SPC" . eval-defun)
     ("d ESC" . ignore)                     ("d RET" . shell-command)
 
@@ -3302,9 +3301,11 @@ is enabled.")
 (defun keyamp-RET ()
   "Return key command for transient use."
   (interactive)
-  (if (display-graphic-p)
-      (keyamp-exe-remap "<return>" 'keyamp-insert 'keyamp-escape)
-    (keyamp-exe-remap "RET" 'keyamp-insert 'keyamp-escape)))
+  (if (eq major-mode 'eww-mode)
+      (keyamp-command-execute 'keyamp-insert) ; do transtate
+    (if (display-graphic-p)
+        (keyamp-exe-remap "<return>" 'keyamp-insert 'keyamp-escape)
+      (keyamp-exe-remap "RET" 'keyamp-insert 'keyamp-escape))))
 
 (defun keyamp-lleader-E ()
   (interactive) (keyamp-exe-remap "e" 'undo 'del-win))
@@ -3605,8 +3606,7 @@ is enabled.")
  (keyamp--set-map x '(backward-del-word del-word) nil nil nil 2))
 
 (with-sparse-keymap-x
- (keyamp--map-leader x '(undo . del-back))
- (keyamp--remap x '((del-back . undo-redo)))
+ (keyamp--map-leader x '(undo-only . undo-redo))
  (keyamp--set-map x '(undo undo-redo)))
 
 (with-sparse-keymap-x
@@ -3661,6 +3661,9 @@ is enabled.")
 (with-sparse-keymap-x
  (keyamp--remap x '((backward-bracket . dired-jump)))
  (keyamp--set-map x '(save-buffer) nil nil nil 3))
+
+(with-sparse-keymap-x ; use dummy for indication purpose
+ (keyamp--set-map x '(yank yank-pop newline open-line) nil nil nil 1))
 
 
 ;; Modes Remaps
@@ -3967,9 +3970,11 @@ is enabled.")
 (with-eval-after-load 'org
   (keyamp--map-tab org-mode-map org-cycle)
   (keyamp--remap org-mode-map
-    '((eval-last-sexp . insert-date) (insert-date . org-time-stamp))))
+    '((eval-region-or-sexp . insert-date) (insert-date . org-time-stamp))))
 
 (with-eval-after-load 'org-agenda
+  (keyamp--map org-agenda-mode-map
+    '(("<double-mouse-1>" . org-agenda-switch-to-task)))
   (keyamp--map-tab org-agenda-mode-map todo)
   (keyamp--remap org-agenda-mode-map
     '((keyamp-insert       . org-agenda-switch-to-task)
@@ -3996,7 +4001,9 @@ is enabled.")
       (kmacro-helper       . config)
       (copy-to-register    . sql)
       (forw-char           . screen-idle-escape)
-      (back-char           . screen-idle-return))))
+      (back-char           . screen-idle-return)
+      (beg-of-line         . bookmark-jump)
+      (end-of-line         . recentf-open-files))))
 
 (defvar screen-idle-keymap (make-sparse-keymap))
 (keyamp--map-leader screen-idle-keymap '(up-line . down-line))
@@ -4523,7 +4530,7 @@ is enabled.")
       (describe-variable     . xref-find-references)
       (mark-defun            . go-mark-defun)
       (eval-defun            . flymake-show-project-diagnostics)
-      (eval-last-sexp        . server)
+      (eval-region-or-sexp   . server)
       (reformat-lines        . eglot-reconnect))))
 
 (with-sparse-keymap-x
@@ -4676,12 +4683,12 @@ is enabled.")
                  org-shiftdown                    t
                  org-shiftup                      t
                  open-line                        t
-                 yank                             t
                  shrink-whitespaces               t
                  todo                             t
                  toggle-comment                   t
                  toggle-letter-case               t
-                 undo                             t)))
+                 undo                             t
+                 yank                             t)))
 
 (defconst keyamp-repeat-commands-hash
   #s(hash-table test equal data
@@ -4776,6 +4783,7 @@ is enabled.")
                  text-scale-decrease              t
                  text-scale-increase              t
                  text-scale-reset                 t
+                 translate                        t
                  up-line                          t
                  vterm-down                       t
                  vterm-send-return                t
@@ -4805,13 +4813,13 @@ is enabled.")
 (defconst keyamp-insert-indicator  "●︎" "Insert.")
 (defconst keyamp-edit-indicator    "●︎" "Change.")
 
-(defconst keyamp-screen-color  "SlateBlue"   "Screen.")
-(defconst keyamp-io-color      "#0000ff"     "IO.")
-(defconst keyamp-repeat-color  "DeepSkyBlue" "Read.")
-(defconst keyamp-command-color "LawnGreen"   "Command.")
-(defconst keyamp-idle-color    "Gold"        "Idle.")
-(defconst keyamp-insert-color  "DarkOrange"  "Insert.")
-(defconst keyamp-edit-color    "Red"         "Change.")
+(defconst keyamp-screen-color  "#ab82ff" "Screen.")
+(defconst keyamp-io-color      "#1e90ff" "IO.")
+(defconst keyamp-repeat-color  "#00bfff" "Read.")
+(defconst keyamp-command-color "#7cfc00" "Command.")
+(defconst keyamp-idle-color    "#ffd700" "Idle.")
+(defconst keyamp-insert-color  "#ff8c00" "Insert.")
+(defconst keyamp-edit-color    "#ff0000" "Change.")
 
 (defface modeline-front-space `((t :foreground ,keyamp-command-color))
   "Modeline front space face.")
@@ -4825,7 +4833,7 @@ is enabled.")
 (defvar keyamp-indicate-repeat-timer nil "Indicate repeat timer.")
 (defconst keyamp-indicate-repeat-delay 1 "Repeat cursor change delay.")
 
-(defconst keyamp-idle-timeout (* 3 60)
+(defconst keyamp-idle-timeout (1- 60)
   "Idle timeout for keymaps without self timeout.")
 (defconst keyamp-defer-load 5 "Defer load second priority features.")
 
@@ -4934,15 +4942,14 @@ insert cancels the timer.")
                                (lambda () (setq before-last-command-event nil))))
       (if before-last-command-event (setq before-last-command-event nil)))))
 (add-hook 'post-self-insert-hook 'keyamp-SPC-SPC)
-(advice-add 'isearch-printing-char    :after 'keyamp-SPC-SPC)
-(advice-add 'minibuffer-complete-word :after 'keyamp-SPC-SPC)
+(advice-add-macro '(isearch-printing-char minibuffer-complete-word)
+                  :after 'keyamp-SPC-DEL)
 
 (defun keyamp-SPC-DEL (&rest r)
   "Insert SPC DEL to activate command mode."
   (if (eq before-last-command-event 32)
       (if isearch-mode (isearch-cancel) (keyamp-command))))
-(advice-add 'delete-backward-char :after 'keyamp-SPC-DEL)
-(advice-add 'isearch-del-char     :after 'keyamp-SPC-DEL)
+(advice-add-macro '(delete-backward-char isearch-del-char) :after 'keyamp-SPC-DEL)
 
 (defun keyamp-command-if-insert (&rest r)
   "Activate command mode if insert mode."
@@ -4950,8 +4957,7 @@ insert cancels the timer.")
 
 (defun keyamp-insert-and-SPC ()
   "Activate insert mode and insert SPC."
-  (interactive)
-  (unless keyamp-insert-p (keyamp-insert)) (insert " "))
+  (interactive) (unless keyamp-insert-p (keyamp-insert)) (insert " "))
 
 (defun keyamp-minibuffer-insert ()
   "If minibuffer input not empty then confirm and exit instead
@@ -4971,8 +4977,7 @@ of quit minibuffer."
 
 (defun keyamp-insert-n ()
   "Insert N literally."
-  (interactive)
-  (keyamp-insert-init) (execute-kbd-macro (kbd "n")))
+  (interactive) (keyamp-insert-init) (execute-kbd-macro (kbd "n")))
 
 (defun keyamp-insert-y ()
   "Insert Y literally. Only if asked."
@@ -4984,8 +4989,7 @@ of quit minibuffer."
 
 (defun keyamp-insert-! ()
   "Insert ! literally."
-  (interactive)
-  (keyamp-insert-init) (execute-kbd-macro (kbd "!")))
+  (interactive) (keyamp-insert-init) (execute-kbd-macro (kbd "!")))
 
 (defun keyamp-exit-minibuffer ()
   "Exit if file completion. It means use content of minibuffer as it is,
@@ -5027,7 +5031,7 @@ Simply hit TAB to minibuffer-complete file name if the name exists."
   (unless (eq this-command last-command) (force-mode-line-update t)))
 
 (defun keyamp-indicate (Indicator Cursor Color)
-  "Indicate mode with INDICATOR and CURSOR."
+  "Indicate mode with INDICATOR, CURSOR and COLOR."
   (keyamp-mode-line-front-space Indicator)
   (keyamp-change-cursor-type Cursor)
   (set-face-attribute 'modeline-front-space nil :foreground Color))
@@ -5035,8 +5039,8 @@ Simply hit TAB to minibuffer-complete file name if the name exists."
 (defun keyamp-indicate-repeat ()
   "Indicate repeat view is active. Cursor type change runs after first
 repeat command exactly after a delay even if there more repeat commands follow."
-  (unless (memq (alist-get 'cursor-type default-frame-alist)
-                `(,keyamp-command-cursor ,keyamp-repeat-cursor))
+  (unless (memq mode-line-front-space
+                `(,keyamp-command-indicator ,keyamp-repeat-indicator))
     (keyamp-indicate keyamp-command-indicator
                      keyamp-command-cursor keyamp-command-color))
   (unless (timerp keyamp-indicate-repeat-timer)
@@ -5084,11 +5088,10 @@ repeat command exactly after a delay even if there more repeat commands follow."
 (defun keyamp-escape ()
   "Return to command mode, clear selection or quit minibuffer."
   (interactive)
-  (cond
-   (keyamp-repeat-p   (keyamp-command))
-   (keyamp-insert-p   (keyamp-command))
-   ((region-active-p) (deactivate-mark))
-   ((minibufferp)     (abort-recursive-edit))))
+  (cond (keyamp-repeat-p   (keyamp-command))
+        (keyamp-insert-p   (keyamp-command))
+        ((region-active-p) (deactivate-mark))
+        ((minibufferp)     (abort-recursive-edit))))
 
 ;;;###autoload
 (define-minor-mode keyamp
