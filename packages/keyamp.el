@@ -107,6 +107,9 @@
           (setq this-command 'gnus-topic-next) (gnus-topic-next))
          (t (setq this-command 'end-of-block) (end-of-block)))
       (command-execute 'next-line)
+      (if (and (eq major-mode 'gnus-summary-mode)
+               (> (line-number-at-pos) 2))
+          (command-execute 'next-line))
       (if (eq last-command 'up-line) (before-last-command)))))
 
 (defun beginning-of-visual-line-once (&rest r)
@@ -419,8 +422,7 @@ and `right-brackets'."
 
 (defun deactivate-region ()
   "Command `deactivate-mark'."
-  (interactive)
-  (deactivate-mark))
+  (interactive) (deactivate-mark))
 
 (defalias 'page-up-half 'View-scroll-half-page-backward)
 (defalias 'page-dn-half 'View-scroll-half-page-forward)
@@ -690,25 +692,23 @@ Cycle in this order: Init Caps, ALL CAPS, all lower. Calculates initial state."
         (setq xp2 (point))
         (if (string-is-capitalized (buffer-substring xp1 xp2))
             (put this-command 'state 2))))
-    (cond
-     ((equal 0 (get this-command 'state))
-      (upcase-initials-region xp1 xp2)
-      (put this-command 'state 1))
-     ((equal 1 (get this-command 'state))
-      (upcase-region xp1 xp2)
-      (put this-command 'state 2))
-     ((equal 2 (get this-command 'state))
-      (downcase-region xp1 xp2)
-      (put this-command 'state 0)))))
+    (cond ((equal 0 (get this-command 'state))
+           (upcase-initials-region xp1 xp2)
+           (put this-command 'state 1))
+          ((equal 1 (get this-command 'state))
+           (upcase-region xp1 xp2)
+           (put this-command 'state 2))
+          ((equal 2 (get this-command 'state))
+           (downcase-region xp1 xp2)
+           (put this-command 'state 0)))))
 
 (defun toggle-prev-letter-case ()
   "Toggle the letter case of the letter to the left of cursor."
   (interactive)
   (let ((case-fold-search nil))
     (left-char 1)
-    (cond
-     ((looking-at "[[:lower:]]") (upcase-region (point) (1+ (point))))
-     ((looking-at "[[:upper:]]") (downcase-region (point) (1+ (point)))))
+    (cond ((looking-at "[[:lower:]]") (upcase-region (point) (1+ (point))))
+          ((looking-at "[[:upper:]]") (downcase-region (point) (1+ (point)))))
     (right-char)))
 
 (defun upcase-sentence ()
@@ -871,14 +871,12 @@ for short line length."
 (defun unfill-paragraph ()
   "Replace newline chars in current paragraph by single spaces.
 This command does the inverse of `fill-paragraph'."
-  (interactive)
-  (let ((fill-column 90002000)) (fill-paragraph)))
+  (interactive) (let ((fill-column 90002000)) (fill-paragraph)))
 
 (defun unfill-region (Begin End)
   "Replace newline chars in region by single spaces.
 This command does the inverse of `fill-region'."
-  (interactive "r")
-  (let ((fill-column 90002000)) (fill-region Begin End)))
+  (interactive "r") (let ((fill-column 90002000)) (fill-region Begin End)))
 
 (defun change-newline-chars-to-one (Begin End)
   "Replace newline char sequence by just one."
@@ -1149,8 +1147,7 @@ current line, work on that region;
   (interactive)
   ;; This function sets a property 'state.
   ;; Possible values are 0 to length of xcharArray.
-  (let* (xp1
-         xp2
+  (let* (xp1 xp2
          (xcharArray ["-" "_" " "])
          (xn (length xcharArray))
          (xregionWasActive-p (region-active-p))
@@ -1404,13 +1401,11 @@ LBracket and RBracket are strings. WrapMethod must be either `line' or
 
 (defun insert-space-before ()
   "Insert space before cursor."
-  (interactive)
-  (insert " "))
+  (interactive) (insert " "))
 
 (defun insert-formfeed ()
   "Insert a form feed char (codepoint 12)."
-  (interactive)
-  (insert "\n\u000c\n"))
+  (interactive) (insert "\n\u000c\n"))
 
 (defun insert-column-a-z ()
   "Insert letters A to Z vertically, similar to `rectangle-number-lines'.
@@ -1452,8 +1447,7 @@ If `visual-line-mode' is on, consider line as visual line."
         (if visual-line-mode
             (let ((xp1 (point)))
               (end-of-visual-line 1)
-              (when (eq xp1 (point))
-                (end-of-visual-line 2)))
+              (if (eq xp1 (point)) (end-of-visual-line 2)))
           (forward-line 1)
           (end-of-line))
       (if visual-line-mode
@@ -1551,8 +1545,7 @@ command, so that next buffer shown is a user buffer."
    ((string-equal buffer-file-truename org-agenda-file-2) nil)
    ((string-equal buffer-file-truename org-agenda-file-3) nil)
    ((string-match ".+em/project+." default-directory) nil)
-   ((and buffer-file-truename
-         (string-match ".sql" buffer-file-truename)) nil)
+   ((and buffer-file-truename (string-match ".sql" buffer-file-truename)) nil)
    (t t)))
 
 (defun back-buf ()
@@ -1605,10 +1598,9 @@ command, so that next buffer shown is a user buffer."
 
 (defun project-buffer-p ()
   "Return t if current buffer is a project buffer, else nil."
-  (cond
-   ((string-equal "*" (substring (buffer-name) 0 1)) nil)
-   ((and (string-match ".+em/project+." default-directory)
-         (not (string-equal major-mode "dired-mode"))) t)))
+  (cond ((string-equal "*" (substring (buffer-name) 0 1)) nil)
+        ((and (string-match ".+em/project+." default-directory)
+              (not (string-equal major-mode "dired-mode"))) t)))
 
 (defun prev-proj-buf ()
   "Switch to the previous project buffer."
@@ -1733,13 +1725,12 @@ Switch to the same buffer type after close, e.g. user or project."
                  (random #xfffff))))))
   (let ((xtype (if (project-buffer-p) "proj" "user")))
     (close-current-buffer)
-    (cond
-     ((eq major-mode 'dired-mode) nil)
-     ((eq major-mode 'ibuffer-mode) nil)
-     ((string-equal xtype "proj")
-      (unless (project-buffer-p) (prev-proj-buf)))
-     ((string-equal xtype "user")
-      (unless (user-buffer-p) (prev-buf))))))
+    (cond ((eq major-mode 'dired-mode) nil)
+          ((eq major-mode 'ibuffer-mode) nil)
+          ((string-equal xtype "proj")
+           (unless (project-buffer-p) (prev-proj-buf)))
+          ((string-equal xtype "user")
+           (unless (user-buffer-p) (prev-buf))))))
 
 (defun close-current-buffer ()
   "Close the current buffer.
@@ -1906,20 +1897,17 @@ File suffix is used to determine which program to run, set in the variable
                (xappCmdStr (cdr (assoc xfExt xextAppMap)))
                xcmdStr)
           (setq xcmdStr
-                (when xappCmdStr
-                  (format "%s %s &"
-                          xappCmdStr
-                          (shell-quote-argument xfname))))
-          (when (buffer-modified-p) (save-buffer))
-          (cond
-           ((string-equal xfExt "el")
-            (load xfname))
-           ((string-equal xfExt "go")
-            (run-current-go-file))
-           (t (if xappCmdStr
-                  (progn (message "Running %s" xcmdStr)
-                         (shell-command xcmdStr xoutBuffer))
-                (error "%s: Unknown file extension: %s" real-this-command xfExt))))
+                (if xappCmdStr
+                    (format "%s %s &" xappCmdStr (shell-quote-argument xfname))))
+          (if (buffer-modified-p) (save-buffer))
+          (cond ((string-equal xfExt "el")
+                 (load xfname))
+                ((string-equal xfExt "go")
+                 (run-current-go-file))
+                (t (if xappCmdStr
+                       (progn (message "Running %s" xcmdStr)
+                              (shell-command xcmdStr xoutBuffer))
+                     (error "%s: Unknown extension: %s" real-this-command xfExt))))
           (setq run-output (concat "run " xbuf))
           (enlarge-window-split)))
     (message "Abort run file")))
@@ -1996,8 +1984,7 @@ If the current buffer is not associated with a file nor dired, nothing's done."
 
 (defun isearch-cur-word ()
   "Call `isearch' on current word."
-  (isearch-mode t)
-  (isearch-yank-string (cur-word)))
+  (isearch-mode t) (isearch-yank-string (cur-word)))
 
 (defun isearch-cur-word-forward ()
   "Forward `isearch-cur-word'."
@@ -2016,8 +2003,7 @@ If the current buffer is not associated with a file nor dired, nothing's done."
 (defun occur-cur-word ()
   "Call `occur' on current word."
   (interactive)
-  (occur (cur-word))
-  (enlarge-window-split))
+  (occur (cur-word)) (enlarge-window-split))
 
 (defun search-string ()
   "Search string in all files of current directory."
@@ -2076,8 +2062,7 @@ When called in Emacs Lisp, if Fname is given, open that."
 (defun alternate-frame ()
   "Switch to alternate buffer or frame.
 If there more than one frame, switch to next frame."
-  (interactive)
-  (if (< 1 (length (frame-list))) (other-frame -1) (alt-buf)))
+  (interactive) (if (< 1 (length (frame-list))) (other-frame -1) (alt-buf)))
 
 (defun kmacro-record ()
   "Start or stop macro recording."
@@ -2129,8 +2114,7 @@ before actually send the cd command."
 
 (defun change-wd ()
   "Change working directory."
-  (interactive)
-  (get-wd) (set-wd))
+  (interactive) (get-wd) (set-wd))
 
 (advice-add 'completion-at-point :around
             (lambda (fun &rest r) "no need complete empty command"
@@ -2166,10 +2150,7 @@ before actually send the cd command."
 (defun eshell-clear-input ()
   "Clear input eshell."
   (interactive)
-  (if (region-active-p)
-      (cut-line)
-    (beg-of-line)
-    (kill-line)))
+  (if (region-active-p) (cut-line) (beg-of-line) (kill-line)))
 
 (defun eshell-search-input ()
   "Eshell history ido complete."
@@ -2188,24 +2169,20 @@ before actually send the cd command."
 
 (defun vterm-up ()
   "Send `<up>' to the libvterm."
-  (interactive)
-  (vterm-send-key "<up>"))
+  (interactive) (vterm-send-key "<up>"))
 
 (defun vterm-down ()
   "Send `<down>' to the libvterm."
-  (interactive)
-  (vterm-send-key "<down>"))
+  (interactive) (vterm-send-key "<down>"))
 
 (defun vterm-backward-kill-word ()
   "Vterm backward kill word."
-  (interactive)
-  (vterm-send-key (kbd "C-w")))
+  (interactive) (vterm-send-key (kbd "C-w")))
 
 (defun vterm-history-search ()
   "History search. Map C-a to history-incremental-search-backward in zshrc
 and reverse-search-history in bashrc."
-  (interactive)
-  (vterm-send-key (kbd "C-a")))
+  (interactive) (vterm-send-key (kbd "C-a")))
 
 (defun screenshot ()
   "Take screenshot on macOS."
@@ -2215,9 +2192,7 @@ and reverse-search-history in bashrc."
 
 (defun clock ()
   "World clock."
-  (interactive)
-  (world-clock)
-  (other-window 1))
+  (interactive) (world-clock) (other-window 1))
 
 (defun player ()
   "Run player."
@@ -2226,8 +2201,7 @@ and reverse-search-history in bashrc."
 
 (defun text-scale-reset ()
   "Reset text scale."
-  (interactive)
-  (text-scale-adjust 0))
+  (interactive) (text-scale-adjust 0))
 
 (defun toggle-ibuffer ()
   "Toggle ibuffer. Force switch to current buffer to update `other-buffer'."
@@ -2249,13 +2223,11 @@ and reverse-search-history in bashrc."
 
 (defun flyspell-goto-prev-error ()
   "Go to prev error."
-  (interactive)
-  (flyspell-goto-next-error t))
+  (interactive) (flyspell-goto-next-error t))
 
 (defun sun-moon ()
   "Show the Sun and the Moon."
-  (interactive)
-  (lunar-phases) (run-with-timer 1 nil 'sunrise-sunset))
+  (interactive) (lunar-phases) (run-with-timer 1 nil 'sunrise-sunset))
 
 (defun weather ()
   "Show weather."
@@ -2267,8 +2239,7 @@ and reverse-search-history in bashrc."
 
 (defun shopping ()
   "Toggle shopping list."
-  (interactive)
-  (find-file shopping-list-file))
+  (interactive) (find-file shopping-list-file))
 
 (defun downloads ()
   "Go to Downloads."
@@ -2303,8 +2274,7 @@ and reverse-search-history in bashrc."
 
 (defun sql ()
   "Open SQL client."
-  (interactive)
-  (find-file "~/.sql"))
+  (interactive) (find-file "~/.sql"))
 
 (defvar sql-type "sqlite" "SQL type for client.")
 
@@ -2361,18 +2331,15 @@ and reverse-search-history in bashrc."
 
 (defun terminal ()
   "Run terminal emulator."
-  (interactive)
-  (vterm))
+  (interactive) (vterm))
 
 (defun novel ()
   "Read novel."
-  (interactive)
-  (switch-to-buffer "*novel*"))
+  (interactive) (switch-to-buffer "*novel*"))
 
 (defun hippie-expand-undo ()
   "Undo the expansion."
-  (interactive)
-  (he-reset-string))
+  (interactive) (he-reset-string))
 
 (defun pass-generate ()
   "Generate and copy pass."
@@ -2475,13 +2442,11 @@ Use as around advice e.g. for mouse left click after double click."
 
 (defun mouse-3 ()
   "Mouse right click. If buffer read only then lookup translation."
-  (interactive)
-  (if buffer-read-only (translate)))
+  (interactive) (if buffer-read-only (translate)))
 
 (defun calendar-split ()
   "Split calendar."
-  (interactive)
-  (calendar) (other-window 1))
+  (interactive) (calendar) (other-window 1))
 
 
 ;; Windows
@@ -2508,8 +2473,7 @@ Use as around advice e.g. for mouse left click after double click."
 
 (defun other-win ()
   "Other window."
-  (interactive)
-  (setq this-command 'other-window) (other-window 1))
+  (interactive) (setq this-command 'other-window) (other-window 1))
 
 (defun shrink-win ()
   "Shrink window to fit rows count."
@@ -2809,8 +2773,9 @@ already, then use existing remap instead. Execute resulting command."
       (keymap-set input-decode-map
                   "ESC" `(menu-item "" ,esc-binding :filter keyamp-tty-ESC-filter)))))
 
-;; Map terminal ESC to <escape>.
-(keymap-set key-translation-map "ESC" "<escape>")
+(unless (display-graphic-p) ;; map terminal ESC to <escape>
+  (keyamp-catch-tty-ESC)
+  (keymap-set key-translation-map "ESC" "<escape>"))
 
 
 ;; Input source
@@ -2930,7 +2895,9 @@ is enabled.")
     ;; Control sequences for leaders. Russian converted from Engineer Engram.
     ;; The sequences are prefixes for key hold down in Karabiner.
     ("C-^" . keyamp-lleader-map) ("C-+" . keyamp-lleader-map)
-    ("C-_" . keyamp-rleader-map) ("C-И" . keyamp-rleader-map)))
+    ("C-_" . keyamp-rleader-map) ("C-И" . keyamp-rleader-map)
+
+    ("S-SPC" . paste-or-prev)    ("S-<return>" . forward-char)))
 
 (keyamp--map-leader keyamp-command-map '(keyamp-lleader-map . keyamp-rleader-map))
 (keyamp--map-return keyamp-command-map keyamp-insert)
@@ -3113,7 +3080,7 @@ is enabled.")
     ("q" . fill-or-unfill)
     ("w" . sun-moon)
 
-    ("e e"   . todo)
+    ("e e"   . todo)                       ("e k"   . weather)
     ("e DEL" . clock)                      ("e SPC" . calendar)
     ("e ESC" . ignore)                     ("e RET" . insert-date)
 
@@ -3302,7 +3269,7 @@ is enabled.")
   "Return key command for transient use."
   (interactive)
   (if (eq major-mode 'eww-mode)
-      (keyamp-command-execute 'keyamp-insert) ; do transtate
+      (keyamp-command-execute 'keyamp-insert) ; do translate
     (if (display-graphic-p)
         (keyamp-exe-remap "<return>" 'keyamp-insert 'keyamp-escape)
       (keyamp-exe-remap "RET" 'keyamp-insert 'keyamp-escape))))
@@ -3319,10 +3286,9 @@ is enabled.")
 (defun keyamp-C-h ()
   "Maybe substitute for C-h."
   (interactive)
-  (cond
-   ((eq major-mode 'dired-mode) (keyamp-command-execute 'dired-do-delete))
-   ((eq major-mode 'ibuffer-mode) (keyamp-command-execute 'ibuffer-do-delete))
-   (t (keyamp-command-execute 'deactivate-region))))
+  (cond ((eq major-mode 'dired-mode) (keyamp-command-execute 'dired-do-delete))
+        ((eq major-mode 'ibuffer-mode) (keyamp-command-execute 'ibuffer-do-delete))
+        (t (keyamp-command-execute 'deactivate-region))))
 
 
 ;; Repeat mode screen commands
@@ -3367,7 +3333,7 @@ is enabled.")
      previous-buffer      next-buffer
      find-prev-dir-file   find-next-dir-file
      shrink-window        enlarge-window
-     downloads            org-agenda-switch-to-task)))
+     org-agenda-switch-to-task)))
 
 (with-sparse-keymap-x
  ;; DEL/SPC to switch other window after split as a result of the commands.
@@ -3663,7 +3629,7 @@ is enabled.")
  (keyamp--set-map x '(save-buffer) nil nil nil 3))
 
 (with-sparse-keymap-x ; use dummy for indication purpose
- (keyamp--set-map x '(yank yank-pop newline open-line) nil nil nil 1))
+ (keyamp--set-map x '(yank yank-pop newline open-line org-open-line) nil nil nil 1))
 
 
 ;; Modes Remaps
@@ -3679,12 +3645,12 @@ is enabled.")
    ;; backward/forward. Similarly double DEL to activate history move.
    (keyamp--map-leader x '(select-block . select-word))
    (keyamp--remap x
-     '((end-of-lyne       . keyamp-insert-n) ; literal answers Y N !
-       (backward-del-word . keyamp-insert-y)
-       (isearch-backward  . keyamp-insert-!)
-       (keyamp-insert     . keyamp-minibuffer-insert)
-       (keyamp-escape     . keyamp-minibuffer-escape)
-       (open-file         . keyamp-exit-minibuffer)))
+     '((end-of-lyne             . keyamp-insert-n) ; literal answers Y N !
+       (backward-del-word       . keyamp-insert-y)
+       (toggle-case-fold-search . keyamp-insert-!)
+       (keyamp-insert           . keyamp-minibuffer-insert)
+       (keyamp-escape           . keyamp-minibuffer-escape)
+       (open-file               . keyamp-exit-minibuffer)))
    ;; The hook is last one run during minibuffer setup and set the keymap.
    (keyamp--set-map-hook x '(minibuffer-setup-hook) :command nil :repeat)
    (add-hook 'minibuffer-setup-hook 'keyamp-minibuffer-setup-insert 96))
@@ -3951,7 +3917,6 @@ is enabled.")
 
 (with-eval-after-load 'replace
   (keyamp--remap occur-mode-map '((keyamp-insert . occur-mode-goto-occurrence)))
-
   (keyamp--map query-replace-map
     '(("d" . skip) ("k" . act) ("в" . skip) ("л" . act))))
 
@@ -4151,6 +4116,8 @@ is enabled.")
       (next-eww-buffer . eshell-clear)
       (select-block    . eshell-previous-input)
       (quoted-insert   . eshell-interrupt-process)
+      (open-line       . ignore)
+      (newline         . ignore)
       (toggle-comment  . ignore)))
 
   (with-sparse-keymap-x
@@ -4190,23 +4157,30 @@ is enabled.")
   (keyamp--map-tab vterm-mode-map vterm-send-tab)
   (keyamp--map vterm-mode-map
     '(("C-h" . term-interrupt-subjob) ("C-q" . term-interrupt-subjob)
-      ("C-r" . delete-other-windows)  ("C-t" . delete-other-windows)
-      ("C-u" . vterm-send-next-key)))
+      ("C-r" . delete-other-windows)  ("C-t" . delete-other-windows)))
 
   (keyamp--remap vterm-mode-map
-    '((select-block      . vterm-up)
-      (prev-eww-buffer   . vterm-clear)
-      (paste-or-prev     . vterm-yank)
-      (paste-from-r1     . vterm-yank-pop)
-      (backward-del-word . vterm-backward-kill-word)))
+    '((select-block        . vterm-up)
+      (prev-eww-buffer     . vterm-clear)
+      (paste-or-prev       . vterm-yank)
+      (paste-from-r1       . vterm-yank-pop)
+      (backward-del-word   . vterm-backward-kill-word)
+      (toggle-comment      . vterm-send-next-key)
+      (open-line           . ignore)
+      (newline             . ignore)
+      (cut-line            . ignore)
+      (insert-space-before . ignore)
+      (del-back            . vterm-send-backspace)))
+
+  (with-sparse-keymap-x
+   (keyamp--map-leader x '(vterm-send-backspace . keyamp-insert-and-SPC))
+   (keyamp--set-map x '(vterm-send-backspace) nil nil nil 1))
 
   (with-sparse-keymap-x
    (keyamp--map-leader x '(previous-line . next-line))
    (keyamp--remap x
-     '((previous-line . vterm-up)
-       (next-line     . vterm-down)
-       (undo          . delete-window)
-       (keyamp-insert . vterm-send-return)))
+     '((previous-line . vterm-up)      (next-line     . vterm-down)
+       (undo          . delete-window) (keyamp-insert . vterm-send-return)))
    (keyamp--set-map x '(vterm-history-search) nil :insert)
    (keyamp--set-map x '(vterm-up vterm-down) :command))
 
@@ -4360,8 +4334,7 @@ is enabled.")
      (kmacro-play      . radio-channel-2) (kmacro-helper    . radio-channel-3)
      (append-to-r1     . radio-channel-4) (terminal         . radio-channel-5)
      (pass             . radio-channel-6) (jump-to-register . radio-channel-7)
-     (copy-to-register . radio-channel-8) (proced           . radio-channel-9)
-     (open-line        . radio-prev)      (newline          . radio-next)))
+     (copy-to-register . radio-channel-8) (proced           . radio-channel-9)))
  (keyamp--set-map x
    '(radio radio-next radio-prev radio-channel-0
      radio-channel-1 radio-channel-2 radio-channel-3
@@ -4615,7 +4588,7 @@ is enabled.")
       (open-line     . calc-roll-down) (newline . calc-algebraic-entry)
       (paste-or-prev . calc-yank)))
   (with-sparse-keymap-x
-   (keyamp--map-leader x '(undo . del-back ))
+   (keyamp--map-leader x '(undo . del-back))
    (keyamp--remap x '((del-back . calc-redo)))
    (keyamp--set-map x '(calc-undo calc-redo))
    (defun keyamp-input-timer-payload-calc ()
@@ -4638,7 +4611,6 @@ is enabled.")
                  describe-key                     t
                  describe-mode                    t
                  describe-variable                t
-                 downloads                        t
                  exec-query                       t
                  find-next-dir-file               t
                  find-prev-dir-file               t
@@ -4683,11 +4655,13 @@ is enabled.")
                  org-shiftdown                    t
                  org-shiftup                      t
                  open-line                        t
+                 org-open-line                    t
                  shrink-whitespaces               t
                  todo                             t
                  toggle-comment                   t
                  toggle-letter-case               t
                  undo                             t
+                 vterm-send-backspace             t
                  yank                             t)))
 
 (defconst keyamp-repeat-commands-hash
@@ -4805,19 +4779,19 @@ is enabled.")
   "/Library/Application Support/org.pqrs/Karabiner-Elements/bin/karabiner_cli"
   "Karabiner-Elements CLI executable. Optional for mode sync.")
 
+(defconst keyamp-idle-indicator    "●︎" "Idle.")
 (defconst keyamp-screen-indicator  "●︎" "Screen.")
-(defconst keyamp-io-indicator      "●︎" "IO.")
 (defconst keyamp-repeat-indicator  "●︎" "Read.")
 (defconst keyamp-command-indicator "●︎" "Command.")
-(defconst keyamp-idle-indicator    "●︎" "Idle.")
+(defconst keyamp-io-indicator      "●︎" "Network.")
 (defconst keyamp-insert-indicator  "●︎" "Insert.")
 (defconst keyamp-edit-indicator    "●︎" "Change.")
 
-(defconst keyamp-screen-color  "#ab82ff" "Screen.")
-(defconst keyamp-io-color      "#1e90ff" "IO.")
+(defconst keyamp-idle-color    "#ab82ff" "Idle.")
+(defconst keyamp-screen-color  "#0000ff" "Screen.")
 (defconst keyamp-repeat-color  "#00bfff" "Read.")
 (defconst keyamp-command-color "#7cfc00" "Command.")
-(defconst keyamp-idle-color    "#ffd700" "Idle.")
+(defconst keyamp-io-color      "#ffd700" "Network.")
 (defconst keyamp-insert-color  "#ff8c00" "Insert.")
 (defconst keyamp-edit-color    "#ff0000" "Change.")
 
@@ -4916,13 +4890,11 @@ insert cancels the timer.")
 
 (defun keyamp-command ()
   "Activate command mode."
-  (interactive)
-  (keyamp-command-init) (run-hooks 'keyamp-command-hook))
+  (interactive) (keyamp-command-init) (run-hooks 'keyamp-command-hook))
 
 (defun keyamp-insert ()
   "Activate insert mode."
-  (interactive)
-  (keyamp-insert-init) (run-hooks 'keyamp-insert-hook))
+  (interactive) (keyamp-insert-init) (run-hooks 'keyamp-insert-hook))
 
 (defconst before-last-command-event-threshold
   (if (display-graphic-p) 0 70)
@@ -4969,11 +4941,14 @@ of insert mode activation."
 
 (defun keyamp-minibuffer-escape ()
   "If minibuffer input not empty then activate command mode instead
-of quit minibuffer."
+of quit minibuffer. Answer q to literal confirmation."
   (interactive)
-  (if (> (length (buffer-substring (minibuffer-prompt-end) (point))) 0)
-      (keyamp-command)
-    (abort-recursive-edit)))
+  (let ((xq (buffer-substring (point-min) (point-max))))
+    (if (and (minibufferp) (string-match "y, n, !\\|yn!q" xq))
+        (progn (keyamp-insert-init) (execute-kbd-macro (kbd "q")))
+      (if (> (length (buffer-substring (minibuffer-prompt-end) (point))) 0)
+          (keyamp-command)
+        (abort-recursive-edit)))))
 
 (defun keyamp-insert-n ()
   "Insert N literally."
@@ -5007,10 +4982,12 @@ Simply hit TAB to minibuffer-complete file name if the name exists."
   "List of commands activating insert mode in minibuffer.")
 
 (defun keyamp-minibuffer-setup-insert ()
-  "Activate insert mode for list of commands after minibuffer setup."
+  "Activate insert mode for list of commands after minibuffer setup.
+Set up input timer to activate command mode."
   (when (or (eq (icomplete--category) 'file)
             (memq real-this-command keyamp-minibuffer-insert-commands))
-    (keyamp-repeat-deactivate) (keyamp-command-execute 'keyamp-insert)))
+    (keyamp-repeat-deactivate) (keyamp-command-execute 'keyamp-insert)
+    (keyamp-input-timer-post-command)))
 
 (setq-default cursor-in-non-selected-windows nil)
 
@@ -5099,7 +5076,6 @@ repeat command exactly after a delay even if there more repeat commands follow."
   :global t
   :keymap keyamp-map
   (when keyamp
-    (keyamp-catch-tty-ESC)
     (keyamp-command)
     (add-hook 'minibuffer-exit-hook  'keyamp-command)
     (add-hook 'isearch-mode-end-hook 'keyamp-command)
