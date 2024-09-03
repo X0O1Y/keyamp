@@ -151,16 +151,16 @@
   "Button backward for transient use."
   (interactive)
   (if (equal before-last-command this-command)
-      (progn (setq this-command 'backward-button) (command-execute 'backward-button))
-    (command-execute 'backward-button)
+      (progn (setq this-command 'backward-button) (backward-button 1 nil nil t))
+    (backward-button 1 nil nil t)
     (if (eq last-command 'button-forw) (before-last-command))))
 
 (defun button-forw ()
   "Button forward for transient use."
   (interactive)
   (if (equal before-last-command this-command)
-      (progn (setq this-command 'forward-button) (command-execute 'forward-button))
-    (command-execute 'forward-button)
+      (progn (setq this-command 'forward-button) (forward-button 1 nil nil t))
+    (forward-button 1 nil nil t)
     (if (eq last-command 'button-back) (before-last-command))))
 
 (defun isearch-back ()
@@ -256,9 +256,10 @@ Save point to register 7 before repeated call."
   (if (eq major-mode 'dired-mode) (dired-next-line 1)))
 
 (defun end-of-buf ()
-  "Go to the end of buffer, next press to the beginning of buffer."
+  "Go to the end of buffer, next call to the beginning of buffer."
   (interactive)
-  (if (= (count-lines 1 (point)) (- (count-lines (point-min) (point-max)) 1))
+  (if (or (= (count-lines 1 (point)) (count-lines (point-min) (point-max)))
+          (= (count-lines 1 (point)) (1- (count-lines (point-min) (point-max)))))
       (goto-char (point-min))
     (goto-char (point-max))
     (unless (eq major-mode 'eshell-mode) (forward-line -1))))
@@ -301,7 +302,7 @@ The list of brackets to jump to is defined by `right-brackets'."
   (interactive)
   (re-search-forward (regexp-opt right-brackets) nil t))
 
-(defun goto-matching-bracket ()
+(defun goto-match-br ()
   "Move cursor to the matching bracket.
 If cursor is not on a bracket, call `backward-up-list'.
 The list of brackets to jump to is defined by `left-brackets'
@@ -405,17 +406,21 @@ and `right-brackets'."
   "If next symbol not part of a word, delete the symbol. Otherwise kill
 characters forward until encountering the end of the word."
   (interactive)
-  (if (looking-at "[[:blank:][:alpha:][:digit:]]+")
-      (kill-word 1)
-    (kill-region (point) (progn (forward-char 1) (point)))))
+  (if buffer-read-only
+      (setq this-command 'ignore)
+    (if (looking-at "[[:blank:][:alpha:][:digit:]]+")
+        (kill-word 1)
+      (kill-region (point) (progn (forward-char 1) (point))))))
 
 (defun backward-del-word ()
   "If prev symbol not part of a word, delete the symbol. Otherwise kill
 characters backward until encountering the end of the word."
   (interactive)
-  (if (looking-back "[[:blank:][:alpha:][:digit:]]+" 1)
-      (backward-kill-word 1)
-    (kill-region (point) (progn (backward-char 1) (point)))))
+  (if buffer-read-only
+      (setq this-command 'ignore)
+    (if (looking-back "[[:blank:][:alpha:][:digit:]]+" 1)
+        (backward-kill-word 1)
+      (kill-region (point) (progn (backward-char 1) (point))))))
 
 (defun copy-text-block ()
   "Copy text block to register 1."
@@ -460,9 +465,11 @@ When `universal-argument' is called first, copy whole buffer
 (defun cut-line ()
   "Cut current line or selection."
   (interactive)
-  (if (region-active-p)
-      (kill-region (region-beginning) (region-end) t)
-    (kill-region (line-beginning-position) (line-beginning-position 2))))
+  (if buffer-read-only
+      (setq this-command 'ignore)
+    (if (region-active-p)
+        (kill-region (region-beginning) (region-end) t)
+      (kill-region (line-beginning-position) (line-beginning-position 2)))))
 
 (defun copy-all ()
   "Copy buffer content to `kill-ring'. Respects `narrow-to-region'."
@@ -475,11 +482,14 @@ This command calls `yank', and if repeated, call `yank-pop'.
 When `universal-argument' is called first with a number arg,
 paste that many times."
   (interactive)
-  (if (and delete-selection-mode (region-active-p))
-      (delete-region (region-beginning) (region-end)))
-  (if current-prefix-arg
-      (progn (dotimes (_ (prefix-numeric-value current-prefix-arg)) (yank)))
-    (if (eq real-last-command this-command) (yank-pop 1) (yank))))
+  (if buffer-read-only
+      (setq this-command 'ignore)
+    (progn
+      (if (and delete-selection-mode (region-active-p))
+          (delete-region (region-beginning) (region-end)))
+      (if current-prefix-arg
+          (progn (dotimes (_ (prefix-numeric-value current-prefix-arg)) (yank)))
+        (if (eq real-last-command this-command) (yank-pop 1) (yank))))))
 
 (defconst show-kill-ring-separator (concat "\n\n" (make-string 77 95) "\n\n")
   "A line divider for `show-kill-ring'.")
@@ -575,13 +585,15 @@ If `universal-argument' is called first, do not delete inner text."
 (defun del-back ()
   "Try cut bracket. If error, then delete char."
   (interactive)
-  (let (ok)
-    (unwind-protect
-        (progn (cut-bracket) (setq ok t))
-      (unless ok
-        (if (looking-back "\\s)" 1)
-            (kill-region (point) (progn (backward-char 1) (point)))
-          (kill-region (point) (progn (forward-char 1) (point))))))))
+  (if buffer-read-only
+      (setq this-command 'ignore)
+    (let (ok)
+      (unwind-protect
+          (progn (cut-bracket) (setq ok t))
+        (unless ok
+          (if (looking-back "\\s)" 1)
+              (kill-region (point) (progn (backward-char 1) (point)))
+            (kill-region (point) (progn (forward-char 1) (point)))))))))
 
 (defun change-bracket-pairs (FromChars ToChars)
   "Change bracket pairs to another type or none.
@@ -648,28 +660,30 @@ ToChars is similar, with a special value of \" none \", replace by empty string.
   "Toggle the letter case of current word or selection.
 Cycle in this order: Init Caps, ALL CAPS, all lower. Calculates initial state."
   (interactive)
-  (let ((deactivate-mark nil) xp1 xp2)
-    (unless (eq last-command this-command) (put this-command 'state 0))
-    (if (region-active-p)
-        (setq xp1 (region-beginning) xp2 (region-end))
-      (save-excursion
-        (skip-chars-backward "[:alpha:]")
-        (setq xp1 (point))
-        (if (string-is-capitalized (buffer-substring xp1 (1+ xp1)))
-            (put this-command 'state 1))
-        (skip-chars-forward "[:alpha:]")
-        (setq xp2 (point))
-        (if (string-is-capitalized (buffer-substring xp1 xp2))
-            (put this-command 'state 2))))
-    (cond ((equal 0 (get this-command 'state))
-           (upcase-initials-region xp1 xp2)
-           (put this-command 'state 1))
-          ((equal 1 (get this-command 'state))
-           (upcase-region xp1 xp2)
-           (put this-command 'state 2))
-          ((equal 2 (get this-command 'state))
-           (downcase-region xp1 xp2)
-           (put this-command 'state 0)))))
+  (if buffer-read-only
+      (setq this-command 'ignore)
+    (let ((deactivate-mark nil) xp1 xp2)
+      (unless (eq last-command this-command) (put this-command 'state 0))
+      (if (region-active-p)
+          (setq xp1 (region-beginning) xp2 (region-end))
+        (save-excursion
+          (skip-chars-backward "[:alpha:]")
+          (setq xp1 (point))
+          (if (string-is-capitalized (buffer-substring xp1 (1+ xp1)))
+              (put this-command 'state 1))
+          (skip-chars-forward "[:alpha:]")
+          (setq xp2 (point))
+          (if (string-is-capitalized (buffer-substring xp1 xp2))
+              (put this-command 'state 2))))
+      (cond ((equal 0 (get this-command 'state))
+             (upcase-initials-region xp1 xp2)
+             (put this-command 'state 1))
+            ((equal 1 (get this-command 'state))
+             (upcase-region xp1 xp2)
+             (put this-command 'state 2))
+            ((equal 2 (get this-command 'state))
+             (downcase-region xp1 xp2)
+             (put this-command 'state 0))))))
 
 (defun toggle-prev-letter-case ()
   "Toggle the letter case of the letter to the left of cursor."
@@ -784,39 +798,41 @@ When called in a Elisp program, Begin End are region boundaries."
 Shrink neighboring spaces, then newlines, then spaces again, leaving
 one space or newline at each step, till no more white space."
   (interactive)
-  (let* ((xeol-count 0) (xp0 (point))
-         xp1 ; whitespace begin
-         xp2 ; whitespace end
-         (xcharBefore (char-before)) (xcharAfter (char-after))
-         (xspace-neighbor-p (or (eq xcharBefore 32) (eq xcharBefore 9)
-                                (eq xcharAfter 32)  (eq xcharAfter 9))))
-    (skip-chars-backward " \n\t")
-    (setq xp1 (point))
-    (goto-char xp0)
-    (skip-chars-forward " \n\t")
-    (setq xp2 (point))
-    (goto-char xp1)
-    (while (search-forward "\n" xp2 t) (setq xeol-count (1+ xeol-count)))
-    (goto-char xp0)
-    (cond
-     ((eq xeol-count 0)
-      (if (> (- xp2 xp1) 1)
-          (progn (delete-horizontal-space) (insert " "))
-        (delete-horizontal-space)))
-     ((eq xeol-count 1)
-      (if xspace-neighbor-p
-          (delete-spaces)
-        (progn (delete-blank-lines) (insert " "))))
-     ((eq xeol-count 2)
-      (if xspace-neighbor-p (delete-spaces) (delete-blank-lines)))
-     ((> xeol-count 2)
-      (if xspace-neighbor-p
-          (delete-spaces)
-        (progn (goto-char xp2)
-               (search-backward "\n")
-               (delete-region xp1 (point))
-               (insert "\n"))))
-     (t (message "Nothing done. Logic error 40873. Should not reach here")))))
+  (if buffer-read-only
+      (setq this-command 'ignore)
+    (let* ((xeol-count 0) (xp0 (point))
+           xp1 ; whitespace begin
+           xp2 ; whitespace end
+           (xcharBefore (char-before)) (xcharAfter (char-after))
+           (xspace-neighbor-p (or (eq xcharBefore 32) (eq xcharBefore 9)
+                                  (eq xcharAfter 32) (eq xcharAfter 9))))
+      (skip-chars-backward " \n\t")
+      (setq xp1 (point))
+      (goto-char xp0)
+      (skip-chars-forward " \n\t")
+      (setq xp2 (point))
+      (goto-char xp1)
+      (while (search-forward "\n" xp2 t) (setq xeol-count (1+ xeol-count)))
+      (goto-char xp0)
+      (cond
+       ((eq xeol-count 0)
+        (if (> (- xp2 xp1) 1)
+            (progn (delete-horizontal-space) (insert " "))
+          (delete-horizontal-space)))
+       ((eq xeol-count 1)
+        (if xspace-neighbor-p
+            (delete-spaces)
+          (progn (delete-blank-lines) (insert " "))))
+       ((eq xeol-count 2)
+        (if xspace-neighbor-p (delete-spaces) (delete-blank-lines)))
+       ((> xeol-count 2)
+        (if xspace-neighbor-p
+            (delete-spaces)
+          (progn (goto-char xp2)
+                 (search-backward "\n")
+                 (delete-region xp1 (point))
+                 (insert "\n"))))
+       (t (message "Nothing done. Logic error 40873. Should not reach here"))))))
 
 (defun fill-or-unfill ()
   "Reformat current block or selection to short/long line.
@@ -1020,15 +1036,17 @@ Move cursor to the beginning of next text block."
 (defun toggle-comment ()
   "Like `comment-dwim', but toggle comment if cursor is not at end of line."
   (interactive)
-  (if (region-active-p)
-      (comment-dwim nil)
-    (let ((xlbp (line-beginning-position)) (xlep (line-end-position)))
-      (if (eq xlbp xlep)
-          (comment-dwim nil)
-        (if (eq (point) xlep)
+  (if buffer-read-only
+      (setq this-command 'ignore)
+    (if (region-active-p)
+        (comment-dwim nil)
+      (let ((xlbp (line-beginning-position)) (xlep (line-end-position)))
+        (if (eq xlbp xlep)
             (comment-dwim nil)
-          (comment-or-uncomment-region xlbp xlep)
-          (forward-line))))))
+          (if (eq (point) xlep)
+              (comment-dwim nil)
+            (comment-or-uncomment-region xlbp xlep)
+            (forward-line)))))))
 
 (defun quote-lines (Begin End QuoteL QuoteR Sep)
   "Add quotes/brackets and separator (comma) to lines.
@@ -1172,23 +1190,23 @@ If a buffer is not file and not dired, copy value of `default-directory'."
 (defun cut-text-block ()
   "Cut text block plus blank lines or selection."
   (interactive)
-  (let (xp1 xp2)
-    (if (region-active-p)
-        (setq xp1 (region-beginning) xp2 (region-end))
-      (if (re-search-backward "\n[ \t]*\n+" nil 1)
-          (setq xp1 (goto-char (match-end 0)))
-        (setq xp1 (point)))
-      (if (re-search-forward "\n[ \t]*\n" nil 1)
-          (setq xp2 (match-end 0))
-        (setq xp2 (point-max))))
-    (kill-region xp1 xp2)))
+  (if buffer-read-only
+      (setq this-command 'ignore)
+    (let (xp1 xp2)
+      (if (region-active-p)
+          (setq xp1 (region-beginning) xp2 (region-end))
+        (if (re-search-backward "\n[ \t]*\n+" nil 1)
+            (setq xp1 (goto-char (match-end 0)))
+          (setq xp1 (point)))
+        (if (re-search-forward "\n[ \t]*\n" nil 1)
+            (setq xp2 (match-end 0))
+          (setq xp2 (point-max))))
+      (kill-region xp1 xp2))))
 
 (defun clear-r1 ()
-  "Clear register 1.
-See also: `paste-from-r1', `copy-to-register'."
+  "Clear register 1. See also: `paste-from-r1', `copy-to-register'."
   (interactive)
-  (copy-to-register ?1 (point-min) (point-min))
-  (message "Clear register 1"))
+  (copy-to-register ?1 (point-min) (point-min)) (message "Clear register 1"))
 
 (defun copy-to-r1 ()
   "Copy current line or selection to register 1.
@@ -1370,7 +1388,8 @@ LBracket and RBracket are strings. WrapMethod must be either `line' or
 
 (defun insert-space-before ()
   "Insert space before cursor."
-  (interactive) (insert " "))
+  (interactive)
+  (if buffer-read-only (setq this-command 'ignore) (insert " ")))
 
 (defun insert-formfeed ()
   "Insert a form feed char (codepoint 12)."
@@ -1442,13 +1461,13 @@ including bracket, else select current word."
    ((looking-at "\\s(") ; left bracket
     (mark-sexp))
    ((looking-back ")" (- (point) 1)) ; right bracket
-    (goto-matching-bracket)
+    (goto-match-br)
     (mark-sexp))
    ((looking-at "\\s)") ; right bracket
     (backward-up-list)
     (mark-sexp))
    ((looking-back "\"" (max (- (point) 1) (point-min))) ; string quote back
-    (goto-matching-bracket)
+    (goto-match-br)
     (mark-sexp))
    ((looking-at "\\s \"") ; string quote after space
     (mark-sexp))
@@ -1662,9 +1681,9 @@ With prefix arg, find the previous file."
       (find-file (nth pos files)))))
 
 (defun new-empty-buffer ()
-  "Create a new empty buffer. New buffer is named buffer, buffer<2>, etc."
+  "Create a new empty buffer. New buffer is named file, file<2>, etc."
   (interactive)
-  (let ((xbuf (generate-new-buffer "buffer")))
+  (let ((xbuf (generate-new-buffer "file")))
     (switch-to-buffer xbuf)
     (funcall initial-major-mode)
     xbuf))
@@ -2085,13 +2104,13 @@ before actually send the cd command."
   "Split eshell window below."
   (interactive)
   (if (one-window-p) (split-window-below))
-  (enlarge-window-split)
-  (other-window 1)
-  (command-execute 'eshell))
+  (enlarge-window-split) (other-window 1)
+  (let ((inhibit-messages t) (message-log-max nil)) (command-execute 'eshell)))
 
 (defun kmacro-helper ()
   "Keyboard macro helper. Ad hoc redefine."
-  (interactive) (alt-buf))
+  (interactive)
+  (setq this-command 'config) (command-execute 'config))
 
 (defalias 'kmacro-play 'call-last-kbd-macro)
 
@@ -2112,8 +2131,7 @@ before actually send the cd command."
   "Split terminal window below."
   (interactive)
   (if (one-window-p) (split-window-below))
-  (enlarge-window-split)
-  (other-window 1)
+  (enlarge-window-split) (other-window 1)
   (command-execute 'vterm))
 
 (defun vterm-up ()
@@ -2178,9 +2196,14 @@ and reverse-search-history in bashrc."
 (defun shopping () "Toggle shopping list." (interactive) (find-file shopping-list-file))
 
 (defun downloads ()
-  "Go to Downloads."
+  "Go to downloads or temp."
   (interactive)
-  (if (file-exists-p downloads-dir) (find-file downloads-dir) (message "No downloads")))
+  (if (equal (replace-regexp-in-string (getenv "HOME") "~" default-directory)
+             downloads-dir)
+      (find-file "~/.emacs.d/temp")
+    (if (file-exists-p downloads-dir)
+        (find-file downloads-dir)
+      (find-file "~/.emacs.d/temp"))))
 
 (defun org-agenda-switch-to-task ()
   "Same as `org-agenda-switch-to', but call `tasks' in case of error."
@@ -2433,6 +2456,8 @@ Use as around advice e.g. for mouse left click after double click."
 (defun scroll-one-pixel (&rest r)
   "Scroll one pixel up. Disables recentering cursor temporary."
   (if pixel-scroll-mode (pixel-scroll-pixel-up 1)))
+
+(defalias 'view-messages 'view-echo-area-messages)
 
 (provide 'commands)
 
