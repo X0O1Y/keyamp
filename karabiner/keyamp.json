@@ -2351,7 +2351,7 @@
           ],
           "to_if_held_down": [
             {
-              "shell_command": "/Applications/emacsclient --no-wait --eval '(save-buffers-kill-terminal)' && sleep 0.05 && open -a 'Emacs'",
+              "shell_command": "/Applications/emacsclient --no-wait --eval \"(save-buffers-kill-terminal)\" && sleep 0.05 && open -a 'Emacs'",
               "repeat": false,
               "halt": true
             }
@@ -6653,7 +6653,7 @@
               "repeat": false
             },
             {
-              "shell_command": "open -a 'Brave Browser'"
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)' && open -a 'Brave Browser'"
             }
           ]
         },
@@ -6689,7 +6689,7 @@
               ]
             },
             {
-              "shell_command": "open -a 'Emacs'"
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)' && open -a 'Emacs'"
             }
           ]
         }
@@ -7146,7 +7146,7 @@
               "repeat": false
             },
             {
-              "shell_command": "open -a 'Brave Browser'"
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)' && open -a 'Brave Browser'"
             }
           ]
         },
@@ -7182,7 +7182,7 @@
               ]
             },
             {
-              "shell_command": "open -a 'Emacs'"
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)' && open -a 'Emacs'"
             }
           ]
         }
@@ -7219,7 +7219,7 @@
           ],
           "to": [
             {
-              "shell_command": "/Applications/emacsclient --no-wait --eval '(message \"ABC\")'"
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
             },
             {
               "select_input_source": {
@@ -7257,7 +7257,7 @@
           ],
           "to": [
             {
-              "shell_command": "/Applications/emacsclient --no-wait --eval '(message \"ABC\")'"
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
             },
             {
               "select_input_source": {
@@ -7295,7 +7295,7 @@
           ],
           "to": [
             {
-              "shell_command": "/Applications/emacsclient --no-wait --eval '(message \"АБВ\")'"
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-ru)'"
             },
             {
               "select_input_source": {
@@ -7331,6 +7331,9 @@
                 "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
               },
               "repeat": false
+            },
+            {
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
             }
           ]
         },
@@ -7360,6 +7363,9 @@
                 "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
               },
               "repeat": false
+            },
+            {
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
             }
           ]
         },
@@ -7384,6 +7390,9 @@
             }
           ],
           "to": [
+            {
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-ru)'"
+            },
             {
               "select_input_source": {
                 "input_source_id": "com.apple.keylayout.RussianWin"
@@ -7418,6 +7427,9 @@
               "modifiers": [
                 "command"
               ]
+            },
+            {
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
             }
           ]
         }

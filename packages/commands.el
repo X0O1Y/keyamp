@@ -1892,7 +1892,7 @@ File suffix is used to determine which program to run, set in the variable
                        (progn (message "Running %s" xcmdStr)
                               (shell-command xcmdStr xoutBuffer))
                      (error "%s: Unknown extension: %s" real-this-command xfExt))))
-          (setq run-output (concat "run " xbuf))
+          (setq run-output (concat "Run " xbuf))
           (enlarge-window-split)))
     (message "Abort run file")))
 
@@ -2047,11 +2047,31 @@ When called in Emacs Lisp, if Fname is given, open that."
 If there more than one frame, switch to next frame."
   (interactive) (if (< 1 (length (frame-list))) (other-frame -1) (alt-buf)))
 
+(defvar proced-defer-timer nil "Timer to defer `proced-defer'.")
+
+(defun proced-run () "Run proced." (setq proced-defer-timer nil) (proced))
+
+(defun proced-defer ()
+  "Defer in order to reuse double key press for another command."
+  (interactive)
+  (if (timerp proced-defer-timer)
+      (progn (cancel-timer proced-defer-timer) (setq proced-defer-timer nil))
+    (setq proced-defer-timer (run-with-timer 0.25 nil 'proced-run))))
+
+(defvar kmacro-record-timer nil "Timer to defer `kmacro-record'.")
+
+(defun kmacro-start ()
+  "Defer in order to reuse double key press for another command."
+  (kmacro-start-macro nil) (setq kmacro-record-timer nil))
+
 (defun kmacro-record ()
   "Start or stop macro recording."
   (interactive)
   (if (or defining-kbd-macro executing-kbd-macro)
-      (kmacro-end-macro nil) (kmacro-start-macro nil)))
+      (kmacro-end-macro nil)
+    (if (timerp kmacro-record-timer)
+        (progn (cancel-timer kmacro-record-timer) (setq kmacro-record-timer nil))
+      (setq kmacro-record-timer (run-with-timer 0.25 nil 'kmacro-start)))))
 
 (defun terminal-prompt (Prompt)
   "Compare PROMPT and actual prompt."
@@ -2279,7 +2299,7 @@ and reverse-search-history in bashrc."
 (defun eval-region-or-sexp ()
   "Eval region or last sexp."
   (interactive)
-  (if (region-active-p)
+  (if (use-region-p)
       (command-execute 'eval-region)
     (command-execute 'eval-last-sexp)))
 
@@ -2438,8 +2458,7 @@ Use as around advice e.g. for mouse left click after double click."
     (with-current-buffer xbuf
       (save-excursion
         (let ((inhibit-read-only t))
-          (goto-char (point-min))
-          (kill-line 4))))
+          (goto-char (point-min)) (kill-line 4))))
     (shrink-completion-win))
   (setq this-command 'completion-at-point))
 
@@ -2458,6 +2477,8 @@ Use as around advice e.g. for mouse left click after double click."
   (if pixel-scroll-mode (pixel-scroll-pixel-up 1)))
 
 (defalias 'view-messages 'view-echo-area-messages)
+
+(defun save-all-unsaved () (interactive) (save-some-buffers t))
 
 (provide 'commands)
 
