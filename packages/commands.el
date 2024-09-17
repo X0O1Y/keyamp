@@ -37,6 +37,12 @@
       (forward-line (- (count-lines (point-min) (point-max))))
     (apply fun r)))
 
+(defconst before-last-command-event-threshold (if (display-graphic-p) 0 70)
+  "Threshold for `before-last-command-event'. Give time to paste into terminal.")
+(defconst before-last-command-event-timeout 300
+  "Timeout for `before-last-command-event'.")
+(defvar before-last-command-event nil "Before `last-command-event'.")
+
 (defconst before-last-command-timeout 200 "Timeout for `before-last-command' in ms.")
 (defvar before-last-command nil "Command before last command.")
 
@@ -45,6 +51,8 @@
   (setq before-last-command last-command)
   (run-with-timer (/ before-last-command-timeout 1000.0) nil
                   (lambda () (setq before-last-command nil))))
+
+(defvar last-command-keys nil "Last command keys.")
 
 (defun up-line ()
   "Up line for transient use."
@@ -58,9 +66,12 @@
           (ibuffer-backward-filter-group))
          ((eq major-mode 'gnus-group-mode)
           (setq this-command 'gnus-topic-prev) (gnus-topic-prev))
-         (t (setq this-command 'beg-of-block) (beg-of-block)))
+         (t (if (equal last-command-keys "t") ; else SPC
+                (progn (setq this-command 'page-up-half) (page-up-half))
+              (setq this-command 'beg-of-block) (beg-of-block))))
       (command-execute 'previous-line)
-      (if (eq last-command 'down-line) (before-last-command)))))
+      (if (eq last-command 'down-line) (before-last-command))))
+  (setq last-command-keys (this-command-keys)))
 
 (defun down-line ()
   "Down line for transient use."
@@ -74,12 +85,15 @@
           (ibuffer-forward-filter-group))
          ((eq major-mode 'gnus-group-mode)
           (setq this-command 'gnus-topic-next) (gnus-topic-next))
-         (t (setq this-command 'end-of-block) (end-of-block)))
+         (t (if (equal last-command-keys "d") ; else DEL
+                (progn (setq this-command 'page-dn-half) (page-dn-half))
+              (setq this-command 'end-of-block) (end-of-block))))
       (command-execute 'next-line)
       (if (and (eq major-mode 'gnus-summary-mode)
                (> (line-number-at-pos) 2))
           (command-execute 'next-line))
-      (if (eq last-command 'up-line) (before-last-command)))))
+      (if (eq last-command 'up-line) (before-last-command))))
+  (setq last-command-keys (this-command-keys)))
 
 (defun beginning-of-visual-line-once (&rest r)
   "Call to `beginning-of-visual-line'."
@@ -232,8 +246,7 @@ Save point to register 7 before repeated call."
   "Back block. Fast double direction switch to prev buf."
   (interactive)
   (if (equal before-last-command this-command)
-      (progn (command-execute 'back-block)
-             (setq this-command 'prev-buf) (command-execute 'prev-buf))
+      (progn (setq this-command 'dummy) (command-execute 'back-block))
     (command-execute 'back-block)
     (if (eq last-command 'end-of-block) (before-last-command))))
 
@@ -241,8 +254,7 @@ Save point to register 7 before repeated call."
   "Forw block."
   (interactive)
   (if (equal before-last-command this-command)
-      (progn (command-execute 'forw-block)
-             (setq this-command 'next-buf) (command-execute 'next-buf))
+      (progn (setq this-command 'dummy) (command-execute 'forw-block))
     (command-execute 'forw-block)
     (if (eq last-command 'beg-of-block) (before-last-command))))
 
@@ -352,6 +364,7 @@ and `right-brackets'."
 (defun back-word ()
   "Backward word. Fast double direction switch breaks beat to char move."
   (interactive)
+  (if (member (this-command-keys) (list "l" [1075])) (push-mark (point) t)) ; virtual leader
   (if (equal before-last-command this-command)
       (progn (setq this-command 'dummy) (command-execute 'backward-word))
     (command-execute 'backward-word)
@@ -360,6 +373,7 @@ and `right-brackets'."
 (defun forw-word ()
   "Forward word."
   (interactive)
+    (if (member (this-command-keys) (list "w" [1097])) (push-mark (point) t)) ; virtual leader
   (if (equal before-last-command this-command)
       (progn (setq this-command 'dummy) (command-execute 'forward-word))
     (command-execute 'forward-word)
@@ -394,10 +408,27 @@ and `right-brackets'."
   "Command `deactivate-mark'."
   (interactive) (deactivate-mark))
 
-(defalias 'page-up-half 'View-scroll-half-page-backward)
-(defalias 'page-dn-half 'View-scroll-half-page-forward)
-(advice-add 'page-up-half :after 'beginning-of-visual-line-once)
-(advice-add 'page-dn-half :after 'beginning-of-visual-line-once)
+(defun page-up-half ()
+  "Page up half. Direction fast switch to cancel transient move."
+  (interactive)
+  (if (equal before-last-command this-command)
+      (progn (setq this-command 'dummy)
+             (command-execute 'View-scroll-half-page-backward))
+    (command-execute 'View-scroll-half-page-backward)
+    (if (eq last-command 'page-dn-half) (before-last-command)))
+  (beginning-of-visual-line-once))
+
+(defun page-dn-half ()
+  "Page dn half."
+  (interactive)
+  (if (equal before-last-command this-command)
+      (progn (setq this-command 'dummy)
+             (command-execute 'View-scroll-half-page-forward))
+    (command-execute 'View-scroll-half-page-forward)
+    (if (eq last-command 'page-up-half) (before-last-command)))
+  (beginning-of-visual-line-once))
+
+(advice-add 'mark-defun :after 'exchange-point-and-mark)
 
 
 ;; Editing commands
@@ -1303,7 +1334,11 @@ If there is selection, delete it first."
                                       (substring xx 3 5)))
                  (format-time-string "%z"))))
       ((string-match "^weekday" xstyle) (format-time-string "%Y-%m-%d %A"))
-      (t (format-time-string "%Y-%m-%d"))))))
+      (t (format-time-string "%Y-%m-%d")))))
+  (when (eq major-mode 'org-mode)
+    (beginning-of-line)
+    (title-case-region-or-line)
+    (end-of-line)))
 
 (defun insert-bracket-pair (LBracket RBracket &optional WrapMethod)
   "Insert brackets around selection, word, at point, and maybe move cursor
@@ -1428,7 +1463,7 @@ If region is active, extend selection downward by block."
   "Select current line. If region is active, extend selection downward by line.
 If `visual-line-mode' is on, consider line as visual line."
   (interactive)
-  (if t ;(bolp)
+  (if (bolp)
       (progn (setq this-command 'prev-buf) (prev-buf))
     (push-mark (point) t nil)
     (if (region-active-p)
@@ -2233,10 +2268,10 @@ and reverse-search-history in bashrc."
 (defun todo ()
   "Modification of `org-todo'. Capitalize task."
   (interactive)
-  (if (eq major-mode 'org-mode)
-      (progn (org-todo)
-             (beginning-of-line) (title-case-region-or-line) (end-of-line)))
-  (if (eq major-mode 'org-agenda-mode) (org-agenda-todo)))
+  (cond ((eq major-mode 'org-mode) (org-todo))
+        ((eq major-mode 'org-agenda-mode) (org-agenda-todo)))
+  (when (eq major-mode 'org-mode)
+    (beginning-of-line) (title-case-region-or-line)))
 
 (defun toggle-gnus ()
   "Toggle gnus."
@@ -2433,7 +2468,12 @@ Use as around advice e.g. for mouse left click after double click."
   (if (active-minibuffer-window)
       (abort-recursive-edit)
     (if (one-window-p)
-        (progn (setq this-command 'split-window-below) (split-window-below))
+        (progn
+          (if (null (frame-parameter nil 'fullscreen))
+              (progn (setq this-command 'split-window-below)
+                     (split-window-below))
+            (setq this-command 'split-window-horizontally)
+            (split-window-horizontally)))
       (setq this-command 'delete-window) (delete-window))))
 
 (defun other-win ()
@@ -2479,6 +2519,12 @@ Use as around advice e.g. for mouse left click after double click."
 (defalias 'view-messages 'view-echo-area-messages)
 
 (defun save-all-unsaved () (interactive) (save-some-buffers t))
+
+(defun save-buffer-isearch-cancel ()
+  "Cancel isearch and save buffer."
+  (interactive)
+  (if (and (buffer-modified-p) (buffer-file-name)) (save-buffer))
+  (if isearch-mode (isearch-cancel)))
 
 (provide 'commands)
 
