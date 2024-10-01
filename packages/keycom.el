@@ -1256,7 +1256,7 @@ If a buffer is not file and not dired, copy value of `default-directory'."
 (defun clear-r1 ()
   "Clear register 1. See also: `paste-from-r1', `copy-to-register'."
   (interactive)
-  (copy-to-register ?1 (point-min) (point-min)) (message "Clear register 1"))
+  (copy-to-register ?1 (point-min) (point-min)) (message "Clear register"))
 
 (defun copy-to-r1 ()
   "Copy current line or selection to register 1.
@@ -1267,7 +1267,7 @@ See also: `paste-from-r1', `copy-to-register'."
         (setq xp1 (region-beginning) xp2 (region-end))
       (setq xp1 (line-beginning-position) xp2 (line-end-position)))
     (copy-to-register ?1 xp1 xp2)
-    (message "Copy register 1"))
+    (message "Copy register"))
   (return-before-copy))
 
 (defun append-to-r1 ()
@@ -1282,7 +1282,7 @@ See also: `paste-from-r1', `copy-to-register'."
     (append-to-register ?1 xp1 xp2)
     (with-temp-buffer (insert "\n")
                       (append-to-register ?1 (point-min) (point-max)))
-    (message "Append register 1")))
+    (message "Append register")))
 
 (defun paste-from-r1 ()
   "Paste text from register 1. See also: `copy-to-r1', `insert-register'."
@@ -2034,9 +2034,21 @@ If the current buffer is not associated with a file nor dired, nothing's done."
   (isearch-repeat-backward)
   (setq this-command 'isearch-cur-word-backward))
 
-(defun occur-cur-word ()
+(defvar occur-cur-word-defer-timer nil "Timer to defer `occur-cur-word'.")
+
+(defun occur-cur-word-run ()
   "Call `occur' on current word."
-  (interactive) (occur (cur-word)) (enlarge-window-split))
+  (interactive)
+  (setq occur-cur-word-defer-timer nil)
+  (occur (cur-word)) (enlarge-window-split))
+
+(defun occur-cur-word ()
+  "Defer in order to reuse double key press for another command."
+  (interactive)
+  (if (timerp occur-cur-word-defer-timer)
+      (progn (cancel-timer occur-cur-word-defer-timer)
+             (setq occur-cur-word-defer-timer nil))
+    (setq occur-cur-word-defer-timer (run-with-timer 0.25 nil 'occur-cur-word-run))))
 
 (defun search-string ()
   "Search string in all files of current directory."
@@ -2489,17 +2501,21 @@ Use as around advice e.g. for mouse left click after double click."
 (defun del-win ()
   "Split window if one window, otherwise delete window."
   (interactive)
-  (if (active-minibuffer-window)
-      (abort-recursive-edit)
-    (if (one-window-p)
-        (progn
-          (if (or (not (display-graphic-p))
-                  (null (frame-parameter nil 'fullscreen)))
-              (progn (setq this-command 'split-window-below)
-                     (split-window-below))
-            (setq this-command 'split-window-horizontally)
-            (split-window-horizontally)))
-      (setq this-command 'delete-window) (delete-window))))
+  (if (and (not (null (frame-parameter nil 'fullscreen)))
+           (display-graphic-p))
+      (progn (setq this-command 'split-window-below)
+             (split-window-below))
+    (if (active-minibuffer-window)
+        (abort-recursive-edit)
+      (if (one-window-p)
+          (progn
+            (if (or (not (display-graphic-p))
+                    (null (frame-parameter nil 'fullscreen)))
+                (progn (setq this-command 'split-window-below)
+                       (split-window-below))
+              (setq this-command 'split-window-horizontally)
+              (split-window-horizontally)))
+        (setq this-command 'delete-window) (delete-window)))))
 
 (defun other-win ()
   "Other window."
@@ -2557,6 +2573,13 @@ Use as around advice e.g. for mouse left click after double click."
   (interactive)
   (if (and (buffer-modified-p) (buffer-file-name)) (save-buffer))
   (if isearch-mode (isearch-cancel)))
+
+(defun empty-trash ()
+  "Empty trash on macOS."
+  (interactive)
+  (if (and (y-or-n-p-with-timeout "Empty trash?" 3 nil)
+           (string-equal system-type "darwin"))
+      (call-process "osascript" nil 0 nil "-e" "tell app \"Finder\" to empty")))
 
 (provide 'keycom)
 
