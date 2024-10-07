@@ -443,40 +443,40 @@ is enabled.")
 (keyamp--map keyamp-command-map
   '(;; left half
     ("`" . make-frame-command)             ("ё" . make-frame-command)               ("~" . keyamp-qwerty-to-current-layout)  ("Ë" . keyamp-qwerty-to-current-layout)
-    ("1" . kmacro-record)                                                           ("!" . ignore)
-    ("2" . kmacro-play)                                                             ("@" . ignore)
+    ("1" . kmacro-record)                                                           ("!" . self-insert-command)
+    ("2" . kmacro-play)                                                             ("@" . self-insert-command)
     ("3" . kmacro-helper)                                                           ("#" . self-insert-command)              ("№" . ignore)
-    ("4" . append-to-r1)                                                            ("$" . ignore)
-    ("5" . terminal-split)                                                          ("%" . ignore)
+    ("4" . append-to-r1)                                                            ("$" . self-insert-command)
+    ("5" . terminal-split)                                                          ("%" . self-insert-command)
 
     ("q" . insert-space-before)            ("й" . insert-space-before)              ("Q" . ignore)                           ("Й" . ignore)
     ("w" . backward-del-word)              ("ц" . backward-del-word)                ("W" . ignore)                           ("Ц" . ignore)
     ("e" . undo)                           ("у" . undo)                             ("E" . ignore)                           ("У" . ignore)
     ("r" . del-word)                       ("к" . del-word)                         ("R" . ignore)                           ("К" . ignore)
-    ("t" . cut-text-block)                 ("е" . cut-text-block)                   ("T" . ignore)                           ("Е" . ignore)
+    ("t" . cut-text-block)                 ("е" . cut-text-block)                   ("T" . self-insert-command)              ("Е" . ignore)
 
     ("a" . shrink-whitespaces)             ("ф" . shrink-whitespaces)               ("A" . ignore)                           ("Ф" . ignore)
     ("s" . open-line)                      ("ы" . open-line)                        ("S" . ignore)                           ("Ы" . ignore)
     ("d" . del-back)                       ("в" . del-back)                         ("D" . ignore)                           ("В" . ignore)
     ("f" . newline)                        ("а" . newline)                          ("F" . ignore)                           ("А" . ignore)
-    ("g" . activate-region)                ("п" . activate-region)                  ("G" . ignore)                           ("П" . ignore)
+    ("g" . activate-region)                ("п" . activate-region)                  ("G" . self-insert-command)              ("П" . ignore)
 
     ("z" . toggle-comment)                 ("я" . toggle-comment)                   ("Z" . ignore)                           ("Я" . ignore)
     ("x" . cut-line)                       ("ч" . cut-line)                         ("X" . ignore)                           ("Ч" . ignore)
     ("c" . copy-line)                      ("с" . copy-line)                        ("C" . ignore)                           ("С" . ignore)
     ("v" . paste-or-prev)                  ("м" . paste-or-prev)                    ("V" . ignore)                           ("М" . ignore)
-    ("b" . toggle-letter-case)             ("и" . toggle-letter-case)               ("B" . ignore)                           ("И" . ignore)
+    ("b" . toggle-letter-case)             ("и" . toggle-letter-case)               ("B" . self-insert-command)              ("И" . ignore)
 
     ;; right half
-    ("6" . pass)                                                                    ("^" . ignore)
+    ("6" . pass)                                                                    ("^" . self-insert-command)
     ("7" . jump-to-register)                                                        ("&" . keyamp-self-insert-and-insert)
     ("8" . point-to-register)                                                       ("*" . goto-match-br) ; QWERTY * → = Engineer Engram, QWERTY / → = RU PC Karabiner
     ("9" . proced-defer)                                                            ("(" . self-insert-command)
-    ("0" . eshell-split)                                                            (")" . ignore)
-    ("-" . enlarge-window)                                                          ("_" . ignore)
-    ("=" . goto-match-br)                                                           ("+" . ignore)
+    ("0" . eshell-split)                                                            (")" . self-insert-command)
+    ("-" . enlarge-window)                                                          ("_" . self-insert-command)
+    ("=" . goto-match-br)                                                           ("+" . self-insert-command)
 
-    ("y"  . occur-cur-word)                ("н" . occur-cur-word)                   ("Y" . ignore)                           ("Н" . ignore)
+    ("y"  . occur-cur-word)                ("н" . occur-cur-word)                   ("Y" . self-insert-command)              ("Н" . ignore)
     ("u"  . back-word)                     ("г" . back-word)                        ("U" . ignore)                           ("Г" . ignore)
     ("i"  . previous-line)                 ("ш" . previous-line)                    ("I" . ignore)                           ("Ш" . ignore)
     ("o"  . forw-word)                     ("щ" . forw-word)                        ("O" . ignore)                           ("Щ" . ignore)
@@ -485,14 +485,14 @@ is enabled.")
     ("]"  . write-file)                    ("ъ" . write-file)                       ("}" . ignore)                           ("Ъ" . ignore)
     ("\\" . bookmark-set)                                                           ("|" . ignore)
 
-    ("h" . beg-of-line)                    ("р" . beg-of-line)                      ("H"  . ignore)                          ("Р" . ignore)
+    ("h" . beg-of-line)                    ("р" . beg-of-line)                      ("H"  . self-insert-command)             ("Р" . ignore)
     ("j" . backward-char)                  ("о" . backward-char)                    ("J"  . ignore)                          ("О" . ignore)
     ("k" . next-line)                      ("л" . next-line)                        ("K"  . ignore)                          ("Л" . ignore)
     ("l" . forward-char)                   ("д" . forward-char)                     ("L"  . ignore)                          ("Д" . ignore)
     (";" . end-of-lyne)                    ("ж" . end-of-lyne)                      (":"  . ignore)                          ("Ж" . ignore)
     ("'" . alternate-frame)                ("э" . alternate-frame)                  ("\"" . ignore)                          ("Э" . ignore)
 
-    ("n" . isearch-forward)                ("т" . isearch-forward)                  ("N" . toggle-case-fold-search)          ("Т" . toggle-case-fold-search)
+    ("n" . isearch-forward)                ("т" . isearch-forward)                  ("N" . self-insert-command)              ("Т" . ignore)
     ("m" . backward-bracket)               ("ь" . backward-bracket)                 ("M" . ignore)                           ("Ь" . ignore)
     ("," . other-win)                      ("б" . other-win)                        ("<" . ignore)                           ("Б" . ignore)
     ("." . forward-bracket)                ("ю" . forward-bracket)                  (">" . ignore)                           ("Ю" . ignore)
@@ -510,7 +510,7 @@ is enabled.")
 (keyamp--map-tab keyamp-lleader-map read-only-mode)
 (keyamp--map keyamp-lleader-map
   '(;; left leader left half
-    ("`" . next-buffer)
+    ("`" . revert-buffer)
     ("1" . periodic-chart)
     ("2" . kmacro-name-last-macro)
     ("3" . apply-macro-to-region-lines)
@@ -580,7 +580,7 @@ is enabled.")
     ("l" . describe-foo-at-point)
     (";" . recentf-open-files)
     ("'" . sync)
-    ("n" . isearch-backward)
+    ("n" . toggle-case-fold-search)
     ("m" . downloads)
     ("," . player)
     ("." . open-last-closed)
@@ -975,7 +975,7 @@ is enabled.")
    "Repeat move by lines."
    (when (memq major-mode keyamp-lines-move-modes)
      (keyamp-repeat-deactivate-init x)
-     (run-with-timer keyamp-defer-0.05 nil 'keyamp-indicate-read)))
+     (run-with-timer 0.05 nil 'keyamp-indicate-read)))
 
  (advice-add-macro '(other-window translate dired-find-file dired-jump)
                    :after 'keyamp-lines-move))
@@ -1173,16 +1173,17 @@ is enabled.")
 
 ;; G acts as a kind of left leader and more.
 (with-sparse-keymap-x
- (keyamp--map-leader x '(delete-other-windows . next-buf))
+ (keyamp--map-leader x '(delete-other-windows . dired-jump))
+ (keyamp--map x '(("C-r" . open-in-external-app)))
  (keyamp--remap x
    '((undo             . delete-window)       (del-back        . alternate-frame)
      (open-line        . prev-proj-buf)       (newline         . next-proj-buf)
      (activate-region  . rectangle-mark-mode) (jump-mark       . jump-six)
      (other-win        . jump-seven)          (isearch-forward . jump-eight)
      (alternate-frame  . toggle-pin-window)   (keyamp-insert   . toggle-ibuffer)
-     (keyamp-escape    . deactivate-region)))
+     (keyamp-escape    . deactivate-region)   (del-word        . toggle-gnus)))
  (advice-add 'activate-region :after
-             (lambda () "virtual left leader transient"
+             (lambda () "virtual leader G transient"
                (if (eq (mark) (point)) (set-transient-map x nil nil nil 2)))))
 
 (defun keyamp-deactivate-region (&rest _)
@@ -1190,8 +1191,9 @@ is enabled.")
   (if (eq last-command 'activate-region) (deactivate-region)))
 
 (advice-add-macro
- '(del-win alt-buf prev-buf next-buf prev-proj-buf next-proj-buf toggle-ibuffer
-   jump-six jump-seven jump-eight toggle-pin-window alternate-frame delete-other-windows)
+ '(del-win alt-buf prev-proj-buf next-proj-buf toggle-ibuffer
+   jump-six jump-seven jump-eight toggle-pin-window alternate-frame
+   delete-other-windows delete-window open-in-external-app dired-jump toggle-gnus)
  :before 'keyamp-deactivate-region)
 
 (with-sparse-keymap-x
@@ -1366,16 +1368,53 @@ is enabled.")
    ;; backward/forward. Similarly double DEL to activate history move.
    (keyamp--map-leader x '(select-block . select-word))
    (keyamp--remap x
-     '((beg-of-line             . keyamp-beg-of-buf)
-       (end-of-lyne             . keyamp-insert-n) ; literal answers Y N !
-       (backward-del-word       . keyamp-insert-y) ; but not for `read-event'
-       (toggle-case-fold-search . keyamp-insert-!)
-       (keyamp-insert           . keyamp-minibuffer-insert)
+     '((insert-space-before     . keyamp-insert-q)
+       (backward-del-word       . keyamp-insert-w)
+       (undo                    . keyamp-insert-e)
+       (del-word                . keyamp-insert-r)
+       (cut-text-block          . keyamp-insert-t)
+       (occur-cur-word          . keyamp-insert-y)
+       (back-word               . keyamp-insert-u)
+       (previous-line           . keyamp-insert-i)
+       (forw-word               . keyamp-insert-o)
+       (jump-mark               . keyamp-insert-p)
+       (alt-buf                 . keyamp-insert-bracket)
+       (shrink-whitespaces      . keyamp-insert-a)
+       (open-line               . keyamp-insert-s)
+       (del-back                . keyamp-insert-d)
+       (newline                 . keyamp-insert-f)
+       (activate-region         . keyamp-insert-g)
+       (beg-of-line             . keyamp-insert-h)
+       (backward-char           . keyamp-insert-j)
+       (next-line               . keyamp-insert-k)
+       (forward-char            . keyamp-insert-l)
+       (end-of-lyne             . keyamp-insert-semicolon)
+       (alternate-frame         . keyamp-insert-quote)
+       (toggle-comment          . keyamp-insert-z)
+       (cut-line                . keyamp-insert-x)
+       (copy-line               . keyamp-insert-c)
+       (paste-or-prev           . keyamp-insert-v)
+       (toggle-letter-case      . keyamp-insert-b)
+       (isearch-forward         . keyamp-insert-n)
+       (backward-bracket        . keyamp-insert-m)
+       (other-win               . keyamp-insert-comma)
+       (forward-bracket         . keyamp-insert-dot)
+       (goto-match-br           . keyamp-insert-slash)
+       (toggle-case-fold-search . keyamp-insert-N)
+       (keyamp-insert           . keyamp-minibuffer-return)
        (keyamp-escape           . keyamp-minibuffer-escape)
        (open-file               . keyamp-exit-minibuffer)))
    ;; The hook is last one (almost) run during minibuffer setup and set the keymap.
    (keyamp--set-map-hook x '(minibuffer-setup-hook) :command nil :repeat)
    (add-hook 'minibuffer-setup-hook 'keyamp-minibuffer-setup-insert 96))
+
+  (defun keyamp-select-word (fun &rest r)
+    "Execute `paste-or-prev' in empty minibuffer."
+    (if (and (minibufferp) (= 0 (- (buffer-size) (length (minibuffer-prompt)))))
+        (keyamp-command-execute 'paste-or-prev)
+      (apply fun r)))
+
+  (advice-add 'select-word :around 'keyamp-select-word)
 
   ;; Hit D/DEL for No, K/SPC for Yes to answer non-literal Y or N.
   (keyamp--remap y-or-n-p-map
@@ -2775,52 +2814,70 @@ insert cancels the timer.")
   "Self insert and activate insert mode."
   (interactive) (keyamp-insert) (self-insert-command 1))
 
-(defun keyamp-minibuffer-insert ()
-  "If minibuffer input not empty then confirm and exit instead
-of insert mode activation."
+(defun keyamp-minibuffer-return ()
+  "Force complete and exit if show matches on no input or escape."
   (interactive)
-  (if (> (length (buffer-substring (minibuffer-prompt-end) (point))) 0)
-      (exit-minibuffer) (keyamp-insert)))
+  (if icomplete-show-matches-on-no-input
+      (icomplete-force-complete-and-exit)
+    (keyamp-insert)))
 
 (defun keyamp-minibuffer-escape ()
   "If minibuffer input not empty then activate command mode instead
 of quit minibuffer. Answer q to literal confirmation."
   (interactive)
-  (let ((xq (buffer-substring (point-min) (point-max))))
-    (if (and (minibufferp) (string-match "y, n, !\\|yn!q" xq))
-        (progn (keyamp-insert-init) (execute-kbd-macro (kbd "q")))
-      (if (> (length (buffer-substring (minibuffer-prompt-end) (point))) 0)
-          (keyamp-command) (abort-recursive-edit)))))
+  (if (string-match "y, n, !\\|yn!q" (minibuffer-prompt))
+      (progn (keyamp-insert-init) (execute-kbd-macro (kbd "q")))
+    (if (> (length (buffer-substring (minibuffer-prompt-end) (point))) 0)
+        (keyamp-command) (abort-recursive-edit))))
 
-(defconst keyamp-defer-0.05 0.05 "Defer execution for 0.05 s.")
+(defun keyamp-input (Key)
+  "Activate insert mode and input KEY."
+  (keyamp-insert-init)
+  (execute-kbd-macro (kbd (keyamp--convert-kbd-str Key))))
 
-(defun keyamp-beg-of-buf ()
-  "Tripple H to go to the beginning of the buffer."
+(defun keyamp-insert-q ()         (interactive) (keyamp-input "q"))
+(defun keyamp-insert-w ()         (interactive) (keyamp-input "w"))
+(defun keyamp-insert-e ()         (interactive) (keyamp-input "e"))
+(defun keyamp-insert-r ()         (interactive) (keyamp-input "r"))
+(defun keyamp-insert-t ()         (interactive) (keyamp-input "t"))
+(defun keyamp-insert-y ()         (interactive) (keyamp-input "y"))
+(defun keyamp-insert-u ()         (interactive) (keyamp-input "u"))
+(defun keyamp-insert-i ()         (interactive) (keyamp-input "i"))
+(defun keyamp-insert-o ()         (interactive) (keyamp-input "o"))
+(defun keyamp-insert-p ()         (interactive) (keyamp-input "p"))
+(defun keyamp-insert-bracket ()   (interactive) (keyamp-input "["))
+
+(defun keyamp-insert-a ()         (interactive) (keyamp-input "a"))
+(defun keyamp-insert-s ()         (interactive) (keyamp-input "s"))
+(defun keyamp-insert-d ()
   (interactive)
-  (if (member (this-command-keys) (list (keyamp--convert-kbd-str "h") [1088]))
-      (progn (run-with-timer keyamp-defer-0.05 nil 'keyamp-command-execute 'beg-of-buf)
-             (abort-recursive-edit))
-    (keyamp-command-execute 'beg-of-line)))
-
-(defun keyamp-insert-n ()
-  "Insert N literally. Or tripple N to go to the end of the buffer."
+  (if (string-match "y or n" (minibuffer-prompt))
+      (y-or-n-p-insert-n)
+    (keyamp-input "d")))
+(defun keyamp-insert-f ()         (interactive) (keyamp-input "f"))
+(defun keyamp-insert-g ()         (interactive) (keyamp-input "g"))
+(defun keyamp-insert-h ()         (interactive) (keyamp-input "h"))
+(defun keyamp-insert-j ()         (interactive) (keyamp-input "j"))
+(defun keyamp-insert-k ()
   (interactive)
-  (if (member (this-command-keys) (list (keyamp--convert-kbd-str ";") [1078]))
-      (progn (run-with-timer keyamp-defer-0.05 nil 'keyamp-command-execute 'end-of-buf)
-             (abort-recursive-edit))
-    (keyamp-insert-init) (execute-kbd-macro (kbd "n"))))
+  (if (string-match "y or n" (minibuffer-prompt))
+      (y-or-n-p-insert-y)
+    (keyamp-input "k")))
+(defun keyamp-insert-l ()         (interactive) (keyamp-input "l"))
+(defun keyamp-insert-semicolon () (interactive) (keyamp-input ";"))
+(defun keyamp-insert-quote ()     (interactive) (keyamp-input "'"))
 
-(defun keyamp-insert-y ()
-  "Insert Y literally. Only if asked."
-  (interactive)
-  (let ((xq (buffer-substring (point-min) (point-max))))
-    (if (and (minibufferp) (string-match "y, n, !\\|yn!q" xq))
-        (progn (keyamp-insert-init) (execute-kbd-macro (kbd "y")))
-      (backward-kill-word 1))))
-
-(defun keyamp-insert-! ()
-  "Insert ! literally."
-  (interactive) (keyamp-insert-init) (execute-kbd-macro (kbd "!")))
+(defun keyamp-insert-z ()         (interactive) (keyamp-input "z"))
+(defun keyamp-insert-x ()         (interactive) (keyamp-input "x"))
+(defun keyamp-insert-c ()         (interactive) (keyamp-input "c"))
+(defun keyamp-insert-v ()         (interactive) (keyamp-input "v"))
+(defun keyamp-insert-b ()         (interactive) (keyamp-input "b"))
+(defun keyamp-insert-n ()         (interactive) (keyamp-input "n"))
+(defun keyamp-insert-N ()         (interactive) (keyamp-input "N"))
+(defun keyamp-insert-m ()         (interactive) (keyamp-input "m"))
+(defun keyamp-insert-comma ()     (interactive) (keyamp-input ","))
+(defun keyamp-insert-dot ()       (interactive) (keyamp-input "."))
+(defun keyamp-insert-slash ()     (interactive) (keyamp-input "/"))
 
 (defun keyamp-exit-minibuffer ()
   "Exit if file completion. It means use content of minibuffer as it is,
@@ -2874,7 +2931,9 @@ Set up input timer to activate command mode."
   (if (not keyamp-insert-p)
       (keyamp-indicate keyamp-read-indicator keyamp-read-cursor keyamp-read-color))
   (if (eq last-command 'keyamp--read-dummy)
-      (keyamp-blink-start keyamp-idle-color keyamp-read-color)))
+      (if (or isearch-mode (minibufferp))
+          (keyamp-blink-start keyamp-insert-color keyamp-read-color)
+        (keyamp-blink-start keyamp-idle-color keyamp-read-color))))
 
 (defvar keyamp-indicate-read-timer nil "Indicate read timer.")
 

@@ -335,13 +335,18 @@ If cursor is not on a bracket, call `backward-up-list'.
 The list of brackets to jump to is defined by `left-brackets'
 and `right-brackets'."
   (interactive)
-  (if (equal "%" (this-command-keys))
-      ;; see equal sign mapping for russian, so because of conflict
-      ;; while for Engram it is free and can be remapped:
-      (progn (setq this-command 'text-scale-increase) (text-scale-increase 1))
-    (if (nth 3 (syntax-ppss))
-        (backward-up-list 1 'ESCAPE-STRINGS 'NO-SYNTAX-CROSSING)
-      (cond
+  (cond
+   ;; see equal sign mapping for russian, so because of conflict
+   ;; while for Engram it is free and can be remapped
+   ((equal "%" (this-command-keys))
+    (setq this-command 'text-scale-increase) (text-scale-increase 1))
+   ;; next allows to call self insert if not russian
+   ((and (equal "=" (this-command-keys))
+         (boundp 'frame-title-ru) (null frame-title-ru))
+    (self-insert-command 1))
+   ;; base scenario
+   ((nth 3 (syntax-ppss)) (backward-up-list 1 'ESCAPE-STRINGS 'NO-SYNTAX-CROSSING))
+   (t (cond
        ((eq (char-after) ?\") (forward-sexp))
        ((eq (char-before) ?\") (backward-sexp))
        ((looking-at (regexp-opt left-brackets)) (forward-sexp))
@@ -1235,7 +1240,9 @@ If a buffer is not file and not dired, copy value of `default-directory'."
     (kill-new
      (if DirPathOnlyQ
          (file-name-directory xfpath)
-       (progn (message "%s" xfpath) xfpath)))))
+       (let* ((xx (concat xfpath ":" (format-mode-line "%l")))
+              (x (replace-regexp-in-string (getenv "HOME") "~" xx)))
+         (message "%s" x) x)))))
 
 (defun cut-text-block ()
   "Cut text block plus blank lines or selection."
@@ -1979,7 +1986,7 @@ If the current buffer is not associated with a file, nothing's done."
         (let ((xbackupName
                (concat xfname "~" (format-time-string xdateTimeFormat) "~")))
           (copy-file xfname xbackupName t)
-          (message "Backup"))
+          (message "Backup %s" xfname))
       (if (eq major-mode 'dired-mode)
           (progn
             (mapc (lambda (xx)
