@@ -1359,8 +1359,8 @@ is enabled.")
 
 (with-eval-after-load 'minibuffer
   (with-sparse-keymap-x
-   ;; On minibuffer startup press DEL or I to list history backwards or
-   ;; SPC or K to list completion candidates forward. After that
+   ;; On minibuffer startup press DEL to list history backwards or
+   ;; SPC to list completion candidates forward or paste. After that
    ;; I/K or DEL/SPC to list either history or completion candidates
    ;; accordingly choice made. RET to confirm and exit, ESC to quit.
    ;; To switch from history to candidates listing press ESC then double
@@ -1404,7 +1404,7 @@ is enabled.")
        (keyamp-insert           . keyamp-minibuffer-return)
        (keyamp-escape           . keyamp-minibuffer-escape)
        (open-file               . keyamp-exit-minibuffer)))
-   ;; The hook is last one (almost) run during minibuffer setup and set the keymap.
+   ;; The hook is last one run during minibuffer setup and set the keymap.
    (keyamp--set-map-hook x '(minibuffer-setup-hook) :command nil :repeat)
    (add-hook 'minibuffer-setup-hook 'keyamp-minibuffer-setup-insert 96))
 
@@ -2815,11 +2815,8 @@ insert cancels the timer.")
   (interactive) (keyamp-insert) (self-insert-command 1))
 
 (defun keyamp-minibuffer-return ()
-  "Force complete and exit if show matches on no input or escape."
-  (interactive)
-  (if icomplete-show-matches-on-no-input
-      (icomplete-force-complete-and-exit)
-    (keyamp-insert)))
+  "Force complete and exit."
+  (interactive) (icomplete-force-complete-and-exit))
 
 (defun keyamp-minibuffer-escape ()
   "If minibuffer input not empty then activate command mode instead
@@ -2833,7 +2830,9 @@ of quit minibuffer. Answer q to literal confirmation."
 (defun keyamp-input (Key)
   "Activate insert mode and input KEY."
   (keyamp-insert-init)
-  (execute-kbd-macro (kbd (keyamp--convert-kbd-str Key))))
+  (if (string-match "y, n, !\\|yn!q" (minibuffer-prompt))
+      (execute-kbd-macro (kbd (keyamp--convert-kbd-str Key)))
+    (insert (keyamp--convert-kbd-str Key))))
 
 (defun keyamp-insert-q ()         (interactive) (keyamp-input "q"))
 (defun keyamp-insert-w ()         (interactive) (keyamp-input "w"))
