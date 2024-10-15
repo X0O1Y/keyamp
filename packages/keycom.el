@@ -208,11 +208,11 @@ Save point to register 6 before repeated call."
   (let ((xp (point)))
     (set-mark-command t) (if (eql xp (point)) (set-mark-command t))))
 
-(defun jump-six ()   "Jump to register six."
+(defun jump-6 () "Jump to register 6."
        (interactive) (if (get-register ?6) (jump-to-register ?6)))
-(defun jump-seven () "Jump to register seven."
+(defun jump-7 () "Jump to register 7."
        (interactive) (if (get-register ?7) (jump-to-register ?7)))
-(defun jump-eight () "Jump to register eight."
+(defun jump-8 () "Jump to register 8."
        (interactive) (if (get-register ?8) (jump-to-register ?8)))
 
 (defun beg-of-line ()
@@ -250,7 +250,8 @@ Save point to register 6 before repeated call."
   (if (eq major-mode 'dired-mode) (dired-next-line 1)))
 
 (defun beg-of-block ()
-  "Back block. Fast double direction switch to prev buf."
+  "Back block. Fast double direction switch via SPC to stop,
+switch via K to half page move."
   (interactive)
   (if (equal before-last-command this-command)
       (if (equal last-command-keys "t") ; else SPC
@@ -262,7 +263,8 @@ Save point to register 6 before repeated call."
   (setq last-command-keys (this-command-keys)))
 
 (defun end-of-block ()
-  "Forw block."
+  "Forw block. Fast double direction switch via DEL to stop,
+switch via I to half page move."
   (interactive)
   (if (equal before-last-command this-command)
       (if (equal last-command-keys "d") ; else DEL
@@ -1835,57 +1837,60 @@ with line and column number. If so, jump to that line number.
 If path does not have a file extension, automatically try with “.el”
 for elisp files."
   (interactive)
-  (let* ((xinput
-          (if (region-active-p)
-              (buffer-substring-no-properties (region-beginning) (region-end))
-            (let ((xp0 (point)) xp1 xp2
-                  (xpathStops "^  \t\n\"`'“”|[]{}<>\\"))
-              (skip-chars-backward xpathStops)
-              (setq xp1 (point))
-              (goto-char xp0)
-              (skip-chars-forward xpathStops)
-              (setq xp2 (point))
-              (goto-char xp0)
-              (buffer-substring-no-properties xp1 xp2))))
-         xpath)
-    (setq xpath
-          (replace-regexp-in-string "^file://" ""
-                                    (replace-regexp-in-string ":\\'" "" xinput)))
-    (if (string-match-p "\\`https?://" xpath)
-        (if (string-match-p "\\`https?://www.youtube.com" xpath)
-            (movie xpath)
-          (browse-url xpath))
-      (progn
-        (if (string-match "#" xpath)
-            (let ((xfpath (substring xpath 0 (match-beginning 0)))
-                  (xfractPart (substring xpath (1+ (match-beginning 0)))))
-              (if (file-exists-p xfpath)
-                  (progn
-                    (find-file xfpath)
-                    (goto-char (point-min))
-                    (search-forward xfractPart))
-                (when (y-or-n-p (format "No file %s. Create?" xfpath))
-                  (find-file xfpath))))
-          (if (string-match "^\\`\\(.+?\\):\\([0-9]+\\)\\(:[0-9]+\\)?\\'" xpath)
-              (let ((xfpath (match-string-no-properties 1 xpath))
-                    (xlineNum (string-to-number (match-string-no-properties 2 xpath))))
+  (if (eq major-mode 'dired-mode)
+      (progn (setq this-command 'delete-other-windows)
+             (delete-other-windows))
+    (let* ((xinput
+            (if (region-active-p)
+                (buffer-substring-no-properties (region-beginning) (region-end))
+              (let ((xp0 (point)) xp1 xp2
+                    (xpathStops "^  \t\n\"`'“”|[]{}<>\\"))
+                (skip-chars-backward xpathStops)
+                (setq xp1 (point))
+                (goto-char xp0)
+                (skip-chars-forward xpathStops)
+                (setq xp2 (point))
+                (goto-char xp0)
+                (buffer-substring-no-properties xp1 xp2))))
+           xpath)
+      (setq xpath
+            (replace-regexp-in-string "^file://" ""
+                                      (replace-regexp-in-string ":\\'" "" xinput)))
+      (if (string-match-p "\\`https?://" xpath)
+          (if (string-match-p "\\`https?://www.youtube.com" xpath)
+              (movie xpath)
+            (browse-url xpath))
+        (progn
+          (if (string-match "#" xpath)
+              (let ((xfpath (substring xpath 0 (match-beginning 0)))
+                    (xfractPart (substring xpath (1+ (match-beginning 0)))))
                 (if (file-exists-p xfpath)
                     (progn
                       (find-file xfpath)
                       (goto-char (point-min))
-                      (forward-line (1- xlineNum)))
+                      (search-forward xfractPart))
                   (when (y-or-n-p (format "No file %s. Create?" xfpath))
                     (find-file xfpath))))
-            (if (file-exists-p xpath)
-                (if (and (> (length xpath) 0)
-                         (not (member xpath '("//" "/" "." ".." ":"))))
-                    (find-file xpath)
+            (if (string-match "^\\`\\(.+?\\):\\([0-9]+\\)\\(:[0-9]+\\)?\\'" xpath)
+                (let ((xfpath (match-string-no-properties 1 xpath))
+                      (xlineNum (string-to-number (match-string-no-properties 2 xpath))))
+                  (if (file-exists-p xfpath)
+                      (progn
+                        (find-file xfpath)
+                        (goto-char (point-min))
+                        (forward-line (1- xlineNum)))
+                    (when (y-or-n-p (format "No file %s. Create?" xfpath))
+                      (find-file xfpath))))
+              (if (file-exists-p xpath)
+                  (if (and (> (length xpath) 0)
+                           (not (member xpath '("//" "/" "." ".." ":"))))
+                      (find-file xpath)
+                    (setq this-command 'delete-other-windows)
+                    (delete-other-windows))
+                (if (file-exists-p (concat xpath ".el"))
+                    (find-file (concat xpath ".el"))
                   (setq this-command 'delete-other-windows)
-                  (delete-other-windows))
-              (if (file-exists-p (concat xpath ".el"))
-                  (find-file (concat xpath ".el"))
-                (setq this-command 'delete-other-windows)
-                (delete-other-windows)))))))))
+                  (delete-other-windows))))))))))
 
 (defun url-paste-and-go ()
   "Go to URL from system clipboard."
@@ -1951,7 +1956,7 @@ File suffix is used to determine which program to run, set in the variable
                      (error "%s: Unknown extension: %s" real-this-command xfExt))))
           (setq run-output (concat "Run " xbuf))
           (enlarge-window-split)))
-    (message "Abort run file")))
+    (message "Cancel run file")))
 
 (defun clean-whitespace ()
   "Delete trailing whitespace, and replace repeated blank lines to just 1.
@@ -2055,14 +2060,14 @@ If the current buffer is not associated with a file nor dired, nothing's done."
   (if (timerp occur-cur-word-defer-timer)
       (progn (cancel-timer occur-cur-word-defer-timer)
              (setq occur-cur-word-defer-timer nil))
-    (setq occur-cur-word-defer-timer (run-with-timer 0.25 nil 'occur-cur-word-run))))
+    (setq occur-cur-word-defer-timer (run-with-timer wait-double nil 'occur-cur-word-run))))
 
 (defun search-string ()
   "Search string in all files of current directory."
   (interactive)
   (let ((xdefault (cur-word)))
     (find-text
-     (read-string (format "Search string (default %s): " xdefault)
+     (read-string "Search: "
                   nil 'query-replace-history xdefault)
      (expand-file-name "") ".[A-Za-z0-9]+$" t t)))
 
@@ -2118,8 +2123,9 @@ If there more than one frame, switch to next frame."
   (unless (minibufferp)
     (if (< 1 (length (frame-list))) (other-frame -1) (alt-buf))))
 
-(defvar proced-defer-timer nil "Timer to defer `proced-defer'.")
+(defvar wait-double 0.25 "Wait double press timeout.")
 
+(defvar proced-defer-timer nil "Timer to defer `proced-defer'.")
 (defun proced-run () "Run proced." (setq proced-defer-timer nil) (proced))
 
 (defun proced-defer ()
@@ -2127,7 +2133,7 @@ If there more than one frame, switch to next frame."
   (interactive)
   (if (timerp proced-defer-timer)
       (progn (cancel-timer proced-defer-timer) (setq proced-defer-timer nil))
-    (setq proced-defer-timer (run-with-timer 0.25 nil 'proced-run))))
+    (setq proced-defer-timer (run-with-timer wait-double nil 'proced-run))))
 
 (defvar kmacro-record-timer nil "Timer to defer `kmacro-record'.")
 
@@ -2142,7 +2148,7 @@ If there more than one frame, switch to next frame."
       (kmacro-end-macro nil)
     (if (timerp kmacro-record-timer)
         (progn (cancel-timer kmacro-record-timer) (setq kmacro-record-timer nil))
-      (setq kmacro-record-timer (run-with-timer 0.25 nil 'kmacro-start)))))
+      (setq kmacro-record-timer (run-with-timer wait-double nil 'kmacro-start)))))
 
 (defun terminal-prompt (Prompt)
   "Compare PROMPT and actual prompt."
@@ -2311,7 +2317,7 @@ and reverse-search-history in bashrc."
 (defun toggle-gnus ()
   "Toggle gnus."
   (interactive)
-  (if onlinep
+  (if (and (boundp onlinep) onlinep) ; create own online predicate
       (progn (when (display-graphic-p)
                (setq xframe (make-frame-command)) (other-frame 1))
              (if (get-buffer "*Group*")
@@ -2578,8 +2584,15 @@ Use as around advice e.g. for mouse left click after double click."
 (defun save-buffer-isearch-cancel ()
   "Cancel isearch and save buffer."
   (interactive)
-  (if (and (buffer-modified-p) (buffer-file-name)) (save-buffer))
-  (if isearch-mode (isearch-cancel)))
+  (if (and isearch-push-state-function isearch-cmds)
+      ;; For defined push-state function, restore the first state.
+      ;; This calls pop-state function and restores original point.
+      (let ((isearch-cmds (last isearch-cmds)))
+        (isearch--set-state (car isearch-cmds)))
+    (goto-char isearch-opoint))
+  (isearch-done t)
+  (isearch-clean-overlays)
+  (save-buffer))
 
 (defun empty-trash ()
   "Empty trash on macOS."
