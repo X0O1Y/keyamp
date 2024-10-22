@@ -713,7 +713,7 @@ ToChars is similar, with a special value of \" none \", replace by empty string.
   "Check if S capitalized."
   (let ((case-fold-search nil)) (equal (upcase s) s)))
 
-(defun toggle-letter-case ()
+(defun toggle-case ()
   "Toggle the letter case of current word or selection.
 Cycle in this order: Init Caps, ALL CAPS, all lower. Calculates initial state."
   (interactive)
@@ -1932,7 +1932,7 @@ Output is printed to buffer “*run output*”.
 File suffix is used to determine which program to run, set in the variable
 `run-current-file-map'."
   (interactive)
-  (if (y-or-n-p "Run?")
+  (if (y-or-n-p (concat "Run? " (buffer-file-name)))
       (progn
         (when (not buffer-file-name) (save-buffer))
         (let* ((xoutBuffer "*run output*")

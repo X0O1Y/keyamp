@@ -385,10 +385,12 @@ It is possible to have QWERTY keyboard using ANY custom layout in Emacs only."
   (if (get 'keyamp-qwerty-to-current-layout 'state)
       (progn (put 'keyamp-qwerty-to-current-layout 'state nil)
              (quail-set-keyboard-layout "standard")
-             (message "QWERTY keyboard to %s deactivated" keyamp-current-layout))
+             (if (eq 'keyamp-qwerty-to-current-layout this-command)
+                 (message "Deactivated QWERTY keyboard to %s" keyamp-current-layout)))
     (put 'keyamp-qwerty-to-current-layout 'state t)
     (quail-set-keyboard-layout keyamp-current-layout)
-    (message "QWERTY keyboard to %s activated" keyamp-current-layout))
+    (if (eq 'keyamp-qwerty-to-current-layout this-command)
+        (message "Activated QWERTY keyboard to %s" keyamp-current-layout)))
   (let ((xl (alist-get keyamp-current-layout keyamp-layouts nil nil 'string-equal)))
     (mapc #'(lambda (x)
               (keymap-set key-translation-map
@@ -465,7 +467,7 @@ is enabled.")
     ("x" . cut-line)                       ("ч" . cut-line)                         ("X" . keyamp-self-insert-and-insert)   ("Ч" . keyamp-self-insert-and-insert)
     ("c" . copy-line)                      ("с" . copy-line)                        ("C" . keyamp-self-insert-and-insert)   ("С" . keyamp-self-insert-and-insert)
     ("v" . paste-or-prev)                  ("м" . paste-or-prev)                    ("V" . keyamp-self-insert-and-insert)   ("М" . keyamp-self-insert-and-insert)
-    ("b" . toggle-letter-case)             ("и" . toggle-letter-case)               ("B" . self-insert-command)             ("И" . keyamp-self-insert-and-insert)
+    ("b" . toggle-case)                    ("и" . toggle-case)                      ("B" . self-insert-command)             ("И" . keyamp-self-insert-and-insert)
 
     ;; right half
     ("6" . pass)                                                                    ("^" . self-insert-command)
@@ -527,7 +529,7 @@ is enabled.")
     ("s" . prev-buf)
     ("d" . alt-buf)
     ("f" . next-buf)
-    ("g" . rectangle-mark-mode)
+    ("g" . new-empty-buffer)
 
     ("z" . universal-argument)
     ("x" . restart-emacs)
@@ -639,7 +641,7 @@ is enabled.")
     ("f DEL" . insert-backtick-quote)      ("f SPC" . insert-ascii-double-quote)
     ("f ESC" . ignore)                     ("f RET" . emoji-insert)
 
-    ("g" . new-empty-buffer)
+    ("g" . ignore)
     ("z" . goto-char)
     ("x" . next-eww-buffer)
     ("c" . copy-all)
@@ -845,7 +847,7 @@ is enabled.")
      (cut-line            . prev-eww-buffer)
      (copy-line           . screen-idle)
      (paste-or-prev       . tasks)
-     (toggle-letter-case  . downloads)
+     (toggle-case         . downloads)
      (backward-bracket    . dired-jump)
      (forward-bracket     . save-close-buf)
      (kmacro-helper       . config)
@@ -858,8 +860,7 @@ is enabled.")
      (back-word           . prev-buf)
      (proced-defer        . save-close-buf)
      (kmacro-play         . save-close-buf)
-     (append-to-r1        . recentf-open-files)
-     (rectangle-mark-mode . new-empty-buffer)))
+     (append-to-r1        . recentf-open-files)))
 
  (keyamp--set-map x
    '(prev-buf                   next-buf
@@ -953,6 +954,12 @@ is enabled.")
  (keyamp--remap x '((make-frame-command . delete-frame)))
  (keyamp--set-map x '(alternate-frame)))
 
+(defun run-current-file-indicate ()
+  "Defer indicate for `run-current-file' after indicate modify."
+  (run-with-timer 0.5 nil 'keyamp-blink-start keyamp-screen-color keyamp-read-color))
+
+(advice-add 'run-current-file :after 'run-current-file-indicate)
+
 
 ;; Repeat mode - read commands
 
@@ -996,8 +1003,14 @@ is enabled.")
  (keyamp--set-map x '(beg-of-block end-of-block)))
 
 (with-sparse-keymap-x
+ (keyamp--map-tab x end-of-buf)
  (keyamp--remap x '((beg-of-line . beg-of-buf) (end-of-lyne . end-of-buf)))
- (keyamp--set-map x '(beg-of-buf end-of-buf)))
+ (keyamp--set-map x '(beg-of-buf)))
+
+(with-sparse-keymap-x
+ (keyamp--map-tab x beg-of-buf)
+ (keyamp--remap x '((beg-of-line . beg-of-buf) (end-of-lyne . end-of-buf)))
+ (keyamp--set-map x '(end-of-buf)))
 
 (defvar keyamp-beg-of-buf-timer nil "Beg of buf timer.")
 (defvar keyamp-end-of-buf-timer nil "End of buf timer.")
@@ -1174,28 +1187,51 @@ is enabled.")
 
 ;; G acts as a leader key.
 (with-sparse-keymap-x
- (keyamp--map-leader x '(delete-other-windows . dired-jump))
+ (keyamp--map-leader x '(describe-foo-at-point . dired-jump))
+ (keyamp--map-tab x end-of-buf)
  (keyamp--map x '(("C-r" . open-in-external-app)))
  (keyamp--remap x
-   '((undo               . delete-window)       (del-back        . alternate-frame)
-     (open-line          . prev-proj-buf)       (newline         . next-proj-buf)
-     (activate-region    . rectangle-mark-mode) (jump-mark       . jump-6)
-     (other-win          . jump-7)              (isearch-forward . jump-8)
-     (alternate-frame    . toggle-pin-window)   (keyamp-insert   . toggle-ibuffer)
-     (keyamp-escape      . deactivate-region)   (del-word        . toggle-gnus)
-     (toggle-letter-case . downloads)           (proced-defer    . open-last-closed)))
+   '((insert-space-before . ignore)
+     (backward-del-word   . ignore)
+     (undo                . delete-window)
+     (del-word            . ignore)
+     (cut-text-block      . ignore)
+     (shrink-whitespaces  . ignore)
+     (open-line           . prev-proj-buf)
+     (del-back            . delete-other-windows)
+     (newline             . next-proj-buf)
+     (activate-region     . rectangle-mark-mode)
+     (toggle-comment      . ignore)
+     (cut-line            . ignore)
+     (copy-line           . ignore)
+     (paste-or-prev       . tasks)
+     (toggle-case         . downloads)
+
+     (jump-mark           . jump-6)
+     (other-win           . jump-7)
+     (isearch-forward     . jump-8)
+     (alternate-frame     . screen-idle)
+     (kmacro-helper       . toggle-pin-window)
+
+     (keyamp-insert       . toggle-ibuffer)
+     (keyamp-escape       . deactivate-region)
+     (point-to-register   . ignore)
+     (proced-defer        . open-last-closed)))
  (advice-add 'activate-region :after
              (lambda () "virtual leader G transient"
-               (if (eq (mark) (point)) (set-transient-map x nil nil nil 2)))))
+               (if (eq (mark) (point)) (set-transient-map x)))))
 
 (defun keyamp-deactivate-region (&rest _)
   "Deactivate region if last command is activate region."
   (if (eq last-command 'activate-region) (deactivate-region)))
 
 (advice-add-macro
- '(del-win alt-buf prev-proj-buf next-proj-buf toggle-ibuffer open-last-closed
-   jump-6 jump-7 jump-8 toggle-pin-window alternate-frame downloads
-   delete-other-windows delete-window open-in-external-app dired-jump toggle-gnus)
+ '(prev-proj-buf next-proj-buf toggle-ibuffer open-last-closed
+   jump-6 jump-7 jump-8 toggle-pin-window downloads tasks screen-idle
+   delete-other-windows delete-window open-in-external-app dired-jump
+   shrink-whitespaces cut-text-block insert-space-before toggle-comment
+   cut-line copy-line backward-del-word end-of-buf describe-foo-at-point
+   xref-find-definitions)
  :before 'keyamp-deactivate-region)
 
 (with-sparse-keymap-x
@@ -1302,8 +1338,8 @@ is enabled.")
  (keyamp--set-map x '(copy-line)))
 
 (with-sparse-keymap-x
- (keyamp--remap x '((del-back . toggle-letter-case)))
- (keyamp--set-map x '(toggle-letter-case) nil nil nil 1))
+ (keyamp--remap x '((del-back . toggle-case)))
+ (keyamp--set-map x '(toggle-case) nil nil nil 1))
 
 (with-sparse-keymap-x
  (keyamp--map-leader x '(del-back . undo))
@@ -1397,7 +1433,7 @@ is enabled.")
        (cut-line                . keyamp-insert-x)
        (copy-line               . keyamp-insert-c)
        (paste-or-prev           . keyamp-insert-v)
-       (toggle-letter-case      . keyamp-insert-b)
+       (toggle-case             . keyamp-insert-b)
        (isearch-forward         . keyamp-insert-n)
        (backward-bracket        . keyamp-insert-m)
        (other-win               . keyamp-insert-comma)
@@ -1502,7 +1538,7 @@ is enabled.")
       (cut-line            . dired-kill-subdir)
       (cut-text-block      . dired-maybe-insert-subdir)
       (paste-or-prev       . dired-create-directory)
-      (toggle-letter-case  . dired-sort)
+      (toggle-case         . dired-sort)
       (copy-to-r1          . dired-do-copy)
       (paste-from-r1       . dired-do-rename)
       (mark-whole-buffer   . dired-toggle-marks)
@@ -1565,7 +1601,7 @@ is enabled.")
       (cut-line            . prev-eww-buffer)
       (copy-line           . screen-idle)
       (paste-or-prev       . tasks)
-      (toggle-letter-case  . downloads)
+      (toggle-case         . downloads)
       (backward-bracket    . downloads)
       (forward-bracket     . save-close-buf)
       (kmacro-helper       . config)
@@ -1691,6 +1727,7 @@ is enabled.")
 
 (with-eval-after-load 'org-agenda
   (keyamp--map-tab org-agenda-mode-map todo)
+  (keyamp--map org-agenda-mode-map '(("<double-mouse-1>" . org-agenda-tasks)))
   (keyamp--remap org-agenda-mode-map
     '((keyamp-insert       . org-agenda-tasks)
       (make-frame-command  . delete-frame)
@@ -1709,7 +1746,7 @@ is enabled.")
       (toggle-comment      . view-messages)
       (cut-line            . prev-eww-buffer)
       (paste-or-prev       . tasks)
-      (toggle-letter-case  . downloads)
+      (toggle-case         . downloads)
       (backward-bracket    . downloads)
       (forward-bracket     . save-close-buf)
       (kmacro-helper       . config)
@@ -2428,7 +2465,6 @@ is enabled.")
                  occur-cur-word                   t
                  open-in-external-app             t
                  player                           t
-                 run-current-file                 t
                  sun-moon                         t
                  sync                             t
                  view-messages                    t
@@ -2487,7 +2523,7 @@ is enabled.")
                  title-case-region-or-line        t
                  todo                             t
                  toggle-comment                   t
-                 toggle-letter-case               t
+                 toggle-case                      t
                  toggle-prev-letter-case          t
                  undo                             t
                  vterm-send-backspace             t
@@ -2747,6 +2783,8 @@ insert cancel the timer.")
         (set-transient-map keyamp-command-map (lambda () t)))
   (keyamp-indicate-command))
 
+(defvar keyamp-qwerty-to-current-layout-state nil "Save state.")
+
 (defun keyamp-insert-init (&rest _)
   "Enter insert mode."
   (keyamp-cancel-repeat-idle-timer)
@@ -3000,6 +3038,7 @@ after a delay even if there more read commands follow."
 
 (defun keyamp-indicate-command ()
   "Indicate command."
+  (keyamp-blink-stop)
   (keyamp-indicate keyamp-command-indicator keyamp-command-cursor keyamp-command-color))
 
 (defvar keyamp-user-error nil
@@ -3026,9 +3065,8 @@ after a delay even if there more read commands follow."
   (if (eq keyamp-io-indicator mode-line-front-space)
       (keyamp-indicate Indicator Cursor Color)))
 
-(defun keyamp-indicate-io (&rest _)
-  "Indicate IO feedback from emacsclient evals or processes calls.
-Cancel after `keyamp-blink-blink'."
+(defun keyamp-blink-io ()
+  "Blink IO."
   (let* ((xInd mode-line-front-space) (xCur (frame-parameter nil 'cursor-type))
          (xCol (face-attribute 'mode-line-front-space-face :foreground)))
     (unless (eq xCol keyamp-io-color)
@@ -3037,6 +3075,12 @@ Cancel after `keyamp-blink-blink'."
       (setq keyamp-indicate-io-timer
             (run-with-timer keyamp-blink-blink nil
                             'keyamp-indicate-io-cancel xInd xCur xCol)))))
+
+(defun keyamp-indicate-io (&rest _)
+  "Indicate IO feedback from emacsclient evals or processes calls.
+Cancel after `keyamp-blink-blink'. Double blink."
+  (keyamp-blink-io)
+  (run-with-timer (* 2 keyamp-blink-blink) nil 'keyamp-blink-io))
 
 (defvar keyamp-blink-on-timer nil "Blink indicator on timer.")
 (defvar keyamp-blink-off-timer nil "Blink indicator off timer.")
