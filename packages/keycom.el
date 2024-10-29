@@ -2482,9 +2482,11 @@ Use as around advice e.g. for mouse left click after double click."
   "Confirm and quit. Because restart without confirm."
   (interactive) (if (y-or-n-p-with-timeout "Quit?" 3 nil) (save-buffers-kill-terminal)))
 
-(defun mouse-3 ()
-  "Mouse right click. If buffer read only then lookup translation."
-  (interactive) (if buffer-read-only (translate)))
+(defun mouse-3 (e)
+  "Mouse right click. Select word or if eww buffer then lookup translation."
+  (interactive "e")
+  (unless (region-active-p) (mouse-set-point e))
+  (if (eq major-mode 'eww-mode) (translate) (select-word)))
 
 (defun calendar-split () "Split calendar." (interactive) (calendar) (other-window 1))
 
@@ -2600,6 +2602,23 @@ Use as around advice e.g. for mouse left click after double click."
   (if (and (y-or-n-p-with-timeout "Empty trash?" 3 nil)
            (string-equal system-type "darwin"))
       (call-process "osascript" nil 0 nil "-e" "tell app \"Finder\" to empty")))
+
+(defun yt-dlp-video ()
+  "Ask URL and download video."
+  (interactive)
+  (let* ((xurl (read-string "Download video: ")) (x (concat "yt-dlp \"" xurl "\"")))
+    (async-shell-command x)))
+
+(defun yt-dlp-audio ()
+  "Ask URL and download audio."
+  (interactive)
+  (let* ((xurl (read-string "Download audio: "))
+         (x (concat "yt-dlp --extract-audio --audio-format mp3 \"" xurl "\"")))
+    (async-shell-command x)))
+
+(defun rectangle ()
+  "Rectangle mark mode or quit minibuffer."
+  (interactive) (if (minibufferp) (abort-recursive-edit) (rectangle-mark-mode)))
 
 (provide 'keycom)
 
