@@ -816,7 +816,7 @@ When called in a Elisp program, Begin End are region boundaries."
                      [" От " " от "] [" Для " " для "] [" И " " и "]
                      [" К " " к "] [" С " " с "] [" По " " по "]
                      [" В " " в "] [" На " " на "] [" Из " " из "]
-                     [" Или " " или "]
+                     [" Или " " или "] [" О " " о "]
                      ]))
     (save-excursion
       (save-restriction
@@ -2486,7 +2486,9 @@ Use as around advice e.g. for mouse left click after double click."
   "Mouse right click. Select word or if eww buffer then lookup translation."
   (interactive "e")
   (unless (region-active-p) (mouse-set-point e))
-  (if (eq major-mode 'eww-mode) (translate) (select-word)))
+  (if (eq major-mode 'eww-mode)
+      (translate)
+    (select-word)))
 
 (defun calendar-split () "Split calendar." (interactive) (calendar) (other-window 1))
 
@@ -2596,10 +2598,10 @@ Use as around advice e.g. for mouse left click after double click."
   (isearch-clean-overlays)
   (save-buffer))
 
-(defun empty-trash ()
-  "Empty trash on macOS."
+(defun empty-bin ()
+  "Empty bin on macOS."
   (interactive)
-  (if (and (y-or-n-p-with-timeout "Empty trash?" 3 nil)
+  (if (and (y-or-n-p-with-timeout "Empty bin?" 3 nil)
            (string-equal system-type "darwin"))
       (call-process "osascript" nil 0 nil "-e" "tell app \"Finder\" to empty")))
 

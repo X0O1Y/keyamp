@@ -6641,7 +6641,7 @@
             {
               "type": "frontmost_application_unless",
               "file_paths": [
-                "/Brave Browser"
+                "/Google Chrome"
               ]
             }
           ],
@@ -6653,7 +6653,7 @@
               "repeat": false
             },
             {
-              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)' && open -a 'Brave Browser'"
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)' && open -a 'Google Chrome'"
             }
           ]
         },
@@ -6671,7 +6671,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Brave Browser"
+                "/Google Chrome"
               ]
             }
           ],
@@ -6818,7 +6818,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Brave Browser"
+                "/Google Chrome"
               ]
             }
           ],
@@ -7001,6 +7001,13 @@
               "shell_command": "~/.pbcopy.sh",
               "halt": true
             }
+          ],
+          "to_if_held_down": [
+            {
+              "shell_command": "open -a SwitchBetweenAudioDevices.app",
+              "repeat": false,
+              "halt": true
+            }
           ]
         }
       ]
@@ -7021,11 +7028,14 @@
           "to_after_key_up": [
             {
               "shell_command": "/Applications/emacsclient --no-wait --eval '(play-pause)'"
+            },
+            {
+              "key_code": "play_or_pause"
             }
           ],
           "to_if_held_down": [
             {
-              "shell_command": "open -a SwitchBetweenAudioDevices.app",
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(radio)'",
               "repeat": false,
               "halt": true
             }
@@ -7049,12 +7059,18 @@
           "to_after_key_up": [
             {
               "shell_command": "/Applications/emacsclient --no-wait --eval '(play-next)'"
+            },
+            {
+              "key_code": "fastforward"
             }
           ],
           "to_if_held_down": [
             {
               "shell_command": "/Applications/emacsclient --no-wait --eval '(play-prev)'",
               "halt": true
+            },
+            {
+              "key_code": "rewind"
             }
           ]
         }
@@ -7134,7 +7150,7 @@
             {
               "type": "frontmost_application_unless",
               "file_paths": [
-                "/Brave Browser"
+                "/Google Chrome"
               ]
             }
           ],
@@ -7146,7 +7162,7 @@
               "repeat": false
             },
             {
-              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)' && open -a 'Brave Browser'"
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)' && open -a 'Google Chrome'"
             }
           ]
         },
@@ -7164,7 +7180,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Brave Browser"
+                "/Google Chrome"
               ]
             }
           ],
