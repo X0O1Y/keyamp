@@ -488,7 +488,7 @@ is enabled.")
     (";" . end-of-lyne)                    ("ж" . end-of-lyne)                      (":"  . keyamp-self-insert-and-insert)  ("Ж" . keyamp-self-insert-and-insert)
     ("'" . alternate-frame)                ("э" . alternate-frame)                  ("\"" . keyamp-self-insert-and-insert)  ("Э" . keyamp-self-insert-and-insert)
 
-    ("n" . isearch-forward)                ("т" . isearch-forward)                  ("N" . self-insert-command)             ("Т" . keyamp-self-insert-and-insert)
+    ("n" . isearch-forward)                ("т" . isearch-forward)                  ("N" . keyamp-insert-N)                 ("Т" . keyamp-self-insert-and-insert)
     ("m" . backward-bracket)               ("ь" . backward-bracket)                 ("M" . keyamp-self-insert-and-insert)   ("Ь" . keyamp-self-insert-and-insert)
     ("," . other-win)                      ("б" . other-win)                        ("<" . keyamp-self-insert-and-insert)   ("Б" . keyamp-self-insert-and-insert)
     ("." . forward-bracket)                ("ю" . forward-bracket)                  (">" . keyamp-self-insert-and-insert)   ("Ю" . keyamp-self-insert-and-insert)
@@ -939,7 +939,8 @@ is enabled.")
  (keyamp--set-map x '(find-prev-dir-file find-next-dir-file)))
 
 (with-sparse-keymap-x
- (keyamp--remap x '((backward-bracket . dired-jump)))
+ (keyamp--remap x
+   '((backward-bracket . dired-jump) (proced-defer . save-close-buf)))
  (keyamp--set-map x
    '(dired-jump downloads dired-find-file ibuffer-visit-buffer open-last-closed
      bookmark-jump widget-button-press)))
@@ -981,10 +982,11 @@ is enabled.")
 (with-sparse-keymap-x
  ;; Initiate by triple DEL/SPC (hold down).
  ;; I/K or DEL/SPC to move by lines. See `return-before'.
- (keyamp--map-leader x '(previous-line . next-line))
+ (keyamp--map-leader x '(up-line . down-line))
  (keyamp--map-tab x keyamp-screen-TAB)
  (keyamp--remap x
-   '((previous-line . up-line) (next-line . down-line) (keyamp-insert . keyamp-RET)))
+   '((previous-line . up-line-rev) (next-line   . down-line)
+     (keyamp-insert . keyamp-RET)  (beg-of-line . up-line-rev)))
  (keyamp--set-map x '(up-line down-line))
  (keyamp--set-map-hook x '(ibuffer-hook gnus-group-mode-hook) nil nil :repeat)
 
@@ -1002,6 +1004,13 @@ is enabled.")
 
  (advice-add-macro '(other-window translate dired-find-file dired-jump)
                    :after 'keyamp-lines-move))
+
+(with-sparse-keymap-x ; swap leaders up/down
+ (keyamp--map-leader x '(down-line-rev . up-line-rev))
+ (keyamp--remap x
+   '((previous-line . up-line)    (next-line . down-line)
+     (keyamp-insert . keyamp-RET)))
+ (keyamp--set-map x '(up-line-rev down-line-rev)))
 
 (with-sparse-keymap-x
  (keyamp--map-leader x '(up-line . down-line))
@@ -1158,7 +1167,7 @@ is enabled.")
  (keyamp--remap x
    '((back-word        . select-word)
      (forw-word        . select-quote)
-     (beg-of-line      . switch-to-buffer)
+     (beg-of-line      . prev-buf)
      (forward-char     . describe-foo-at-point)
      (backward-bracket . downloads)
      (other-win        . player)
@@ -1172,13 +1181,13 @@ is enabled.")
  (keyamp--remap x
    '((back-word        . select-line)
      (forw-word        . select-block)
-     (previous-line    . page-up-half)
+     (previous-line    . beg-of-buf)
      (jump-mark        . mark-defun)
      (beg-of-line      . beg-of-block)
      (backward-char    . isearch-cur-word-backward)
-     (next-line        . page-dn-half)
+     (next-line        . end-of-buf)
      (backward-bracket . dired-jump)
-     (end-of-lyne      . end-of-block)))
+     (end-of-lyne      . next-buf)))
  (advice-add 'forw-word :after
              (lambda () "virtual right leader transient" (keyamp-leader-init x))))
 
@@ -1211,7 +1220,7 @@ is enabled.")
      (newline             . next-proj-buf)
      (activate-region     . rectangle)
      (toggle-comment      . ignore)
-     (cut-line            . ignore)
+     (cut-line            . prev-eww-buffer)
      (copy-line           . describe-foo-at-point)
      (paste-or-prev       . tasks)
      (toggle-case         . downloads)
@@ -1249,7 +1258,7 @@ is enabled.")
    copy-line             backward-del-word
    end-of-buf            describe-foo-at-point
    xref-find-definitions end-of-buf
-   ignore
+   prev-eww-buffer       ignore
    ;; help-command
    describe-char         info
    info-lookup-symbol    describe-function
@@ -1419,7 +1428,11 @@ is enabled.")
  (keyamp--set-map x
    '(ignore              monitor
      dummy               mouse-3
-     mac-mwheel-scroll   mouse-set-point)
+     mac-mwheel-scroll   mouse-set-point
+     previous-line       next-line
+     backward-bracket    forward-bracket
+     goto-match-br
+     dired-next-line     dired-previous-line)
    nil nil nil keyamp-blink-blink-half))
 
 
@@ -1527,7 +1540,9 @@ is enabled.")
    :after 'keyamp-insert-init)
 
   (keyamp--map minibuffer-inactive-mode-map
-    '(("<mouse-1>" . monitor) ("<double-mouse-1>" . ignore))))
+    '(("<mouse-1>" . alt-buf) ("<double-mouse-1>" . ignore)))
+  (keyamp--remap minibuffer-inactive-mode-map
+    '((mouse-3 . execute-extended-command))))
 
 (with-eval-after-load 'icomplete
   (keyamp--map-return icomplete-minibuffer-map keyamp-exit-minibuffer)
@@ -2597,6 +2612,7 @@ is enabled.")
                  dired-mark                       t
                  dired-unmark                     t
                  down-line                        t
+                 down-line-rev                    t
                  emms-pause                       t
                  emms-playlist-mode-play-smart    t
                  emms-random                      t
@@ -2641,6 +2657,8 @@ is enabled.")
                  ido-prev-match                   t
                  image-next-file                  t
                  image-previous-file              t
+                 image-decrease-size              t
+                 image-increase-size              t
                  Info-backward-node               t
                  Info-forward-node                t
                  Info-prev-reference              t
@@ -2674,6 +2692,7 @@ is enabled.")
                  text-scale-reset                 t
                  translate                        t
                  up-line                          t
+                 up-line-rev                      t
                  vterm-down                       t
                  vterm-send-return                t
                  vterm-up                         t
@@ -2687,6 +2706,7 @@ is enabled.")
                 (beg-of-block                     t
                  beg-of-buf                       t
                  down-line                        t
+                 down-line-rev                    t
                  end-of-block                     t
                  end-of-buf                       t
                  gnus-beg-of-buf                  t
@@ -2707,7 +2727,8 @@ is enabled.")
                  isearch-forw                     t
                  scroll-down-command              t
                  scroll-up-command                t
-                 up-line                          t)))
+                 up-line                          t
+                 up-line-rev                      t)))
 
 (defconst keyamp-idle-commands-hash
   #s(hash-table test equal data
@@ -2718,7 +2739,18 @@ is enabled.")
                  mac-mwheel-scroll                t
                  mouse-set-point                  t
                  mouse-3                          t
-                 mouse-drag-region                t)))
+                 mouse-drag-region                t
+                 previous-line                    t
+                 next-line                        t
+                 backward-bracket                 t
+                 forward-bracket                  t
+                 goto-match-br                    t
+                 dired-next-line                  t
+                 dired-previous-line              t)))
+
+(defconst keyamp-isearch-not-insert
+  '(isearch-forw isearch-cur-word-forward isearch-back isearch-cur-word-backward)
+  "List of excluded commands from indicate insert mode in isearch.")
 
 
 
@@ -2858,7 +2890,9 @@ insert cancel the timer.")
 (defun keyamp-SPC-SPC (&rest _)
   "Insert SPC SPC to activate command mode."
   (if (and (eq before-last-command-event 32) (eq last-command-event 32))
-      (if isearch-mode (isearch-cancel) (delete-char -2) (keyamp-escape))
+      (if isearch-mode
+          (isearch-cancel-clean)
+        (delete-char -2) (keyamp-escape))
     (if (eq last-command-event 32)
         (progn
           (run-with-timer (if (and (minibufferp) (not (display-graphic-p))) 0
@@ -2874,7 +2908,7 @@ insert cancel the timer.")
 (defun keyamp-SPC-DEL (&rest _)
   "Insert SPC DEL to activate command mode."
   (if (eq before-last-command-event 32)
-      (if isearch-mode (isearch-cancel) (keyamp-command))))
+      (if isearch-mode (isearch-cancel-clean) (keyamp-command))))
 (advice-add-macro '(delete-backward-char isearch-del-char) :after 'keyamp-SPC-DEL)
 
 (defun keyamp-command-if-insert (&rest _)
@@ -3107,7 +3141,10 @@ after a delay even if there more read commands follow."
 (defun keyamp-indicate-command ()
   "Indicate command."
   (keyamp-blink-stop)
-  (keyamp-indicate keyamp-command-indicator keyamp-command-cursor keyamp-command-color))
+  (keyamp-indicate keyamp-command-indicator keyamp-command-cursor keyamp-command-color)
+  (if (memq this-command '(dired-find-file ibuffer-visit-buffer open-last-closed
+                           bookmark-jump   widget-button-press))
+      (keyamp-blink-start keyamp-screen-color keyamp-command-color)))
 
 (defvar keyamp-user-error nil
   "True if previous command signaled `user-error'. See `command-error-function'.")
@@ -3116,7 +3153,10 @@ after a delay even if there more read commands follow."
   "Indicate transient. Run with `post-command-hook'."
   (if keyamp-user-error
       (progn (keyamp-command) (setq keyamp-user-error nil))
-    (cond (keyamp-insert-p (keyamp-indicate-insert))
+    (cond ((or keyamp-insert-p
+               (and isearch-mode
+                    (not (memq this-command keyamp-isearch-not-insert))))
+           (keyamp-indicate-insert))
           ((gethash this-command keyamp-screen-commands-hash)
            (keyamp-indicate-screen))
           ((gethash this-command keyamp-read-commands-hash)
@@ -3156,7 +3196,8 @@ Cancel after `keyamp-blink-blink'. Double blink."
 
 (defun keyamp-indicate-prefix ()
   "Indicate prefix."
-  (if (member (this-single-command-keys) '([32] [127] [backspace]))
+  (if (or (member (this-single-command-keys) '([32] [127] [backspace]))
+          prefix-arg)
       (keyamp-indicate-idle)))
 
 (defvar keyamp-prefix-delay 0.1 "Delay before indicate prefix keymap.")
@@ -3277,6 +3318,7 @@ Cancel after `keyamp-blink-blink'. Double blink."
     (keyamp-defer-load)
     (keyamp-prefix)
     (add-hook 'post-command-hook     'keyamp-transient)
+    (add-hook 'pre-command-hook      'keyamp-repeat-deactivate)
     (add-hook 'minibuffer-exit-hook  'keyamp-command)
     (add-hook 'minibuffer-exit-hook  'keyamp-deactivate-region)
     (add-hook 'isearch-mode-hook     'keyamp-repeat-deactivate)

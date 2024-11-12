@@ -60,15 +60,14 @@
   (if (equal before-last-command 'backward-char)
       (progn (setq this-command 'back-char) (back-char))
     (if (equal before-last-command this-command)
-        (cond
-         ((eq major-mode 'ibuffer-mode)
-          (setq this-command 'ibuffer-backward-filter-group)
-          (ibuffer-backward-filter-group))
-         ((eq major-mode 'gnus-group-mode)
-          (setq this-command 'gnus-topic-prev) (gnus-topic-prev))
-         (t (if (equal last-command-keys "t") ; else SPC
-                (progn (setq this-command 'page-up-half) (page-up-half))
-              (setq this-command 'beg-of-block) (beg-of-block))))
+        (cond ((eq major-mode 'ibuffer-mode)
+               (setq this-command 'ibuffer-backward-filter-group)
+               (ibuffer-backward-filter-group))
+              ((eq major-mode 'gnus-group-mode)
+               (setq this-command 'gnus-topic-prev) (gnus-topic-prev))
+              (t (if (equal last-command-keys "t") ; else SPC
+                     (progn (setq this-command 'page-up-half) (page-up-half))
+                   (setq this-command 'beg-of-block) (beg-of-block))))
       (command-execute 'previous-line)
       (if (eq last-command 'down-line) (before-last-command))))
   (setq last-command-keys (this-command-keys)))
@@ -79,20 +78,54 @@
   (if (equal before-last-command 'forward-char)
       (progn (setq this-command 'forw-char) (forw-char))
     (if (equal before-last-command this-command)
-        (cond
-         ((eq major-mode 'ibuffer-mode)
-          (setq this-command 'ibuffer-forward-filter-group)
-          (ibuffer-forward-filter-group))
-         ((eq major-mode 'gnus-group-mode)
-          (setq this-command 'gnus-topic-next) (gnus-topic-next))
-         (t (if (equal last-command-keys "d") ; else DEL
-                (progn (setq this-command 'page-dn-half) (page-dn-half))
-              (setq this-command 'end-of-block) (end-of-block))))
+        (cond ((eq major-mode 'ibuffer-mode)
+               (setq this-command 'ibuffer-forward-filter-group)
+               (ibuffer-forward-filter-group))
+              ((eq major-mode 'gnus-group-mode)
+               (setq this-command 'gnus-topic-next) (gnus-topic-next))
+              (t (if (equal last-command-keys "d") ; else DEL
+                     (progn (setq this-command 'page-dn-half) (page-dn-half))
+                   (setq this-command 'end-of-block) (end-of-block))))
       (command-execute 'next-line)
       (if (and (eq major-mode 'gnus-summary-mode)
                (> (line-number-at-pos) 2))
           (command-execute 'next-line))
       (if (eq last-command 'up-line) (before-last-command))))
+  (setq last-command-keys (this-command-keys)))
+
+(defun up-line-rev ()
+  "Up line for transient use. Reverse."
+  (interactive)
+  (if (equal before-last-command 'backward-char)
+      (progn (setq this-command 'back-char) (back-char))
+    (if (equal before-last-command this-command)
+        (cond ((eq major-mode 'ibuffer-mode)
+               (setq this-command 'ibuffer-backward-filter-group)
+               (ibuffer-backward-filter-group))
+              ((eq major-mode 'gnus-group-mode)
+               (setq this-command 'gnus-topic-prev) (gnus-topic-prev))
+              (t (setq this-command 'up-line) (up-line)))
+      (command-execute 'previous-line)
+      (if (eq last-command 'down-line-rev) (before-last-command))))
+  (setq last-command-keys (this-command-keys)))
+
+(defun down-line-rev ()
+  "Down line for transient use. Reverse."
+  (interactive)
+  (if (equal before-last-command 'forward-char)
+      (progn (setq this-command 'forw-char) (forw-char))
+    (if (equal before-last-command this-command)
+        (cond ((eq major-mode 'ibuffer-mode)
+               (setq this-command 'ibuffer-forward-filter-group)
+               (ibuffer-forward-filter-group))
+              ((eq major-mode 'gnus-group-mode)
+               (setq this-command 'gnus-topic-next) (gnus-topic-next))
+              (t (setq this-command 'down-line) (down-line)))
+      (command-execute 'next-line)
+      (if (and (eq major-mode 'gnus-summary-mode)
+               (> (line-number-at-pos) 2))
+          (command-execute 'next-line))
+      (if (eq last-command 'up-line-rev) (before-last-command))))
   (setq last-command-keys (this-command-keys)))
 
 (defun beginning-of-visual-line-once (&rest _)
@@ -133,7 +166,7 @@
   "History backward for transient use."
   (interactive)
   (if (equal before-last-command this-command)
-      (progn (setq this-command 'abort-recursive-edit) (abort-recursive-edit))
+      (isearch-cancel-clean-are)
     (command-execute 'previous-line-or-history-element)
     (if (eq last-command 'hist-forw) (before-last-command))))
 
@@ -141,7 +174,7 @@
   "History forward for transient use."
   (interactive)
   (if (equal before-last-command this-command)
-      (progn (setq this-command 'abort-recursive-edit) (abort-recursive-edit))
+      (isearch-cancel-clean-are)
     (command-execute 'next-line-or-history-element)
     (if (eq last-command 'hist-back) (before-last-command))))
 
@@ -177,12 +210,30 @@
     (forward-button 1 nil nil t)
     (if (eq last-command 'button-back) (before-last-command))))
 
+(defun isearch-cancel-clean ()
+  "Like `isearch-cancel' but no quit signal and clean up echo area."
+  (if (and isearch-push-state-function isearch-cmds)
+      ;; For defined push-state function, restore the first state.
+      ;; This calls pop-state function and restores original point.
+      (let ((isearch-cmds (last isearch-cmds)))
+        (isearch--set-state (car isearch-cmds)))
+    (goto-char isearch-opoint))
+  (isearch-done t) ; Exit isearch..
+  (isearch-clean-overlays)
+  (message nil))
+
+(defun isearch-cancel-clean-are ()
+  "Defer `isearch-cancel-clean' and `abort-recursive-edit'."
+  (run-with-timer 0.1 nil 'isearch-cancel-clean)
+  (setq this-command 'abort-recursive-edit)
+  (abort-recursive-edit))
+
 (defun isearch-back ()
   "Isearch backward for transient use."
   (interactive)
   (if (or (equal before-last-command this-command)
           (equal before-last-command 'isearch-cur-word-backward))
-      (progn (setq this-command 'isearch-cancel) (isearch-cancel))
+      (progn (setq this-command 'isearch-cancel) (isearch-cancel-clean))
     (command-execute 'isearch-repeat-backward)
     (if (or (eq last-command 'isearch-forw)
             (eq last-command 'isearch-cur-word-forward))
@@ -193,7 +244,7 @@
   (interactive)
   (if (or (equal before-last-command this-command)
           (equal before-last-command 'isearch-cur-word-forward))
-      (progn (setq this-command 'isearch-cancel) (isearch-cancel))
+      (progn (setq this-command 'isearch-cancel) (isearch-cancel-clean))
     (command-execute 'isearch-repeat-forward)
     (if (or (eq last-command 'isearch-back)
             (eq last-command 'isearch-cur-word-backward))
@@ -2588,15 +2639,8 @@ Use as around advice e.g. for mouse left click after double click."
 (defun save-buffer-isearch-cancel ()
   "Cancel isearch and save buffer."
   (interactive)
-  (if (and isearch-push-state-function isearch-cmds)
-      ;; For defined push-state function, restore the first state.
-      ;; This calls pop-state function and restores original point.
-      (let ((isearch-cmds (last isearch-cmds)))
-        (isearch--set-state (car isearch-cmds)))
-    (goto-char isearch-opoint))
-  (isearch-done t)
-  (isearch-clean-overlays)
-  (save-buffer))
+  (isearch-cancel-clean)
+  (if (buffer-file-name) (save-buffer) (command-execute 'write-file)))
 
 (defun empty-bin ()
   "Empty bin on macOS."
