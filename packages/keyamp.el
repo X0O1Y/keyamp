@@ -280,7 +280,8 @@ already, then use existing remap instead. Execute resulting command."
 
 (defun keyamp-defer-command-around (fun &rest _)
   "Run `keyamp-defer-command' as around advice."
-  (if (memq last-command '(backward-char forward-char)) (before-last-command))
+  (if (memq last-command '(backward-char forward-char previous-line))
+      (before-last-command))
   (keyamp-defer-command keyamp-key-repeat-delay fun))
 
 
@@ -943,7 +944,7 @@ is enabled.")
    '((backward-bracket . dired-jump) (proced-defer . save-close-buf)))
  (keyamp--set-map x
    '(dired-jump downloads dired-find-file ibuffer-visit-buffer open-last-closed
-     bookmark-jump widget-button-press)))
+     bookmark-jump widget-button-press alt-buf)))
 
 (with-sparse-keymap-x
  (keyamp--remap x
@@ -984,16 +985,17 @@ is enabled.")
  ;; I/K or DEL/SPC to move by lines. See `return-before'.
  (keyamp--map-leader x '(up-line . down-line))
  (keyamp--map-tab x keyamp-screen-TAB)
+ (keyamp--map x '(("<up>" . up-line-rev)))
  (keyamp--remap x
-   '((previous-line . up-line-rev) (next-line   . down-line)
-     (keyamp-insert . keyamp-RET)  (beg-of-line . up-line-rev)))
+   '((previous-line . up-line-rev) (next-line . down-line)
+     (keyamp-insert . keyamp-RET)))
  (keyamp--set-map x '(up-line down-line))
  (keyamp--set-map-hook x '(ibuffer-hook gnus-group-mode-hook) nil nil :repeat)
 
  (defvar keyamp-lines-move-modes
    '(occur-mode         org-agenda-mode  gnus-group-mode
      ibuffer-mode       eww-mode         messages-buffer-mode
-     emms-playlist-mode fundamental-mode dired-mode)
+     emms-playlist-mode dired-mode)
    "List of modes using lines move.")
 
  (defun keyamp-lines-move (&rest _)
@@ -1434,6 +1436,10 @@ is enabled.")
      goto-match-br
      dired-next-line     dired-previous-line)
    nil nil nil keyamp-blink-blink-half))
+
+(with-sparse-keymap-x ; easy undo new line with DEL
+ (keyamp--map-leader x '(undo . nil))
+ (keyamp--set-map x '(newline python-return-and-indent open-line)))
 
 
 ;; Modes Remaps
@@ -1906,15 +1912,15 @@ is enabled.")
   (keyamp--map doc-view-mode-map '(("C-r" . delete-other-windows)))
   (keyamp--remap doc-view-mode-map
     '((keyamp-insert  . keyamp-escape)
-      (previous-line  . doc-view-previous-line-or-previous-page)
-      (next-line      . doc-view-next-line-or-next-page)
-      (up-line        . doc-view-previous-line-or-previous-page)
-      (down-line      . doc-view-next-line-or-next-page)
+      (select-block   . doc-view-scroll-down-or-previous-page)
+      (select-word    . doc-view-scroll-up-or-next-page)
+      (previous-line  . doc-view-scroll-down-or-previous-page)
+      (next-line      . doc-view-scroll-up-or-next-page)
+      (up-line        . doc-view-scroll-down-or-previous-page)
+      (down-line      . doc-view-scroll-up-or-next-page)
       (backward-char  . doc-view-previous-page)
       (forward-char   . doc-view-next-page)
-      (enlarge-window . doc-view-enlarge)
-      (beg-of-line    . doc-view-scroll-down-or-previous-page)
-      (end-of-lyne    . doc-view-scroll-up-or-next-page)))
+      (enlarge-window . doc-view-enlarge)))
 
   (with-sparse-keymap-x
    (keyamp--map-leader x '(doc-view-shrink . doc-view-enlarge))
@@ -1924,19 +1930,11 @@ is enabled.")
    (keyamp--map-leader x '(previous-line . next-line))
    (keyamp--remap x
      '((previous-line . doc-view-scroll-down-or-previous-page)
-       (next-line     . doc-view-scroll-up-or-next-page)))
-   (keyamp--set-map x
-     '(doc-view-scroll-down-or-previous-page doc-view-scroll-up-or-next-page)))
-
-  (with-sparse-keymap-x
-   (keyamp--map-leader x '(previous-line . next-line))
-   (keyamp--remap x
-     '((previous-line . doc-view-scroll-down-or-previous-page)
        (next-line     . doc-view-scroll-up-or-next-page)
        (up-line       . doc-view-scroll-down-or-previous-page)
        (down-line     . doc-view-scroll-up-or-next-page)))
    (keyamp--set-map x
-     '(doc-view-previous-line-or-previous-page doc-view-next-line-or-next-page))))
+     '(doc-view-scroll-down-or-previous-page doc-view-scroll-up-or-next-page))))
 
 (with-eval-after-load 'image-mode
   (keyamp--map image-mode-map '(("C-r" . delete-other-windows)))
@@ -1966,6 +1964,10 @@ is enabled.")
 (with-eval-after-load 'profiler
   (keyamp--remap profiler-report-mode-map
     '((keyamp-insert . profiler-report-toggle-entry))))
+
+(with-eval-after-load 'proced
+  (keyamp--remap proced-mode-map
+    '((keyamp-insert . proced-refine))))
 
 (with-eval-after-load 'esh-mode
   (keyamp--map-tab eshell-mode-map completion-at-point)
@@ -2359,7 +2361,10 @@ is enabled.")
   (keyamp--map-backtab python-mode-map python-de-indent)
   (keyamp--map-return python-mode-map python-return-and-indent)
   (keyamp--remap python-mode-map
-    '((newline . python-return-and-indent) (reformat-lines . python-format-buffer))))
+    '((newline . python-return-and-indent) (reformat-lines . python-format-buffer)))
+  (with-sparse-keymap-x
+   (keyamp--map-leader x '(python-de-indent . python-indent-or-complete))
+   (keyamp--set-map x '(python-indent-or-complete python-de-indent) nil nil nil keyamp-delay-1)))
 
 (with-eval-after-load 'go-ts-mode
   (keyamp--map-tab go-ts-mode-map company-manual-begin)
@@ -2465,288 +2470,296 @@ is enabled.")
 
 (defconst keyamp-screen-commands-hash
   #s(hash-table test equal data
-                (async-shell-command              t
-                 calendar-split                   t
-                 clock                            t
-                 config                           t
-                 delete-other-windows             t
-                 delete-window                    t
-                 describe-char                    t
-                 describe-face                    t
-                 describe-foo-at-point            t
-                 describe-function                t
-                 describe-key                     t
-                 describe-mode                    t
-                 describe-variable                t
-                 exec-query                       t
-                 find-next-dir-file               t
-                 find-prev-dir-file               t
-                 gnus-summary-scroll-up           t
-                 list-matching-lines              t
-                 next-buffer                      t
-                 next-eww-buffer                  t
-                 next-proj-buf                    t
-                 next-buf                         t
-                 occur-cur-word                   t
-                 open-in-external-app             t
-                 org-agenda-tasks                 t
-                 player                           t
-                 prev-eww-buffer                  t
-                 prev-proj-buf                    t
-                 prev-buf                         t
-                 previous-buffer                  t
-                 save-close-buf                   t
-                 server                           t
-                 split-window-below               t
-                 split-window-horizontally        t
-                 sun-moon                         t
-                 sync                             t
-                 tasks                            t
-                 test                             t
-                 view-messages                    t)))
+                (async-shell-command                     t
+                 calendar-split                          t
+                 clock                                   t
+                 config                                  t
+                 delete-other-windows                    t
+                 delete-window                           t
+                 describe-char                           t
+                 describe-face                           t
+                 describe-foo-at-point                   t
+                 describe-function                       t
+                 describe-key                            t
+                 describe-mode                           t
+                 describe-variable                       t
+                 exec-query                              t
+                 find-next-dir-file                      t
+                 find-prev-dir-file                      t
+                 gnus-summary-scroll-up                  t
+                 list-matching-lines                     t
+                 next-buffer                             t
+                 next-eww-buffer                         t
+                 next-proj-buf                           t
+                 next-buf                                t
+                 occur-cur-word                          t
+                 open-in-external-app                    t
+                 org-agenda-tasks                        t
+                 player                                  t
+                 prev-eww-buffer                         t
+                 prev-proj-buf                           t
+                 prev-buf                                t
+                 previous-buffer                         t
+                 save-close-buf                          t
+                 server                                  t
+                 split-window-below                      t
+                 split-window-horizontally               t
+                 sun-moon                                t
+                 sync                                    t
+                 tasks                                   t
+                 test                                    t
+                 view-messages                           t)))
 
 (defconst keyamp-screen-read-commands-hash
   #s(hash-table test equal data
-                (async-shell-command              t
-                 calendar-split                   t
-                 clock                            t
-                 describe-char                    t
-                 describe-face                    t
-                 describe-function                t
-                 describe-key                     t
-                 describe-mode                    t
-                 describe-variable                t
-                 exec-query                       t
-                 gnus-summary-scroll-up           t
-                 list-matching-lines              t
-                 occur-cur-word                   t
-                 open-in-external-app             t
-                 player                           t
-                 sun-moon                         t
-                 sync                             t
-                 view-messages                    t
-                 describe-foo-at-point            t)))
+                (async-shell-command                     t
+                 calendar-split                          t
+                 clock                                   t
+                 describe-char                           t
+                 describe-face                           t
+                 describe-function                       t
+                 describe-key                            t
+                 describe-mode                           t
+                 describe-variable                       t
+                 exec-query                              t
+                 gnus-summary-scroll-up                  t
+                 list-matching-lines                     t
+                 occur-cur-word                          t
+                 open-in-external-app                    t
+                 player                                  t
+                 sun-moon                                t
+                 sync                                    t
+                 view-messages                           t
+                 describe-foo-at-point                   t)))
 
 (defconst keyamp-modify-commands-hash
   #s(hash-table test equal data
-                (apply-macro-to-region-lines      t
-                 backward-del-word                t
-                 clean-whitespace                 t
-                 cut-line                         t
-                 cycle-hyphen-lowline-space       t
-                 del-back                         t
-                 del-word                         t
-                 delete-duplicate-lines           t
-                 delete-forward-char              t
-                 delete-matching-lines            t
-                 delete-non-matching-line         t
-                 dired-toggle-mark                t
-                 emoji-insert                     t
-                 eval-defun                       t
-                 eval-region-or-sexp              t
-                 fill-or-unfil                    t
-                 ibuffer-do-delete                t
-                 insert-ascii-double-quote        t
-                 insert-ascii-single-quote        t
-                 insert-backtick-quote            t
-                 insert-brace                     t
-                 insert-char                      t
-                 insert-column-a-z                t
-                 insert-date                      t
-                 insert-double-angle-quote        t
-                 insert-double-curly-quote        t
-                 insert-emacs-quote               t
-                 insert-formfeed                  t
-                 insert-paren                     t
-                 insert-space-before              t
-                 insert-square-bracket            t
-                 json-pretty                      t
-                 kill-region                      t
-                 new-empty-buffer                 t
-                 newline                          t
-                 open-line                        t
-                 org-insert-source-code           t
-                 org-open-line                    t
-                 org-shiftdown                    t
-                 org-shiftup                      t
-                 quote-lines                      t
-                 reformat-lines                   t
-                 reformat-to-sentence-lines       t
-                 run-current-file                 t
-                 save-buffer                      t
-                 shrink-whitespaces               t
-                 sort-lines-key-value             t
-                 space-to-newline                 t
-                 title-case-region-or-line        t
-                 todo                             t
-                 toggle-comment                   t
-                 toggle-case                      t
-                 toggle-prev-letter-case          t
-                 undo                             t
-                 vterm-send-backspace             t
-                 yank                             t)))
+                (apply-macro-to-region-lines             t
+                 backward-del-word                       t
+                 clean-whitespace                        t
+                 cut-line                                t
+                 cycle-hyphen-lowline-space              t
+                 del-back                                t
+                 del-word                                t
+                 delete-duplicate-lines                  t
+                 delete-forward-char                     t
+                 delete-matching-lines                   t
+                 delete-non-matching-line                t
+                 dired-toggle-mark                       t
+                 emoji-insert                            t
+                 eval-defun                              t
+                 eval-region-or-sexp                     t
+                 fill-or-unfil                           t
+                 ibuffer-do-delete                       t
+                 insert-ascii-double-quote               t
+                 insert-ascii-single-quote               t
+                 insert-backtick-quote                   t
+                 insert-brace                            t
+                 insert-char                             t
+                 insert-column-a-z                       t
+                 insert-date                             t
+                 insert-double-angle-quote               t
+                 insert-double-curly-quote               t
+                 insert-emacs-quote                      t
+                 insert-formfeed                         t
+                 insert-paren                            t
+                 insert-space-before                     t
+                 insert-square-bracket                   t
+                 json-pretty                             t
+                 kill-region                             t
+                 new-empty-buffer                        t
+                 newline                                 t
+                 open-line                               t
+                 org-insert-source-code                  t
+                 org-open-line                           t
+                 org-shiftdown                           t
+                 org-shiftup                             t
+                 python-indent-or-complete               t
+                 python-de-indent                        t
+                 quote-lines                             t
+                 reformat-lines                          t
+                 reformat-to-sentence-lines              t
+                 run-current-file                        t
+                 save-buffer                             t
+                 shrink-whitespaces                      t
+                 sort-lines-key-value                    t
+                 space-to-newline                        t
+                 title-case-region-or-line               t
+                 todo                                    t
+                 toggle-comment                          t
+                 toggle-case                             t
+                 toggle-prev-letter-case                 t
+                 undo                                    t
+                 vterm-send-backspace                    t
+                 yank                                    t)))
 
 (defconst keyamp-read-commands-hash
   #s(hash-table test equal data
-                (back-word                        t
-                 button-back                      t
-                 back-char                        t
-                 backward-punct                   t
-                 beg-of-block                     t
-                 beg-of-buf                       t
-                 calc-redo                        t
-                 calc-undo                        t
-                 calendar-goto-today              t
-                 calendar-scroll-left             t
-                 calendar-scroll-right            t
-                 company-manual-begin             t
-                 company-next-page                t
-                 company-previous-page            t
-                 company-select-forw              t
-                 company-select-back              t
-                 completion-at-point              t
-                 comp-back                        t
-                 comp-forw                        t
-                 copy-line                        t
-                 dired-jump                       t
-                 dired-mark                       t
-                 dired-unmark                     t
-                 down-line                        t
-                 down-line-rev                    t
-                 emms-pause                       t
-                 emms-playlist-mode-play-smart    t
-                 emms-random                      t
-                 emms-seek-backward               t
-                 emms-seek-backward-or-previous   t
-                 emms-seek-forward                t
-                 emms-seek-forward-or-next        t
-                 end-of-block                     t
-                 end-of-buf                       t
-                 enlarge-window                   t
-                 enlarge-window-horizontally      t
-                 eshell-next-input                t
-                 eshell-previous-input            t
-                 eshell-search-input              t
-                 select-word                      t
-                 find-next-file                   t
-                 find-next-match                  t
-                 find-previous-file               t
-                 find-previous-match              t
-                 flymake-goto-next-error          t
-                 flymake-goto-prev-error          t
-                 forw-char                        t
-                 forw-word                        t
-                 button-forw                      t
-                 forward-punct                    t
-                 gnus-beg-of-buf                  t
-                 gnus-delete-window-article       t
-                 gnus-end-of-buf                  t
-                 gnus-summary-next-group          t
-                 gnus-summary-prev-group          t
-                 gnus-topic-next                  t
-                 gnus-topic-prev                  t
-                 gnus-topic-select-group          t
-                 page-up-half                     t
-                 page-dn-half                     t
-                 hist-forw                        t
-                 hist-back                        t
-                 ibuffer-backward-filter-group    t
-                 ibuffer-forward-filter-group     t
-                 ibuffer-toggle-filter-group      t
-                 ido-next-match                   t
-                 ido-prev-match                   t
-                 image-next-file                  t
-                 image-previous-file              t
-                 image-decrease-size              t
-                 image-increase-size              t
-                 Info-backward-node               t
-                 Info-forward-node                t
-                 Info-prev-reference              t
-                 Info-next-reference              t
-                 isearch-cur-word-backward        t
-                 isearch-cur-word-forward         t
-                 isearch-back                     t
-                 isearch-forw                     t
-                 isearch-ring-advance             t
-                 isearch-ring-retreat             t
-                 isearch-yank-kill                t
-                 jump-mark                        t
-                 keyamp--read-dummy               t
-                 minibuffer-previous-completion   t
-                 minibuffer-next-completion       t
-                 radio-next                       t
-                 radio-prev                       t
-                 recenter-top-bottom              t
-                 recentf-open-files               t
-                 screen-idle                      t
-                 screen-idle-return               t
-                 scroll-down-command              t
-                 scroll-up-command                t
-                 select-block                     t
-                 select-line                      t
-                 select-quote                     t
-                 shrink-window                    t
-                 shrink-window-horizontally       t
-                 text-scale-decrease              t
-                 text-scale-increase              t
-                 text-scale-reset                 t
-                 translate                        t
-                 up-line                          t
-                 up-line-rev                      t
-                 vterm-down                       t
-                 vterm-send-return                t
-                 vterm-up                         t
-                 widget-backward                  t
-                 widget-forward                   t
-                 xref-find-definitions            t
-                 xref-go-back                     t)))
+                (back-word                               t
+                 button-back                             t
+                 back-char                               t
+                 backward-punct                          t
+                 beg-of-block                            t
+                 beg-of-buf                              t
+                 calc-redo                               t
+                 calc-undo                               t
+                 calendar-goto-today                     t
+                 calendar-scroll-left                    t
+                 calendar-scroll-right                   t
+                 company-manual-begin                    t
+                 company-next-page                       t
+                 company-previous-page                   t
+                 company-select-forw                     t
+                 company-select-back                     t
+                 completion-at-point                     t
+                 comp-back                               t
+                 comp-forw                               t
+                 copy-line                               t
+                 dired-jump                              t
+                 dired-mark                              t
+                 dired-unmark                            t
+                 doc-view-scroll-down-or-previous-page   t
+                 doc-view-scroll-up-or-next-page         t
+                 doc-view-shrink                         t
+                 doc-view-enlarge                        t
+                 down-line                               t
+                 down-line-rev                           t
+                 emms-pause                              t
+                 emms-playlist-mode-play-smart           t
+                 emms-random                             t
+                 emms-seek-backward                      t
+                 emms-seek-backward-or-previous          t
+                 emms-seek-forward                       t
+                 emms-seek-forward-or-next               t
+                 end-of-block                            t
+                 end-of-buf                              t
+                 enlarge-window                          t
+                 enlarge-window-horizontally             t
+                 eshell-next-input                       t
+                 eshell-previous-input                   t
+                 eshell-search-input                     t
+                 select-word                             t
+                 find-next-file                          t
+                 find-next-match                         t
+                 find-previous-file                      t
+                 find-previous-match                     t
+                 flymake-goto-next-error                 t
+                 flymake-goto-prev-error                 t
+                 forw-char                               t
+                 forw-word                               t
+                 button-forw                             t
+                 forward-punct                           t
+                 gnus-beg-of-buf                         t
+                 gnus-delete-window-article              t
+                 gnus-end-of-buf                         t
+                 gnus-summary-next-group                 t
+                 gnus-summary-prev-group                 t
+                 gnus-topic-next                         t
+                 gnus-topic-prev                         t
+                 gnus-topic-select-group                 t
+                 page-up-half                            t
+                 page-dn-half                            t
+                 hist-forw                               t
+                 hist-back                               t
+                 ibuffer-backward-filter-group           t
+                 ibuffer-forward-filter-group            t
+                 ibuffer-toggle-filter-group             t
+                 ido-next-match                          t
+                 ido-prev-match                          t
+                 image-next-file                         t
+                 image-previous-file                     t
+                 image-decrease-size                     t
+                 image-increase-size                     t
+                 Info-backward-node                      t
+                 Info-forward-node                       t
+                 Info-prev-reference                     t
+                 Info-next-reference                     t
+                 isearch-cur-word-backward               t
+                 isearch-cur-word-forward                t
+                 isearch-back                            t
+                 isearch-forw                            t
+                 isearch-ring-advance                    t
+                 isearch-ring-retreat                    t
+                 isearch-yank-kill                       t
+                 jump-mark                               t
+                 keyamp--read-dummy                      t
+                 minibuffer-previous-completion          t
+                 minibuffer-next-completion              t
+                 radio-next                              t
+                 radio-prev                              t
+                 recenter-top-bottom                     t
+                 recentf-open-files                      t
+                 screen-idle                             t
+                 screen-idle-return                      t
+                 scroll-down-command                     t
+                 scroll-up-command                       t
+                 select-block                            t
+                 select-line                             t
+                 select-quote                            t
+                 shrink-window                           t
+                 shrink-window-horizontally              t
+                 text-scale-decrease                     t
+                 text-scale-increase                     t
+                 text-scale-reset                        t
+                 translate                               t
+                 up-line                                 t
+                 up-line-rev                             t
+                 vterm-down                              t
+                 vterm-send-return                       t
+                 vterm-up                                t
+                 widget-backward                         t
+                 widget-forward                          t
+                 xref-find-definitions                   t
+                 xref-go-back                            t)))
 
 (defconst keyamp-read-screen-commands-hash
   #s(hash-table test equal data
-                (beg-of-block                     t
-                 beg-of-buf                       t
-                 down-line                        t
-                 down-line-rev                    t
-                 end-of-block                     t
-                 end-of-buf                       t
-                 gnus-beg-of-buf                  t
-                 gnus-end-of-buf                  t
-                 gnus-summary-next-group          t
-                 gnus-summary-prev-group          t
-                 gnus-topic-next                  t
-                 gnus-topic-prev                  t
-                 gnus-topic-select-group          t
-                 page-up-half                     t
-                 page-dn-half                     t
-                 ibuffer-backward-filter-group    t
-                 ibuffer-forward-filter-group     t
-                 ibuffer-toggle-filter-group      t
-                 isearch-cur-word-backward        t
-                 isearch-cur-word-forward         t
-                 isearch-back                     t
-                 isearch-forw                     t
-                 scroll-down-command              t
-                 scroll-up-command                t
-                 up-line                          t
-                 up-line-rev                      t)))
+                (beg-of-block                            t
+                 beg-of-buf                              t
+                 doc-view-scroll-down-or-previous-page   t
+                 doc-view-scroll-up-or-next-page         t
+                 down-line                               t
+                 down-line-rev                           t
+                 end-of-block                            t
+                 end-of-buf                              t
+                 gnus-beg-of-buf                         t
+                 gnus-end-of-buf                         t
+                 gnus-summary-next-group                 t
+                 gnus-summary-prev-group                 t
+                 gnus-topic-next                         t
+                 gnus-topic-prev                         t
+                 gnus-topic-select-group                 t
+                 page-up-half                            t
+                 page-dn-half                            t
+                 ibuffer-backward-filter-group           t
+                 ibuffer-forward-filter-group            t
+                 ibuffer-toggle-filter-group             t
+                 isearch-cur-word-backward               t
+                 isearch-cur-word-forward                t
+                 isearch-back                            t
+                 isearch-forw                            t
+                 scroll-down-command                     t
+                 scroll-up-command                       t
+                 up-line                                 t
+                 up-line-rev                             t)))
 
 (defconst keyamp-idle-commands-hash
   #s(hash-table test equal data
-                (ignore                           t
-                 monitor                          t
-                 activate-region                  t
-                 dummy                            t
-                 mac-mwheel-scroll                t
-                 mouse-set-point                  t
-                 mouse-3                          t
-                 mouse-drag-region                t
-                 previous-line                    t
-                 next-line                        t
-                 backward-bracket                 t
-                 forward-bracket                  t
-                 goto-match-br                    t
-                 dired-next-line                  t
-                 dired-previous-line              t)))
+                (ignore                                  t
+                 monitor                                 t
+                 activate-region                         t
+                 dummy                                   t
+                 mac-mwheel-scroll                       t
+                 mouse-set-point                         t
+                 mouse-3                                 t
+                 mouse-drag-region                       t
+                 previous-line                           t
+                 next-line                               t
+                 backward-bracket                        t
+                 forward-bracket                         t
+                 goto-match-br                           t
+                 dired-next-line                         t
+                 dired-previous-line                     t)))
 
 (defconst keyamp-isearch-not-insert
   '(isearch-forw isearch-cur-word-forward isearch-back isearch-cur-word-backward)
@@ -2786,7 +2799,7 @@ is enabled.")
 (defvar keyamp-command-cursor 'box        "Command cursor.")
 (defvar keyamp-insert-cursor  '(hbar . 2) "Insert cursor.")
 (defvar keyamp-read-cursor    'hollow     "Read cursor.")
-(defvar keyamp-screen-cursor  nil         "Screen cursor.")
+(defvar keyamp-screen-cursor  'box        "Screen cursor.")
 (defvar keyamp-modify-cursor  '(bar . 2)  "Modify cursor.")
 
 (defvar keyamp-idle-timeout 60 "Idle timeout for keymaps without self timeout.")
@@ -3143,7 +3156,8 @@ after a delay even if there more read commands follow."
   (keyamp-blink-stop)
   (keyamp-indicate keyamp-command-indicator keyamp-command-cursor keyamp-command-color)
   (if (memq this-command '(dired-find-file ibuffer-visit-buffer open-last-closed
-                           bookmark-jump   widget-button-press))
+                           bookmark-jump   widget-button-press  alt-buf
+                           alternate-frame))
       (keyamp-blink-start keyamp-screen-color keyamp-command-color)))
 
 (defvar keyamp-user-error nil
@@ -3193,6 +3207,12 @@ after a delay even if there more read commands follow."
 Cancel after `keyamp-blink-blink'. Double blink."
   (keyamp-blink-io)
   (run-with-timer (* 2 keyamp-blink-blink) nil 'keyamp-blink-io))
+
+(defun after-save-hook-indicate-io ()
+  "Indicate IO after save if save not with command and not in insert mode."
+  (if (and (not keyamp-insert-p) (not this-command)) (keyamp-indicate-io)))
+
+(add-hook 'after-save-hook 'after-save-hook-indicate-io)
 
 (defun keyamp-indicate-prefix ()
   "Indicate prefix."

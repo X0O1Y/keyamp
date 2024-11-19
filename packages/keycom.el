@@ -75,22 +75,24 @@
 (defun down-line ()
   "Down line for transient use."
   (interactive)
-  (if (equal before-last-command 'forward-char)
-      (progn (setq this-command 'forw-char) (forw-char))
-    (if (equal before-last-command this-command)
-        (cond ((eq major-mode 'ibuffer-mode)
-               (setq this-command 'ibuffer-forward-filter-group)
-               (ibuffer-forward-filter-group))
-              ((eq major-mode 'gnus-group-mode)
-               (setq this-command 'gnus-topic-next) (gnus-topic-next))
-              (t (if (equal last-command-keys "d") ; else DEL
-                     (progn (setq this-command 'page-dn-half) (page-dn-half))
-                   (setq this-command 'end-of-block) (end-of-block))))
-      (command-execute 'next-line)
-      (if (and (eq major-mode 'gnus-summary-mode)
-               (> (line-number-at-pos) 2))
-          (command-execute 'next-line))
-      (if (eq last-command 'up-line) (before-last-command))))
+  (if (equal before-last-command 'previous-line) ; before select-word
+      (progn (setq this-command 'up-line-rev) (up-line-rev))
+    (if (equal before-last-command 'forward-char)
+        (progn (setq this-command 'forw-char) (forw-char))
+      (if (equal before-last-command this-command)
+          (cond ((eq major-mode 'ibuffer-mode)
+                 (setq this-command 'ibuffer-forward-filter-group)
+                 (ibuffer-forward-filter-group))
+                ((eq major-mode 'gnus-group-mode)
+                 (setq this-command 'gnus-topic-next) (gnus-topic-next))
+                (t (if (equal last-command-keys "d") ; else DEL
+                       (progn (setq this-command 'page-dn-half) (page-dn-half))
+                     (setq this-command 'end-of-block) (end-of-block))))
+        (command-execute 'next-line)
+        (if (and (eq major-mode 'gnus-summary-mode)
+                 (> (line-number-at-pos) 2))
+            (command-execute 'next-line))
+        (if (eq last-command 'up-line) (before-last-command)))))
   (setq last-command-keys (this-command-keys)))
 
 (defun up-line-rev ()
@@ -2640,7 +2642,8 @@ Use as around advice e.g. for mouse left click after double click."
   "Cancel isearch and save buffer."
   (interactive)
   (isearch-cancel-clean)
-  (if (buffer-file-name) (save-buffer) (command-execute 'write-file)))
+  (cond ((buffer-file-name) (save-buffer))
+        ((string-match "^file*." (buffer-name)) (command-execute 'write-file))))
 
 (defun empty-bin ()
   "Empty bin on macOS."
