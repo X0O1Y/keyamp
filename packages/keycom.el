@@ -268,9 +268,8 @@ Save point to register 6 before repeated call."
 (defun jump-8 () "Jump to register 8."
        (interactive) (if (get-register ?8) (jump-to-register ?8)))
 
-(defun beg-of-line ()
+(defun beg-of-line-raw ()
   "Move cursor to beginning of line."
-  (interactive)
   (let ((xp (point)))
     (if visual-line-mode
         (beginning-of-visual-line)
@@ -281,10 +280,17 @@ Save point to register 6 before repeated call."
         (back-to-indentation)
         (if (eq xp (point)) (beginning-of-line))))))
 
+(defun beg-of-line ()
+  "Move cursor to beginning of line. Move to end of line if in beginning of line."
+  (interactive)
+  (if (bolp) (end-of-line) (beg-of-line-raw)))
+
 (defun end-of-lyne ()
   "End of line or visual line."
   (interactive)
-  (if visual-line-mode (end-of-visual-line) (end-of-line)))
+  (cond ((eolp)           (beg-of-line-raw))
+        (visual-line-mode (end-of-visual-line))
+        (t                (end-of-line))))
 
 (defun back-block ()
   "Move cursor to the end of prev block."
@@ -1732,6 +1738,19 @@ command, so that next buffer shown is a user buffer."
                    (message "%s" "No next proj buffer") (switch-to-buffer xbuf)))
         (setq i 100)))))
 
+(defun next-eww-buffer ()
+  "Switch to the next eww buffer."
+  (interactive)
+  (let ((i 0) (xbuf (current-buffer)))
+    (next-buffer)
+    (while (< i 99)
+      (if (not (eq major-mode 'eww-mode))
+          (progn (next-buffer)
+                 (setq i (1+ i))
+                 (when (= i 99)
+                   (message "%s" "No next eww buffer") (switch-to-buffer xbuf)))
+        (setq i 100)))))
+
 (defun prev-eww-buffer ()
   "Switch to the previous eww buffer."
   (interactive)
@@ -1745,17 +1764,30 @@ command, so that next buffer shown is a user buffer."
                    (message "%s" "No prev eww buffer") (switch-to-buffer xbuf)))
         (setq i 100)))))
 
-(defun next-eww-buffer ()
-  "Switch to the next eww buffer."
+(defun prev-vterm-buffer ()
+  "Switch to the previous vterm buffer."
+  (interactive)
+  (let ((i 0) (xbuf (current-buffer)))
+    (previous-buffer)
+    (while (< i 99)
+      (if (not (eq major-mode 'vterm-mode))
+          (progn (previous-buffer)
+                 (setq i (1+ i))
+                 (when (= i 99)
+                   (message "%s" "No prev eww buffer") (switch-to-buffer xbuf)))
+        (setq i 100)))))
+
+(defun next-vterm-buffer ()
+  "Switch to the next vterm buffer."
   (interactive)
   (let ((i 0) (xbuf (current-buffer)))
     (next-buffer)
     (while (< i 99)
-      (if (not (eq major-mode 'eww-mode))
+      (if (not (eq major-mode 'vterm-mode))
           (progn (next-buffer)
                  (setq i (1+ i))
                  (when (= i 99)
-                   (message "%s" "No next eww buffer") (switch-to-buffer xbuf)))
+                   (message "%s" "No next vterm buffer") (switch-to-buffer xbuf)))
         (setq i 100)))))
 
 (defun alt-buf ()
@@ -1974,7 +2006,14 @@ first. To test, file name must contain _test suffix."
                    xprogName xfname))
     (progn (message "%s" xcmdStr) (shell-command xcmdStr xoutputb))))
 
-(defconst run-current-file-map '(("pl" . "perl") ("py" . "python3") ("sh" . "bash"))
+(defconst pyvenv "~/pyvenv" "Python virtual environment.")
+
+(defconst run-current-file-map
+  `(("pl" . "perl")
+    ("py" . ,(if (file-exists-p pyvenv)
+                (concat "source " pyvenv "/bin/activate && python")
+              "python3"))
+    ("sh" . "bash"))
   "Alist file extension to program name.")
 
 (defun run-current-file ()
@@ -2280,15 +2319,23 @@ before actually send the cd command."
 (defun terminal-split ()
   "Split terminal window below."
   (interactive)
-  (if (one-window-p) (split-window-below))
-  (enlarge-window-split) (other-window 1)
-  (command-execute 'vterm))
+  (if (eq major-mode 'vterm-mode)
+      (let ((current-prefix-arg '-)) (call-interactively 'vterm))
+    (split-window-below)
+    (enlarge-window-split) (other-window 1)
+    (command-execute 'vterm)))
 
 (defun vterm-up ()
   "Send `<up>' to the libvterm." (interactive) (vterm-send-key "<up>"))
 
 (defun vterm-down ()
   "Send `<down>' to the libvterm." (interactive) (vterm-send-key "<down>"))
+
+(defun vterm-left ()
+  "Send `<left>' to the libvterm." (interactive) (vterm-send-key "<left>"))
+
+(defun vterm-right ()
+  "Send `<right>' to the libvterm." (interactive) (vterm-send-key "<right>"))
 
 (defun vterm-backward-kill-word ()
   "Vterm backward kill word." (interactive) (vterm-send-key (kbd "C-w")))

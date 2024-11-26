@@ -6925,7 +6925,13 @@
           },
           "to_after_key_up": [
             {
-              "shell_command": "open -a Preview",
+              "shell_command": "open -a Preview"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "shell_command": "open -a /opt/homebrew/bin/mpv",
+              "repeat": false,
               "halt": true
             }
           ]
@@ -6949,7 +6955,36 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/mpv"
+                "/Safari"
+              ]
+            }
+          ],
+          "to": [
+            {
+              "key_code": "tab",
+              "modifiers": [
+                "command"
+              ],
+              "halt": true,
+              "repeat": false
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "f6",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Docker"
               ]
             }
           ],
@@ -6976,7 +7011,13 @@
           },
           "to_after_key_up": [
             {
-              "shell_command": "open -a /opt/homebrew/bin/mpv",
+              "shell_command": "open -a Safari"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "shell_command": "open -a 'Docker Desktop'",
+              "repeat": false,
               "halt": true
             }
           ]
@@ -7025,19 +7066,18 @@
               ]
             }
           },
+          "to_if_held_down": [
+            {
+              "key_code": "play_or_pause"
+            },
+            {
+              "shell_command": "sleep 0.5 && killall Music",
+              "halt": true
+            }
+          ],
           "to_after_key_up": [
             {
               "shell_command": "/Applications/emacsclient --no-wait --eval '(play-pause)'"
-            },
-            {
-              "key_code": "play_or_pause"
-            }
-          ],
-          "to_if_held_down": [
-            {
-              "shell_command": "/Applications/emacsclient --no-wait --eval '(radio)'",
-              "repeat": false,
-              "halt": true
             }
           ]
         }
@@ -7154,15 +7194,31 @@
               ]
             }
           ],
-          "to": [
+          "to_after_key_up": [
             {
               "select_input_source": {
                 "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
-              },
-              "repeat": false
+              }
             },
             {
               "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)' && open -a 'Google Chrome'"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              }
+            },
+            {
+              "key_code": "tab",
+              "modifiers": [
+                "command"
+              ]
+            },
+            {
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'",
+              "halt": true
             }
           ]
         },
@@ -7184,12 +7240,11 @@
               ]
             }
           ],
-          "to": [
+          "to_after_key_up": [
             {
               "select_input_source": {
                 "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
-              },
-              "repeat": false
+              }
             },
             {
               "key_code": "h",
@@ -7199,6 +7254,23 @@
             },
             {
               "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)' && open -a 'Emacs'"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              }
+            },
+            {
+              "key_code": "tab",
+              "modifiers": [
+                "command"
+              ]
+            },
+            {
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'",
+              "halt": true
             }
           ]
         }
@@ -7233,15 +7305,25 @@
               "type": "input_source_if"
             }
           ],
-          "to": [
+          "to_after_key_up": [
             {
               "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
             },
             {
               "select_input_source": {
                 "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
-              },
-              "repeat": false
+              }
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              }
+            },
+            {
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'",
+              "halt": true
             }
           ]
         },
@@ -7271,15 +7353,25 @@
               "type": "input_source_if"
             }
           ],
-          "to": [
+          "to_after_key_up": [
             {
               "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
             },
             {
               "select_input_source": {
                 "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
-              },
-              "repeat": false
+              }
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              }
+            },
+            {
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'",
+              "halt": true
             }
           ]
         },
@@ -7309,15 +7401,25 @@
               "type": "input_source_if"
             }
           ],
-          "to": [
+          "to_after_key_up": [
             {
               "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-ru)'"
             },
             {
               "select_input_source": {
                 "input_source_id": "com.apple.keylayout.RussianWin"
+              }
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
               },
-              "repeat": false
+              "halt": true
+            },
+            {
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
             }
           ]
         },
@@ -7341,15 +7443,25 @@
               "type": "input_source_if"
             }
           ],
-          "to": [
+          "to_after_key_up": [
             {
               "select_input_source": {
                 "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
-              },
-              "repeat": false
+              }
             },
             {
               "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              }
+            },
+            {
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'",
+              "halt": true
             }
           ]
         },
@@ -7373,15 +7485,25 @@
               "type": "input_source_if"
             }
           ],
-          "to": [
+          "to_after_key_up": [
             {
               "select_input_source": {
                 "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
-              },
-              "repeat": false
+              }
             },
             {
               "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              }
+            },
+            {
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'",
+              "halt": true
             }
           ]
         },
@@ -7405,15 +7527,25 @@
               "type": "input_source_if"
             }
           ],
-          "to": [
+          "to_after_key_up": [
             {
               "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-ru)'"
             },
             {
               "select_input_source": {
                 "input_source_id": "com.apple.keylayout.RussianWin"
-              },
-              "repeat": false
+              }
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              }
+            },
+            {
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'",
+              "halt": true
             }
           ]
         }
@@ -7432,11 +7564,84 @@
               ]
             }
           },
-          "to_after_key_up": [
+          "conditions": [
+            {
+              "type": "frontmost_application_unless",
+              "file_paths": [
+                "/Google Chrome"
+              ]
+            }
+          ],
+          "to_if_held_down": [
             {
               "select_input_source": {
                 "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
               }
+            },
+            {
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)' && open -a 'Google Chrome'",
+              "halt": true
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              },
+              "repeat": false
+            },
+            {
+              "key_code": "tab",
+              "modifiers": [
+                "command"
+              ]
+            },
+            {
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "f15",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Google Chrome"
+              ]
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              }
+            },
+            {
+              "key_code": "h",
+              "modifiers": [
+                "command"
+              ]
+            },
+            {
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)' && open -a 'Emacs'",
+              "halt": true
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              },
+              "repeat": false
             },
             {
               "key_code": "tab",

@@ -499,7 +499,7 @@ is enabled.")
     ("<up>"   . up-line)                   ("<down>"  . down-line)
 
     ("S-<escape>"    . ignore)             ("S-<return>" . speedbar)
-    ("S-<backspace>" . ignore)             ("S-SPC"      . ignore)))
+    ("S-<backspace>" . prev-buf)           ("S-SPC"      . tasks)))
 
 (keyamp--map-leader keyamp-lleader-map '(select-block . select-quote))
 (keyamp--map-return keyamp-lleader-map execute-extended-command)
@@ -777,7 +777,9 @@ is enabled.")
 (keyamp--map-tab isearch-mode-map isearch-forw)
 (keyamp--map-backtab isearch-mode-map isearch-back)
 (keyamp--map-escape isearch-mode-map isearch-cancel)
-(keyamp--map isearch-mode-map '(("C-^" . keyamp-lleader-map)))
+(keyamp--map isearch-mode-map
+  '(("C-^"   . keyamp-lleader-map)
+    ("S-SPC" . isearch-forw) ("S-<backspace>" . isearch-back)))
 (keyamp--remap isearch-mode-map '((paste-from-r1 . isearch-yank-r1)))
 
 (with-sparse-keymap-x
@@ -882,6 +884,7 @@ is enabled.")
      delete-window              save-close-buf
      prev-proj-buf              next-proj-buf
      prev-eww-buffer            next-eww-buffer
+     prev-vterm-buffer          next-vterm-buffer
      tasks                      config
      previous-buffer            next-buffer
      find-prev-dir-file         find-next-dir-file
@@ -922,6 +925,11 @@ is enabled.")
    '((open-line . prev-eww-buffer) (newline . next-eww-buffer)
      (del-back  . eww-reload)      (undo    . justify-buffer)))
  (keyamp--set-map x '(prev-eww-buffer next-eww-buffer)))
+
+(with-sparse-keymap-x
+ (keyamp--map-tab x keyamp-screen-TAB)
+ (keyamp--remap x '((open-line . prev-vterm-buffer) (newline . next-vterm-buffer)))
+ (keyamp--set-map x '(prev-vterm-buffer next-vterm-buffer)))
 
 (with-sparse-keymap-x
  (keyamp--remap x '((open-line . prev-buf) (newline . tasks)))
@@ -1547,8 +1555,7 @@ is enabled.")
 
   (keyamp--map minibuffer-inactive-mode-map
     '(("<mouse-1>" . alt-buf) ("<double-mouse-1>" . ignore)))
-  (keyamp--remap minibuffer-inactive-mode-map
-    '((mouse-3 . execute-extended-command))))
+  (keyamp--remap minibuffer-inactive-mode-map '((mouse-3 . toggle-ibuffer))))
 
 (with-eval-after-load 'icomplete
   (keyamp--map-return icomplete-minibuffer-map keyamp-exit-minibuffer)
@@ -2033,7 +2040,7 @@ is enabled.")
       (cut-line            . ignore)
       (insert-space-before . ignore)
       (del-back            . vterm-send-backspace)
-      (terminal-split      . delete-other-windows)))
+      (next-buf            . next-vterm-buffer)))
 
   (with-sparse-keymap-x
    (keyamp--map-leader x '(vterm-send-backspace . keyamp-insert-and-SPC))
@@ -2042,10 +2049,16 @@ is enabled.")
   (with-sparse-keymap-x
    (keyamp--map-leader x '(previous-line . next-line))
    (keyamp--remap x
-     '((previous-line . vterm-up)      (next-line     . vterm-down)
+     '((previous-line . vterm-up) (next-line     . vterm-down)
+       (backward-char . vterm-left) (forward-char  . vterm-right)
        (undo          . delete-window) (keyamp-insert . vterm-send-return)))
    (keyamp--set-map x '(vterm-history-search) nil :insert)
-   (keyamp--set-map x '(vterm-up vterm-down) :command))
+   (keyamp--set-map x '(vterm-up vterm-down vterm-yank-pop) :command))
+
+  (with-sparse-keymap-x
+   (keyamp--map-leader x '(backward-char . forward-char))
+   (keyamp--remap x '((backward-char . vterm-left) (forward-char . vterm-right)))
+   (keyamp--set-map x '(vterm-left vterm-right) :command))
 
   (with-sparse-keymap-x
    (keyamp--map-leader x '(vterm-up . self-insert-command))
@@ -2490,6 +2503,7 @@ is enabled.")
                  list-matching-lines                     t
                  next-buffer                             t
                  next-eww-buffer                         t
+                 next-vterm-buffer                       t
                  next-proj-buf                           t
                  next-buf                                t
                  occur-cur-word                          t
@@ -2497,6 +2511,7 @@ is enabled.")
                  org-agenda-tasks                        t
                  player                                  t
                  prev-eww-buffer                         t
+                 prev-vterm-buffer                       t
                  prev-proj-buf                           t
                  prev-buf                                t
                  previous-buffer                         t
@@ -2705,6 +2720,8 @@ is enabled.")
                  up-line                                 t
                  up-line-rev                             t
                  vterm-down                              t
+                 vterm-left                              t
+                 vterm-right                             t
                  vterm-send-return                       t
                  vterm-up                                t
                  widget-backward                         t
@@ -2786,7 +2803,7 @@ is enabled.")
 (defvar keyamp-modify-indicator  "●︎" "Modify indicator.")
 
 (defvar keyamp-idle-color    "#ab82ff" "Idle color.")
-(defvar keyamp-screen-color  "#0000ff" "Screen color.")
+(defvar keyamp-screen-color  "#1e90ff" "Screen color.")
 (defvar keyamp-read-color    "#00bfff" "Read color.")
 (defvar keyamp-command-color "#7cfc00" "Command color.")
 (defvar keyamp-io-color      "#ffd700" "IO color.")
@@ -2799,7 +2816,7 @@ is enabled.")
 (defvar keyamp-command-cursor 'box        "Command cursor.")
 (defvar keyamp-insert-cursor  '(hbar . 2) "Insert cursor.")
 (defvar keyamp-read-cursor    'hollow     "Read cursor.")
-(defvar keyamp-screen-cursor  'box        "Screen cursor.")
+(defvar keyamp-screen-cursor  nil         "Screen cursor.")
 (defvar keyamp-modify-cursor  '(bar . 2)  "Modify cursor.")
 
 (defvar keyamp-idle-timeout 60 "Idle timeout for keymaps without self timeout.")
@@ -2903,9 +2920,7 @@ insert cancel the timer.")
 (defun keyamp-SPC-SPC (&rest _)
   "Insert SPC SPC to activate command mode."
   (if (and (eq before-last-command-event 32) (eq last-command-event 32))
-      (if isearch-mode
-          (isearch-cancel-clean)
-        (delete-char -2) (keyamp-escape))
+      (if isearch-mode (isearch-cancel-clean) (delete-char -2) (keyamp-escape))
     (if (eq last-command-event 32)
         (progn
           (run-with-timer (if (and (minibufferp) (not (display-graphic-p))) 0
@@ -3147,9 +3162,7 @@ after a delay even if there more read commands follow."
   (keyamp-indicate keyamp-insert-indicator keyamp-insert-cursor keyamp-insert-color)
   (cond ((gethash this-command keyamp-read-commands-hash)
          (keyamp-blink-start keyamp-read-color keyamp-insert-color))
-        ((gethash this-command keyamp-modify-commands-hash)
-         (keyamp-blink-start keyamp-modify-color keyamp-insert-color))
-        (t (keyamp-blink-start keyamp-idle-color keyamp-insert-color))))
+        (t (keyamp-blink-start keyamp-modify-color keyamp-insert-color))))
 
 (defun keyamp-indicate-command ()
   "Indicate command."
@@ -3215,8 +3228,8 @@ Cancel after `keyamp-blink-blink'. Double blink."
 (add-hook 'after-save-hook 'after-save-hook-indicate-io)
 
 (defun keyamp-indicate-prefix ()
-  "Indicate prefix."
-  (if (or (member (this-single-command-keys) '([32] [127] [backspace]))
+  "Indicate prefix. SPC DEL backspace C-h."
+  (if (or (member (this-single-command-keys) '([32] [127] [backspace] [8]))
           prefix-arg)
       (keyamp-indicate-idle)))
 
