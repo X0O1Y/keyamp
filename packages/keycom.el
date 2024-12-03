@@ -57,77 +57,73 @@
 (defun up-line ()
   "Up line for transient use."
   (interactive)
-  (if (equal before-last-command 'backward-char)
-      (progn (setq this-command 'back-char) (back-char))
-    (if (equal before-last-command this-command)
-        (cond ((eq major-mode 'ibuffer-mode)
-               (setq this-command 'ibuffer-backward-filter-group)
-               (ibuffer-backward-filter-group))
-              ((eq major-mode 'gnus-group-mode)
-               (setq this-command 'gnus-topic-prev) (gnus-topic-prev))
-              (t (if (equal last-command-keys "t") ; else SPC
-                     (progn (setq this-command 'page-up-half) (page-up-half))
-                   (setq this-command 'beg-of-block) (beg-of-block))))
-      (command-execute 'previous-line)
-      (if (eq last-command 'down-line) (before-last-command))))
+  (cond ((equal before-last-command 'back-word)
+         (setq this-command 'back-word-repeat) (back-word-repeat))
+        ((equal before-last-command 'backward-char)
+         (setq this-command 'back-char) (back-char))
+        ((equal before-last-command this-command)
+         (cond ((eq major-mode 'ibuffer-mode) (ibuffer-backward-filter-group))
+               ((eq major-mode 'gnus-group-mode)
+                (setq this-command 'gnus-topic-prev) (gnus-topic-prev))
+               (t (if (equal last-command-keys "t") ; else SPC
+                      (progn (setq this-command 'page-up-half) (page-up-half))
+                    (setq this-command 'beg-of-block) (beg-of-block)))))
+        (t (command-execute 'previous-line)
+           (if (eq last-command 'down-line) (before-last-command))))
   (setq last-command-keys (this-command-keys)))
 
 (defun down-line ()
   "Down line for transient use."
   (interactive)
-  (if (equal before-last-command 'previous-line) ; before select-word
-      (progn (setq this-command 'up-line-rev) (up-line-rev))
-    (if (equal before-last-command 'forward-char)
-        (progn (setq this-command 'forw-char) (forw-char))
-      (if (equal before-last-command this-command)
-          (cond ((eq major-mode 'ibuffer-mode)
-                 (setq this-command 'ibuffer-forward-filter-group)
-                 (ibuffer-forward-filter-group))
-                ((eq major-mode 'gnus-group-mode)
-                 (setq this-command 'gnus-topic-next) (gnus-topic-next))
-                (t (if (equal last-command-keys "d") ; else DEL
-                       (progn (setq this-command 'page-dn-half) (page-dn-half))
-                     (setq this-command 'end-of-block) (end-of-block))))
-        (command-execute 'next-line)
-        (if (and (eq major-mode 'gnus-summary-mode)
-                 (> (line-number-at-pos) 2))
-            (command-execute 'next-line))
-        (if (eq last-command 'up-line) (before-last-command)))))
+  (cond ((equal before-last-command 'forw-word)
+         (setq this-command 'forw-word-repeat) (forw-word-repeat))
+        ((equal before-last-command 'previous-line) ; before select-word
+         (setq this-command 'up-line-rev) (up-line-rev))
+        ((equal before-last-command 'forward-char)
+         (setq this-command 'forw-char) (forw-char))
+        ((equal before-last-command this-command)
+         (cond ((eq major-mode 'ibuffer-mode) (ibuffer-forward-filter-group))
+               ((eq major-mode 'gnus-group-mode)
+                (setq this-command 'gnus-topic-next) (gnus-topic-next))
+               (t (if (equal last-command-keys "d") ; else DEL
+                      (progn (setq this-command 'page-dn-half) (page-dn-half))
+                    (setq this-command 'end-of-block) (end-of-block)))))
+        (t (command-execute 'next-line)
+           (if (and (eq major-mode 'gnus-summary-mode)
+                    (> (line-number-at-pos) 2))
+               (command-execute 'next-line)) ; double next line
+           (if (eq last-command 'up-line) (before-last-command))))
   (setq last-command-keys (this-command-keys)))
 
 (defun up-line-rev ()
   "Up line for transient use. Reverse."
   (interactive)
-  (if (equal before-last-command 'backward-char)
-      (progn (setq this-command 'back-char) (back-char))
-    (if (equal before-last-command this-command)
-        (cond ((eq major-mode 'ibuffer-mode)
-               (setq this-command 'ibuffer-backward-filter-group)
-               (ibuffer-backward-filter-group))
-              ((eq major-mode 'gnus-group-mode)
-               (setq this-command 'gnus-topic-prev) (gnus-topic-prev))
-              (t (setq this-command 'up-line) (up-line)))
-      (command-execute 'previous-line)
-      (if (eq last-command 'down-line-rev) (before-last-command))))
+  (if (equal before-last-command this-command)
+      (cond ((eq major-mode 'ibuffer-mode)
+             (setq this-command 'ibuffer-backward-filter-group)
+             (ibuffer-backward-filter-group))
+            ((eq major-mode 'gnus-group-mode)
+             (setq this-command 'gnus-topic-prev) (gnus-topic-prev))
+            (t (setq this-command 'up-line) (up-line)))
+    (command-execute 'previous-line)
+    (if (eq last-command 'down-line-rev) (before-last-command)))
   (setq last-command-keys (this-command-keys)))
 
 (defun down-line-rev ()
   "Down line for transient use. Reverse."
   (interactive)
-  (if (equal before-last-command 'forward-char)
-      (progn (setq this-command 'forw-char) (forw-char))
-    (if (equal before-last-command this-command)
-        (cond ((eq major-mode 'ibuffer-mode)
-               (setq this-command 'ibuffer-forward-filter-group)
-               (ibuffer-forward-filter-group))
-              ((eq major-mode 'gnus-group-mode)
-               (setq this-command 'gnus-topic-next) (gnus-topic-next))
-              (t (setq this-command 'down-line) (down-line)))
-      (command-execute 'next-line)
-      (if (and (eq major-mode 'gnus-summary-mode)
-               (> (line-number-at-pos) 2))
-          (command-execute 'next-line))
-      (if (eq last-command 'up-line-rev) (before-last-command))))
+  (if (equal before-last-command this-command)
+      (cond ((eq major-mode 'ibuffer-mode)
+             (setq this-command 'ibuffer-forward-filter-group)
+             (ibuffer-forward-filter-group))
+            ((eq major-mode 'gnus-group-mode)
+             (setq this-command 'gnus-topic-next) (gnus-topic-next))
+            (t (setq this-command 'down-line) (down-line)))
+    (command-execute 'next-line)
+    (if (and (eq major-mode 'gnus-summary-mode)
+             (> (line-number-at-pos) 2))
+        (command-execute 'next-line))
+    (if (eq last-command 'up-line-rev) (before-last-command)))
   (setq last-command-keys (this-command-keys)))
 
 (defun beginning-of-visual-line-once (&rest _)
@@ -137,10 +133,12 @@
               (eq major-mode 'dired-mode))
     (beginning-of-visual-line)))
 
-(advice-add 'up-line   :before 'up-line-wrap)
-(advice-add 'down-line :around 'down-line-wrap)
-(advice-add 'up-line   :after 'beginning-of-visual-line-once)
-(advice-add 'down-line :after 'beginning-of-visual-line-once)
+(advice-add 'up-line       :before 'up-line-wrap)
+(advice-add 'down-line     :around 'down-line-wrap)
+(advice-add 'up-line       :after 'beginning-of-visual-line-once)
+(advice-add 'down-line     :after 'beginning-of-visual-line-once)
+(advice-add 'up-line-rev   :after 'beginning-of-visual-line-once)
+(advice-add 'down-line-rev :after 'beginning-of-visual-line-once)
 
 (defun goto-point-max (&rest _)
   "Go to point max if not there."
@@ -453,14 +451,30 @@ and `right-brackets'."
     (command-execute 'backward-word)
     (if (eq last-command 'forw-word) (before-last-command))))
 
+(defun back-word-repeat ()
+  "Backward word for leader repeat."
+  (interactive)
+  (if (equal before-last-command this-command)
+      (progn (backward-word) (setq this-command 'dummy) (command-execute 'dummy))
+    (command-execute 'backward-word)
+    (if (eq last-command 'forw-word-repeat) (before-last-command))))
+
 (defun forw-word ()
   "Forward word."
   (interactive)
-    (if (member (this-command-keys) (list "w" [1097])) (push-mark (point) t)) ; virtual leader
+  (if (member (this-command-keys) (list "w" [1097])) (push-mark (point) t)) ; virtual leader
   (if (equal before-last-command this-command)
       (progn (forward-word) (setq this-command 'dummy) (command-execute 'dummy))
     (command-execute 'forward-word)
     (if (eq last-command 'back-word) (before-last-command))))
+
+(defun forw-word-repeat ()
+  "Forward word for leader repeat."
+  (interactive)
+  (if (equal before-last-command this-command)
+      (progn (forward-word) (setq this-command 'dummy) (command-execute 'dummy))
+    (command-execute 'forward-word)
+    (if (eq last-command 'back-word-repeat) (before-last-command))))
 
 (defun back-char ()
   "Backward char."
@@ -519,24 +533,14 @@ and `right-brackets'."
 ;; Editing commands
 
 (defun del-word ()
-  "If next symbol not part of a word, delete the symbol. Otherwise kill
-characters forward until encountering the end of the word."
+  "Kill characters forward until encountering the end of the word."
   (interactive)
-  (if buffer-read-only
-      (setq this-command 'ignore)
-    (if (looking-at "[[:blank:][:alpha:][:digit:]]+")
-        (kill-word 1)
-      (kill-region (point) (progn (forward-char 1) (point))))))
+  (if buffer-read-only (setq this-command 'ignore) (kill-word 1)))
 
 (defun backward-del-word ()
-  "If prev symbol not part of a word, delete the symbol. Otherwise kill
-characters backward until encountering the end of the word."
+  "Kill characters backward until encountering the end of the word."
   (interactive)
-  (if buffer-read-only
-      (setq this-command 'ignore)
-    (if (looking-back "[[:blank:][:alpha:][:digit:]]+" 1)
-        (backward-kill-word 1)
-      (kill-region (point) (progn (backward-char 1) (point))))))
+  (if buffer-read-only (setq this-command 'ignore) (backward-kill-word 1)))
 
 (defun copy-text-block ()
   "Copy text block to register 1."
@@ -710,6 +714,8 @@ If `universal-argument' is called first, do not delete inner text."
           (if (looking-back "\\s)" 1)
               (kill-region (point) (progn (backward-char 1) (point)))
             (kill-region (point) (progn (forward-char 1) (point)))))))))
+
+(defun del-forw () "Delete char forward." (interactive) (delete-char 1))
 
 (defun change-bracket-pairs (FromChars ToChars)
   "Change bracket pairs to another type or none.
@@ -1303,7 +1309,7 @@ If a buffer is not file and not dired, copy value of `default-directory'."
          (file-name-directory xfpath)
        (let* ((xx (concat xfpath ":" (format-mode-line "%l")))
               (x (replace-regexp-in-string (getenv "HOME") "~" xx)))
-         (message "%s" x) x)))))
+         (message "Copy %s" x) x)))))
 
 (defun cut-text-block ()
   "Cut text block plus blank lines or selection."
@@ -1514,8 +1520,7 @@ LBracket and RBracket are strings. WrapMethod must be either `line' or
   (if buffer-read-only (setq this-command 'ignore) (insert " ")))
 
 (defun insert-formfeed ()
-  "Insert a form feed char (codepoint 12)."
-  (interactive) (insert "\n\u000c\n"))
+  "Insert a form feed char (codepoint 12)." (interactive) (insert "\n\u000c\n"))
 
 (defun insert-column-a-z ()
   "Insert letters A to Z vertically, similar to `rectangle-number-lines'.
@@ -1788,6 +1793,32 @@ command, so that next buffer shown is a user buffer."
                  (setq i (1+ i))
                  (when (= i 99)
                    (message "%s" "No next vterm buffer") (switch-to-buffer xbuf)))
+        (setq i 100)))))
+
+(defun prev-eshell-buffer ()
+  "Switch to the previous eshell buffer."
+  (interactive)
+  (let ((i 0) (xbuf (current-buffer)))
+    (previous-buffer)
+    (while (< i 99)
+      (if (not (eq major-mode 'eshell-mode))
+          (progn (previous-buffer)
+                 (setq i (1+ i))
+                 (when (= i 99)
+                   (message "%s" "No prev eww buffer") (switch-to-buffer xbuf)))
+        (setq i 100)))))
+
+(defun next-eshell-buffer ()
+  "Switch to the next eshell buffer."
+  (interactive)
+  (let ((i 0) (xbuf (current-buffer)))
+    (next-buffer)
+    (while (< i 99)
+      (if (not (eq major-mode 'eshell-mode))
+          (progn (next-buffer)
+                 (setq i (1+ i))
+                 (when (= i 99)
+                   (message "%s" "No next eshell buffer") (switch-to-buffer xbuf)))
         (setq i 100)))))
 
 (defun alt-buf ()
@@ -2292,9 +2323,14 @@ before actually send the cd command."
 (defun eshell-split ()
   "Split eshell window below."
   (interactive)
-  (if (one-window-p) (split-window-below))
-  (enlarge-window-split) (other-window 1)
-  (let ((inhibit-messages t) (message-log-max nil)) (command-execute 'eshell)))
+  (if (eq major-mode 'eshell-mode)
+      (let ((current-prefix-arg '-) (inhibit-messages t) (message-log-max nil))
+        (call-interactively 'eshell))
+    (if (or (> (window-total-height) 30)
+            (one-window-p))
+        (progn (split-window-below) (enlarge-window-split)))
+    (other-window 1)
+    (let ((inhibit-messages t) (message-log-max nil)) (command-execute 'eshell))))
 
 (defun kmacro-helper ()
   "Keyboard macro helper. Ad hoc redefine."
@@ -2321,8 +2357,10 @@ before actually send the cd command."
   (interactive)
   (if (eq major-mode 'vterm-mode)
       (let ((current-prefix-arg '-)) (call-interactively 'vterm))
-    (split-window-below)
-    (enlarge-window-split) (other-window 1)
+    (if (or (> (window-total-height) 30)
+            (one-window-p))
+        (progn (split-window-below) (enlarge-window-split)))
+    (other-window 1)
     (command-execute 'vterm)))
 
 (defun vterm-up ()
@@ -2513,7 +2551,7 @@ This checks in turn:
      ((setq xsym (variable-at-point))
       (describe-variable xsym)))))
 
-(defvar video-extensions '("mkv" "mp4" "avi" "mov" "ts" "mts" "webm")
+(defvar video-extensions '("mkv" "mp4" "avi" "mov" "ts" "mts" "webm" "vob")
   "Open these video file extensions with `open-in-external-app'.")
 
 (defvar external-extensions `("mp3" "m4a" "flac" "torrent" "app")
@@ -2586,9 +2624,7 @@ Use as around advice e.g. for mouse left click after double click."
   "Mouse right click. Select word or if eww buffer then lookup translation."
   (interactive "e")
   (unless (region-active-p) (mouse-set-point e))
-  (if (eq major-mode 'eww-mode)
-      (translate)
-    (select-word)))
+  (if (eq major-mode 'eww-mode) (translate) (select-word)))
 
 (defun calendar-split () "Split calendar." (interactive) (calendar) (other-window 1))
 
