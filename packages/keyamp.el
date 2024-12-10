@@ -5,41 +5,22 @@
 ;;          __   _____   __
 ;;         |__| |_____| |__|
 ;;
-;; DEL SPC RET keys provide IDE workflow using ordinary on-screen keyboard.
-;;
+;; DEL SPC RET keys provide IDE workflow for ordinary on-screen keyboard.
 ;; This package is part of input model.
-;; Follow the link: https://github.com/xEgorka/keyamp
 
 ;;; Commentary:
 
-;; Try keyamp with qwerty layout:
+;; Keyamp provides 3 modes: insert, command and repeat. Command mode
+;; based on persistent transient keymap. Repeat mode adds transient
+;; remaps on top of command mode for easy repeat of command chains
+;; during screen positioning, cursor move and editing. Mode line front
+;; space color indicates active transient keymap. Repeat mode turned
+;; on/off automatically either by advice or with timer.
+
+;; Try Keyboard Amplifier out with qwerty layout:
 ;; (setq keyamp-current-layout "qwerty")
 ;; (require 'keyamp)
 ;; (keyamp)
-
-;; Keyamp provides 3 modes: insert, command and repeat.
-;; Command mode based on persistent transient keymap.
-
-;; Repeat mode pushes transient remaps to keymap stack on top of
-;; command mode for easy repeat of command chains during screen
-;; positioning, cursor move and editing. Cursor shape indicates active
-;; transient keymap. Repeat mode turned on/off automatically either by
-;; advice or with timer.
-
-;; DEL and SPC are two leader keys, RET activates insert mode, ESC
-;; does command one. Holding down each of the keys posts control
-;; sequence depending on mode. Keyboard has symmetric layout: left
-;; side for editing and NO while right side for moving and YES. Any
-;; Emacs major or minor mode could be remapped to fit the model, see
-;; the package.
-
-;; Karabiner integration allows to post control or leader sequences by
-;; holding down a key. No need to have any modifier or arrows keys at
-;; all. Holding down posts leader layer. The same symmetric layout
-;; might be configured on ANSI keyboard, ergonomic split and virtual
-;; keyboards. See the link for layouts and karabiner config.
-
-;; This package is a fork of xah-fly-keys.
 
 ;;; Code:
 
@@ -133,10 +114,11 @@ If Direct-p is t, do not remap key to current keyboard layout."
           (lambda (xcmd)
             `(advice-add ,(list 'quote xcmd) (if ,How ,How :after)
                          (lambda (&rest _) "auto repeat"
-                           (when (or (eq real-this-command 'repeat)
-                                     (eq this-command 'kill-region) ; exception
-                                     (eq this-command 'undo)        ; exception
-                                     (eq this-command ,(list 'quote xcmd)))
+                           (when (and (not (or defining-kbd-macro executing-kbd-macro))
+                                      (or (eq real-this-command 'repeat)
+                                          (eq this-command 'kill-region) ; exception
+                                          (eq this-command 'undo) ; exception
+                                          (eq this-command ,(list 'quote xcmd))))
                              (if (and ,CommandMode keyamp-insert-p)
                                  (keyamp-command))
                              (keyamp-repeat-init ,xkeymapName)
@@ -246,7 +228,8 @@ already, then use existing remap instead. Execute resulting command."
 
 (defun keyamp-double-press (Cmd)
   "Execute COMMAND after second command call during `keyamp-double-press-timeout'."
-  (if (and (timerp keyamp-double-press-timer) (eq this-command last-command))
+  (if (and (timerp keyamp-double-press-timer) (eq this-command last-command)
+           (not (or defining-kbd-macro executing-kbd-macro)))
       (keyamp-command-execute Cmd))
   (setq keyamp-double-press-timer
         (run-with-timer (/ keyamp-double-press-timeout 1000.0) nil
@@ -654,18 +637,18 @@ is enabled.")
 
     ("y"  . search-string)
     ("u"  . backward-punct)
-    ("i"  . page-up-half)
+    ("i"  . beg-of-block)
     ("o"  . forward-punct)
     ("p"  . mark-defun)
     ("["  . open-last-closed)
     ("]"  . rename-visited-file)
     ("\\" . bookmark-delete)
 
-    ("h" . beg-of-block)
+    ("h" . page-up-half)
     ("j" . isearch-cur-word-backward)
-    ("k" . page-dn-half)
+    ("k" . end-of-block)
     ("l" . isearch-cur-word-forward)
-    (";" . end-of-block)
+    (";" . page-dn-half)
     ("'" . toggle-frame-maximized)
 
     ("n" . toggle-case-fold-search)
@@ -745,8 +728,9 @@ is enabled.")
   (advice-add 'mouse-set-point   :before 'scroll-one-pixel)
   (advice-add 'mouse-set-point   :after  'keyamp-command-if-insert)
   (advice-add 'mouse-drag-region :before 'copy-selection)
-  (advice-add 'mac-mwheel-scroll :before 'keyamp-command-if-insert)
-  (advice-add 'mac-mwheel-scroll :before 'deactivate-mark-if-active))
+  ;; (advice-add 'mac-mwheel-scroll :before 'keyamp-command-if-insert)
+  ;; (advice-add 'mac-mwheel-scroll :before 'deactivate-mark-if-active)
+  )
 
 (advice-add 'keyamp-insert :before 'delete-before)
 (advice-add 'keyamp-insert :around 'lookup-around)
@@ -1445,21 +1429,11 @@ is enabled.")
      reformat-lines              reformat-to-sentence-lines
      run-current-file            save-buffer
      sort-lines-key-value        space-to-newline
-     title-case-region-or-line   toggle-prev-letter-case
-     ;; yank-pop                    yank
-     )
+     title-case-region-or-line   toggle-prev-letter-case)
    nil nil nil keyamp-blink-blink))
 
 (with-sparse-keymap-x ; dummy indication idle
- (keyamp--set-map x
-   '(ignore              monitor
-     dummy               mouse-3
-     mac-mwheel-scroll   mouse-set-point
-     previous-line       next-line
-     backward-bracket    forward-bracket
-     goto-match-br
-     dired-next-line     dired-previous-line)
-   nil nil nil keyamp-blink-blink-half))
+ (keyamp--set-map x '(ignore) nil nil nil keyamp-blink-blink-half))
 
 (with-sparse-keymap-x ; easy undo with DEL
  (keyamp--map-leader x '(undo . nil))
@@ -2412,8 +2386,9 @@ is enabled.")
     '((describe-foo-at-point . xref-find-definitions)
       (describe-variable     . xref-find-references)
       (mark-defun            . go-mark-defun)
-      (eval-defun            . flymake-show-project-diagnostics)
-      (eval-region-or-sexp   . server)
+      (stow                  . flymake-show-project-diagnostics)
+      (eval-region-or-sexp   . make-run)
+      (eval-defun            . make-test)
       (reformat-lines        . eglot-reconnect))))
 
 (with-sparse-keymap-x
@@ -2807,12 +2782,8 @@ is enabled.")
                  monitor                                 t
                  activate-region                         t
                  dummy                                   t
-                 mac-mwheel-scroll                       t
-                 mouse-set-point                         t
                  mouse-3                                 t
                  mouse-drag-region                       t
-                 previous-line                           t
-                 next-line                               t
                  backward-bracket                        t
                  forward-bracket                         t
                  goto-match-br                           t
@@ -2936,7 +2907,8 @@ insert cancel the timer.")
   (if keyamp--deactivate-command-fun (funcall keyamp--deactivate-command-fun))
   (setq keyamp--deactivate-command-fun
         (set-transient-map keyamp-command-map (lambda () t)))
-  (keyamp-indicate-command))
+  (keyamp-indicate-command)
+  (if keyamp-led (keyamp-led-on)))
 
 (defvar keyamp-qwerty-to-current-layout-state nil "Save state.")
 
@@ -3240,7 +3212,9 @@ after a delay even if there more read commands follow."
           ((gethash this-command keyamp-idle-commands-hash)
            (keyamp-indicate-idle))
           ((use-region-p) (keyamp-indicate-idle))
-          (t (keyamp-indicate-command)))))
+          (t (keyamp-indicate-command)))
+    (if (or (eq this-command 'kmacro-record) defining-kbd-macro)
+        (keyamp-blink-modify))))
 
 (defvar keyamp-indicate-modify-timer nil "Indicate modify timer.")
 
@@ -3317,7 +3291,7 @@ Cancel after `keyamp-blink-blink'. Double blink."
 
 (defun keyamp-blink-stop ()
   "Stop blink."
-  (if keyamp-led (keyamp-blink-led-stop))
+  (if (and keyamp-led-blink keyamp-led) (keyamp-blink-led-stop))
   (remove-hook 'post-command-hook 'keyamp-blink-stop)
   (if (timerp keyamp-blink-off-timer) (cancel-timer keyamp-blink-off-timer))
   (if (timerp keyamp-blink-on-timer) (cancel-timer keyamp-blink-on-timer)))
@@ -3325,7 +3299,7 @@ Cancel after `keyamp-blink-blink'. Double blink."
 (defun keyamp-blink-start (Color1 Color2)
   "Start blink."
   (keyamp-blink-stop)
-  (if keyamp-led (keyamp-blink-led-start))
+  (if (and keyamp-led-blink keyamp-led) (keyamp-blink-led-start))
   (add-hook 'post-command-hook 'keyamp-blink-stop)
   (setq keyamp-blink-on-timer
         (run-with-timer keyamp-blink-shift keyamp-blink 'keyamp-blink Color1 Color2)))
@@ -3364,10 +3338,11 @@ Cancel after `keyamp-blink-blink'. Double blink."
         (run-with-timer keyamp-blink-shift keyamp-blink 'keyamp-blink-led)))
 
 (defvar keyamp-led nil "Keyboard led control.")
+(defvar keyamp-led-blink nil "If true then blink led along with mode indicator.")
 
 (defun keyamp-led-init ()
   "Init led control."
-  (if (executable-find "setleds") (setq keyamp-led t)))
+  (when (executable-find "setleds") (setq keyamp-led t) (keyamp-led-on)))
 
 (defvar keyamp-idle-timer nil "Idle timer.")
 
