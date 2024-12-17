@@ -77,7 +77,8 @@
   (interactive)
   (cond ((equal before-last-command 'forw-word)
          (setq this-command 'forw-word-repeat) (forw-word-repeat))
-        ((equal before-last-command 'previous-line) ; before select-word
+        ((or (equal before-last-command 'previous-line)
+             (equal before-last-command 'dired-previous-line)) ; before select-word
          (setq this-command 'up-line-rev) (up-line-rev))
         ((equal before-last-command 'forward-char)
          (setq this-command 'forw-char) (forw-char))
@@ -255,9 +256,11 @@
 Call this repeatedly will cycle all positions in `mark-ring'.
 Save point to register 6 before repeated call."
   (interactive)
-  (unless (eq this-command last-command) (point-to-register ?6))
-  (let ((xp (point)))
-    (set-mark-command t) (if (eql xp (point)) (set-mark-command t))))
+  (if (region-active-p)
+      (exchange-point-and-mark)
+    (unless (eq this-command last-command) (point-to-register ?6))
+    (let ((xp (point)))
+      (set-mark-command t) (if (eql xp (point)) (set-mark-command t)))))
 
 (defun jump-6 () "Jump to register 6."
        (interactive) (if (get-register ?6) (jump-to-register ?6)))
@@ -2134,6 +2137,20 @@ If the current buffer is not associated with a file nor dired, nothing's done."
       (progn (make-backup) (when (buffer-modified-p) (save-buffer)))
     (make-backup)))
 
+(defun make-backup-and-copy ()
+  "Make backup and copy file path."
+  (interactive) (make-backup-and-save) (copy-file-path))
+
+(defun save-buffer-silent ()
+  "Save buffer without message."
+  (let ((inhibit-message t))
+    (unless (minibufferp) (save-buffer))))
+
+(defun save-buffer-silent-defer ()
+  "Defer `save-buffer-silent'."
+  (unless (eq major-mode 'emacs-lisp-mode)
+    (run-with-timer 0.5 nil 'save-buffer-silent)))
+
 
 
 (defun cur-word ()
@@ -2228,7 +2245,7 @@ When called in Emacs Lisp, if Fname is given, open that."
                      video-extensions))
         (mapc (lambda (xfpath) (movie xfpath)) xfileList))
        ((or (and (string-equal major-mode 'dired-mode)
-                 (string-match "Sound" (dired-get-filename)))
+                 (string-match (concat (getenv "HOME") "/Sound")  (dired-get-filename)))
             (string-equal "mp3"
                           (file-name-extension
                            (downcase (file-truename (nth 0 xfileList))))))
@@ -2551,7 +2568,7 @@ This checks in turn:
      ((setq xsym (variable-at-point))
       (describe-variable xsym)))))
 
-(defvar video-extensions '("mkv" "mp4" "avi" "mov" "ts" "mts" "webm" "vob")
+(defvar video-extensions '("mkv" "mp4" "avi" "mov" "ts" "mts" "webm" "vob" "aiff")
   "Open these video file extensions with `open-in-external-app'.")
 
 (defvar external-extensions `("mp3" "m4a" "flac" "torrent" "app")
