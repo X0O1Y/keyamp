@@ -106,7 +106,8 @@ If Direct-p is t, do not remap key to current keyboard layout."
   "Map `set-transient-map' using `advice-add' over a list CMDLIST.
 - Advice default HOW :after might be changed by specific HOW;
 - Activate COMMANDMODE or INSERTMODE mode optionally;
-- Deactivate repeat mode after idle for TIMEOUT seconds."
+- Deactivate repeat mode after idle for TIMEOUT seconds;
+- Ignore advice if defining or executing kbd macro."
   (declare (indent defun))
   (let ((xkeymapName (make-symbol "keymap-name")))
     `(let ((,xkeymapName ,KeymapName))
@@ -820,7 +821,6 @@ is enabled.")
 
 ;; Repeat mode - screen commands
 
-(defvar keyamp-delay-0.5 0.5 "Delay 0.5 second.")
 (defvar keyamp-delay-1 1 "Delay 1 second.")
 (defvar keyamp-delay-2 2 "Delay 2 seconds.")
 (defvar keyamp-delay-3 3 "Delay 3 seconds.")
@@ -1087,7 +1087,7 @@ is enabled.")
    gnus-topic-prev               gnus-topic-next
    page-up-half                  page-dn-half
    prev-buf                      next-buf
-   back-word                     forw-word
+   ;; back-word                     forw-word
    back-char                     forw-char
    dired-do-delete               deactivate-region)
 :before 'return-before)
@@ -1139,12 +1139,12 @@ is enabled.")
  (keyamp--map x '(("ш" . keyamp-lleader-i-map) ("л" . keyamp-lleader-k-map)))
  (keyamp--map keyamp-lleader-i-map '(("i" . make-backup-and-copy)))
  (keyamp--map keyamp-lleader-k-map '(("k" . make-backup-and-save)))
- (keyamp--remap x '((back-word . select-word) (forw-word . select-quote)))
+ (keyamp--remap x '((back-word . select-block) (forw-word . select-quote)))
  (advice-add 'back-word :after (lambda () "virtual left leader transient" (keyamp-leader-init x))))
 
 (with-sparse-keymap-x
  (keyamp--remap x
-   '((back-word     . select-line) (forw-word . select-block)
+   '((back-word     . select-line) (forw-word . select-word)
      (previous-line . end-of-buf)  (next-line . end-of-block)
      (backward-char . isearch-cur-word-forward)))
  (advice-add 'forw-word :after (lambda () "virtual right leader transient" (keyamp-leader-init x))))
@@ -1165,32 +1165,19 @@ is enabled.")
  (keyamp--map-tab x help-command)
  (keyamp--map x '(("C-r" . open-in-external-app)))
  (keyamp--remap x
-   '((insert-space-before . ignore)
-     (backward-del-word   . ignore)
-     (undo                . delete-window)
-     (del-word            . ignore)
-     (cut-text-block      . ignore)
+   '((undo                . delete-window)
      (shrink-whitespaces  . screen-idle)
-     (open-line           . ignore)
+     (open-line           . prev-buf)
      (del-back            . del-forw)
-     (newline             . ignore)
+     (newline             . next-proj-buf)
      (activate-region     . rectangle)
-     (toggle-comment      . ignore)
-     (cut-line            . ignore)
-     (copy-line           . ignore)
-     (paste-or-prev       . next-proj-buf)
      (toggle-case         . downloads)
-
-     (occur-cur-word      . ignore)
      (other-win           . jump-7)
      (isearch-forward     . jump-8)
      (alternate-frame     . screen-idle)
      (kmacro-helper       . toggle-pin-window)
-
      (keyamp-insert       . toggle-ibuffer)
-     (keyamp-escape       . deactivate-region)
-     (point-to-register   . ignore)
-     (proced-defer        . open-last-closed)))
+     (keyamp-escape       . deactivate-region)))
  (advice-add 'activate-region :after
              (lambda () "virtual leader G transient"
                (if (eq (mark) (point)) (set-transient-map x)))))
@@ -1202,10 +1189,9 @@ is enabled.")
 (advice-add-macro
  '(tasks                 open-in-external-app
    delete-window         screen-idle
-   del-forw              open-last-closed
-   next-proj-buf         downloads
+   del-forw              next-proj-buf
    jump-7                jump-8
-   screen-idle
+   screen-idle           downloads
    toggle-pin-window     toggle-ibuffer
 
    ;; help-command prefix
@@ -1432,7 +1418,7 @@ is enabled.")
        (toggle-comment      . keyamp-insert-z)
        (cut-line            . keyamp-insert-x)
        (copy-line           . keyamp-insert-c)
-       (paste-or-prev       . paste-or-prev)
+       (paste-or-prev       . keyamp-insert-v)
        (toggle-case         . keyamp-insert-b)
        (isearch-forward     . keyamp-insert-n)
        (backward-bracket    . keyamp-insert-m)
@@ -1524,7 +1510,8 @@ is enabled.")
 
 (with-eval-after-load 'dired
   (keyamp--map dired-mode-map
-    '(("<mouse-1>" . dired-find-file) ("<mouse-2>" . dired-find-file)))
+    '(("<double-mouse-1>" . dired-find-file)
+      ("<mouse-1>" . mouse-set-point) ("<mouse-2>" . mouse-set-point)))
   (keyamp--remap dired-mode-map
     '((keyamp-insert       . dired-find-file)
       (backward-bracket    . dired-jump)
@@ -1726,10 +1713,6 @@ is enabled.")
    (keyamp--map-leader x '(widget-backward . widget-forward))
    (keyamp--set-map x '(widget-backward widget-forward))))
 
-(with-sparse-keymap-x
- (keyamp--remap x '((jump-to-register . stopwatch-lap)))
- (keyamp--set-map x '(stopwatch stopwatch-lap)))
-
 (with-eval-after-load 'org
   (keyamp--map-tab org-mode-map org-cycle)
   (keyamp--remap org-mode-map
@@ -1766,9 +1749,12 @@ is enabled.")
       (append-to-r1        . recentf-open-files)
       (kmacro-play         . save-close-buf)
       (kmacro-record       . org-agenda-redo)
-      (point-to-register   . org-timer-notify)
-      (proced-defer        . list-timers)
-      (jump-to-register    . stopwatch))))
+      (pass                . stopwatch-lap)
+      (jump-to-register    . stopwatch)
+      (point-to-register   . timer)
+      (insert-register     . timer-stop)
+      (proced-defer        . timer-display)
+      (eshell-split        . alarm))))
 
 (defvar screen-idle-keymap (make-sparse-keymap))
 (keyamp--map-leader screen-idle-keymap '(up-line . down-line))
@@ -2374,7 +2360,7 @@ is enabled.")
   (keyamp--remap calendar-mode-map
     '((beg-of-line . calendar-scroll-right) (end-of-lyne   . calendar-scroll-left)
       (del-back    . calendar-goto-today)   (keyamp-insert . org-calendar-select)
-      (undo        . del-win)))
+      (undo        . delete-window)))
   (with-sparse-keymap-x
    (keyamp--map-leader x '(calendar-scroll-right . calendar-scroll-left))
    (keyamp--map-tab x calendar-other-month)
@@ -2732,7 +2718,7 @@ is enabled.")
   '(isearch-forw isearch-cur-word-forward isearch-back isearch-cur-word-backward)
   "List of excluded commands from indicate insert mode in isearch.")
 
-(defconst keyamp-blink-modify-commands '(kmacro-record stopwatch stopwatch-lap)
+(defconst keyamp-blink-modify-commands '(kmacro-record stopwatch)
   "List of commands to `keyamp-blink-modify' after.")
 
 
@@ -2844,14 +2830,13 @@ insert cancel the timer.")
   "Set command mode."
   (keyamp-repeat-deactivate)
   (when keyamp-insert-p
-    (setq keyamp-insert-p nil) (point-to-register ?7) (push-mark (point) t))
+    (setq keyamp-insert-p nil)
+    (when (buffer-file-name) (point-to-register ?7) (push-mark (point) t)))
   (if keyamp--deactivate-command-fun (funcall keyamp--deactivate-command-fun))
   (setq keyamp--deactivate-command-fun
         (set-transient-map keyamp-command-map (lambda () t)))
   (keyamp-indicate-command)
   (if keyamp-led (keyamp-led-on)))
-
-(defvar keyamp-qwerty-to-current-layout-state nil "Save state.")
 
 (defun keyamp-insert-init (&rest _)
   "Enter insert mode."
@@ -2985,7 +2970,13 @@ of quit minibuffer. Answer q to literal confirmation."
 (defun keyamp-insert-z ()         (interactive) (keyamp-input "z"))
 (defun keyamp-insert-x ()         (interactive) (keyamp-input "x"))
 (defun keyamp-insert-c ()         (interactive) (keyamp-input "c"))
-(defun keyamp-insert-v ()         (interactive) (keyamp-input "v"))
+(defun keyamp-insert-v ()
+  (interactive)
+  (if (or (string-match "M-x" (minibuffer-prompt))
+          (string-match "Jump to bookmark" (minibuffer-prompt))
+          (string-match "Switch to buffer" (minibuffer-prompt)))
+      (keyamp-input "v")
+    (keyamp-command-execute 'paste-or-prev)))
 (defun keyamp-insert-b ()         (interactive) (keyamp-input "b"))
 (defun keyamp-insert-n ()         (interactive) (keyamp-input "n"))
 (defun keyamp-insert-N ()         (interactive) (keyamp-input "N"))
@@ -3174,8 +3165,8 @@ after a delay even if there more read commands follow."
 
 (defun keyamp-blink-modify ()
   "Blink modify."
-  (let* ((xInd mode-line-front-space) (xCur (frame-parameter nil 'cursor-type))
-         (xCol (face-attribute 'mode-line-front-space-face :foreground)))
+  (let ((xInd mode-line-front-space) (xCur (frame-parameter nil 'cursor-type))
+        (xCol (face-attribute 'mode-line-front-space-face :foreground)))
     (unless (eq xCol keyamp-modify-color)
       (keyamp-indicate keyamp-modify-indicator xCur keyamp-modify-color)
       (if (timerp keyamp-indicate-modify-timer) (cancel-timer keyamp-indicate-modify-timer))
@@ -3192,8 +3183,8 @@ after a delay even if there more read commands follow."
 
 (defun keyamp-blink-io ()
   "Blink IO."
-  (let* ((xInd mode-line-front-space) (xCur (frame-parameter nil 'cursor-type))
-         (xCol (face-attribute 'mode-line-front-space-face :foreground)))
+  (let ((xInd mode-line-front-space) (xCur (frame-parameter nil 'cursor-type))
+        (xCol (face-attribute 'mode-line-front-space-face :foreground)))
     (unless (eq xCol keyamp-io-color)
       (keyamp-indicate keyamp-io-indicator xCur keyamp-io-color)
       (if (timerp keyamp-indicate-io-timer) (cancel-timer keyamp-indicate-io-timer))
@@ -3214,7 +3205,7 @@ Cancel after `keyamp-blink-blink'. Double blink."
 (add-hook 'after-save-hook 'after-save-hook-indicate-io)
 
 (defun keyamp-indicate-prefix ()
-  "Indicate prefix. SPC DEL backspace C-h."
+  "Indicate prefix: SPC DEL backspace C-h or C-u."
   (if (or (member (this-single-command-keys) '([32] [127] [backspace] [8]))
           prefix-arg)
       (keyamp-indicate-idle)))
@@ -3314,7 +3305,8 @@ Cancel after `keyamp-blink-blink'. Double blink."
   (cond ((or keyamp-repeat-p keyamp-insert-p) (keyamp-command))
         ((region-active-p)                    (deactivate-mark))
         ((minibufferp)                        (abort-recursive-edit))
-        ((< 0 (recursion-depth))              (exit-recursive-edit))))
+        ((< 0 (recursion-depth))              (exit-recursive-edit))
+        (t                                    (keyamp-command))))
 
 (defun keyamp-features ()
   "Second priority features."

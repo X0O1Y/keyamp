@@ -10,61 +10,24 @@
                 },
                 "rules": [
                     {
-                        "description": "f13",
+                        "description": "f7",
                         "manipulators": [
                             {
-                                "conditions": [
-                                    {
-                                        "file_paths": ["/Google Chrome"],
-                                        "type": "frontmost_application_unless"
-                                    }
-                                ],
                                 "from": {
-                                    "key_code": "f13",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [{ "shell_command": "open -a 'Google Chrome'" }],
-                                "to_if_held_down": [
-                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
-                                    {
-                                        "key_code": "tab",
-                                        "modifiers": ["command"]
-                                    },
-                                    {
-                                        "halt": true,
-                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": ["/Google Chrome"],
-                                        "type": "frontmost_application_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "f13",
+                                    "key_code": "f7",
                                     "modifiers": { "optional": ["any"] }
                                 },
                                 "to_after_key_up": [
-                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
-                                    {
-                                        "key_code": "h",
-                                        "modifiers": ["command"]
-                                    },
-                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)' && open -a 'Emacs'" }
-                                ],
-                                "to_if_held_down": [
-                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
-                                    {
-                                        "key_code": "tab",
-                                        "modifiers": ["command"]
-                                    },
                                     {
                                         "halt": true,
-                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
+                                        "shell_command": "~/.local/bin/pbcopy"
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "repeat": false,
+                                        "shell_command": "open -a SwitchBetweenAudioDevices.app"
                                     }
                                 ],
                                 "type": "basic"
@@ -72,100 +35,42 @@
                         ]
                     },
                     {
-                        "description": "f6",
+                        "description": "f9",
                         "manipulators": [
                             {
-                                "conditions": [
-                                    {
-                                        "file_paths": ["/Safari"],
-                                        "type": "frontmost_application_if"
-                                    }
-                                ],
                                 "from": {
-                                    "key_code": "f6",
+                                    "key_code": "f9",
                                     "modifiers": { "optional": ["any"] }
                                 },
-                                "to": [
-                                    {
-                                        "halt": true,
-                                        "key_code": "tab",
-                                        "modifiers": ["command"],
-                                        "repeat": false
-                                    }
+                                "to_after_key_up": [
+                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(let ((message-log-max nil)) (message \"Play next\"))' && /Applications/emacsclient --no-wait --eval '(play-next)'" },
+                                    { "key_code": "fastforward" }
                                 ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": ["/Docker"],
-                                        "type": "frontmost_application_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "f6",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [
-                                    {
-                                        "halt": true,
-                                        "key_code": "tab",
-                                        "modifiers": ["command"],
-                                        "repeat": false
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "from": {
-                                    "key_code": "f6",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [{ "shell_command": "open -a Safari" }],
                                 "to_if_held_down": [
                                     {
                                         "halt": true,
-                                        "repeat": false,
-                                        "shell_command": "open -a 'Docker Desktop'"
-                                    }
+                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(let ((message-log-max nil)) (message \"Play prev\"))' && /Applications/emacsclient --no-wait --eval '(play-prev)'"
+                                    },
+                                    { "key_code": "rewind" }
                                 ],
                                 "type": "basic"
                             }
                         ]
                     },
                     {
-                        "description": "f5",
+                        "description": "f8",
                         "manipulators": [
                             {
-                                "conditions": [
-                                    {
-                                        "file_paths": ["/Preview"],
-                                        "type": "frontmost_application_if"
-                                    }
-                                ],
                                 "from": {
-                                    "key_code": "f5",
+                                    "key_code": "f8",
                                     "modifiers": { "optional": ["any"] }
                                 },
-                                "to": [
-                                    {
-                                        "key_code": "h",
-                                        "modifiers": ["command"]
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "from": {
-                                    "key_code": "f5",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [{ "shell_command": "open -a Preview" }],
+                                "to_after_key_up": [{ "shell_command": "/Applications/emacsclient --no-wait --eval '(play-pause)'" }],
                                 "to_if_held_down": [
+                                    { "key_code": "play_or_pause" },
                                     {
                                         "halt": true,
-                                        "repeat": false,
-                                        "shell_command": "open -a /opt/homebrew/bin/mpv"
+                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(let ((message-log-max nil)) (message \"Play online\"))' && sleep 0.5 && killall Music"
                                     }
                                 ],
                                 "type": "basic"
@@ -4902,24 +4807,38 @@
                         ]
                     },
                     {
-                        "description": "f7",
+                        "description": "f5",
                         "manipulators": [
                             {
-                                "from": {
-                                    "key_code": "f7",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [
+                                "conditions": [
                                     {
-                                        "halt": true,
-                                        "shell_command": "~/.pbcopy.sh"
+                                        "file_paths": ["/Preview"],
+                                        "type": "frontmost_application_if"
                                     }
                                 ],
+                                "from": {
+                                    "key_code": "f5",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "h",
+                                        "modifiers": ["command"]
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "f5",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [{ "shell_command": "open -a Preview" }],
                                 "to_if_held_down": [
                                     {
                                         "halt": true,
                                         "repeat": false,
-                                        "shell_command": "open -a SwitchBetweenAudioDevices.app"
+                                        "shell_command": "open -a /opt/homebrew/bin/mpv"
                                     }
                                 ],
                                 "type": "basic"
@@ -4927,43 +4846,62 @@
                         ]
                     },
                     {
-                        "description": "f8",
+                        "description": "f6",
                         "manipulators": [
                             {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Safari"],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
                                 "from": {
-                                    "key_code": "f8",
+                                    "key_code": "f6",
                                     "modifiers": { "optional": ["any"] }
                                 },
-                                "to_after_key_up": [{ "shell_command": "/Applications/emacsclient --no-wait --eval '(play-pause)'" }],
-                                "to_if_held_down": [
-                                    { "key_code": "play_or_pause" },
+                                "to": [
                                     {
                                         "halt": true,
-                                        "shell_command": "sleep 0.5 && killall Music"
+                                        "key_code": "tab",
+                                        "modifiers": ["command"],
+                                        "repeat": false
                                     }
                                 ],
                                 "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "f9",
-                        "manipulators": [
+                            },
                             {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Docker"],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
                                 "from": {
-                                    "key_code": "f9",
+                                    "key_code": "f6",
                                     "modifiers": { "optional": ["any"] }
                                 },
-                                "to_after_key_up": [
-                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(play-next)'" },
-                                    { "key_code": "fastforward" }
+                                "to": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "tab",
+                                        "modifiers": ["command"],
+                                        "repeat": false
+                                    }
                                 ],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "f6",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [{ "shell_command": "open -a Safari" }],
                                 "to_if_held_down": [
                                     {
                                         "halt": true,
-                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(play-prev)'"
-                                    },
-                                    { "key_code": "rewind" }
+                                        "repeat": false,
+                                        "shell_command": "open -a 'Docker Desktop'"
+                                    }
                                 ],
                                 "type": "basic"
                             }
@@ -5004,6 +4942,68 @@
                                     {
                                         "halt": true,
                                         "shell_command": "open -a Karabiner-EventViewer"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "f13",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Google Chrome"],
+                                        "type": "frontmost_application_unless"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f13",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [{ "shell_command": "open -a 'Google Chrome'" }],
+                                "to_if_held_down": [
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
+                                    {
+                                        "key_code": "tab",
+                                        "modifiers": ["command"]
+                                    },
+                                    {
+                                        "halt": true,
+                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Google Chrome"],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f13",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
+                                    {
+                                        "key_code": "h",
+                                        "modifiers": ["command"]
+                                    },
+                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)' && open -a 'Emacs'" }
+                                ],
+                                "to_if_held_down": [
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
+                                    {
+                                        "key_code": "tab",
+                                        "modifiers": ["command"]
+                                    },
+                                    {
+                                        "halt": true,
+                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
                                     }
                                 ],
                                 "type": "basic"

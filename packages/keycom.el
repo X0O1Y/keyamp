@@ -448,7 +448,11 @@ and `right-brackets'."
 (defun back-word ()
   "Backward word. Fast double direction switch breaks beat to char move."
   (interactive)
-  (if (member (this-command-keys) (list "l" [1075])) (push-mark (point) t)) ; virtual leader
+  (if (and (member (this-command-keys) (list "l" [1075]))
+           (not (or (eq last-command 'select-word)
+                    (eq last-command 'back-word)
+                    (eq last-command 'jump-mark))))
+      (push-mark (point) t)) ; virtual leader
   (if (equal before-last-command this-command)
       (progn (backward-word) (setq this-command 'dummy) (command-execute 'dummy))
     (command-execute 'backward-word)
@@ -465,7 +469,10 @@ and `right-brackets'."
 (defun forw-word ()
   "Forward word."
   (interactive)
-  (if (member (this-command-keys) (list "w" [1097])) (push-mark (point) t)) ; virtual leader
+  (if (and (member (this-command-keys) (list "w" [1097]))
+           (not (or (eq last-command 'select-word)
+                    (eq last-command 'forw-word))))
+      (push-mark (point) t)) ; virtual leader
   (if (equal before-last-command this-command)
       (progn (forward-word) (setq this-command 'dummy) (command-execute 'dummy))
     (command-execute 'forward-word)
@@ -1344,7 +1351,7 @@ See also: `paste-from-r1', `copy-to-register'."
         (setq xp1 (region-beginning) xp2 (region-end))
       (setq xp1 (line-beginning-position) xp2 (line-end-position)))
     (copy-to-register ?1 xp1 xp2)
-    (message "Copy register"))
+    (let ((message-log-max nil)) (message "Copy register")))
   (return-before-copy))
 
 (defun append-to-r1 ()
@@ -1382,6 +1389,7 @@ See also: `paste-from-r1', `copy-to-register'."
     (unless (use-region-p) (goto-char (point-min)))
     (apply fun r)))
 
+;; make replace from beginning of the buffer
 (advice-add 'query-replace :around #'beg-of-buffer)
 (advice-add 'query-replace-regexp :around #'beg-of-buffer)
 
@@ -2047,7 +2055,8 @@ first. To test, file name must contain _test suffix."
     ("py" . ,(if (file-exists-p pyvenv)
                 (concat "source " pyvenv "/bin/activate && python")
               "python3"))
-    ("sh" . "bash"))
+    ("sh" . "bash")
+    (nil  . "bash"))
   "Alist file extension to program name.")
 
 (defun run-current-file ()
@@ -2117,7 +2126,7 @@ If the current buffer is not associated with a file, nothing's done."
         (let ((xbackupName
                (concat xfname "~" (format-time-string xdateTimeFormat) "~")))
           (copy-file xfname xbackupName t)
-          (message "Backup %s" xfname))
+          (message "Backup %s" (replace-regexp-in-string (getenv "HOME") "~" xfname)))
       (if (eq major-mode 'dired-mode)
           (progn
             (mapc (lambda (xx)
@@ -2612,8 +2621,8 @@ This checks in turn:
   "If region active deactivate mark conditionally and return to the point
 before selection. This fun to be run as before advice for move fun."
   (interactive)
-  (when (and (region-active-p) (memq last-command '(select-block select-word
-                                                    select-line  select-quote)))
+  (when (and (region-active-p)
+             (memq last-command '(select-block select-word select-line select-quote)))
     (deactivate-mark) (double-jump-back)))
 
 (defun delete-before (&rest _)
@@ -2640,8 +2649,12 @@ Use as around advice e.g. for mouse left click after double click."
 (defun mouse-3 (e)
   "Mouse right click. Select word or if eww buffer then lookup translation."
   (interactive "e")
-  (unless (region-active-p) (mouse-set-point e))
-  (if (eq major-mode 'eww-mode) (translate) (select-word)))
+  (mouse-set-point e)
+  (if (eq major-mode 'eww-mode)
+      (translate)
+    (if (use-region-p)
+        (deactivate-mark))
+    (select-word)))
 
 (defun calendar-split () "Split calendar." (interactive) (calendar) (other-window 1))
 
@@ -2755,15 +2768,20 @@ Use as around advice e.g. for mouse left click after double click."
 (defun yt-dlp-video ()
   "Ask URL and download video."
   (interactive)
-  (let* ((xurl (read-string "Download video: ")) (x (concat "yt-dlp \"" xurl "\"")))
-    (async-shell-command x)))
+  (let* ((xurl (read-string "Download video: "))
+         (x (concat "yt-dlp \"" xurl "\""))
+         (xproxy (concat "socks5://127.0.0.1:" socks-port)))
+    (with-environment-variables (("https_proxy" xproxy))
+      (async-shell-command x))))
 
 (defun yt-dlp-audio ()
   "Ask URL and download audio."
   (interactive)
   (let* ((xurl (read-string "Download audio: "))
-         (x (concat "yt-dlp --extract-audio --audio-format mp3 \"" xurl "\"")))
-    (async-shell-command x)))
+         (x (concat "yt-dlp --extract-audio --audio-format mp3 \"" xurl "\""))
+         (xproxy (concat "socks5://127.0.0.1:" socks-port)))
+    (with-environment-variables (("https_proxy" xproxy))
+      (async-shell-command x))))
 
 (defun rectangle ()
   "Rectangle mark mode or quit minibuffer."
