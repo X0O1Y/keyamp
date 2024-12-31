@@ -10,6 +10,482 @@
                 },
                 "rules": [
                     {
+                        "description": "right shift",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "right_shift pressed",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    },
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "input_sources": [{ "input_source_id": "com.apple.keylayout.RussianWin" }],
+                                        "type": "input_source_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "right_shift",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [
+                                    { "sticky_modifier": { "right_shift": "off" } },
+                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'" },
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } }
+                                ],
+                                "to_if_held_down": [
+                                    { "sticky_modifier": { "right_shift": "off" } },
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
+                                    {
+                                        "halt": true,
+                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "right_shift pressed",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    },
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "input_sources": [{ "input_source_id": "com.apple.keylayout.ABC" }],
+                                        "type": "input_source_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "right_shift",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [
+                                    { "sticky_modifier": { "right_shift": "off" } },
+                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'" },
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } }
+                                ],
+                                "to_if_held_down": [
+                                    { "sticky_modifier": { "right_shift": "off" } },
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
+                                    {
+                                        "halt": true,
+                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "right_shift pressed",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    },
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "input_sources": [{ "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" }],
+                                        "type": "input_source_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "right_shift",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [
+                                    { "sticky_modifier": { "right_shift": "off" } },
+                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-ru)'" },
+                                    { "select_input_source": { "input_source_id": "com.apple.keylayout.RussianWin" } }
+                                ],
+                                "to_if_held_down": [
+                                    { "sticky_modifier": { "right_shift": "off" } },
+                                    {
+                                        "halt": true,
+                                        "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" }
+                                    },
+                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'" }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "right_shift pressed",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    },
+                                    {
+                                        "input_sources": [{ "input_source_id": "com.apple.keylayout.RussianWin" }],
+                                        "type": "input_source_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "right_shift",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [
+                                    { "sticky_modifier": { "right_shift": "off" } },
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
+                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'" }
+                                ],
+                                "to_if_held_down": [
+                                    { "sticky_modifier": { "right_shift": "off" } },
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
+                                    {
+                                        "halt": true,
+                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "right_shift pressed",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    },
+                                    {
+                                        "input_sources": [{ "input_source_id": "com.apple.keylayout.ABC" }],
+                                        "type": "input_source_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "right_shift",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [
+                                    { "sticky_modifier": { "right_shift": "off" } },
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
+                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'" }
+                                ],
+                                "to_if_held_down": [
+                                    { "sticky_modifier": { "right_shift": "off" } },
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
+                                    {
+                                        "halt": true,
+                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "right_shift pressed",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    },
+                                    {
+                                        "input_sources": [{ "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" }],
+                                        "type": "input_source_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "right_shift",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [
+                                    { "sticky_modifier": { "right_shift": "off" } },
+                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-ru)'" },
+                                    { "select_input_source": { "input_source_id": "com.apple.keylayout.RussianWin" } }
+                                ],
+                                "to_if_held_down": [
+                                    { "sticky_modifier": { "right_shift": "off" } },
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
+                                    {
+                                        "halt": true,
+                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "right_shift",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [
+                                    {
+                                        "set_variable": {
+                                            "name": "right_shift pressed",
+                                            "value": 1
+                                        }
+                                    },
+                                    { "sticky_modifier": { "right_shift": "toggle" } },
+                                    { "key_code": "right_shift" }
+                                ],
+                                "to_delayed_action": {
+                                    "to_if_canceled": [
+                                        {
+                                            "set_variable": {
+                                                "name": "right_shift pressed",
+                                                "value": 0
+                                            }
+                                        }
+                                    ],
+                                    "to_if_invoked": [
+                                        {
+                                            "set_variable": {
+                                                "name": "right_shift pressed",
+                                                "value": 0
+                                            }
+                                        }
+                                    ]
+                                },
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "left shift",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "left_shift pressed",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    },
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "input_sources": [{ "input_source_id": "com.apple.keylayout.RussianWin" }],
+                                        "type": "input_source_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "left_shift",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [
+                                    { "sticky_modifier": { "left_shift": "off" } },
+                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'" },
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } }
+                                ],
+                                "to_if_held_down": [
+                                    { "sticky_modifier": { "left_shift": "off" } },
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
+                                    {
+                                        "halt": true,
+                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "left_shift pressed",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    },
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "input_sources": [{ "input_source_id": "com.apple.keylayout.ABC" }],
+                                        "type": "input_source_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "left_shift",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [
+                                    { "sticky_modifier": { "left_shift": "off" } },
+                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'" },
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } }
+                                ],
+                                "to_if_held_down": [
+                                    { "sticky_modifier": { "left_shift": "off" } },
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
+                                    {
+                                        "halt": true,
+                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "left_shift pressed",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    },
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "input_sources": [{ "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" }],
+                                        "type": "input_source_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "left_shift",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [
+                                    { "sticky_modifier": { "left_shift": "off" } },
+                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-ru)'" },
+                                    { "select_input_source": { "input_source_id": "com.apple.keylayout.RussianWin" } }
+                                ],
+                                "to_if_held_down": [
+                                    { "sticky_modifier": { "left_shift": "off" } },
+                                    {
+                                        "halt": true,
+                                        "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" }
+                                    },
+                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'" }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "left_shift pressed",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    },
+                                    {
+                                        "input_sources": [{ "input_source_id": "com.apple.keylayout.RussianWin" }],
+                                        "type": "input_source_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "left_shift",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [
+                                    { "sticky_modifier": { "left_shift": "off" } },
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
+                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'" }
+                                ],
+                                "to_if_held_down": [
+                                    { "sticky_modifier": { "left_shift": "off" } },
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
+                                    {
+                                        "halt": true,
+                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "left_shift pressed",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    },
+                                    {
+                                        "input_sources": [{ "input_source_id": "com.apple.keylayout.ABC" }],
+                                        "type": "input_source_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "left_shift",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [
+                                    { "sticky_modifier": { "left_shift": "off" } },
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
+                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'" }
+                                ],
+                                "to_if_held_down": [
+                                    { "sticky_modifier": { "left_shift": "off" } },
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
+                                    {
+                                        "halt": true,
+                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "left_shift pressed",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    },
+                                    {
+                                        "input_sources": [{ "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" }],
+                                        "type": "input_source_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "left_shift",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [
+                                    { "sticky_modifier": { "left_shift": "off" } },
+                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-ru)'" },
+                                    { "select_input_source": { "input_source_id": "com.apple.keylayout.RussianWin" } }
+                                ],
+                                "to_if_held_down": [
+                                    { "sticky_modifier": { "left_shift": "off" } },
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
+                                    {
+                                        "halt": true,
+                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "left_shift",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [
+                                    {
+                                        "set_variable": {
+                                            "name": "left_shift pressed",
+                                            "value": 1
+                                        }
+                                    },
+                                    { "sticky_modifier": { "left_shift": "toggle" } },
+                                    { "key_code": "left_shift" }
+                                ],
+                                "to_delayed_action": {
+                                    "to_if_canceled": [
+                                        {
+                                            "set_variable": {
+                                                "name": "left_shift pressed",
+                                                "value": 0
+                                            }
+                                        }
+                                    ],
+                                    "to_if_invoked": [
+                                        {
+                                            "set_variable": {
+                                                "name": "left_shift pressed",
+                                                "value": 0
+                                            }
+                                        }
+                                    ]
+                                },
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
                         "description": "f7",
                         "manipulators": [
                             {
@@ -5515,13 +5991,6 @@
                             "to": [{ "key_code": "page_up" }]
                         },
                         {
-                            "from": { "key_code": "left_shift" },
-                            "to": [
-                                { "sticky_modifier": { "left_shift": "toggle" } },
-                                { "key_code": "left_shift" }
-                            ]
-                        },
-                        {
                             "from": { "key_code": "return_or_enter" },
                             "to": [{ "key_code": "f14" }]
                         },
@@ -5532,13 +6001,6 @@
                         {
                             "from": { "key_code": "right_option" },
                             "to": [{ "key_code": "page_down" }]
-                        },
-                        {
-                            "from": { "key_code": "right_shift" },
-                            "to": [
-                                { "sticky_modifier": { "right_shift": "toggle" } },
-                                { "key_code": "right_shift" }
-                            ]
                         }
                     ]
                 },
@@ -5556,20 +6018,6 @@
                         {
                             "from": { "key_code": "f12" },
                             "to": [{ "consumer_key_code": "volume_increment" }]
-                        },
-                        {
-                            "from": { "key_code": "left_shift" },
-                            "to": [
-                                { "sticky_modifier": { "left_shift": "toggle" } },
-                                { "key_code": "left_shift" }
-                            ]
-                        },
-                        {
-                            "from": { "key_code": "right_shift" },
-                            "to": [
-                                { "sticky_modifier": { "right_shift": "toggle" } },
-                                { "key_code": "right_shift" }
-                            ]
                         }
                     ]
                 },

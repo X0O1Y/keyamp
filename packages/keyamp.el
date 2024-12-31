@@ -184,8 +184,8 @@ Activate command, insert or repeat mode optionally."
   (let ((xkeymapName (make-symbol "keymap-name")))
     `(let ((,xkeymapName ,KeymapName))
        (if (display-graphic-p)
-           (keyamp--map ,xkeymapName '(("S-<tab>" . ,Cmd)))
-         (keyamp--map ,xkeymapName '(("<backtab>" . ,Cmd)))))))
+           (keyamp--map ,xkeymapName '(("S-<tab>" . ,Cmd))))
+       (keyamp--map ,xkeymapName '(("<backtab>" . ,Cmd))))))
 
 (defmacro keyamp--map-return (KeymapName Cmd)
   "Map RET and <return> keys to CMD using `keyamp--map'."
@@ -197,11 +197,11 @@ Activate command, insert or repeat mode optionally."
          (keyamp--map ,xkeymapName '(("RET" . ,Cmd)))))))
 
 (defmacro keyamp--map-escape (KeymapName Cmd)
-  "Map ESC and <escape> keys to CMD using `keyamp--map'."
+  "Map <escape> key to CMD using `keyamp--map'."
   (declare (indent defun))
   (let ((xkeymapName (make-symbol "keymap-name")))
     `(let ((,xkeymapName ,KeymapName))
-       (keyamp--map ,xkeymapName '(("ESC" . ,Cmd) ("<escape>" . ,Cmd))))))
+       (keyamp--map ,xkeymapName '(("<escape>" . ,Cmd))))))
 
 (defmacro with-sparse-keymap-x (&rest body)
   "Make sparse keymap x for next use in BODY."
@@ -224,7 +224,7 @@ already, then use existing remap instead. Execute resulting command."
 
 ;; Double press
 
-(defconst keyamp-double-press-timeout 250 "Double key press timeout in ms.")
+(defconst keyamp-double-press-timeout (/ 250 1000.0) "Double key press timeout.")
 (defvar keyamp-double-press-timer nil "Double key press timer.")
 
 (defun keyamp-double-press (Cmd)
@@ -233,7 +233,7 @@ already, then use existing remap instead. Execute resulting command."
            (not (or defining-kbd-macro executing-kbd-macro)))
       (keyamp-command-execute Cmd))
   (setq keyamp-double-press-timer
-        (run-with-timer (/ keyamp-double-press-timeout 1000.0) nil
+        (run-with-timer keyamp-double-press-timeout nil
                         (lambda () (setq keyamp-double-press-timer nil)))))
 
 (defmacro keyamp--map-double (CmdCmdAlist)
@@ -250,17 +250,18 @@ already, then use existing remap instead. Execute resulting command."
 ;; Triple press
 
 (defvar keyamp-defer-command-timer nil "Defer command timer.")
-(defconst keyamp-key-repeat-delay (if (display-graphic-p) 30 90)
-  "Key repeat delay in ms. Higher value for network access.")
+(defconst keyamp-key-repeat-delay (/ (if (display-graphic-p) 30 90) 1000.0)
+  "Key repeat delay. Higher value for network access.")
 
 (defun keyamp-defer-command (Defer Command)
-  "Defer execution of COMMAND for DEFER ms."
-  (setq keyamp-defer-command-timer (run-with-timer (/ Defer 1000.0) nil Command)))
+  "Defer execution of COMMAND for DEFER."
+  (setq keyamp-defer-command-timer (run-with-timer Defer nil Command)))
 
 (defun keyamp-cancel-defer-command-timer ()
   "Cancel `keyamp-defer-command-timer'."
   (when (timerp keyamp-defer-command-timer)
-    (cancel-timer keyamp-defer-command-timer) (setq keyamp-defer-command-timer nil)))
+    (cancel-timer keyamp-defer-command-timer)
+    (setq keyamp-defer-command-timer nil)))
 
 (defun keyamp-defer-command-around (fun &rest _)
   "Run `keyamp-defer-command' as around advice."
@@ -271,12 +272,14 @@ already, then use existing remap instead. Execute resulting command."
 
 ;; Terminal escape
 
-(defconst keyamp-tty-seq-timeout 30
-  "Timeout in ms to wait key sequence after ESC sent in tty.")
+(defconst keyamp-tty-seq-timeout (/ 30 1000.0)
+  "Timeout to wait key sequence after ESC sent in tty.")
 
 (defun keyamp-tty-ESC-filter (map)
-  (if (and (equal (this-single-command-keys) [?\e])
-           (sit-for (/ keyamp-tty-seq-timeout 1000.0)))
+  "Map last ESC key from this single command keys to <escape>."
+  (if (and (let ((tty-seq (this-single-command-keys)))
+             (= ?\e (aref tty-seq (1- (length tty-seq)))))
+           (sit-for keyamp-tty-seq-timeout))
       [escape] map))
 
 (defun keyamp-lookup-key (map key)
@@ -414,8 +417,7 @@ is enabled.")
     ;; Control sequences for leaders. Russian converted from Engineer Engram.
     ;; The sequences are prefixes for key hold down in Karabiner.
     ("C-^" . keyamp-lleader-map)      ("C-+" . keyamp-lleader-map)
-    ("C-_" . keyamp-rleader-map)      ("C-И" . keyamp-rleader-map)
-    ("S-<backspace>" . backward-char) ("S-SPC" . forward-char)))
+    ("C-_" . keyamp-rleader-map)      ("C-И" . keyamp-rleader-map)))
 
 (keyamp--map-leader keyamp-command-map '(keyamp-lleader-map . keyamp-rleader-map))
 (keyamp--map-return keyamp-command-map keyamp-insert)
@@ -480,15 +482,13 @@ is enabled.")
     ("/" . goto-match-br)                                                           ("?" . keyamp-self-insert-and-insert)
 
     ("<left>" . back-char)                 ("<right>" . forw-char)
-    ("<up>"   . up-line)                   ("<down>"  . down-line)
-
-    ("S-<escape>"    . ignore)             ("S-<return>" . speedbar)
-    ("S-<backspace>" . prev-proj-buf)      ("S-SPC"      . next-proj-buf)))
+    ("<up>"   . up-line)                   ("<down>"  . down-line)))
 
 (keyamp--map-leader keyamp-lleader-map '(select-block . select-quote))
 (keyamp--map-return keyamp-lleader-map execute-extended-command)
 (keyamp--map-escape keyamp-lleader-map ignore)
 (keyamp--map-tab keyamp-lleader-map read-only-mode)
+(keyamp--map-backtab keyamp-lleader-map prev-proj-buf)
 (keyamp--map keyamp-lleader-map
   '(;; left leader left half
     ("`" . revert-buffer)
@@ -530,7 +530,7 @@ is enabled.")
 
     ("i i"   . copy-file-path)
     ("i DEL" . count-words)                ("i SPC" . count-matches)
-    ("i ESC" . ignore)                     ("i RET" . show-in-desktop)
+    ("i <escape>" . ignore)                ("i RET" . show-in-desktop)
 
     ("o"  . flymake-goto-next-error)
     ("p"  . show-kill-ring)
@@ -544,7 +544,7 @@ is enabled.")
     ("j d"   . display-line-numbers-mode)  ("j k"   . narrow-to-defun)
     ("j f"   . toggle-word-wrap)           ("j j"   . widen)
     ("j DEL" . hl-line-mode)               ("j SPC" . whitespace-mode)
-    ("j ESC" . ignore)                     ("j RET" . toggle-truncate-lines)
+    ("j <escape>" . ignore)                ("j RET" . toggle-truncate-lines)
 
     ("k s"   . space-to-newline)
     ("k d"   . delete-matching-lines)      ("k k"   . list-matching-lines)
@@ -556,7 +556,7 @@ is enabled.")
     ("k x"   . insert-column-a-z)          ("k ."   . sort-lines-block-or-region)
     ("k c"   . cycle-hyphen-lowline-space) ("k ,"   . sort-numeric-fields)
     ("k DEL" . ispell-word)                ("k SPC" . flyspell-buffer)
-    ("k ESC" . ignore)                     ("k RET" . ignore)
+    ("k <escape>" . ignore)                ("k RET" . ignore)
 
     ("l" . describe-foo-at-point)
     (";" . recentf-open-files)
@@ -571,22 +571,22 @@ is enabled.")
     (keyamp--map keyamp-lleader-map
       '(("i DEL" . nil)        ("i <backspace>" . count-words)
         ("i RET" . nil)        ("i <return>"    . show-in-desktop)
-        ("i ESC" . nil)        ("i <escape>"    . ignore)
         ("j DEL" . nil)        ("j <backspace>" . hl-line-mode)
         ("j RET" . nil)        ("j <return>"    . toggle-truncate-lines)
-        ("j ESC" . nil)        ("j <escape>"    . ignore)
         ("k DEL" . nil)        ("k <backspace>" . ispell-word)
         ("k RET" . nil)        ("k <return>"    . list-matching-lines)
-        ("k ESC" . nil)        ("k <escape>"    . ignore)
-        ("<mouse-1>" . ignore) ("<mouse-2>" . ignore) ("<mouse-3>" . ignore)
+        ("<mouse-1>" . ignore)
+        ("<mouse-2>" . ignore)
+        ("<mouse-3>" . ignore)
         ("<down-mouse-1>" . mouse-drag-region-rectangle))))
 
 (keyamp--map-leader keyamp-rleader-map '(select-line . select-word))
 (keyamp--map-return keyamp-rleader-map screen-idle)
 (keyamp--map-escape keyamp-rleader-map ignore)
 (keyamp--map-tab keyamp-rleader-map help-command)
+(keyamp--map-backtab keyamp-rleader-map speedbar)
 (keyamp--map keyamp-rleader-map
-  '( ;; right leader left half
+  '(;; right leader left half
     ("`" . find-next-dir-file)
     ("1" . view-lossage)
     ("2" . insert-kbd-macro)
@@ -599,7 +599,7 @@ is enabled.")
 
     ("e e"   . todo)                       ("e k"   . weather)
     ("e DEL" . clock)                      ("e SPC" . calendar)
-    ("e ESC" . ignore)                     ("e RET" . insert-date)
+    ("e <escape>" . ignore)                ("e RET" . insert-date)
 
     ("r" . query-replace-regexp)
     ("t" . calc)
@@ -610,7 +610,7 @@ is enabled.")
     ("d e"   . org-shiftup)                ("d i"   . async-shell-command)
     ("d d"   . eval-region-or-sexp)        ("d k"   . run-current-file)
     ("d DEL" . stow)                       ("d SPC" . eval-defun)
-    ("d ESC" . ignore)                     ("d RET" . shell-command)
+    ("d <escape>" . ignore)                ("d RET" . shell-command)
 
     ("f e"   . insert-emacs-quote)         ("f i"   . insert-ascii-single-quote)
     ("f f"   . insert-char)                ("f j"   . insert-brace)
@@ -618,7 +618,7 @@ is enabled.")
     ("f s"   . insert-formfeed)            ("f l"   . insert-square-bracket)
     ("f g"   . insert-double-angle-quote)  ("f h"   . insert-double-curly-quote)
     ("f DEL" . insert-backtick-quote)      ("f SPC" . insert-ascii-double-quote)
-    ("f ESC" . ignore)                     ("f RET" . emoji-insert)
+    ("f <escape>" . ignore)                ("f RET" . emoji-insert)
 
     ("g" . ignore)
     ("z" . goto-char)
@@ -663,14 +663,13 @@ is enabled.")
     (keyamp--map keyamp-rleader-map
       '(("e DEL" . nil)        ("e <backspace>" . clock)
         ("e RET" . nil)        ("e <return>"    . insert-date)
-        ("e ESC" . nil)        ("e <escape>"    . ignore)
         ("d DEL" . nil)        ("d <backspace>" . stow)
         ("d RET" . nil)        ("d <return>"    . shell-command)
-        ("d ESC" . nil)        ("d <escape>"    . ignore)
         ("f DEL" . nil)        ("f <backspace>" . insert-backtick-quote)
         ("f RET" . nil)        ("f <return>"    . emoji-insert)
-        ("f ESC" . nil)        ("f <escape>"    . ignore)
-        ("<mouse-1>" . ignore) ("<mouse-2>" . ignore) ("<mouse-3>" . ignore))))
+        ("<mouse-1>" . ignore)
+        ("<mouse-2>" . ignore)
+        ("<mouse-3>" . ignore))))
 
 (keyamp--map-double
   '((keyamp-escape  . alternate-frame) (activate-region . deactivate-region)
@@ -682,10 +681,17 @@ is enabled.")
 
 ;; Core Remaps
 
-(setq help-map (make-sparse-keymap)) (fset 'help-command help-map)
+(when (display-graphic-p)
+  (keymap-set key-translation-map "S-SPC"         "<tab>")
+  (keymap-set key-translation-map "S-<backspace>" "<backtab>")
+  (keymap-set key-translation-map "S-<return>"    "C-t"))
+
+(setq help-map (make-sparse-keymap))
+(fset 'help-command help-map)
 (keyamp--map-leader help-map '(lookup-word-definition . translate))
 (keyamp--map-return help-map lookup-web)
 (keyamp--map-tab help-map lookup-wikipedia)
+(keyamp--map-backtab help-map lookup-etymology)
 (keyamp--map-escape help-map ignore)
 (keyamp--map help-map
   '(("e" . describe-char)      ("i" . info)
@@ -697,34 +703,14 @@ is enabled.")
     ("r" . describe-mode)      ("u" . lookup-all-synonyms)
     ("a" . describe-face)      (";" . lookup-wiktionary)
     ("g" . apropos-command)    ("h" . describe-coding-system)
-    ("z" . apropos-variable)   ("." . lookup-word-dict-org)
-    ("x" . apropos-value)      ("," . lookup-etymology)))
-
-;; unmap C-h from help-command
-(setq c-h-map (make-sparse-keymap)) (fset 'c-h-command c-h-map)
-(keyamp--map global-map '(("C-h" . c-h-command)))
-(keyamp--map-escape c-h-map ignore)
-
-(defun keyamp-map-function-key (Key)
-  "Translate C-h KEY to function key."
-  (let ((x (cond ((string-equal Key "-") "11") ((string-equal Key "=") "12")
-                 (t (number-to-string (mod (string-to-number Key) 10))))))
-    (keymap-set key-translation-map
-                (concat "C-h " (keyamp--convert-kbd-str Key))
-                (concat "<f" x ">"))))
-
-(dolist (k '("1" "2" "3" "4" "5" "6" "7" "8" "9" "0" "-" "="))
-  (keyamp-map-function-key k))
+    ("z" . apropos-variable)   ("x" . apropos-value)))
 
 (keyamp--map global-map '(("C-r" . open-file) ("C-t" . hippie-expand)))
+
 (when (display-graphic-p)
   (keyamp--map global-map
-    '(("<prior>" . page-up-half) ("<next>" . page-dn-half)
-      ("<double-mouse-1>"        . select-word)
-      ("<mouse-3>"               . mouse-3)
-      ("<header-line> <mouse-1>" . novel)))
-  ;; Avoid karabiner mode sync lag.
-  (keyamp--remap keyamp-command-map '((hippie-expand . open-file)))
+    '(("<prior>"          . page-up-half) ("<next>"    . page-dn-half)
+      ("<double-mouse-1>" . select-word)  ("<mouse-3>" . mouse-3)))
   (advice-add 'mouse-set-point   :around 'lookup-around)
   (advice-add 'mouse-set-point   :before 'scroll-one-pixel)
   (advice-add 'mouse-set-point   :after  'keyamp-command-if-insert)
@@ -737,13 +723,15 @@ is enabled.")
 (with-sparse-keymap-x
  ;; Repeat using DEL/SPC or D. The concept widely used to form Repeat mode.
  (keyamp--map-leader x '(del-back . del-back))
- (keyamp--remap x '((del-back . repeat))) (keyamp--set-map x '(repeat)))
+ (keyamp--remap x '((del-back . repeat)))
+ (keyamp--set-map x '(repeat)))
 
 (with-sparse-keymap-x
  ;; Hold down RET in insert mode to call `hippie-expand' with C-t.
  ;; Next RET press to insert a possible expansion. DEL to undo, SPC to continue.
  (keyamp--map-leader x '(hippie-expand-undo . self-insert-command))
- (keyamp--map-return x hippie-expand) (keyamp--set-map x '(hippie-expand)))
+ (keyamp--map-return x hippie-expand)
+ (keyamp--set-map x '(hippie-expand)))
 
 (with-sparse-keymap-x
  ;; After starting up an isearch press DEL to retreat to the previous
@@ -756,12 +744,10 @@ is enabled.")
 ;; Hit TAB to repeat after typing in search string and set following transient
 ;; map. Backtab to repeat backward.
 (keyamp--map-leader isearch-mode-map '(isearch-del-char . isearch-printing-char))
-(keyamp--map-tab isearch-mode-map isearch-forw)
 (keyamp--map-backtab isearch-mode-map isearch-back)
+(keyamp--map-tab isearch-mode-map isearch-forw)
 (keyamp--map-escape isearch-mode-map isearch-cancel)
-(keyamp--map isearch-mode-map
-  '(("C-^"   . keyamp-lleader-map)
-    ("S-SPC" . isearch-forw) ("S-<backspace>" . isearch-back)))
+(keyamp--map isearch-mode-map '(("C-^" . keyamp-lleader-map)))
 (keyamp--remap isearch-mode-map '((paste-from-r1 . isearch-yank-r1)))
 
 (with-sparse-keymap-x
@@ -830,6 +816,7 @@ is enabled.")
  ;; by transient maps which might be set by following target commands subsets.
  (keyamp--map-leader x '(open-line . newline))
  (keyamp--map-tab x keyamp-screen-TAB)
+ (keyamp--map-backtab x page-up-half)
  (keyamp--remap x
    '((keyamp-insert       . keyamp-escape)
      (make-frame-command  . delete-frame)
@@ -902,6 +889,7 @@ is enabled.")
 
 (with-sparse-keymap-x
  (keyamp--map-tab x keyamp-screen-TAB)
+ (keyamp--map-backtab x ignore)
  (keyamp--remap x
    '((open-line . prev-eww-buffer) (newline . next-eww-buffer)
      (del-back  . eww-reload)      (undo    . justify-buffer)))
@@ -909,11 +897,13 @@ is enabled.")
 
 (with-sparse-keymap-x
  (keyamp--map-tab x keyamp-screen-TAB)
+ (keyamp--map-backtab x ignore)
  (keyamp--remap x '((open-line . prev-eshell-buffer) (newline . next-eshell-buffer)))
  (keyamp--set-map x '(prev-eshell-buffer next-eshell-buffer)))
 
 (with-sparse-keymap-x
  (keyamp--map-tab x keyamp-screen-TAB)
+ (keyamp--map-backtab x ignore)
  (keyamp--remap x '((open-line . prev-vterm-buffer) (newline . next-vterm-buffer)))
  (keyamp--set-map x '(prev-vterm-buffer next-vterm-buffer)))
 
@@ -979,6 +969,7 @@ is enabled.")
  ;; I/K or DEL/SPC to move by lines. See `return-before'.
  (keyamp--map-leader x '(up-line . down-line))
  (keyamp--map-tab x keyamp-screen-TAB)
+ (keyamp--map-backtab x ignore)
  (keyamp--map x '(("<up>" . up-line-rev)))
  (keyamp--remap x
    '((previous-line . up-line-rev) (next-line . down-line)
@@ -1032,13 +1023,13 @@ is enabled.")
 (advice-add 'end-of-lyne :after
             (lambda () "keyamp-beg-of-buf-timer"
               (setq keyamp-beg-of-buf-timer
-                    (run-with-timer (/ keyamp-double-press-timeout 1000.0) nil
+                    (run-with-timer keyamp-double-press-timeout nil
                                     (lambda () (setq keyamp-beg-of-buf-timer nil))))))
 
 (advice-add 'beg-of-line :after
             (lambda () "keyamp-end-of-buf-timer"
               (setq keyamp-end-of-buf-timer
-                    (run-with-timer (/ keyamp-double-press-timeout 1000.0) nil
+                    (run-with-timer keyamp-double-press-timeout nil
                                     (lambda () (setq keyamp-end-of-buf-timer nil))))))
 
 (advice-add 'beg-of-line :around
@@ -1097,8 +1088,12 @@ is enabled.")
  (keyamp--set-map x '(back-char forw-char)))
 
 ;; touch screen
-(with-sparse-keymap-x (keyamp--map-tab x next-buf) (keyamp--set-map x '(forw-char)))
-(with-sparse-keymap-x (keyamp--map-tab x other-win) (keyamp--set-map x '(back-char)))
+(with-sparse-keymap-x
+ (keyamp--map-tab x next-buf)
+ (keyamp--set-map x '(forw-char)))
+(with-sparse-keymap-x
+ (keyamp--map-tab x other-win)
+ (keyamp--set-map x '(back-char)))
 
 (with-sparse-keymap-x
  (keyamp--remap x '((backward-char . back-word) (forward-char . forw-word)))
@@ -1119,7 +1114,8 @@ is enabled.")
 
 (defun keyamp--leader-deactivate ()
   "Deactivate virtual leader."
-  (if keyamp--deactivate-leader-fun (funcall keyamp--deactivate-leader-fun))
+  (if keyamp--deactivate-leader-fun
+      (funcall keyamp--deactivate-leader-fun))
   (setq keyamp-leader-timer nil))
 
 (defun keyamp-leader-init (Keymap)
@@ -1128,11 +1124,13 @@ is enabled.")
                 (list (keyamp--convert-kbd-str "u") (keyamp--convert-kbd-str "o")
                       [1075] [1097])) ; г 1075 щ 1097
     (setq keyamp--deactivate-leader-fun (set-transient-map Keymap))
-    (if (timerp keyamp-leader-timer) (cancel-timer keyamp-leader-timer))
+    (if (timerp keyamp-leader-timer)
+        (cancel-timer keyamp-leader-timer))
     (setq keyamp-leader-timer
-          (run-with-timer (/ keyamp-double-press-timeout 1000.0) nil 'keyamp--leader-deactivate))))
+          (run-with-timer keyamp-double-press-timeout nil 'keyamp--leader-deactivate))))
 
-(define-prefix-command 'keyamp-lleader-i-map) (define-prefix-command 'keyamp-lleader-k-map)
+(define-prefix-command 'keyamp-lleader-i-map)
+(define-prefix-command 'keyamp-lleader-k-map)
 
 (with-sparse-keymap-x
  (keyamp--map x '(("i" . keyamp-lleader-i-map) ("k" . keyamp-lleader-k-map)))
@@ -1147,11 +1145,13 @@ is enabled.")
    '((back-word     . select-line) (forw-word . select-word)
      (previous-line . end-of-buf)  (next-line . end-of-block)
      (backward-char . isearch-cur-word-forward)))
- (advice-add 'forw-word :after (lambda () "virtual right leader transient" (keyamp-leader-init x))))
+ (advice-add 'forw-word :after
+             (lambda () "virtual right leader transient" (keyamp-leader-init x))))
 
 (defun keyamp-leader-return-before (&rest _)
   "Return before, that is, compensate word move."
-  (if (timerp keyamp-leader-timer) (set-mark-command t)))
+  (if (timerp keyamp-leader-timer)
+      (set-mark-command t)))
 
 (advice-add-macro '(select-block               select-quote
                     make-backup-and-copy       make-backup-and-save
@@ -1163,6 +1163,7 @@ is enabled.")
 (with-sparse-keymap-x
  (keyamp--map-leader x '(prev-buf . tasks))
  (keyamp--map-tab x help-command)
+ (keyamp--map-backtab x ignore)
  (keyamp--map x '(("C-r" . open-in-external-app)))
  (keyamp--remap x
    '((undo                . delete-window)
@@ -1212,6 +1213,7 @@ is enabled.")
  ;; Repeat half page up/down with I/K or DEL/SPC.
  (keyamp--map-leader x '(previous-line . next-line))
  (keyamp--map-tab x scroll-up-command)
+ (keyamp--map-backtab x scroll-down-command)
  (keyamp--remap x
    '((previous-line . page-up-half)  (next-line . page-dn-half)
      (down-line     . page-dn-half)  (up-line   . page-up-half)
@@ -1225,6 +1227,7 @@ is enabled.")
  ;; Arrows always do half page and keep TAB transient, see previous keymap.
  (keyamp--map-leader x '(previous-line . next-line))
  (keyamp--map-tab x next-line)
+ (keyamp--map-backtab x previous-line)
  (keyamp--remap x
    '((previous-line . scroll-down-command) (next-line . scroll-up-command)
      (down-line     . page-dn-half)        (up-line   . page-up-half)
@@ -1286,6 +1289,10 @@ is enabled.")
 (with-sparse-keymap-x
  (keyamp--map-leader x '(undo-only . undo-redo))
  (keyamp--set-map x '(undo undo-redo)))
+
+(with-sparse-keymap-x
+ (keyamp--map x '(("<backtab>" . undo)))
+ (advice-add 'expand-abbrev :after (lambda () (set-transient-map x))))
 
 (with-sparse-keymap-x
  (keyamp--remap x '((del-back . cut-text-block)))
@@ -1455,6 +1462,7 @@ is enabled.")
 
   (with-sparse-keymap-x
    (keyamp--map-tab x minibuffer-next-completion)
+   (keyamp--map-backtab x minibuffer-previous-completion)
    (keyamp--map-leader x
      '(minibuffer-previous-completion . minibuffer-next-completion))
    (keyamp--remap x '((keyamp-escape . delete-completion-win)))
@@ -1648,9 +1656,11 @@ is enabled.")
        company-manual-begin))
 
    (advice-add 'company-manual-begin :before 'keyamp-command)
+
    (defun keyamp-command-company ()
      "Set transient keymap if company candidates."
      (if company-candidates (keyamp-repeat-deactivate-init x)))
+
    (add-hook 'keyamp-command-hook 'keyamp-command-company))
 
   (with-sparse-keymap-x
@@ -1720,6 +1730,7 @@ is enabled.")
 
 (with-eval-after-load 'org-agenda
   (keyamp--map-tab org-agenda-mode-map todo)
+  (keyamp--map-backtab org-agenda-mode-map ignore)
   (keyamp--map org-agenda-mode-map
     '(("<double-mouse-1>" . org-agenda-tasks) ("<mouse-3>" . mouse-3)))
   (keyamp--remap org-agenda-mode-map
@@ -1748,13 +1759,12 @@ is enabled.")
       (back-char           . screen-idle-return)
       (append-to-r1        . recentf-open-files)
       (kmacro-play         . save-close-buf)
-      (kmacro-record       . org-agenda-redo)
+      (kmacro-record       . alarm)
       (pass                . stopwatch-lap)
       (jump-to-register    . stopwatch)
       (point-to-register   . timer)
       (insert-register     . timer-stop)
-      (proced-defer        . timer-display)
-      (eshell-split        . alarm))))
+      (proced-defer        . timer-display))))
 
 (defvar screen-idle-keymap (make-sparse-keymap))
 (keyamp--map-leader screen-idle-keymap '(up-line . down-line))
@@ -1933,7 +1943,8 @@ is enabled.")
    (keyamp--set-map x '(eshell-send-input eshell-interrupt-process) nil :insert)
    (defun keyamp-input-timer-payload-eshell ()
      "Set transient keymap for eshell after input timer timeout."
-     (if (eq major-mode 'eshell-mode) (keyamp-repeat-deactivate-init x)))
+     (if (eq major-mode 'eshell-mode)
+         (keyamp-repeat-deactivate-init x)))
    (advice-add 'keyamp-input-timer-payload :after 'keyamp-input-timer-payload-eshell)
    (keyamp--set-map-hook x '(eshell-mode-hook) nil nil :repeat))
 
@@ -1995,7 +2006,8 @@ is enabled.")
    (keyamp--set-map x '(vterm-send-return term-interrupt-subjob) nil :insert)
    (defun keyamp-input-timer-payload-vterm ()
      "Set transient keymap for vterm after input timer timeout."
-     (if (eq major-mode 'vterm-mode) (keyamp-repeat-deactivate-init x)))
+     (if (eq major-mode 'vterm-mode)
+         (keyamp-repeat-deactivate-init x)))
    (advice-add 'keyamp-input-timer-payload :after 'keyamp-input-timer-payload-vterm))
   (add-hook 'vterm-mode-hook 'keyamp-input-timer-post-command)
   (advice-add-macro '(vterm-send-return term-interrupt-subjob)
@@ -2508,6 +2520,7 @@ is enabled.")
                  eval-defun                              t
                  eval-region-or-sexp                     t
                  fill-or-unfil                           t
+                 hippie-expand                           t
                  ibuffer-do-delete                       t
                  insert-ascii-double-quote               t
                  insert-ascii-single-quote               t
@@ -2705,14 +2718,9 @@ is enabled.")
                  up-line                                 t
                  up-line-rev                             t)))
 
-(defconst keyamp-idle-commands-hash
-  #s(hash-table test equal data
-                (ignore                                  t
-                 monitor                                 t
-                 activate-region                         t
-                 dummy                                   t
-                 mouse-3                                 t
-                 mouse-drag-region                       t)))
+(defconst keyamp-idle-commands
+  '(ignore monitor activate-region dummy mouse-drag-region)
+  "List of indicate idle commands.")
 
 (defconst keyamp-isearch-not-insert
   '(isearch-forw isearch-cur-word-forward isearch-back isearch-cur-word-backward)
@@ -2720,6 +2728,16 @@ is enabled.")
 
 (defconst keyamp-blink-modify-commands '(kmacro-record stopwatch)
   "List of commands to `keyamp-blink-modify' after.")
+
+(defconst keyamp-insert-commands
+  '(self-insert-command org-self-insert-command isearch-printing-char)
+  "List of insert commands.")
+
+(defconst keyamp-screen-command-commands
+  '(dired-find-file ibuffer-visit-buffer open-last-closed
+    bookmark-jump   widget-button-press  alt-buf
+    alternate-frame)
+  "List of command screen commands.")
 
 
 
@@ -2773,7 +2791,8 @@ insert cancel the timer.")
   "Cancel `keyamp-input-timer'."
   (remove-hook 'post-command-hook 'keyamp-cancel-input-timer)
   (remove-hook 'post-self-insert-hook 'keyamp-cancel-input-timer)
-  (if (timerp keyamp-input-timer) (cancel-timer keyamp-input-timer)))
+  (if (timerp keyamp-input-timer)
+      (cancel-timer keyamp-input-timer)))
 
 (defun keyamp-input-timer-payload ()
   "Payload for `keyamp-input-timer'."
@@ -2831,12 +2850,16 @@ insert cancel the timer.")
   (keyamp-repeat-deactivate)
   (when keyamp-insert-p
     (setq keyamp-insert-p nil)
-    (when (buffer-file-name) (point-to-register ?7) (push-mark (point) t)))
-  (if keyamp--deactivate-command-fun (funcall keyamp--deactivate-command-fun))
+    (when (buffer-file-name)
+      (point-to-register ?7)
+      (push-mark (point) t)))
+  (if keyamp--deactivate-command-fun
+      (funcall keyamp--deactivate-command-fun))
   (setq keyamp--deactivate-command-fun
         (set-transient-map keyamp-command-map (lambda () t)))
   (keyamp-indicate-command)
-  (if keyamp-led (keyamp-led-on)))
+  (if keyamp-led
+      (keyamp-led-on)))
 
 (defun keyamp-insert-init (&rest _)
   "Enter insert mode."
@@ -2865,12 +2888,11 @@ insert cancel the timer.")
         (save-buffer-silent-defer)
         (keyamp-command-execute 'keyamp-escape))
     (if (eq last-command-event 32)
-        (progn (run-with-timer (if (and (minibufferp) (not (display-graphic-p))) 0
-                                 (/ before-last-command-event-threshold 1000.0)) nil
-                                 (lambda () (setq before-last-command-event 32)))
-               (run-with-timer (/ before-last-command-event-timeout 1000.0) nil
-                               (lambda () (setq before-last-command-event nil))))
-      (if before-last-command-event (setq before-last-command-event nil)))))
+        (progn
+          (run-with-timer before-last-command-event-threshold nil 'before-last-command-event 32)
+          (run-with-timer before-last-command-event-timeout nil 'before-last-command-event))
+      (if before-last-command-event
+          (before-last-command-event)))))
 (add-hook 'post-self-insert-hook 'keyamp-SPC-SPC)
 (advice-add-macro '(isearch-printing-char minibuffer-complete-word)
                   :after 'keyamp-SPC-SPC)
@@ -2885,32 +2907,41 @@ insert cancel the timer.")
 (advice-add-macro '(delete-backward-char isearch-del-char) :after 'keyamp-SPC-DEL)
 
 (defun keyamp-command-if-insert (&rest _)
-  "Activate command mode if insert mode." (if keyamp-insert-p (keyamp-command)))
+  "Activate command mode if insert mode."
+  (if keyamp-insert-p (keyamp-command)))
 
 (defun keyamp-insert-and-SPC ()
   "Activate insert mode and insert SPC."
-  (interactive) (unless keyamp-insert-p (keyamp-insert)) (insert " "))
+  (interactive)
+  (unless keyamp-insert-p (keyamp-insert))
+  (insert " "))
 
 (defun keyamp-self-insert-and-insert ()
   "Self insert and activate insert mode."
-  (interactive) (keyamp-insert) (self-insert-command 1))
+  (interactive)
+  (keyamp-insert)
+  (self-insert-command 1))
 
 (defun keyamp-minibuffer-return ()
   "Force complete and exit."
-  (interactive) (icomplete-force-complete-and-exit))
+  (interactive)
+  (icomplete-force-complete-and-exit))
 
 (defun keyamp-minibuffer-y-or-n ()
   "Return t if minibuffer ask y or n question."
-  (if-let ((x (minibuffer-prompt))) (string-match "y, n, !\\|yn!q" x)))
+  (if-let ((x (minibuffer-prompt)))
+      (string-match "y, n, !\\|yn!q" x)))
 
 (defun keyamp-minibuffer-escape ()
   "If minibuffer input not empty then activate command mode instead
 of quit minibuffer. Answer q to literal confirmation."
   (interactive)
   (if (keyamp-minibuffer-y-or-n)
-      (progn (keyamp-insert-init) (execute-kbd-macro (kbd "q")))
+      (progn (keyamp-insert-init)
+             (execute-kbd-macro (kbd "q")))
     (if (> (length (buffer-substring (minibuffer-prompt-end) (point))) 0)
-        (keyamp-command) (abort-recursive-edit))))
+        (keyamp-command)
+      (abort-recursive-edit))))
 
 (defun keyamp-input (Key)
   "Activate insert mode and input KEY."
@@ -3004,7 +3035,8 @@ Simply hit TAB to minibuffer-complete file name if the name exists."
 Set up input timer to activate command mode."
   (when (or (eq (icomplete--category) 'file)
             (memq real-this-command keyamp-minibuffer-insert-commands))
-    (keyamp-repeat-deactivate) (keyamp-command-execute 'keyamp-insert)
+    (keyamp-repeat-deactivate)
+    (keyamp-command-execute 'keyamp-insert)
     (keyamp-input-timer-post-command)))
 
 (setq-default cursor-in-non-selected-windows nil)
@@ -3012,15 +3044,18 @@ Set up input timer to activate command mode."
 (defun keyamp-cancel-indicate-read-timer ()
   "Cancel indicate read timer."
   (when (timerp keyamp-indicate-read-timer)
-    (cancel-timer keyamp-indicate-read-timer) (setq keyamp-indicate-read-timer nil)))
+    (cancel-timer keyamp-indicate-read-timer)
+    (setq keyamp-indicate-read-timer nil)))
 
 (defun keyamp-cursor-type (Cursor)
-  "Set cursor type." (modify-all-frames-parameters `((cursor-type . ,Cursor))))
+  "Set cursor type."
+  (modify-all-frames-parameters `((cursor-type . ,Cursor))))
 
 (defun keyamp-indicator (Indicator)
   "Set `mode-line-front-space' to INDICATOR."
   (setq mode-line-front-space Indicator)
-  (unless (eq this-command last-command) (force-mode-line-update t)))
+  (unless (eq this-command last-command)
+    (force-mode-line-update t)))
 
 (defun keyamp-indicator-color (Color)
   "Set `mode-line-front-space-face' face COLOR."
@@ -3029,7 +3064,8 @@ Set up input timer to activate command mode."
 (defun keyamp-indicate (Indicator Cursor Color)
   "Indicate mode with INDICATOR, CURSOR and COLOR."
   (keyamp-cancel-indicate-read-timer)
-  (keyamp-indicator Indicator) (keyamp-cursor-type Cursor)
+  (keyamp-indicator Indicator)
+  (keyamp-cursor-type Cursor)
   (keyamp-indicator-color Color))
 
 (defun keyamp-indicate-read ()
@@ -3073,17 +3109,21 @@ after a delay even if there more read commands follow."
 
 (defun keyamp-cancel-repeat-idle-timer ()
   "Cancel `keyamp--repeat-idle-timer'."
-  (if (timerp keyamp--repeat-idle-timer) (cancel-timer keyamp--repeat-idle-timer)))
+  (if (timerp keyamp--repeat-idle-timer)
+      (cancel-timer keyamp--repeat-idle-timer)))
 
 (defun keyamp-repeat-deactivate ()
   "Deactivate repeat."
-  (if keyamp-repeat-p (setq keyamp-repeat-p nil))
-  (if keyamp--deactivate-repeat-fun (funcall keyamp--deactivate-repeat-fun))
+  (if keyamp-repeat-p
+      (setq keyamp-repeat-p nil))
+  (if keyamp--deactivate-repeat-fun
+      (funcall keyamp--deactivate-repeat-fun))
   (keyamp-cancel-repeat-idle-timer))
 
 (defun keyamp-repeat-deactivate-init (Keymap)
   "Deactivate repeat and init repeat KEYMAP."
-  (keyamp-repeat-deactivate) (keyamp-repeat-init Keymap))
+  (keyamp-repeat-deactivate)
+  (keyamp-repeat-init Keymap))
 
 (defun keyamp-indicate-idle ()
   "Indicate idle."
@@ -3091,7 +3131,8 @@ after a delay even if there more read commands follow."
 
 (defun keyamp-indicate-sleep ()
   "Indicate sleep."
-   (keyamp-blink-stop) (keyamp-indicate-idle))
+  (keyamp-blink-stop)
+  (keyamp-indicate-idle))
 
 (defun keyamp-indicate-screen ()
   "Indicate screen."
@@ -3113,9 +3154,7 @@ after a delay even if there more read commands follow."
   (keyamp-indicate keyamp-insert-indicator keyamp-insert-cursor keyamp-insert-color)
   (cond ((gethash this-command keyamp-read-commands-hash)
          (keyamp-blink-start keyamp-read-color keyamp-insert-color))
-        ((or (eq this-command 'self-insert-command)
-             (eq this-command 'org-self-insert-command)
-             (eq this-command 'isearch-printing-char))
+        ((memq this-command keyamp-insert-commands)
          (keyamp-blink-io))
         ((gethash this-command keyamp-modify-commands-hash)
          (keyamp-blink-modify))))
@@ -3124,9 +3163,7 @@ after a delay even if there more read commands follow."
   "Indicate command."
   (keyamp-blink-stop)
   (keyamp-indicate keyamp-command-indicator keyamp-command-cursor keyamp-command-color)
-  (if (memq this-command '(dired-find-file ibuffer-visit-buffer open-last-closed
-                           bookmark-jump   widget-button-press  alt-buf
-                           alternate-frame))
+  (if (memq this-command keyamp-screen-command-commands)
       (keyamp-blink-start keyamp-screen-color keyamp-command-color)))
 
 (defvar keyamp-user-error nil
@@ -3135,7 +3172,8 @@ after a delay even if there more read commands follow."
 (defun keyamp-transient ()
   "Indicate transient. Run with `post-command-hook'."
   (if keyamp-user-error
-      (progn (keyamp-command) (setq keyamp-user-error nil))
+      (progn (keyamp-command)
+             (setq keyamp-user-error nil))
     (cond ((or keyamp-insert-p
                (and isearch-mode
                     (not (memq this-command keyamp-isearch-not-insert))))
@@ -3148,9 +3186,8 @@ after a delay even if there more read commands follow."
            (keyamp-blink-start keyamp-read-color keyamp-modify-color))
           ((gethash this-command keyamp-modify-commands-hash)
            (keyamp-indicate-modify))
-          ((gethash this-command keyamp-idle-commands-hash)
+          ((memq this-command keyamp-idle-commands)
            (keyamp-indicate-idle))
-          ((use-region-p) (keyamp-indicate-idle))
           (t (keyamp-indicate-command)))
     (if (or defining-kbd-macro
             (memq this-command keyamp-blink-modify-commands))
@@ -3165,11 +3202,13 @@ after a delay even if there more read commands follow."
 
 (defun keyamp-blink-modify ()
   "Blink modify."
-  (let ((xInd mode-line-front-space) (xCur (frame-parameter nil 'cursor-type))
+  (let ((xInd mode-line-front-space)
+        (xCur (frame-parameter nil 'cursor-type))
         (xCol (face-attribute 'mode-line-front-space-face :foreground)))
     (unless (eq xCol keyamp-modify-color)
       (keyamp-indicate keyamp-modify-indicator xCur keyamp-modify-color)
-      (if (timerp keyamp-indicate-modify-timer) (cancel-timer keyamp-indicate-modify-timer))
+      (if (timerp keyamp-indicate-modify-timer)
+          (cancel-timer keyamp-indicate-modify-timer))
       (setq keyamp-indicate-modify-timer
             (run-with-timer keyamp-blink-blink nil
                             'keyamp-indicate-modify-cancel xInd xCur xCol)))))
@@ -3183,7 +3222,8 @@ after a delay even if there more read commands follow."
 
 (defun keyamp-blink-io ()
   "Blink IO."
-  (let ((xInd mode-line-front-space) (xCur (frame-parameter nil 'cursor-type))
+  (let ((xInd mode-line-front-space)
+        (xCur (frame-parameter nil 'cursor-type))
         (xCol (face-attribute 'mode-line-front-space-face :foreground)))
     (unless (eq xCol keyamp-io-color)
       (keyamp-indicate keyamp-io-indicator xCur keyamp-io-color)
@@ -3200,15 +3240,18 @@ Cancel after `keyamp-blink-blink'. Double blink."
 
 (defun after-save-hook-indicate-io ()
   "Indicate IO after save if save not with command and not in insert mode."
-  (if (and (not keyamp-insert-p) (not this-command)) (keyamp-indicate-io)))
+  (if (and (not keyamp-insert-p) (not this-command))
+      (keyamp-indicate-io)))
 
 (add-hook 'after-save-hook 'after-save-hook-indicate-io)
 
 (defun keyamp-indicate-prefix ()
-  "Indicate prefix: SPC DEL backspace C-h or C-u."
-  (if (or (member (this-single-command-keys) '([32] [127] [backspace] [8]))
-          prefix-arg)
-      (keyamp-indicate-idle)))
+  "Indicate prefix."
+  (cond ((member (this-single-command-keys) '([32] [127] [backspace] [8]))
+         (keyamp-indicate-idle)) ; [SPC] [DEL] [backspace] [C-h]
+        ((or (member (this-single-command-keys) '([32 101] [32 97] [32 111] [17]))
+             prefix-arg) ; [SPC D] [SPC F] [SPC E] [C-q] [C-u]
+         (keyamp-indicate-modify))))
 
 (defvar keyamp-prefix-delay 0.1 "Delay before indicate prefix keymap.")
 
@@ -3231,15 +3274,19 @@ Cancel after `keyamp-blink-blink'. Double blink."
 
 (defun keyamp-blink-stop ()
   "Stop blink."
-  (if (and keyamp-led-blink keyamp-led) (keyamp-blink-led-stop))
+  (if (and keyamp-led-blink keyamp-led)
+      (keyamp-blink-led-stop))
   (remove-hook 'post-command-hook 'keyamp-blink-stop)
-  (if (timerp keyamp-blink-off-timer) (cancel-timer keyamp-blink-off-timer))
-  (if (timerp keyamp-blink-on-timer) (cancel-timer keyamp-blink-on-timer)))
+  (if (timerp keyamp-blink-off-timer)
+      (cancel-timer keyamp-blink-off-timer))
+  (if (timerp keyamp-blink-on-timer)
+      (cancel-timer keyamp-blink-on-timer)))
 
 (defun keyamp-blink-start (Color1 Color2)
   "Start blink."
   (keyamp-blink-stop)
-  (if (and keyamp-led-blink keyamp-led) (keyamp-blink-led-start))
+  (if (and keyamp-led-blink keyamp-led)
+      (keyamp-blink-led-start))
   (add-hook 'post-command-hook 'keyamp-blink-stop)
   (setq keyamp-blink-on-timer
         (run-with-timer keyamp-blink-shift keyamp-blink 'keyamp-blink Color1 Color2)))
@@ -3252,7 +3299,8 @@ Cancel after `keyamp-blink-blink'. Double blink."
 
 (defun keyamp-led-off ()
   "Caps lock led off, ignore if Emacs out of focus."
-  (if (frame-focus-state) (keyamp-setleds-caps "-")))
+  (if (frame-focus-state)
+      (keyamp-setleds-caps "-")))
 
 (defvar keyamp-blink-led-on-timer nil "Blink led on timer.")
 (defvar keyamp-blink-led-off-timer nil "Blink led off timer.")
@@ -3266,8 +3314,10 @@ Cancel after `keyamp-blink-blink'. Double blink."
 (defun keyamp-blink-led-stop ()
   "Stop blink led."
   (remove-hook 'post-command-hook 'keyamp-blink-led-stop)
-  (if (timerp keyamp-blink-led-off-timer) (cancel-timer keyamp-blink-led-off-timer))
-  (if (timerp keyamp-blink-led-on-timer) (cancel-timer keyamp-blink-led-on-timer))
+  (if (timerp keyamp-blink-led-off-timer)
+      (cancel-timer keyamp-blink-led-off-timer))
+  (if (timerp keyamp-blink-led-on-timer)
+      (cancel-timer keyamp-blink-led-on-timer))
   (keyamp-led-on))
 
 (defun keyamp-blink-led-start ()
@@ -3282,20 +3332,24 @@ Cancel after `keyamp-blink-blink'. Double blink."
 
 (defun keyamp-led-init ()
   "Init led control."
-  (when (executable-find "setleds") (setq keyamp-led t) (keyamp-led-on)))
+  (when (executable-find "setleds")
+    (setq keyamp-led t)
+    (keyamp-led-on)))
 
 (defvar keyamp-idle-timer nil "Idle timer.")
 
 (defun keyamp-idle-init ()
   "Idle init."
-  (if isearch-mode (isearch-cancel))
+  (if isearch-mode
+      (isearch-cancel))
   (keyamp-command)
   (keyamp-indicate-idle)
   (keyamp-blink-start keyamp-idle-color keyamp-command-color))
 
 (defun keyamp-idle-detect ()
   "Idle detect."
-  (if (timerp keyamp-idle-timer) (cancel-timer keyamp-idle-timer))
+  (if (timerp keyamp-idle-timer)
+      (cancel-timer keyamp-idle-timer))
   (setq keyamp-idle-timer
         (run-with-idle-timer keyamp-idle-timeout t 'keyamp-idle-init)))
 
