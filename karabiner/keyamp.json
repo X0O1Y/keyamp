@@ -92,7 +92,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to": [
@@ -121,7 +121,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -415,7 +415,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -523,7 +523,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -600,7 +600,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -691,7 +691,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -768,7 +768,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -845,7 +845,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -922,7 +922,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -995,7 +995,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -1082,7 +1082,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -1159,7 +1159,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -1236,7 +1236,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -1313,7 +1313,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -1390,7 +1390,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -1481,7 +1481,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -1572,7 +1572,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -1663,7 +1663,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -1754,7 +1754,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -1831,7 +1831,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -1904,7 +1904,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -1987,7 +1987,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -2070,7 +2070,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -2157,7 +2157,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -2234,7 +2234,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -2307,7 +2307,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -2377,7 +2377,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -2454,7 +2454,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -2531,7 +2531,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -2622,7 +2622,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -2699,7 +2699,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -2790,7 +2790,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -2881,7 +2881,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -2972,7 +2972,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -3115,7 +3115,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to": [
@@ -3144,7 +3144,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -3327,7 +3327,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -3467,7 +3467,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -3612,7 +3612,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -3752,7 +3752,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -3897,7 +3897,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -4037,7 +4037,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -4182,7 +4182,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -4322,7 +4322,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -4467,7 +4467,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -4607,7 +4607,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -4752,7 +4752,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -4892,7 +4892,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -5037,7 +5037,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -5177,7 +5177,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -5322,7 +5322,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -5462,7 +5462,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -5607,7 +5607,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -5747,7 +5747,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -5892,7 +5892,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -6032,7 +6032,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 1
+              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -6269,7 +6269,7 @@
           ],
           "to_if_held_down": [
             {
-              "key_code": "k",
+              "key_code": "m",
               "modifiers": [
                 "left_control"
               ],

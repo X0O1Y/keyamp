@@ -40,20 +40,15 @@
 
 (defvar before-last-command-event nil "Before `last-command-event'.")
 
-(defconst before-last-command-event-threshold
-  (cond ((and (minibufferp) (not (display-graphic-p))) 0)
-        ((not (display-graphic-p)) (/ 70 1000.0))
-        (t 0))
-  "Threshold for `before-last-command-event'. Time to paste into terminal.")
+(defun before-last-command-event (Event)
+  "Set and unset `before-last-command-event' to EVENT."
+  (setq before-last-command-event Event)
+  (run-with-timer before-last-command-timeout nil
+                  (lambda () (setq before-last-command-event nil))))
 
-(defconst before-last-command-event-timeout (/ 300 1000.0)
-  "Timeout for `before-last-command-event'.")
+(defconst before-last-command-timeout (/ 200 1000.0)
+  "Timeout for `before-last-command' and `before-last-command-event'.")
 
-(defun before-last-command-event (&optional Event)
-  "Set `before-last-command-event' to EVENT."
-  (setq before-last-command-event Event))
-
-(defconst before-last-command-timeout (/ 200 1000.0) "Timeout for `before-last-command'.")
 (defvar before-last-command nil "Command before last command.")
 
 (defun before-last-command ()
@@ -63,6 +58,18 @@
                   (lambda () (setq before-last-command nil))))
 
 (defvar last-command-keys nil "Last command keys.")
+
+(defvar triple-press-direction-commands-list
+  '(backward-char
+    forward-char
+    previous-line
+    dired-previous-line
+    back-word
+    forw-word)
+  "See `down-line' and `select-word'.
+1. Before last command affects direction of a triple SPC and DEL press
+2. Set right before execution of up and down line by the triple press
+3. Up and down line run as around advice for select block and word.")
 
 (defun up-line ()
   "Up line for transient use."
@@ -162,6 +169,8 @@
   "Call to `beginning-of-visual-line'."
   (unless (or (equal before-last-command 'backward-char)
               (equal before-last-command 'forward-char)
+              (equal before-last-command 'forw-word)
+              (equal before-last-command 'back-word)
               (eq major-mode 'dired-mode))
     (beginning-of-visual-line)))
 
@@ -271,9 +280,14 @@
 
 (defun isearch-cancel-clean-are ()
   "Defer `isearch-cancel-clean' and `abort-recursive-edit'."
-  (run-with-timer 0.1 nil 'isearch-cancel-clean)
+  (interactive)
+  (run-with-timer 0.05 nil 'isearch-cancel-clean)
   (setq this-command 'abort-recursive-edit)
   (abort-recursive-edit))
+
+(defun isearch-minibuffer-prompt ()
+  "Return t if minibufer is isearch minibuffer."
+  (string-match "I-search" (minibuffer-prompt)))
 
 (defun isearch-back ()
   "Isearch backward for transient use."
@@ -2412,7 +2426,7 @@ If there more than one frame, switch to next frame."
   (unless (minibufferp)
     (if (< 1 (length (frame-list))) (other-frame -1) (alt-buf))))
 
-(defvar wait-double 0.25 "Wait double press timeout.")
+(defvar wait-double (/ 250 1000.0) "Wait double press timeout.")
 
 (defvar proced-defer-timer nil "Timer to defer `proced-defer'.")
 (defun proced-run () "Run proced." (setq proced-defer-timer nil) (proced))
@@ -2421,14 +2435,16 @@ If there more than one frame, switch to next frame."
   "Defer in order to reuse double key press for another command."
   (interactive)
   (if (timerp proced-defer-timer)
-      (progn (cancel-timer proced-defer-timer) (setq proced-defer-timer nil))
+      (progn (cancel-timer proced-defer-timer)
+             (setq proced-defer-timer nil))
     (setq proced-defer-timer (run-with-timer wait-double nil 'proced-run))))
 
 (defvar kmacro-record-timer nil "Timer to defer `kmacro-record'.")
 
 (defun kmacro-start ()
   "Defer in order to reuse double key press for another command."
-  (kmacro-start-macro nil) (setq kmacro-record-timer nil))
+  (kmacro-start-macro nil)
+  (setq kmacro-record-timer nil))
 
 (defun kmacro-record ()
   "Start or stop macro recording."
@@ -2582,7 +2598,10 @@ and reverse-search-history in bashrc."
 
 (defun player ()
   "Run player."
-  (interactive) (if (fboundp 'emms-playlist) (emms-playlist) (message "No player")))
+  (interactive)
+  (if (fboundp 'emms-playlist)
+      (emms-playlist)
+    (message "No player")))
 
 (defun text-scale-reset () "Reset text scale." (interactive) (text-scale-adjust 0))
 
@@ -2622,9 +2641,10 @@ and reverse-search-history in bashrc."
         (lon (number-to-string calendar-longitude)))
     (browse-url (concat url "/?" lat "," lon ",9"))))
 
-(defun shopping () "Toggle shopping list."
-       (interactive)
-       (find-file shopping-list-file))
+(defun shopping ()
+  "Toggle shopping list."
+  (interactive)
+  (find-file shopping-list-file))
 
 (defun downloads ()
   "Go to downloads or temp."
@@ -2639,7 +2659,9 @@ and reverse-search-history in bashrc."
 (defun org-agenda-tasks ()
   "Same as `org-agenda-switch-to', but call `tasks' in case of error."
   (interactive)
-  (condition-case user-error (org-agenda-switch-to) (error (tasks))))
+  (condition-case user-error
+      (org-agenda-switch-to)
+    (error (tasks))))
 
 (defun todo ()
   "Modification of `org-todo'. Capitalize task."
@@ -2666,7 +2688,10 @@ and reverse-search-history in bashrc."
                  (gnus-nnews-inbox))))
     (message "%s" "Offline")))
 
-(defun sql () "Open SQL client." (interactive) (find-file "~/.sql"))
+(defun sql ()
+  "Open SQL client."
+  (interactive)
+  (find-file "~/.sql"))
 
 (defvar sql-type "sqlite" "SQL type for client.")
 
@@ -2678,7 +2703,8 @@ and reverse-search-history in bashrc."
 (defun exec-query ()
   "Execute SQL statement separated by semicolon or selected region."
   (interactive)
-  (unless (eq major-mode 'sql-mode) (error "Not SQL"))
+  (unless (eq major-mode 'sql-mode)
+    (error "Not SQL"))
   (let ((xconn (getenv "CONNINFO"))
         (xbuf (concat "*exec query*"))
         xquery xp1 xp2 (xsepRegex ";"))
@@ -2767,7 +2793,7 @@ This checks in turn:
 (defvar video-extensions '("mkv" "mp4" "avi" "mov" "ts" "mts" "webm" "vob" "aiff")
   "Open these video file extensions with `open-in-external-app'.")
 
-(defvar external-extensions `("mp3" "m4a" "flac" "torrent" "app")
+(defvar external-extensions `("mp3" "m4a" "flac" "torrent")
   "Open these file extensions with `open-in-external-app'.")
 
 (setq external-extensions (append external-extensions video-extensions))
@@ -2820,7 +2846,8 @@ before selection. This fun to be run as before advice for move fun."
 
 (defun delete-before (&rest _)
   "Delete selection right before insertion."
-  (if (memq last-command '(select-word select-quote)) (del-back)))
+  (if (memq last-command '(select-word select-quote))
+      (del-back)))
 
 (defun lookup-around (fun &rest r)
   "Lookup selection if buffer is read only and last command `select-word'.

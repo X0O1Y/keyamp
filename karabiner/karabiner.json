@@ -10,566 +10,8 @@
                 },
                 "rules": [
                     {
-                        "description": "right shift",
+                        "description": "return_or_enter",
                         "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "right_shift pressed",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    },
-                                    {
-                                        "file_paths": ["/Emacs"],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "input_sources": [{ "input_source_id": "com.apple.keylayout.RussianWin" }],
-                                        "type": "input_source_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "right_shift",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [
-                                    { "sticky_modifier": { "right_shift": "off" } },
-                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'" },
-                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } }
-                                ],
-                                "to_if_held_down": [
-                                    { "sticky_modifier": { "right_shift": "off" } },
-                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
-                                    {
-                                        "halt": true,
-                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "right_shift pressed",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    },
-                                    {
-                                        "file_paths": ["/Emacs"],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "input_sources": [{ "input_source_id": "com.apple.keylayout.ABC" }],
-                                        "type": "input_source_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "right_shift",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [
-                                    { "sticky_modifier": { "right_shift": "off" } },
-                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'" },
-                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } }
-                                ],
-                                "to_if_held_down": [
-                                    { "sticky_modifier": { "right_shift": "off" } },
-                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
-                                    {
-                                        "halt": true,
-                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "right_shift pressed",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    },
-                                    {
-                                        "file_paths": ["/Emacs"],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "input_sources": [{ "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" }],
-                                        "type": "input_source_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "right_shift",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [
-                                    { "sticky_modifier": { "right_shift": "off" } },
-                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-ru)'" },
-                                    { "select_input_source": { "input_source_id": "com.apple.keylayout.RussianWin" } }
-                                ],
-                                "to_if_held_down": [
-                                    { "sticky_modifier": { "right_shift": "off" } },
-                                    {
-                                        "halt": true,
-                                        "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" }
-                                    },
-                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'" }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "right_shift pressed",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    },
-                                    {
-                                        "input_sources": [{ "input_source_id": "com.apple.keylayout.RussianWin" }],
-                                        "type": "input_source_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "right_shift",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [
-                                    { "sticky_modifier": { "right_shift": "off" } },
-                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
-                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'" }
-                                ],
-                                "to_if_held_down": [
-                                    { "sticky_modifier": { "right_shift": "off" } },
-                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
-                                    {
-                                        "halt": true,
-                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "right_shift pressed",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    },
-                                    {
-                                        "input_sources": [{ "input_source_id": "com.apple.keylayout.ABC" }],
-                                        "type": "input_source_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "right_shift",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [
-                                    { "sticky_modifier": { "right_shift": "off" } },
-                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
-                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'" }
-                                ],
-                                "to_if_held_down": [
-                                    { "sticky_modifier": { "right_shift": "off" } },
-                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
-                                    {
-                                        "halt": true,
-                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "right_shift pressed",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    },
-                                    {
-                                        "input_sources": [{ "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" }],
-                                        "type": "input_source_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "right_shift",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [
-                                    { "sticky_modifier": { "right_shift": "off" } },
-                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-ru)'" },
-                                    { "select_input_source": { "input_source_id": "com.apple.keylayout.RussianWin" } }
-                                ],
-                                "to_if_held_down": [
-                                    { "sticky_modifier": { "right_shift": "off" } },
-                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
-                                    {
-                                        "halt": true,
-                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "from": {
-                                    "key_code": "right_shift",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [
-                                    {
-                                        "set_variable": {
-                                            "name": "right_shift pressed",
-                                            "value": 1
-                                        }
-                                    },
-                                    { "sticky_modifier": { "right_shift": "toggle" } },
-                                    { "key_code": "right_shift" }
-                                ],
-                                "to_delayed_action": {
-                                    "to_if_canceled": [
-                                        {
-                                            "set_variable": {
-                                                "name": "right_shift pressed",
-                                                "value": 0
-                                            }
-                                        }
-                                    ],
-                                    "to_if_invoked": [
-                                        {
-                                            "set_variable": {
-                                                "name": "right_shift pressed",
-                                                "value": 0
-                                            }
-                                        }
-                                    ]
-                                },
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "left shift",
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "left_shift pressed",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    },
-                                    {
-                                        "file_paths": ["/Emacs"],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "input_sources": [{ "input_source_id": "com.apple.keylayout.RussianWin" }],
-                                        "type": "input_source_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "left_shift",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [
-                                    { "sticky_modifier": { "left_shift": "off" } },
-                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'" },
-                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } }
-                                ],
-                                "to_if_held_down": [
-                                    { "sticky_modifier": { "left_shift": "off" } },
-                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
-                                    {
-                                        "halt": true,
-                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "left_shift pressed",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    },
-                                    {
-                                        "file_paths": ["/Emacs"],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "input_sources": [{ "input_source_id": "com.apple.keylayout.ABC" }],
-                                        "type": "input_source_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "left_shift",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [
-                                    { "sticky_modifier": { "left_shift": "off" } },
-                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'" },
-                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } }
-                                ],
-                                "to_if_held_down": [
-                                    { "sticky_modifier": { "left_shift": "off" } },
-                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
-                                    {
-                                        "halt": true,
-                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "left_shift pressed",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    },
-                                    {
-                                        "file_paths": ["/Emacs"],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "input_sources": [{ "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" }],
-                                        "type": "input_source_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "left_shift",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [
-                                    { "sticky_modifier": { "left_shift": "off" } },
-                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-ru)'" },
-                                    { "select_input_source": { "input_source_id": "com.apple.keylayout.RussianWin" } }
-                                ],
-                                "to_if_held_down": [
-                                    { "sticky_modifier": { "left_shift": "off" } },
-                                    {
-                                        "halt": true,
-                                        "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" }
-                                    },
-                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'" }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "left_shift pressed",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    },
-                                    {
-                                        "input_sources": [{ "input_source_id": "com.apple.keylayout.RussianWin" }],
-                                        "type": "input_source_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "left_shift",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [
-                                    { "sticky_modifier": { "left_shift": "off" } },
-                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
-                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'" }
-                                ],
-                                "to_if_held_down": [
-                                    { "sticky_modifier": { "left_shift": "off" } },
-                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
-                                    {
-                                        "halt": true,
-                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "left_shift pressed",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    },
-                                    {
-                                        "input_sources": [{ "input_source_id": "com.apple.keylayout.ABC" }],
-                                        "type": "input_source_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "left_shift",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [
-                                    { "sticky_modifier": { "left_shift": "off" } },
-                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
-                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'" }
-                                ],
-                                "to_if_held_down": [
-                                    { "sticky_modifier": { "left_shift": "off" } },
-                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
-                                    {
-                                        "halt": true,
-                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "left_shift pressed",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    },
-                                    {
-                                        "input_sources": [{ "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" }],
-                                        "type": "input_source_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "left_shift",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [
-                                    { "sticky_modifier": { "left_shift": "off" } },
-                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-ru)'" },
-                                    { "select_input_source": { "input_source_id": "com.apple.keylayout.RussianWin" } }
-                                ],
-                                "to_if_held_down": [
-                                    { "sticky_modifier": { "left_shift": "off" } },
-                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
-                                    {
-                                        "halt": true,
-                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "from": {
-                                    "key_code": "left_shift",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [
-                                    {
-                                        "set_variable": {
-                                            "name": "left_shift pressed",
-                                            "value": 1
-                                        }
-                                    },
-                                    { "sticky_modifier": { "left_shift": "toggle" } },
-                                    { "key_code": "left_shift" }
-                                ],
-                                "to_delayed_action": {
-                                    "to_if_canceled": [
-                                        {
-                                            "set_variable": {
-                                                "name": "left_shift pressed",
-                                                "value": 0
-                                            }
-                                        }
-                                    ],
-                                    "to_if_invoked": [
-                                        {
-                                            "set_variable": {
-                                                "name": "left_shift pressed",
-                                                "value": 0
-                                            }
-                                        }
-                                    ]
-                                },
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "f7",
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "f7",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [
-                                    {
-                                        "halt": true,
-                                        "shell_command": "~/.local/bin/pbcopy"
-                                    }
-                                ],
-                                "to_if_held_down": [
-                                    {
-                                        "halt": true,
-                                        "repeat": false,
-                                        "shell_command": "open -a SwitchBetweenAudioDevices.app"
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "f9",
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "f9",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [
-                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(let ((message-log-max nil)) (message \"Play next\"))' && /Applications/emacsclient --no-wait --eval '(play-next)'" },
-                                    { "key_code": "fastforward" }
-                                ],
-                                "to_if_held_down": [
-                                    {
-                                        "halt": true,
-                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(let ((message-log-max nil)) (message \"Play prev\"))' && /Applications/emacsclient --no-wait --eval '(play-prev)'"
-                                    },
-                                    { "key_code": "rewind" }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "f8",
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "f8",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [{ "shell_command": "/Applications/emacsclient --no-wait --eval '(play-pause)'" }],
-                                "to_if_held_down": [
-                                    { "key_code": "play_or_pause" },
-                                    {
-                                        "halt": true,
-                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(let ((message-log-max nil)) (message \"Play online\"))' && sleep 0.5 && killall Music"
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "spacebar",
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": ["/Emacs"],
-                                        "type": "frontmost_application_unless"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "spacebar",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [{ "key_code": "spacebar" }],
-                                "type": "basic"
-                            },
                             {
                                 "conditions": [
                                     {
@@ -583,16 +25,16 @@
                                     }
                                 ],
                                 "from": {
-                                    "key_code": "spacebar",
+                                    "key_code": "return_or_enter",
                                     "modifiers": { "optional": ["any"] }
                                 },
-                                "parameters": { "basic.to_if_held_down_threshold_milliseconds": 120 },
-                                "to_after_key_up": [{ "key_code": "spacebar" }],
+                                "to_after_key_up": [{ "key_code": "return_or_enter" }],
                                 "to_if_held_down": [
                                     {
                                         "halt": true,
-                                        "key_code": "spacebar",
-                                        "repeat": true
+                                        "key_code": "m",
+                                        "modifiers": ["control"],
+                                        "repeat": false
                                     }
                                 ],
                                 "type": "basic"
@@ -604,21 +46,85 @@
                                         "type": "frontmost_application_if"
                                     },
                                     {
-                                        "name": "spacebar pressed",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    },
-                                    {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
                                         "value": 1
                                     }
                                 ],
                                 "from": {
-                                    "key_code": "spacebar",
+                                    "key_code": "return_or_enter",
                                     "modifiers": { "optional": ["any"] }
                                 },
-                                "to": [{ "key_code": "spacebar" }],
+                                "to_after_key_up": [{ "key_code": "return_or_enter" }],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "m",
+                                        "modifiers": ["left_control"],
+                                        "repeat": false
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_unless"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "return_or_enter",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [{ "key_code": "return_or_enter" }],
+                                "to_if_held_down": [
+                                    {
+                                        "key_code": "h",
+                                        "modifiers": ["command", "option"]
+                                    },
+                                    {
+                                        "key_code": "m",
+                                        "modifiers": ["command"]
+                                    },
+                                    {
+                                        "halt": true,
+                                        "repeat": false,
+                                        "shell_command": "open -a Emacs.app"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "escape",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 0
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "escape",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [{ "key_code": "escape" }],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "j",
+                                        "modifiers": ["control"],
+                                        "repeat": false
+                                    }
+                                ],
                                 "type": "basic"
                             },
                             {
@@ -634,42 +140,59 @@
                                     }
                                 ],
                                 "from": {
-                                    "key_code": "spacebar",
+                                    "key_code": "escape",
                                     "modifiers": { "optional": ["any"] }
                                 },
                                 "to_after_key_up": [
-                                    { "key_code": "spacebar" },
+                                    { "key_code": "escape" },
+                                    {
+                                        "set_variable": {
+                                            "name": "left_command pressed",
+                                            "value": 0
+                                        }
+                                    },
                                     {
                                         "set_variable": {
                                             "name": "spacebar pressed",
-                                            "value": 1
+                                            "value": 0
                                         }
                                     }
                                 ],
-                                "to_delayed_action": {
-                                    "to_if_canceled": [
-                                        {
-                                            "set_variable": {
-                                                "name": "spacebar pressed",
-                                                "value": 0
-                                            }
-                                        }
-                                    ],
-                                    "to_if_invoked": [
-                                        {
-                                            "set_variable": {
-                                                "name": "spacebar pressed",
-                                                "value": 0
-                                            }
-                                        }
-                                    ]
-                                },
                                 "to_if_held_down": [
                                     {
                                         "halt": true,
-                                        "key_code": "b",
-                                        "modifiers": ["left_shift", "left_control"],
+                                        "key_code": "quote",
+                                        "modifiers": ["left_control"],
                                         "repeat": false
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_unless"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "escape",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [
+                                    { "key_code": "escape" },
+                                    {
+                                        "set_variable": {
+                                            "name": "left_command pressed",
+                                            "value": 0
+                                        }
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "repeat": false,
+                                        "shell_command": "open -a Emacs.app"
                                     }
                                 ],
                                 "type": "basic"
@@ -801,6 +324,129 @@
                         ]
                     },
                     {
+                        "description": "spacebar",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_unless"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "spacebar",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [{ "key_code": "spacebar" }],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 0
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "spacebar",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "parameters": { "basic.to_if_held_down_threshold_milliseconds": 120 },
+                                "to_after_key_up": [{ "key_code": "spacebar" }],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "spacebar",
+                                        "repeat": true
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "spacebar pressed",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 2
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "spacebar",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [{ "key_code": "spacebar" }],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 2
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "spacebar",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [
+                                    { "key_code": "spacebar" },
+                                    {
+                                        "set_variable": {
+                                            "name": "spacebar pressed",
+                                            "value": 1
+                                        }
+                                    }
+                                ],
+                                "to_delayed_action": {
+                                    "to_if_canceled": [
+                                        {
+                                            "set_variable": {
+                                                "name": "spacebar pressed",
+                                                "value": 0
+                                            }
+                                        }
+                                    ],
+                                    "to_if_invoked": [
+                                        {
+                                            "set_variable": {
+                                                "name": "spacebar pressed",
+                                                "value": 0
+                                            }
+                                        }
+                                    ]
+                                },
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "b",
+                                        "modifiers": ["left_shift", "left_control"],
+                                        "repeat": false
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
                         "description": "q",
                         "manipulators": [
                             {
@@ -842,7 +488,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -918,7 +564,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -972,7 +618,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -1037,7 +683,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -1091,7 +737,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -1145,7 +791,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -1199,7 +845,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -1250,7 +896,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -1312,7 +958,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -1366,7 +1012,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -1420,7 +1066,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -1474,7 +1120,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -1528,7 +1174,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -1593,7 +1239,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -1658,7 +1304,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -1723,7 +1369,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -1788,7 +1434,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -1842,7 +1488,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -1893,7 +1539,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -1952,7 +1598,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -2011,7 +1657,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -2073,7 +1719,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -2127,7 +1773,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -2178,7 +1824,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -2228,7 +1874,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -2282,7 +1928,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -2336,7 +1982,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -2401,7 +2047,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -2455,7 +2101,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -2520,7 +2166,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -2585,7 +2231,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -2650,7 +2296,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -2745,7 +2391,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -2764,7 +2410,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -2887,7 +2533,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -2978,7 +2624,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -3074,7 +2720,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -3165,7 +2811,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -3261,7 +2907,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -3352,7 +2998,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -3448,7 +3094,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -3539,7 +3185,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -3635,7 +3281,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -3726,7 +3372,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -3822,7 +3468,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -3913,7 +3559,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -4009,7 +3655,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -4100,7 +3746,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -4196,7 +3842,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -4287,7 +3933,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -4383,7 +4029,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -4474,7 +4120,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -4570,7 +4216,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -4661,7 +4307,7 @@
                                     {
                                         "name": "insert mode activated",
                                         "type": "variable_if",
-                                        "value": 1
+                                        "value": 2
                                     }
                                 ],
                                 "from": {
@@ -4787,94 +4433,6 @@
                         ]
                     },
                     {
-                        "description": "return_or_enter",
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": ["/Emacs"],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "insert mode activated",
-                                        "type": "variable_if",
-                                        "value": 0
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "return_or_enter",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [{ "key_code": "return_or_enter" }],
-                                "to_if_held_down": [
-                                    {
-                                        "halt": true,
-                                        "key_code": "m",
-                                        "modifiers": ["control"],
-                                        "repeat": false
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": ["/Emacs"],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "insert mode activated",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "return_or_enter",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [{ "key_code": "return_or_enter" }],
-                                "to_if_held_down": [
-                                    {
-                                        "halt": true,
-                                        "key_code": "k",
-                                        "modifiers": ["left_control"],
-                                        "repeat": false
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": ["/Emacs"],
-                                        "type": "frontmost_application_unless"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "return_or_enter",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [{ "key_code": "return_or_enter" }],
-                                "to_if_held_down": [
-                                    {
-                                        "key_code": "h",
-                                        "modifiers": ["command", "option"]
-                                    },
-                                    {
-                                        "key_code": "m",
-                                        "modifiers": ["command"]
-                                    },
-                                    {
-                                        "halt": true,
-                                        "repeat": false,
-                                        "shell_command": "open -a Emacs.app"
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
                         "description": "tab",
                         "manipulators": [
                             {
@@ -4903,108 +4461,6 @@
                                         "halt": true,
                                         "key_code": "tab",
                                         "repeat": false
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "escape",
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": ["/Emacs"],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "insert mode activated",
-                                        "type": "variable_if",
-                                        "value": 0
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "escape",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [{ "key_code": "escape" }],
-                                "to_if_held_down": [
-                                    {
-                                        "halt": true,
-                                        "key_code": "j",
-                                        "modifiers": ["control"],
-                                        "repeat": false
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": ["/Emacs"],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "insert mode activated",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "escape",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [
-                                    { "key_code": "escape" },
-                                    {
-                                        "set_variable": {
-                                            "name": "left_command pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "spacebar pressed",
-                                            "value": 0
-                                        }
-                                    }
-                                ],
-                                "to_if_held_down": [
-                                    {
-                                        "halt": true,
-                                        "key_code": "quote",
-                                        "modifiers": ["left_control"],
-                                        "repeat": false
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": ["/Emacs"],
-                                        "type": "frontmost_application_unless"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "escape",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [
-                                    { "key_code": "escape" },
-                                    {
-                                        "set_variable": {
-                                            "name": "left_command pressed",
-                                            "value": 0
-                                        }
-                                    }
-                                ],
-                                "to_if_held_down": [
-                                    {
-                                        "halt": true,
-                                        "repeat": false,
-                                        "shell_command": "open -a Emacs.app"
                                     }
                                 ],
                                 "type": "basic"
@@ -5378,6 +4834,74 @@
                                         "repeat": false,
                                         "shell_command": "open -a 'Docker Desktop'"
                                     }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "f7",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "f7",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [
+                                    {
+                                        "halt": true,
+                                        "shell_command": "~/.local/bin/pbcopy"
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "repeat": false,
+                                        "shell_command": "open -a SwitchBetweenAudioDevices.app"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "f8",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "f8",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [{ "shell_command": "/Applications/emacsclient --no-wait --eval '(play-pause)'" }],
+                                "to_if_held_down": [
+                                    { "key_code": "play_or_pause" },
+                                    {
+                                        "halt": true,
+                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(let ((message-log-max nil)) (message \"Play online\"))' && sleep 0.5 && killall Music"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "f9",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "f9",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [
+                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(let ((message-log-max nil)) (message \"Play next\"))' && /Applications/emacsclient --no-wait --eval '(play-next)'" },
+                                    { "key_code": "fastforward" }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(let ((message-log-max nil)) (message \"Play prev\"))' && /Applications/emacsclient --no-wait --eval '(play-prev)'"
+                                    },
+                                    { "key_code": "rewind" }
                                 ],
                                 "type": "basic"
                             }
@@ -5936,6 +5460,482 @@
                                     "modifiers": { "optional": ["any"] }
                                 },
                                 "to": [{ "software_function": { "iokit_power_management_sleep_system": { "delay_milliseconds": 500 } } }],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "left shift",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "left_shift pressed",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    },
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "input_sources": [{ "input_source_id": "com.apple.keylayout.RussianWin" }],
+                                        "type": "input_source_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "left_shift",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [
+                                    { "sticky_modifier": { "left_shift": "off" } },
+                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'" },
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } }
+                                ],
+                                "to_if_held_down": [
+                                    { "sticky_modifier": { "left_shift": "off" } },
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
+                                    {
+                                        "halt": true,
+                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "left_shift pressed",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    },
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "input_sources": [{ "input_source_id": "com.apple.keylayout.ABC" }],
+                                        "type": "input_source_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "left_shift",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [
+                                    { "sticky_modifier": { "left_shift": "off" } },
+                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'" },
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } }
+                                ],
+                                "to_if_held_down": [
+                                    { "sticky_modifier": { "left_shift": "off" } },
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
+                                    {
+                                        "halt": true,
+                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "left_shift pressed",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    },
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "input_sources": [{ "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" }],
+                                        "type": "input_source_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "left_shift",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [
+                                    { "sticky_modifier": { "left_shift": "off" } },
+                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-ru)'" },
+                                    { "select_input_source": { "input_source_id": "com.apple.keylayout.RussianWin" } }
+                                ],
+                                "to_if_held_down": [
+                                    { "sticky_modifier": { "left_shift": "off" } },
+                                    {
+                                        "halt": true,
+                                        "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" }
+                                    },
+                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'" }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "left_shift pressed",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    },
+                                    {
+                                        "input_sources": [{ "input_source_id": "com.apple.keylayout.RussianWin" }],
+                                        "type": "input_source_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "left_shift",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [
+                                    { "sticky_modifier": { "left_shift": "off" } },
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
+                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'" }
+                                ],
+                                "to_if_held_down": [
+                                    { "sticky_modifier": { "left_shift": "off" } },
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
+                                    {
+                                        "halt": true,
+                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "left_shift pressed",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    },
+                                    {
+                                        "input_sources": [{ "input_source_id": "com.apple.keylayout.ABC" }],
+                                        "type": "input_source_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "left_shift",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [
+                                    { "sticky_modifier": { "left_shift": "off" } },
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
+                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'" }
+                                ],
+                                "to_if_held_down": [
+                                    { "sticky_modifier": { "left_shift": "off" } },
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
+                                    {
+                                        "halt": true,
+                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "left_shift pressed",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    },
+                                    {
+                                        "input_sources": [{ "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" }],
+                                        "type": "input_source_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "left_shift",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [
+                                    { "sticky_modifier": { "left_shift": "off" } },
+                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-ru)'" },
+                                    { "select_input_source": { "input_source_id": "com.apple.keylayout.RussianWin" } }
+                                ],
+                                "to_if_held_down": [
+                                    { "sticky_modifier": { "left_shift": "off" } },
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
+                                    {
+                                        "halt": true,
+                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "left_shift",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [
+                                    {
+                                        "set_variable": {
+                                            "name": "left_shift pressed",
+                                            "value": 1
+                                        }
+                                    },
+                                    { "sticky_modifier": { "left_shift": "toggle" } },
+                                    { "key_code": "left_shift" }
+                                ],
+                                "to_delayed_action": {
+                                    "to_if_canceled": [
+                                        {
+                                            "set_variable": {
+                                                "name": "left_shift pressed",
+                                                "value": 0
+                                            }
+                                        }
+                                    ],
+                                    "to_if_invoked": [
+                                        {
+                                            "set_variable": {
+                                                "name": "left_shift pressed",
+                                                "value": 0
+                                            }
+                                        }
+                                    ]
+                                },
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "right shift",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "right_shift pressed",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    },
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "input_sources": [{ "input_source_id": "com.apple.keylayout.RussianWin" }],
+                                        "type": "input_source_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "right_shift",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [
+                                    { "sticky_modifier": { "right_shift": "off" } },
+                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'" },
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } }
+                                ],
+                                "to_if_held_down": [
+                                    { "sticky_modifier": { "right_shift": "off" } },
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
+                                    {
+                                        "halt": true,
+                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "right_shift pressed",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    },
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "input_sources": [{ "input_source_id": "com.apple.keylayout.ABC" }],
+                                        "type": "input_source_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "right_shift",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [
+                                    { "sticky_modifier": { "right_shift": "off" } },
+                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'" },
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } }
+                                ],
+                                "to_if_held_down": [
+                                    { "sticky_modifier": { "right_shift": "off" } },
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
+                                    {
+                                        "halt": true,
+                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "right_shift pressed",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    },
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "input_sources": [{ "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" }],
+                                        "type": "input_source_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "right_shift",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [
+                                    { "sticky_modifier": { "right_shift": "off" } },
+                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-ru)'" },
+                                    { "select_input_source": { "input_source_id": "com.apple.keylayout.RussianWin" } }
+                                ],
+                                "to_if_held_down": [
+                                    { "sticky_modifier": { "right_shift": "off" } },
+                                    {
+                                        "halt": true,
+                                        "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" }
+                                    },
+                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'" }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "right_shift pressed",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    },
+                                    {
+                                        "input_sources": [{ "input_source_id": "com.apple.keylayout.RussianWin" }],
+                                        "type": "input_source_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "right_shift",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [
+                                    { "sticky_modifier": { "right_shift": "off" } },
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
+                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'" }
+                                ],
+                                "to_if_held_down": [
+                                    { "sticky_modifier": { "right_shift": "off" } },
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
+                                    {
+                                        "halt": true,
+                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "right_shift pressed",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    },
+                                    {
+                                        "input_sources": [{ "input_source_id": "com.apple.keylayout.ABC" }],
+                                        "type": "input_source_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "right_shift",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [
+                                    { "sticky_modifier": { "right_shift": "off" } },
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
+                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'" }
+                                ],
+                                "to_if_held_down": [
+                                    { "sticky_modifier": { "right_shift": "off" } },
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
+                                    {
+                                        "halt": true,
+                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "right_shift pressed",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    },
+                                    {
+                                        "input_sources": [{ "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" }],
+                                        "type": "input_source_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "right_shift",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [
+                                    { "sticky_modifier": { "right_shift": "off" } },
+                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-ru)'" },
+                                    { "select_input_source": { "input_source_id": "com.apple.keylayout.RussianWin" } }
+                                ],
+                                "to_if_held_down": [
+                                    { "sticky_modifier": { "right_shift": "off" } },
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
+                                    {
+                                        "halt": true,
+                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "right_shift",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [
+                                    {
+                                        "set_variable": {
+                                            "name": "right_shift pressed",
+                                            "value": 1
+                                        }
+                                    },
+                                    { "sticky_modifier": { "right_shift": "toggle" } },
+                                    { "key_code": "right_shift" }
+                                ],
+                                "to_delayed_action": {
+                                    "to_if_canceled": [
+                                        {
+                                            "set_variable": {
+                                                "name": "right_shift pressed",
+                                                "value": 0
+                                            }
+                                        }
+                                    ],
+                                    "to_if_invoked": [
+                                        {
+                                            "set_variable": {
+                                                "name": "right_shift pressed",
+                                                "value": 0
+                                            }
+                                        }
+                                    ]
+                                },
                                 "type": "basic"
                             }
                         ]
