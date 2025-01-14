@@ -82,6 +82,7 @@
          (back-char))
         ((equal before-last-command this-command)
          (cond ((eq major-mode 'ibuffer-mode)
+                (setq this-command 'ibuffer-backward-filter-group)
                 (ibuffer-backward-filter-group))
                ((eq major-mode 'gnus-group-mode)
                 (setq this-command 'gnus-topic-prev)
@@ -111,6 +112,7 @@
          (forw-char))
         ((equal before-last-command this-command)
          (cond ((eq major-mode 'ibuffer-mode)
+                (setq this-command 'ibuffer-forward-filter-group)
                 (ibuffer-forward-filter-group))
                ((eq major-mode 'gnus-group-mode)
                 (setq this-command 'gnus-topic-next)
@@ -266,8 +268,15 @@
     (if (eq last-command 'button-back)
         (before-last-command))))
 
+(defun isearch-update-ring-force ()
+  "Force push string to isearch ring."
+  (if (and (> (length isearch-string) 0))
+      ;; update the ring data
+      (isearch-update-ring isearch-string isearch-regexp)))
+
 (defun isearch-cancel-clean ()
   "Like `isearch-cancel' but no quit signal and clean up echo area."
+  (isearch-update-ring-force)
   (if (and isearch-push-state-function isearch-cmds)
       ;; For defined push-state function, restore the first state.
       ;; This calls pop-state function and restores original point.
@@ -293,24 +302,24 @@
   "Isearch backward for transient use."
   (interactive)
   (if (or (equal before-last-command this-command)
-          (equal before-last-command 'isearch-cur-word-backward))
+          (equal before-last-command 'isearch-wback))
       (progn (setq this-command 'isearch-cancel)
              (isearch-cancel-clean))
     (command-execute 'isearch-repeat-backward)
     (if (or (eq last-command 'isearch-forw)
-            (eq last-command 'isearch-cur-word-forward))
+            (eq last-command 'isearch-wforw))
         (before-last-command))))
 
 (defun isearch-forw ()
   "Isearch forward for transient use."
   (interactive)
   (if (or (equal before-last-command this-command)
-          (equal before-last-command 'isearch-cur-word-forward))
+          (equal before-last-command 'isearch-wforw))
       (progn (setq this-command 'isearch-cancel)
              (isearch-cancel-clean))
     (command-execute 'isearch-repeat-forward)
     (if (or (eq last-command 'isearch-back)
-            (eq last-command 'isearch-cur-word-backward))
+            (eq last-command 'isearch-wback))
         (before-last-command))))
 
 (defun jump-mark ()
@@ -1804,6 +1813,7 @@ command, so that next buffer shown is a user buffer."
    ((string-equal buffer-file-truename org-agenda-file-2) nil)
    ((string-equal buffer-file-truename org-agenda-file-3) nil)
    ((string-match ".+em/project+." default-directory) nil)
+   ((string-match ".+airflow+." default-directory) nil)
    ((and buffer-file-truename (string-match ".sql" buffer-file-truename)) nil)
    (t t)))
 
@@ -1862,7 +1872,8 @@ command, so that next buffer shown is a user buffer."
 (defun project-buffer-p ()
   "Return t if current buffer is a project buffer, else nil."
   (cond ((string-equal "*" (substring (buffer-name) 0 1)) nil)
-        ((and (string-match ".+em/project+." default-directory)
+        ((and (or (string-match ".+em/project+." default-directory)
+                  (string-match ".+airflow+." default-directory))
               (not (string-equal major-mode "dired-mode"))) t)))
 
 (defun prev-proj-buf ()
@@ -2110,8 +2121,8 @@ If path does not have a file extension, automatically try with “.el”
 for elisp files."
   (interactive)
   (if (eq major-mode 'dired-mode)
-      (progn (setq this-command 'delete-other-windows)
-             (delete-other-windows))
+      (progn (setq this-command 'screen-idle)
+             (screen-idle))
     (let* ((xinput
             (if (region-active-p)
                 (buffer-substring-no-properties (region-beginning) (region-end))
@@ -2157,12 +2168,12 @@ for elisp files."
                   (if (and (> (length xpath) 0)
                            (not (member xpath '("//" "/" "." ".." ":"))))
                       (find-file xpath)
-                    (setq this-command 'delete-other-windows)
-                    (delete-other-windows))
+                    (setq this-command 'screen-idle)
+                    (screen-idle))
                 (if (file-exists-p (concat xpath ".el"))
                     (find-file (concat xpath ".el"))
-                  (setq this-command 'delete-other-windows)
-                  (delete-other-windows))))))))))
+                  (setq this-command 'screen-idle)
+                  (screen-idle))))))))))
 
 (defun url-paste-and-go ()
   "Go to URL from system clipboard."
@@ -2333,19 +2344,19 @@ If the current buffer is not associated with a file nor dired, nothing's done."
   (isearch-mode t)
   (isearch-yank-string (cur-word)))
 
-(defun isearch-cur-word-forward ()
+(defun isearch-wforw ()
   "Forward `isearch-cur-word'."
   (interactive)
   (isearch-cur-word)
   (isearch-repeat-forward)
-  (setq this-command 'isearch-cur-word-forward))
+  (setq this-command 'isearch-wforw))
 
-(defun isearch-cur-word-backward ()
+(defun isearch-wback ()
   "Backward `isearch-cur-word'."
   (interactive)
   (isearch-cur-word)
   (isearch-repeat-backward)
-  (setq this-command 'isearch-cur-word-backward))
+  (setq this-command 'isearch-wback))
 
 (defvar occur-cur-word-defer-timer nil "Timer to defer `occur-cur-word'.")
 
@@ -2370,7 +2381,7 @@ If the current buffer is not associated with a file nor dired, nothing's done."
   (interactive)
   (let ((xdefault (cur-word)))
     (find-text
-     (read-string "Search: "
+     (read-string (format "Search (%s): " xdefault)
                   nil 'query-replace-history xdefault)
      (expand-file-name "") ".[A-Za-z0-9]+$" t t)))
 
@@ -2423,8 +2434,14 @@ When called in Emacs Lisp, if Fname is given, open that."
   "Switch to alternate buffer or frame.
 If there more than one frame, switch to next frame."
   (interactive)
-  (unless (minibufferp)
-    (if (< 1 (length (frame-list))) (other-frame -1) (alt-buf))))
+  (if (< 1 (length (frame-list)))
+      (other-frame -1)
+    (unless (minibufferp)
+      (if (string-equal (buffer-name) "*Ibuffer*")
+          (progn
+            (setq this-command 'screen-idle)
+            (screen-idle))
+        (alt-buf)))))
 
 (defvar wait-double (/ 250 1000.0) "Wait double press timeout.")
 
@@ -2734,7 +2751,9 @@ and reverse-search-history in bashrc."
         ;; way to send attach and dot commands along with sql query
         (let ((xres (shell-command-to-string
                      (format "sqlite3 <<EOF\n%s\nEOF" xquery))))
-          (if (> (length xres) 0) (insert xres) (insert "No rows\n"))))
+          (if (> (length xres) 0)
+              (insert xres)
+            (insert "No rows\n"))))
       (insert (concat (make-string 89 45) "\n")))
     (set-mark-command t)
     (other-window 1))
@@ -2991,10 +3010,11 @@ Use as around advice e.g. for mouse left click after double click."
   "Cancel isearch and save buffer."
   (interactive)
   (isearch-cancel-clean)
-  (cond ((buffer-file-name)
-         (save-buffer))
-        ((string-match "^file*." (buffer-name))
-         (command-execute 'write-file))))
+  (cond
+   ((buffer-file-name)
+    (save-buffer))
+   ((string-match "^file*." (buffer-name))
+    (command-execute 'write-file))))
 
 (defun empty-bin ()
   "Empty bin on macOS."
