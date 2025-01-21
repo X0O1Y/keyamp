@@ -857,15 +857,12 @@ If `universal-argument' is called first, do not delete inner text."
   (interactive)
   (if buffer-read-only
       (setq this-command 'ignore)
-    (let (ok)
-      (unwind-protect
-          (progn (cut-bracket)
-                 (push-mark (point) t)
-                 (setq ok t))
-        (unless ok
-          (if (looking-back "\\s)" 1)
-              (kill-region (point) (progn (backward-char 1) (point)))
-            (kill-region (point) (progn (forward-char 1) (point)))))))))
+    (condition-case nil
+        (progn (cut-bracket)
+               (push-mark (point) t))
+      (error (if (looking-back "\\s)" 1)
+                 (kill-region (point) (progn (backward-char 1) (point)))
+               (kill-region (point) (progn (forward-char 1) (point))))))))
 
 (defun del-forw () "Delete char forward." (interactive) (delete-char 1))
 
@@ -1938,7 +1935,8 @@ command, so that next buffer shown is a user buffer."
   (let ((i 0) (xbuf (current-buffer)))
     (previous-buffer)
     (while (< i 99)
-      (if (not (eq major-mode 'vterm-mode))
+      (if (or (not (eq major-mode 'vterm-mode))
+              (string-equal (buffer-name) "*clock*"))
           (progn (previous-buffer)
                  (setq i (1+ i))
                  (when (= i 99)
@@ -1952,7 +1950,8 @@ command, so that next buffer shown is a user buffer."
   (let ((i 0) (xbuf (current-buffer)))
     (next-buffer)
     (while (< i 99)
-      (if (not (eq major-mode 'vterm-mode))
+      (if (or (not (eq major-mode 'vterm-mode))
+              (string-equal (buffer-name) "*clock*"))
           (progn (next-buffer)
                  (setq i (1+ i))
                  (when (= i 99)
@@ -2023,9 +2022,9 @@ With prefix arg, find the previous file."
       (find-file (nth pos files)))))
 
 (defun new-empty-buffer ()
-  "Create a new empty buffer. New buffer is named file, file<2>, etc."
+  "Create a new empty buffer. New buffer is named buffer, buffer<2>, etc."
   (interactive)
-  (let ((xbuf (generate-new-buffer "file")))
+  (let ((xbuf (generate-new-buffer "buffer")))
     (switch-to-buffer xbuf)
     (funcall initial-major-mode)
     xbuf))
@@ -2044,7 +2043,8 @@ to `user-emacs-directory' temp and named file_‹datetime›_‹randomhex›.txt
 Switch to the same buffer type after close, e.g. user or project."
   (interactive)
   (if (buffer-file-name)
-      (when (buffer-modified-p) (save-buffer))
+      (when (buffer-modified-p)
+        (save-buffer))
     (when (user-buffer-p)
       (widen)
       (when (not (equal (point-max) 1))
@@ -2110,8 +2110,18 @@ Similar to `kill-buffer', with the following addition:
       (find-file (cdr (pop recently-closed-buffers)))
     (message "No recently closed buffers in this session")))
 
+(defun describe-foo-at-point-error ()
+  "Do `describe-variable' in case of error."
+  (condition-case nil
+      (progn
+        (setq this-command 'describe-foo-at-point)
+        (describe-foo-at-point))
+    (error
+     (setq this-command 'describe-function)
+     (call-interactively 'describe-function))))
+
 (defun open-file ()
-  "Open the file path under cursor.
+  "Open the file path under cursor. Or do something depending on context.
 If there is selection, use it for path.
 If the path starts with “http://”, open the URL in browser.
 Input path can be {relative, full path, URL}.
@@ -2121,8 +2131,8 @@ If path does not have a file extension, automatically try with “.el”
 for elisp files."
   (interactive)
   (if (eq major-mode 'dired-mode)
-      (progn (setq this-command 'screen-idle)
-             (screen-idle))
+      (progn (setq this-command 'open-in-external-app)
+             (open-in-external-app))
     (let* ((xinput
             (if (region-active-p)
                 (buffer-substring-no-properties (region-beginning) (region-end))
@@ -2168,19 +2178,18 @@ for elisp files."
                   (if (and (> (length xpath) 0)
                            (not (member xpath '("//" "/" "." ".." ":"))))
                       (find-file xpath)
-                    (setq this-command 'screen-idle)
-                    (screen-idle))
+                    (describe-foo-at-point-error))
                 (if (file-exists-p (concat xpath ".el"))
                     (find-file (concat xpath ".el"))
-                  (setq this-command 'screen-idle)
-                  (screen-idle))))))))))
+                  (describe-foo-at-point-error))))))))))
 
 (defun url-paste-and-go ()
   "Go to URL from system clipboard."
   (let ((xurl (funcall interprogram-paste-function)))
     (if (string-match-p "\\`https?://www.youtube.com" xurl)
         (movie xurl)
-      (eww xurl) (setq last-command 'eww-follow-link))))
+      (eww xurl)
+      (setq last-command 'eww-follow-link))))
 
 
 
