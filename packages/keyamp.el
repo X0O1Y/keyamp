@@ -123,10 +123,12 @@ If Direct-p is t, do not remap key to current keyboard layout."
                                  (keyamp-command))
                              (keyamp-repeat-init ,xkeymapName)
                              (keyamp-cancel-repeat-idle-timer)
-                             (if (and ,TimeOut (not keyamp-insert-p))
+                             (if (and ,TimeOut
+                                      (not keyamp-insert-p))
                                  (setq keyamp--repeat-idle-timer
                                        (run-with-idle-timer ,TimeOut nil 'keyamp-escape)))
-                             (if ,InsertMode (keyamp-insert))))))
+                             (if ,InsertMode
+                                 (keyamp-insert))))))
           (cadr CmdList)))))
 
 (defmacro keyamp--hook (KeymapName HookList &optional CommandMode InsertMode RepeatMode)
@@ -1002,7 +1004,7 @@ is enabled.")
     (when (and this-command
                (memq major-mode keyamp-lines-move-modes))
       (keyamp-repeat-deactivate-init keymap)
-      (run-with-timer keyamp-prefix-delay nil 'keyamp-indicate-read)))
+      (run-at-time nil nil 'keyamp-indicate-read)))
 
   (advice-add-macro '(other-window translate dired-find-file dired-jump)
    :after 'keyamp-lines-move))
@@ -1359,7 +1361,7 @@ is enabled.")
 (with-sparse-keymap ; dummy indication modify
   (keyamp--set keymap
     '(apply-macro-to-region-lines cycle-hyphen-lowline-space
-     delete-duplicate-lines      delete-matching-lines
+      delete-duplicate-lines      delete-matching-lines
       delete-non-matching-lines   emoji-insert
       eval-defun                  eval-region-or-sexp
       eshell-clear-input          fill-or-unfill
@@ -1378,7 +1380,7 @@ is enabled.")
     nil nil nil keyamp-blink-blink))
 
 (with-sparse-keymap ; dummy indication idle
-  (keyamp--set keymap '(ignore dummy monitor) nil nil nil keyamp-blink-blink-half))
+  (keyamp--set keymap '(ignore dummy monitor) nil nil nil keyamp-blink-blink))
 
 (with-sparse-keymap ; easy undo with DEL
   (keyamp--map-leader keymap '(undo . nil))
@@ -1491,8 +1493,8 @@ is enabled.")
                     :after 'keyamp-insert-init)
 
   (keyamp--map minibuffer-inactive-mode-map
-    '(("<mouse-1>" . player) ("<double-mouse-1>" . ignore)))
-  (keyamp--remap minibuffer-inactive-mode-map '((mouse-3 . toggle-ibuffer))))
+    '(("<mouse-1>" . radio) ("<double-mouse-1>" . ignore)))
+  (keyamp--remap minibuffer-inactive-mode-map '((mouse-3 . radio-next))))
 
 (with-eval-after-load 'icomplete
   (keyamp--map-return icomplete-minibuffer-map keyamp-minibuffer-return)
@@ -1564,9 +1566,14 @@ is enabled.")
   (advice-add-macro '(wdired-abort-changes wdired-finish-edit) :after 'keyamp-command))
 
 (with-eval-after-load 'dired-utils
-  (keyamp--map-tab dired-mode-map dired-leader-map)
-  (keyamp--map-tab (define-prefix-command 'dired-leader-map) dired-omit-mode)
-  (keyamp--map dired-leader-map
+  (keyamp--map-backtab dired-mode-map dired-lleader-map)
+  (keyamp--map-backtab (define-prefix-command 'dired-lleader-map) dired-omit-mode)
+  (keyamp--map-leader dired-lleader-map '(dired-size . nil))
+
+  (keyamp--map-tab dired-mode-map dired-rleader-map)
+  (keyamp--map-tab (define-prefix-command 'dired-rleader-map) dired-omit-mode)
+  (keyamp--map-leader dired-rleader-map '(nil . dired-size))
+  (keyamp--map dired-rleader-map
     '(("e"  . dired-optimize-png)     ("u" . dired-2drawing)
       ("o"  . dired-rotate-img-right) ("p" . dired-rotate-img-left)
       ("a"  . dired-image-autocrop)   ("s" . dired-open-marked)
@@ -1802,9 +1809,8 @@ is enabled.")
 (keyamp--map-leader tmux-clock-keymap '(alt-buf . tasks))
 (keyamp--map-escape tmux-clock-keymap alt-buf)
 (keyamp--map-return tmux-clock-keymap alt-buf)
-(keyamp--map tmux-clock-keymap '(("<mouse-1>" . alt-buf)))
 (keyamp--remap tmux-clock-keymap
-  '((del-back      . alt-buf)
+  '((del-back      . alt-buf) (mouse-3      . alt-buf)
     (previous-line . alt-buf) (next-line    . alt-buf)
     (backward-char . alt-buf) (forward-char . alt-buf)))
 
@@ -1984,8 +1990,9 @@ is enabled.")
    prev-buf next-buf             save-close-buf dired-jump)
  :after 'keyamp-command-if-insert)
 
+;;; vterm
 (with-eval-after-load 'vterm
-  (keyamp--map-backtab vterm-mode-map vterm-history-search)
+  (keyamp--map-backtab vterm-mode-map vterm-send-backtab)
   (keyamp--map-tab vterm-mode-map vterm-send-tab)
   (keyamp--map vterm-mode-map '(("C-r" . delete-other-windows)))
 
@@ -1994,30 +2001,30 @@ is enabled.")
       (prev-eww-buffer     . vterm-clear)
       (paste-or-prev       . vterm-yank)
       (paste-from-r1       . vterm-yank-pop)
-      (backward-del-word   . vterm-backward-kill-word)
-      (toggle-comment      . vterm-send-next-key)
+      (shrink-whitespaces  . vterm-tmux-copy-mode)
+      (cut-text-block      . vterm-shell-vi-cmd)
+      (toggle-comment      . vterm-read-send-key)
       (open-line           . prev-vterm-buffer)
       (newline             . next-vterm-buffer)
-      (cut-line            . ignore)
-      (insert-space-before . ignore)
+      (cut-line            . vterm-tmux-next-window)
+      (new-empty-buffer    . vterm-tmux-create-window)
+      (insert-space-before . vterm-tmux-close-window)
       (del-back            . vterm-send-backspace)))
 
   (with-sparse-keymap
-    (keyamp--map-leader keymap '(vterm-send-backspace . keyamp-insert-and-SPC))
-    (keyamp--set keymap '(vterm-send-backspace) nil nil nil keyamp-delay-1))
+    (keyamp--map-leader keymap '(vterm-send-backspace . nil))
+    (keyamp--set keymap '(vterm-send-backspace)))
 
   (with-sparse-keymap
     (keyamp--map-leader keymap '(previous-line . next-line))
-    (keyamp--remap keymap
-      '((previous-line . vterm-up)   (next-line    . vterm-down)
-        (backward-char . vterm-left) (forward-char . vterm-right)))
+    (keyamp--remap keymap '((previous-line . vterm-up) (next-line . vterm-down)))
     (keyamp--set keymap '(vterm-history-search) nil :insert)
     (keyamp--set keymap '(vterm-up vterm-down vterm-yank-pop) :command))
 
   (with-sparse-keymap
     (keyamp--map-leader keymap '(backward-char . forward-char))
     (keyamp--remap keymap '((backward-char . vterm-left) (forward-char . vterm-right)))
-    (keyamp--set keymap '(vterm-left vterm-right) :command))
+    (keyamp--set keymap '(vterm-left vterm-right vterm-reset-cursor-point) :command))
 
   (with-sparse-keymap
     (keyamp--map-leader keymap '(vterm-up . self-insert-command))
@@ -2034,8 +2041,71 @@ is enabled.")
     (advice-add 'keyamp-input-timer-payload :after 'keyamp-input-timer-payload-vterm))
 
   (add-hook 'vterm-mode-hook 'keyamp-input-timer)
-  (advice-add-macro '(vterm-send-return term-interrupt-subjob)
-                    :after 'keyamp-input-timer))
+  (advice-add-macro '(vterm-send-return term-interrupt-subjob) :after 'keyamp-input-timer)
+
+  (with-sparse-keymap
+    (keyamp--map-leader keymap '(vterm-tmux-prev-window . vterm-tmux-next-window))
+    (keyamp--remap keymap '((open-line . vterm-tmux-prev-window) (newline . vterm-tmux-next-window)))
+    (keyamp--set keymap '(vterm-tmux-prev-window vterm-tmux-next-window)))
+
+  ;;; shell prompt vi cmd mode
+  (with-sparse-keymap ; map must be set for bash and zsh
+    (keyamp--remap keymap
+      '((backward-char     . vterm-shell-vi-cmd-self-insert)
+        (forward-char      . vterm-shell-vi-cmd-s)
+        (back-word         . vterm-shell-vi-cmd-l)
+        (forw-word         . vterm-shell-vi-cmd-w)
+        (del-back          . vterm-shell-vi-cmd-e)
+        (undo              . vterm-shell-vi-cmd-self-insert)
+        (beg-of-line       . vterm-shell-vi-cmd-self-insert)
+        (end-of-lyne       . vterm-shell-vi-cmd-self-insert)
+        (del-word          . vterm-shell-vi-cmd-self-insert)
+        (backward-del-word . vterm-shell-vi-cmd-self-insert)))
+    (keyamp--set keymap
+      '(vterm-up ; cmd mode after list history
+        vterm-down
+        vterm-shell-vi-cmd
+        vterm-shell-vi-cmd-self-insert
+        vterm-shell-vi-cmd-s
+        vterm-shell-vi-cmd-l
+        vterm-shell-vi-cmd-w
+        vterm-shell-vi-cmd-e))
+    (add-hook 'keyamp-insert-hook 'vterm-shell-vi-insert))
+
+  (with-sparse-keymap ; word move repeat
+    (keyamp--remap keymap
+      '((backward-char . vterm-shell-vi-cmd-l)
+        (forward-char  . vterm-shell-vi-cmd-w)))
+    (keyamp--set keymap '(vterm-shell-vi-cmd-l vterm-shell-vi-cmd-w)))
+
+  (with-sparse-keymap ; delete char repeat
+    (keyamp--map-leader keymap '(vterm-shell-vi-cmd-e . nil))
+    (keyamp--set keymap '(vterm-shell-vi-cmd-e)))
+
+  ;;; tmux copy mode
+  (with-sparse-keymap
+    (keyamp--map-leader keymap '(vterm-tmux-copy-mode-dot . vterm-tmux-copy-mode-n))
+    (keyamp--remap keymap
+      '((previous-line      . vterm-tmux-copy-mode-self-insert)
+        (backward-char      . vterm-tmux-copy-mode-self-insert)
+        (next-line          . vterm-tmux-copy-mode-self-insert)
+        (forward-char       . vterm-tmux-copy-mode-self-insert)
+        (beg-of-line        . vterm-tmux-copy-mode-dot)
+        (end-of-lyne        . vterm-tmux-copy-mode-n)
+        (shrink-whitespaces . vterm-tmux-copy-mode-q)
+        (copy-line          . vterm-tmux-copy-mode-self-insert)
+        (activate-region    . vterm-tmux-copy-mode-self-insert)
+        (isearch-forward    . vterm-tmux-copy-mode-self-insert)))
+    (keyamp--set keymap
+      '(vterm-tmux-copy-mode vterm-tmux-copy-mode-self-insert
+        vterm-tmux-copy-mode-dot vterm-tmux-copy-mode-n)))
+
+  (with-sparse-keymap ; repeat page move
+    (keyamp--map-leader keymap '(previous-line . next-line))
+    (keyamp--remap keymap
+      '((previous-line . vterm-tmux-copy-mode-dot)
+        (next-line     . vterm-tmux-copy-mode-n)))
+    (keyamp--set keymap '(vterm-tmux-copy-mode-dot vterm-tmux-copy-mode-n))))
 
 (with-eval-after-load 'info
   (keyamp--remap Info-mode-map
@@ -2509,7 +2579,9 @@ is enabled.")
                  sync                                    t
                  tasks                                   t
                  test                                    t
-                 view-messages                           t)))
+                 view-messages                           t
+                 vterm-tmux-prev-window                  t
+                 vterm-tmux-next-window                  t)))
 
 (defconst keyamp-screen-read-commands-hash
   #s(hash-table test equal data
@@ -2716,6 +2788,14 @@ is enabled.")
                  vterm-right                             t
                  vterm-send-return                       t
                  vterm-up                                t
+                 vterm-tmux-copy-mode                    t
+                 vterm-tmux-copy-mode-d                  t
+                 vterm-tmux-copy-mode-h                  t
+                 vterm-tmux-copy-mode-t                  t
+                 vterm-tmux-copy-mode-s                  t
+                 vterm-tmux-copy-mode-d                  t
+                 vterm-tmux-copy-mode-n                  t
+                 vterm-tmux-copy-mode-dot                t
                  widget-backward                         t
                  widget-forward                          t
                  xref-find-definitions                   t
@@ -2749,6 +2829,14 @@ is enabled.")
                  isearch-forw                            t
                  scroll-down-command                     t
                  scroll-up-command                       t
+                 vterm-tmux-copy-mode                    t
+                 vterm-tmux-copy-mode-d                  t
+                 vterm-tmux-copy-mode-h                  t
+                 vterm-tmux-copy-mode-t                  t
+                 vterm-tmux-copy-mode-s                  t
+                 vterm-tmux-copy-mode-d                  t
+                 vterm-tmux-copy-mode-n                  t
+                 vterm-tmux-copy-mode-dot                t
                  up-line                                 t
                  up-line-rev                             t)))
 
@@ -2763,6 +2851,14 @@ is enabled.")
 (defconst keyamp-blink-modify-commands
   '(kmacro-record stopwatch python-format-buffer)
   "List of commands to `keyamp-blink-modify' after.")
+
+(defconst keyamp-blink-io-commands
+  '(vterm-shell-vi-cmd-self-insert
+    vterm-shell-vi-cmd-l
+    vterm-shell-vi-cmd-w
+    vterm-shell-vi-cmd-e
+    vterm-read-send-key)
+  "List of commands to `keyamp-blink-io' after.")
 
 (defconst keyamp-insert-commands
   '(self-insert-command org-self-insert-command isearch-printing-char)
@@ -2987,11 +3083,8 @@ of quit minibuffer. Answer q to literal y or n question."
       (progn (keyamp-insert-init)
              (execute-kbd-macro (kbd "q")))
     (if (keyamp-minibuffer-empty)
-        (abort-recursive-edit)
+        (keyamp-minibuffer-quit)
       (keyamp-command))))
-
-(defvar keyamp-minibuffer-delay (/ 20 1000.0)
-  "Defer next command call after abort recursive edit.")
 
 (defun keyamp-minibuffer-empty ()
   "Return true if minibuffer prompt empty."
@@ -3004,37 +3097,42 @@ of quit minibuffer. Answer q to literal y or n question."
 
 (defun keyamp-defer-command-bookmark (Fun)
   "To defer bookmark command `last-nonmenu-event' must be not list."
-  (run-with-timer keyamp-minibuffer-delay nil
-                  (lambda () (let ((last-nonmenu-event t))
-                               (keyamp-command-execute Fun)))))
+  (run-at-time nil nil (lambda () (let ((last-nonmenu-event t))
+                                    (keyamp-command-execute Fun)))))
+
+(defun keyamp-copy-minibuffer ()
+  "Kill minibuffer content to ring for reuse."
+  (kill-new (buffer-substring-no-properties
+             (1+ (length (minibuffer-prompt))) (point-max))))
 
 (defun keyamp-minibuffer-backtab ()
   "Quit minibuffer and call some other command. Single motion switch."
   (interactive)
+  (keyamp-copy-minibuffer)
   (cond ((keyamp-minibuffer-match "Describe function")
-         (keyamp-defer-command keyamp-minibuffer-delay 'describe-variable))
+         (keyamp-defer-command 0 'describe-variable))
         ((keyamp-minibuffer-match "Describe variable")
-         (keyamp-defer-command keyamp-minibuffer-delay 'describe-function))
+         (keyamp-defer-command 0 'describe-function))
         ((keyamp-minibuffer-match "Jump to bookmark")
-         (keyamp-defer-command keyamp-minibuffer-delay 'switch-to-buffer))
+         (keyamp-defer-command 0 'switch-to-buffer))
         ((keyamp-minibuffer-match "M-x")
-         (keyamp-defer-command keyamp-minibuffer-delay 'describe-function))
+         (keyamp-defer-command 0 'describe-function))
         ((keyamp-minibuffer-match "Query replace")
-         (keyamp-defer-command keyamp-minibuffer-delay 'query-replace-regexp))
+         (keyamp-defer-command 0 'query-replace-regexp))
         ((keyamp-minibuffer-match "Search")
-         (keyamp-defer-command keyamp-minibuffer-delay 'find-name-dired))
+         (keyamp-defer-command 0 'find-name-dired))
         ((keyamp-minibuffer-match "Find-name")
-         (keyamp-defer-command keyamp-minibuffer-delay 'search-string))
+         (keyamp-defer-command 0 'search-string))
         ((keyamp-minibuffer-match "Rename visited file")
-         (keyamp-defer-command keyamp-minibuffer-delay 'write-file))
+         (keyamp-defer-command 0 'write-file))
         ((keyamp-minibuffer-match "Find file")
-         (keyamp-defer-command keyamp-minibuffer-delay 'rename-visited-file))
+         (keyamp-defer-command 0 'rename-visited-file))
         ((keyamp-minibuffer-match "Write file")
-         (keyamp-defer-command keyamp-minibuffer-delay 'find-file))
+         (keyamp-defer-command 0 'find-file))
         ((keyamp-minibuffer-match "Copy")
-         (keyamp-defer-command keyamp-minibuffer-delay 'dired-do-rename))
+         (keyamp-defer-command 0 'dired-do-rename))
         ((keyamp-minibuffer-match "Rename")
-         (keyamp-defer-command keyamp-minibuffer-delay 'dired-do-copy))
+         (keyamp-defer-command 0 'dired-do-copy))
         ((keyamp-minibuffer-match "Switch to buffer")
          (keyamp-defer-command-bookmark 'bookmark-jump))
         ((keyamp-minibuffer-match "Set bookmark named")
@@ -3048,30 +3146,31 @@ of quit minibuffer. Answer q to literal y or n question."
 (defun keyamp-minibuffer-tab ()
   "Quit minibuffer and call some other command. Single motion switch."
   (interactive)
+  (keyamp-copy-minibuffer)
   (cond ((keyamp-minibuffer-match "Describe function")
-         (keyamp-defer-command keyamp-minibuffer-delay 'describe-variable))
+         (keyamp-defer-command 0 'describe-variable))
         ((keyamp-minibuffer-match "Describe variable")
-         (keyamp-defer-command keyamp-minibuffer-delay 'describe-function))
+         (keyamp-defer-command 0 'describe-function))
         ((keyamp-minibuffer-match "Jump to bookmark")
-         (keyamp-defer-command keyamp-minibuffer-delay 'switch-to-buffer))
+         (keyamp-defer-command 0 'switch-to-buffer))
         ((keyamp-minibuffer-match "M-x")
-         (keyamp-defer-command keyamp-minibuffer-delay 'describe-variable))
+         (keyamp-defer-command 0 'describe-variable))
         ((keyamp-minibuffer-match "Query replace")
-         (keyamp-defer-command keyamp-minibuffer-delay 'query-replace-regexp))
+         (keyamp-defer-command 0 'query-replace-regexp))
         ((keyamp-minibuffer-match "Search")
-         (keyamp-defer-command keyamp-minibuffer-delay 'find-name-dired))
+         (keyamp-defer-command 0 'find-name-dired))
         ((keyamp-minibuffer-match "Find-name")
-         (keyamp-defer-command keyamp-minibuffer-delay 'search-string))
+         (keyamp-defer-command 0 'search-string))
         ((keyamp-minibuffer-match "Rename visited file")
-         (keyamp-defer-command keyamp-minibuffer-delay 'find-file))
+         (keyamp-defer-command 0 'find-file))
         ((keyamp-minibuffer-match "Find file")
-         (keyamp-defer-command keyamp-minibuffer-delay 'write-file))
+         (keyamp-defer-command 0 'write-file))
         ((keyamp-minibuffer-match "Write file")
-         (keyamp-defer-command keyamp-minibuffer-delay 'rename-visited-file))
+         (keyamp-defer-command 0 'rename-visited-file))
         ((keyamp-minibuffer-match "Copy")
-         (keyamp-defer-command keyamp-minibuffer-delay 'dired-do-rename))
+         (keyamp-defer-command 0 'dired-do-rename))
         ((keyamp-minibuffer-match "Rename")
-         (keyamp-defer-command keyamp-minibuffer-delay 'dired-do-copy))
+         (keyamp-defer-command 0 'dired-do-copy))
         ((keyamp-minibuffer-match "Switch to buffer")
          (keyamp-defer-command-bookmark 'bookmark-jump))
         ((keyamp-minibuffer-match "Set bookmark named")
@@ -3129,7 +3228,7 @@ of quit minibuffer. Answer q to literal y or n question."
 Engram layout has comma in place of G. Choose similar for your layout."
   (interactive)
   (if (string-equal keyamp-current-layout "engineer-engram")
-      (keyamp-minibuffer-backtab)
+      (keyamp-minibuffer-tab)
     (keyamp-input "g")))
 
 (defun keyamp-insert-h ()         (interactive) (keyamp-input "h"))
@@ -3330,7 +3429,9 @@ after a delay even if there more read commands follow."
       (if (or defining-kbd-macro
               (memq this-command keyamp-blink-modify-commands)
               (eq major-mode 'wdired-mode))
-          (keyamp-blink-modify)))))
+          (keyamp-blink-modify))
+      (if (memq this-command keyamp-blink-io-commands)
+          (keyamp-blink-io)))))
 
 (defvar keyamp-indicate-modify-timer nil "Indicate modify timer.")
 
@@ -3394,9 +3495,11 @@ Cancel after `keyamp-blink-blink'. Double blink."
 (defun keyamp-indicate-prefix ()
   "Indicate prefix."
   (cond ((member (this-single-command-keys) keyamp-prefix-idle)
+         (keyamp-blink-stop)
          (keyamp-indicate-idle))
         ((or (member (this-single-command-keys) keyam-prefix-modify)
              prefix-arg)
+         (keyamp-blink-stop)
          (keyamp-indicate-modify))))
 
 (defvar keyamp-prefix-delay 0.1 "Delay before indicate prefix keymap.")
@@ -3410,7 +3513,6 @@ Cancel after `keyamp-blink-blink'. Double blink."
 
 (defconst keyamp-blink 3.5 "Blink period.")
 (defconst keyamp-blink-blink 0.5 "Blink duration.")
-(defconst keyamp-blink-blink-half (/ keyamp-blink-blink 2) "Blink duration half.")
 (defconst keyamp-blink-shift 1 "Blink shift.")
 
 (defun keyamp-blink (Color1 Color2)
@@ -3460,12 +3562,23 @@ Cancel after `keyamp-blink-blink'. Double blink."
   (setq keyamp-idle-timer
         (run-with-idle-timer keyamp-idle-timeout t 'keyamp-idle-init)))
 
+(defvar keyamp-minibuffer-quit-funs nil
+  "List of funs called after minibuffer quit.")
+
+(defun keyamp-minibuffer-quit ()
+  "Abort recursive edit and call `keyamp-minibuffer-quit-funs'."
+  (run-at-time nil nil
+               (lambda ()
+                 (mapc (lambda (fun) (if (fboundp fun) (funcall fun)))
+                       keyamp-minibuffer-quit-funs)))
+  (abort-recursive-edit))
+
 (defun keyamp-escape ()
   "Return to command mode, clear selection or quit minibuffer."
   (interactive)
   (cond ((or keyamp-repeat-p keyamp-insert-p) (keyamp-command))
         ((region-active-p)                    (deactivate-mark))
-        ((minibufferp)                        (abort-recursive-edit))
+        ((minibufferp)                        (keyamp-minibuffer-quit))
         ((< 0 (recursion-depth))              (exit-recursive-edit))
         (t                                    (keyamp-command))))
 

@@ -7011,12 +7011,12 @@
           },
           "to_after_key_up": [
             {
-              "shell_command": "open -a Safari"
+              "shell_command": "open -a 'Docker Desktop'"
             }
           ],
           "to_if_held_down": [
             {
-              "shell_command": "open -a 'Docker Desktop'",
+              "shell_command": "open -a Safari",
               "repeat": false,
               "halt": true
             }
@@ -7039,13 +7039,13 @@
           },
           "to_after_key_up": [
             {
-              "shell_command": "~/.local/bin/clipboard x",
+              "shell_command": "~/.local/bin/clipboard d",
               "halt": true
             }
           ],
           "to_if_held_down": [
             {
-              "shell_command": "~/.local/bin/clipboard d",
+              "shell_command": "~/.local/bin/clipboard x",
               "repeat": false,
               "halt": true
             }

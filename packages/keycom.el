@@ -46,7 +46,7 @@
   (run-with-timer before-last-command-timeout nil
                   (lambda () (setq before-last-command-event nil))))
 
-(defconst before-last-command-timeout (/ 200 1000.0)
+(defconst before-last-command-timeout (/ 300 1000.0)
   "Timeout for `before-last-command' and `before-last-command-event'.")
 
 (defvar before-last-command nil "Command before last command.")
@@ -2021,10 +2021,12 @@ With prefix arg, find the previous file."
                      (length files))))
       (find-file (nth pos files)))))
 
+(defvar new-buffer-prefix "buffer" "New buffer prefix.")
+
 (defun new-empty-buffer ()
   "Create a new empty buffer. New buffer is named buffer, buffer<2>, etc."
   (interactive)
-  (let ((xbuf (generate-new-buffer "buffer")))
+  (let ((xbuf (generate-new-buffer new-buffer-prefix)))
     (switch-to-buffer xbuf)
     (funcall initial-major-mode)
     xbuf))
@@ -2508,7 +2510,9 @@ before actually send the cd command."
       (progn (switch-to-buffer (other-buffer))
              (copy-file-path t)
              (switch-to-buffer (other-buffer)))
-    (other-window 1) (copy-file-path t) (other-window 1)))
+    (other-window 1)
+    (copy-file-path t)
+    (other-window 1)))
 
 (defun set-wd ()
   "Set working directory."
@@ -2594,25 +2598,143 @@ before actually send the cd command."
     (other-window 1)
     (command-execute 'vterm)))
 
+(defun vterm-read-send-key ()
+  "Read next input event and send it to the libvterm.
+Custom, added prompt on event read."
+  (interactive)
+  (dolist (key (vterm--translate-event-to-args
+                (read-event "Send key")))
+    (apply #'vterm-send-key key)))
+
 (defun vterm-up ()
-  "Send `<up>' to the libvterm." (interactive) (vterm-send-key "<up>"))
+  "Send `<up>' to the libvterm. Activate shell vi cmd mode."
+  (interactive)
+  (vterm-send-key "<up>")
+  (vterm-shell-vi-cmd))
 
 (defun vterm-down ()
-  "Send `<down>' to the libvterm." (interactive) (vterm-send-key "<down>"))
+  "Send `<down>' to the libvterm. Activate shell vi cmd mode."
+  (interactive)
+  (vterm-send-key "<down>")
+  (vterm-shell-vi-cmd))
 
 (defun vterm-left ()
-  "Send `<left>' to the libvterm." (interactive) (vterm-send-key "<left>"))
+  "Send `<left>' to the libvterm."
+  (interactive)
+  (vterm-send-key "<left>"))
 
 (defun vterm-right ()
-  "Send `<right>' to the libvterm." (interactive) (vterm-send-key "<right>"))
-
-(defun vterm-backward-kill-word ()
-  "Vterm backward kill word." (interactive) (vterm-send-key (kbd "C-w")))
+  "Send `<right>' to the libvterm."
+  (interactive)
+  (vterm-send-key "<right>"))
 
 (defun vterm-history-search ()
-  "History search. Map C-a to history-incremental-search-backward in zshrc
+  "History search. Map C-o to history-incremental-search-backward in zshrc
 and reverse-search-history in bashrc."
-  (interactive) (vterm-send-key (kbd "C-a")))
+  (interactive)
+  (vterm-send-key (kbd "C-o")))
+
+(defun vterm-wait () "Wait vterm." (sit-for 0.05))
+
+(defun vterm-tmux-copy-mode ()
+  "Activate copy mode in tmux."
+  (interactive)
+  (vterm-send-key (kbd "C-b"))
+  (vterm-send-key (kbd "["))
+  (vterm-wait) ; wait and go start of line
+  (vterm-send-key (kbd "0")))
+
+(defun vterm-tmux-copy-mode-self-insert ()
+  "Send key to tmux copy mode."
+  (interactive)
+  (vterm--self-insert))
+
+(defun vterm-tmux-copy-mode-dot ()
+  "Send dot to copy mode."
+  (interactive)
+  (vterm-send-key (kbd ".")))
+
+(defun vterm-tmux-copy-mode-n ()
+  "Send n to copy mode."
+  (interactive)
+  (vterm-send-key (kbd "n")))
+
+(defun vterm-tmux-copy-mode-q ()
+  "Send q to copy mode."
+  (interactive)
+  (vterm-send-key (kbd "q")))
+
+(defun vterm-tmux-create-window ()
+  "Tmux create window."
+  (interactive)
+  (vterm-send-key (kbd "C-b"))
+  (vterm-send-key (kbd "c")))
+
+(defun vterm-tmux-close-window ()
+  "Tmux close window."
+  (interactive)
+  (vterm-send-key (kbd "C-b"))
+  (vterm-send-key (kbd "&")))
+
+(defun vterm-tmux-next-window ()
+  "Tmux next window."
+  (interactive)
+  (vterm-send-key (kbd "C-b"))
+  (vterm-send-key (kbd "n")))
+
+(defun vterm-tmux-prev-window ()
+  "Tmux prev window."
+  (interactive)
+  (vterm-send-key (kbd "C-b"))
+  (vterm-send-key (kbd "p")))
+
+(defun vterm-shell-vi-cmd ()
+  "Activate vi cmd mode in shell prompt."
+  (interactive)
+  (vterm-reset-cursor-point)
+  (vterm-send-key (kbd "^[")))
+
+(defun vterm-shell-vi-insert ()
+  "Activate vi insert mode in shell prompt."
+  (interactive)
+  (when (and (eq major-mode 'vterm-mode)
+             (not (eq this-command 'term-interrupt-subjob))
+             (not (eq this-command 'vterm-send-return))
+             (not (eq this-command 'vterm-history-search)))
+    (vterm-send-key (kbd "^["))
+    (vterm-send-key (kbd "C-m"))))
+
+(defun vterm-shell-vi-cmd-self-insert ()
+  "Send key to shell prompt vi cmd mode."
+  (interactive)
+  (vterm--self-insert))
+
+(defun vterm-shell-vi-cmd-s ()
+  "Send key to shell prompt vi cmd mode."
+  (interactive)
+  (let ((x (point)))
+    (vterm-send-key (kbd "s"))
+    (vterm-wait)
+    (if (eq x (point))                      ; point did not move
+        (progn (vterm-send-key (kbd "C-m")) ; activate insert
+               (vterm-right)                ; move after last char
+               (vterm-send-key (kbd "SPC")) ; add space and go command mode
+               (vterm-send-key (kbd "^["))))))
+
+(defun vterm-shell-vi-cmd-l ()
+  "Send key to shell prompt vi cmd mode."
+  (interactive)
+  (vterm-send-key (kbd "l")))
+
+(defun vterm-shell-vi-cmd-w ()
+  "Send key to shell prompt vi cmd mode."
+  (interactive)
+  (vterm-send-key (kbd "w")))
+
+(defun vterm-shell-vi-cmd-e ()
+  "Send key to shell prompt vi cmd mode."
+  (interactive)
+  (vterm-send-key (kbd "e")))
 
 (defun screenshot ()
   "Take screenshot on macOS."
@@ -2719,12 +2841,12 @@ and reverse-search-history in bashrc."
   (interactive)
   (find-file "~/.sql"))
 
-(defvar sql-type "sqlite" "SQL type for client.")
+(defvar sql-type "postgres" "SQL type for client.")
 
 (defun toggle-sql-type ()
   "Toggle `sql-type'."
   (interactive)
-  (setq sql-type (if (equal sql-type "sqlite") "psql" "sqlite")))
+  (setq sql-type (if (equal sql-type "sqlite") "postgres" "sqlite")))
 
 (defun exec-query ()
   "Execute SQL statement separated by semicolon or selected region."
@@ -2751,7 +2873,7 @@ and reverse-search-history in bashrc."
     (goto-char (point-max))
     (push-mark (point) t nil)
     (let ((inhibit-read-only t))
-      (when (string-equal sql-type "psql")
+      (when (string-equal sql-type "postgres")
         (insert (shell-command-to-string
                  (format "psql %s -c \"%s\" -q" xconn xquery))))
       (when (string-equal sql-type "sqlite")
@@ -3022,7 +3144,7 @@ Use as around advice e.g. for mouse left click after double click."
   (cond
    ((buffer-file-name)
     (save-buffer))
-   ((string-match "^file*." (buffer-name))
+   ((string-match (concat "^" new-buffer-prefix "*.") (buffer-name))
     (command-execute 'write-file))))
 
 (defun empty-bin ()
