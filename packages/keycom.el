@@ -1811,7 +1811,7 @@ command, so that next buffer shown is a user buffer."
    ((string-equal buffer-file-truename org-agenda-file-3) nil)
    ((string-match ".+em/project+." default-directory) nil)
    ((string-match ".+airflow+." default-directory) nil)
-   ((and buffer-file-truename (string-match ".sql" buffer-file-truename)) nil)
+   ((and buffer-file-truename (string-match "^\.sql" (buffer-name))) nil)
    (t t)))
 
 (defun back-buf ()
@@ -2279,6 +2279,8 @@ Works on whole buffer or selection, respects `narrow-to-region'."
         (goto-char (point-max))
         (while (eq (char-before) 32) (delete-char -1))))))
 
+(defalias 'clean-whitespace-auto 'clean-whitespace "For non-interactive use.")
+
 (defun make-backup ()
   "Make a backup copy of current file or dired marked files.
 If in dired, backup current file or marked files.
@@ -2585,8 +2587,9 @@ before actually send the cd command."
     (push "" xhist)
     (insert (ido-completing-read "Search input: " xhist))))
 
-(defun terminal-split ()
-  "Split terminal window below."
+(defun terminal ()
+  "Split terminal window below. Switch to terminal if already split.
+Open new terminal if already in terminal."
   (interactive)
   (if (eq major-mode 'vterm-mode)
       (let ((current-prefix-arg '-))
@@ -2594,29 +2597,36 @@ before actually send the cd command."
     (if (or (> (window-total-height) 30)
             (one-window-p))
         (progn (split-window-below)
-               (enlarge-window-split)))
-    (other-window 1)
-    (command-execute 'vterm)))
+               ;; (enlarge-window-split)
+               (other-window 1)))
+    (if (and (boundp 'tt-local)
+             (get-buffer tt-local))
+        (switch-to-buffer tt-local)
+      (vterm))))
 
 (defun vterm-read-send-key ()
   "Read next input event and send it to the libvterm.
 Custom, added prompt on event read."
   (interactive)
   (dolist (key (vterm--translate-event-to-args
-                (read-event "Send key")))
+                (read-event "Press key to send...")))
     (apply #'vterm-send-key key)))
 
-(defun vterm-up ()
+(defun vterm-up-vi-cmd ()
   "Send `<up>' to the libvterm. Activate shell vi cmd mode."
   (interactive)
   (vterm-send-key "<up>")
   (vterm-shell-vi-cmd))
 
-(defun vterm-down ()
-  "Send `<down>' to the libvterm. Activate shell vi cmd mode."
+(defun vterm-up ()
+  "Send `<up>' to the libvterm."
   (interactive)
-  (vterm-send-key "<down>")
-  (vterm-shell-vi-cmd))
+  (vterm-send-key "<up>"))
+
+(defun vterm-down ()
+  "Send `<down>' to the libvterm."
+  (interactive)
+  (vterm-send-key "<down>"))
 
 (defun vterm-left ()
   "Send `<left>' to the libvterm."
@@ -2634,35 +2644,23 @@ and reverse-search-history in bashrc."
   (interactive)
   (vterm-send-key (kbd "C-o")))
 
-(defun vterm-wait () "Wait vterm." (sit-for 0.05))
-
-(defun vterm-tmux-copy-mode ()
+(defun vterm-tmux-copy ()
   "Activate copy mode in tmux."
   (interactive)
   (vterm-send-key (kbd "C-b"))
-  (vterm-send-key (kbd "["))
-  (vterm-wait) ; wait and go start of line
-  (vterm-send-key (kbd "0")))
+  (vterm-send-key (kbd "[")))
 
-(defun vterm-tmux-copy-mode-self-insert ()
+(defun vterm-tmux-copy-self-insert ()
   "Send key to tmux copy mode."
   (interactive)
-  (vterm--self-insert))
+  (if (eq last-command-event 127)
+      (vterm-send-key (kbd "DEL")) ; vterm-module.c:996 missing DEL
+    (vterm--self-insert)))
 
-(defun vterm-tmux-copy-mode-dot ()
-  "Send dot to copy mode."
+(defun vterm-tmux-copy-cancel ()
+  "Cancel copy mode in tmux."
   (interactive)
-  (vterm-send-key (kbd ".")))
-
-(defun vterm-tmux-copy-mode-n ()
-  "Send n to copy mode."
-  (interactive)
-  (vterm-send-key (kbd "n")))
-
-(defun vterm-tmux-copy-mode-q ()
-  "Send q to copy mode."
-  (interactive)
-  (vterm-send-key (kbd "q")))
+  (vterm-send-key (kbd "e")))
 
 (defun vterm-tmux-create-window ()
   "Tmux create window."
@@ -2691,50 +2689,69 @@ and reverse-search-history in bashrc."
 (defun vterm-shell-vi-cmd ()
   "Activate vi cmd mode in shell prompt."
   (interactive)
-  (vterm-reset-cursor-point)
-  (vterm-send-key (kbd "^[")))
+  (when (and (eq major-mode 'vterm-mode)
+             (vterm-reset-cursor-point))
+    (vterm-send-key (kbd "^["))))
 
 (defun vterm-shell-vi-insert ()
   "Activate vi insert mode in shell prompt."
   (interactive)
   (when (and (eq major-mode 'vterm-mode)
+             (string-match "└" (buffer-substring-no-properties
+                                (line-beginning-position) (line-end-position)))
              (not (eq this-command 'term-interrupt-subjob))
              (not (eq this-command 'vterm-send-return))
              (not (eq this-command 'vterm-history-search)))
     (vterm-send-key (kbd "^["))
     (vterm-send-key (kbd "C-m"))))
 
-(defun vterm-shell-vi-cmd-self-insert ()
+(defun vterm-shell-vi-self-insert ()
   "Send key to shell prompt vi cmd mode."
   (interactive)
   (vterm--self-insert))
 
-(defun vterm-shell-vi-cmd-s ()
+(defun vterm-shell-vi-s ()
   "Send key to shell prompt vi cmd mode."
   (interactive)
   (let ((x (point)))
-    (vterm-send-key (kbd "s"))
-    (vterm-wait)
+    (vterm-send-key "s")                    ; workaround vi go after last char
+    (sit-for 0.05)                          ; need some time to sync
     (if (eq x (point))                      ; point did not move
-        (progn (vterm-send-key (kbd "C-m")) ; activate insert
-               (vterm-right)                ; move after last char
-               (vterm-send-key (kbd "SPC")) ; add space and go command mode
+        (progn (vterm-send-key (kbd "C-m")) ; so activate insert
+               (vterm-send-key "<right>")   ; go after last char
+               (vterm-send-key (kbd "SPC")) ; add space and back to cmd mode
                (vterm-send-key (kbd "^["))))))
 
-(defun vterm-shell-vi-cmd-l ()
-  "Send key to shell prompt vi cmd mode."
+(defun vterm-shell-vi-l ()
+  "Send key to shell prompt vi cmd mode. Need command for transient."
   (interactive)
-  (vterm-send-key (kbd "l")))
+  (vterm-send-key "l"))
 
-(defun vterm-shell-vi-cmd-w ()
-  "Send key to shell prompt vi cmd mode."
+(defun vterm-shell-vi-w ()
+  "Send key to shell prompt vi cmd mode. Need command for transient."
   (interactive)
-  (vterm-send-key (kbd "w")))
+  (vterm-send-key "w"))
 
-(defun vterm-shell-vi-cmd-e ()
-  "Send key to shell prompt vi cmd mode."
+(defun vterm-shell-vi-e ()
+  "Send key to shell prompt vi cmd mode. Need command for transient."
   (interactive)
-  (vterm-send-key (kbd "e")))
+  (vterm-send-key "e"))
+
+(defun vterm-tui ()
+  "Activate terminal UI app."
+  (interactive)
+  (vterm-reset-cursor-point))
+
+(defun vterm-tui-self-insert ()
+  "Send key to terminal UI app."
+  (interactive)
+  (cond ((eq last-command-event 127)
+         (vterm-send-key (kbd "DEL")))
+        ((eq last-command-event 13)
+         (vterm-send-return))
+        ((equal (this-command-keys) (kbd "<return>"))
+         (vterm-send-return))
+        (t (vterm--self-insert))))
 
 (defun screenshot ()
   "Take screenshot on macOS."
@@ -2837,9 +2854,11 @@ and reverse-search-history in bashrc."
     (message "%s" "Offline")))
 
 (defun sql ()
-  "Open SQL client."
+  "Open SQL client or toggle sql type."
   (interactive)
-  (find-file "~/.sql"))
+  (if (string-match "^\.sql" (buffer-name))
+      (toggle-sql-type)
+    (find-file "~/.sql")))
 
 (defvar sql-type "postgres" "SQL type for client.")
 
@@ -2875,7 +2894,8 @@ and reverse-search-history in bashrc."
     (let ((inhibit-read-only t))
       (when (string-equal sql-type "postgres")
         (insert (shell-command-to-string
-                 (format "psql %s -c \"%s\" -q" xconn xquery))))
+                 (format "psql %s -c \"%s\" -q" xconn
+                         (string-replace "$" "\\$" xquery)))))
       (when (string-equal sql-type "sqlite")
         ;; attach database can't parse ~
         (setq xquery (replace-regexp-in-string "~" (getenv "HOME") xquery))
@@ -2887,7 +2907,8 @@ and reverse-search-history in bashrc."
             (insert "No rows\n"))))
       (insert (concat (make-string 89 45) "\n")))
     (set-mark-command t)
-    (other-window 1))
+    (other-window 1)
+    (enlarge-window-split))
   (return-before))
 
 (defun eval-region-or-sexp ()
@@ -2896,11 +2917,6 @@ and reverse-search-history in bashrc."
   (if (use-region-p)
       (command-execute 'eval-region)
     (command-execute 'eval-last-sexp)))
-
-(defun terminal ()
-  "Run terminal emulator."
-  (interactive)
-  (vterm))
 
 (defun novel ()
   "Read novel."
@@ -2911,12 +2927,6 @@ and reverse-search-history in bashrc."
   "Undo the expansion."
   (interactive)
   (he-reset-string))
-
-(defun pass-generate ()
-  "Generate and copy pass."
-  (interactive)
-  (let ((xpass (read-from-minibuffer "Generate pass path: " "http/")))
-    (shell-command (concat "pass generate -c " xpass))))
 
 (defun describe-foo-at-point ()
   "Show the documentation of the Elisp function and variable near point.
@@ -2940,7 +2950,7 @@ This checks in turn:
      ((setq xsym (variable-at-point))
       (describe-variable xsym)))))
 
-(defvar video-extensions '("mkv" "mp4" "avi" "mov" "ts" "mts" "webm" "vob" "aiff")
+(defvar video-extensions '("mkv" "mp4" "avi" "mov" "ts" "mts" "m2ts" "webm" "vob" "aiff")
   "Open these video file extensions with `open-in-external-app'.")
 
 (defvar external-extensions `("mp3" "m4a" "flac" "torrent")
@@ -2990,7 +3000,9 @@ This checks in turn:
 before selection. This fun to be run as before advice for move fun."
   (interactive)
   (when (and (region-active-p)
-             (memq last-command '(select-block select-word select-line select-quote)))
+             (memq last-command
+                   '(select-block select-word select-line
+                     select-quote mark-whole-buffer)))
     (deactivate-mark)
     (double-jump-back)))
 
