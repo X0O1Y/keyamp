@@ -441,40 +441,40 @@ is enabled.")
 (keyamp--map keyamp-command-map
   '(;; left half
     ("`" . make-frame-command)             ("ё" . make-frame-command)               ("~" . keyamp-qwerty-to-current-layout) ("Ë" . keyamp-qwerty-to-current-layout)
-    ("1" . kmacro-record)                                                           ("!" . self-insert-command)
-    ("2" . kmacro-play)                                                             ("@" . self-insert-command)
-    ("3" . kmacro-helper)                                                           ("#" . self-insert-command)             ("№" . self-insert-command)
-    ("4" . append-to-r1)                                                            ("$" . self-insert-command)
-    ("5" . terminal)                                                                ("%" . self-insert-command)
+    ("1" . kmacro-record)                                                           ("!" . keyamp-self-insert-and-insert)
+    ("2" . kmacro-play)                                                             ("@" . keyamp-self-insert-and-insert)
+    ("3" . kmacro-helper)                                                           ("#" . keyamp-self-insert-and-insert)   ("№" . keyamp-self-insert-and-insert)
+    ("4" . append-to-r1)                                                            ("$" . keyamp-self-insert-and-insert)
+    ("5" . terminal)                                                                ("%" . keyamp-self-insert-and-insert)
 
     ("q" . insert-space-before)            ("й" . insert-space-before)              ("Q" . keyamp-self-insert-and-insert)   ("Й" . keyamp-self-insert-and-insert)
     ("w" . backward-del-word)              ("ц" . backward-del-word)                ("W" . keyamp-self-insert-and-insert)   ("Ц" . keyamp-self-insert-and-insert)
     ("e" . undo)                           ("у" . undo)                             ("E" . keyamp-self-insert-and-insert)   ("У" . keyamp-self-insert-and-insert)
     ("r" . del-word)                       ("к" . del-word)                         ("R" . keyamp-self-insert-and-insert)   ("К" . keyamp-self-insert-and-insert)
-    ("t" . cut-text-block)                 ("е" . cut-text-block)                   ("T" . self-insert-command)             ("Е" . keyamp-self-insert-and-insert)
+    ("t" . cut-text-block)                 ("е" . cut-text-block)                   ("T" . keyamp-self-insert-and-insert)   ("Е" . keyamp-self-insert-and-insert)
 
     ("a" . shrink-whitespaces)             ("ф" . shrink-whitespaces)               ("A" . keyamp-self-insert-and-insert)   ("Ф" . keyamp-self-insert-and-insert)
     ("s" . open-line)                      ("ы" . open-line)                        ("S" . keyamp-self-insert-and-insert)   ("Ы" . keyamp-self-insert-and-insert)
     ("d" . del-back)                       ("в" . del-back)                         ("D" . keyamp-self-insert-and-insert)   ("В" . keyamp-self-insert-and-insert)
     ("f" . newline)                        ("а" . newline)                          ("F" . keyamp-self-insert-and-insert)   ("А" . keyamp-self-insert-and-insert)
-    ("g" . activate-region)                ("п" . activate-region)                  ("G" . self-insert-command)             ("П" . keyamp-self-insert-and-insert)
+    ("g" . activate-region)                ("п" . activate-region)                  ("G" . keyamp-self-insert-and-insert)   ("П" . keyamp-self-insert-and-insert)
 
     ("z" . toggle-comment)                 ("я" . toggle-comment)                   ("Z" . keyamp-self-insert-and-insert)   ("Я" . keyamp-self-insert-and-insert)
     ("x" . cut-line)                       ("ч" . cut-line)                         ("X" . keyamp-self-insert-and-insert)   ("Ч" . keyamp-self-insert-and-insert)
     ("c" . copy-line)                      ("с" . copy-line)                        ("C" . keyamp-self-insert-and-insert)   ("С" . keyamp-self-insert-and-insert)
     ("v" . paste-or-prev)                  ("м" . paste-or-prev)                    ("V" . keyamp-self-insert-and-insert)   ("М" . keyamp-self-insert-and-insert)
-    ("b" . toggle-case)                    ("и" . toggle-case)                      ("B" . self-insert-command)             ("И" . keyamp-self-insert-and-insert)
+    ("b" . toggle-case)                    ("и" . toggle-case)                      ("B" . keyamp-self-insert-and-insert)   ("И" . keyamp-self-insert-and-insert)
 
     ;; right half
-    ("6" . pass)                                                                    ("^" . self-insert-command)
+    ("6" . pass)                                                                    ("^" . keyamp-self-insert-and-insert)
     ("7" . jump-to-register)                                                        ("&" . keyamp-self-insert-and-insert)
     ("8" . point-to-register)                                                       ("*" . goto-match-br) ; QWERTY * → = Engineer Engram, QWERTY / → = RU PC Karabiner
-    ("9" . proced-defer)                                                            ("(" . self-insert-command)
-    ("0" . eshell-split)                                                            (")" . self-insert-command)
-    ("-" . enlarge-window)                                                          ("_" . self-insert-command)
-    ("=" . goto-match-br)                                                           ("+" . self-insert-command)
+    ("9" . proced-defer)                                                            ("(" . keyamp-self-insert-and-insert)
+    ("0" . sh)                                                                      (")" . keyamp-self-insert-and-insert)
+    ("-" . enlarge-window)                                                          ("_" . keyamp-self-insert-and-insert)
+    ("=" . goto-match-br)                                                           ("+" . keyamp-self-insert-and-insert)
 
-    ("y"  . occur-cur-word)                ("н" . occur-cur-word)                   ("Y" . self-insert-command)             ("Н" . keyamp-self-insert-and-insert)
+    ("y"  . occur-cur-word)                ("н" . occur-cur-word)                   ("Y" . keyamp-self-insert-and-insert)   ("Н" . keyamp-self-insert-and-insert)
     ("u"  . back-word)                     ("г" . back-word)                        ("U" . keyamp-self-insert-and-insert)   ("Г" . keyamp-self-insert-and-insert)
     ("i"  . previous-line)                 ("ш" . previous-line)                    ("I" . keyamp-self-insert-and-insert)   ("Ш" . keyamp-self-insert-and-insert)
     ("o"  . forw-word)                     ("щ" . forw-word)                        ("O" . keyamp-self-insert-and-insert)   ("Щ" . keyamp-self-insert-and-insert)
@@ -483,14 +483,14 @@ is enabled.")
     ("]"  . bookmark-bmenu-list)           ("ъ" . bookmark-bmenu-list)              ("}" . keyamp-self-insert-and-insert)   ("Ъ" . keyamp-self-insert-and-insert)
     ("\\" . bookmark-set)                                                           ("|" . keyamp-self-insert-and-insert)
 
-    ("h" . beg-of-line)                    ("р" . beg-of-line)                      ("H"  . self-insert-command)            ("Р" . keyamp-self-insert-and-insert)
+    ("h" . beg-of-line)                    ("р" . beg-of-line)                      ("H"  . keyamp-self-insert-and-insert)  ("Р" . keyamp-self-insert-and-insert)
     ("j" . backward-char)                  ("о" . backward-char)                    ("J"  . keyamp-self-insert-and-insert)  ("О" . keyamp-self-insert-and-insert)
     ("k" . next-line)                      ("л" . next-line)                        ("K"  . keyamp-self-insert-and-insert)  ("Л" . keyamp-self-insert-and-insert)
     ("l" . forward-char)                   ("д" . forward-char)                     ("L"  . keyamp-self-insert-and-insert)  ("Д" . keyamp-self-insert-and-insert)
     (";" . end-of-lyne)                    ("ж" . end-of-lyne)                      (":"  . keyamp-self-insert-and-insert)  ("Ж" . keyamp-self-insert-and-insert)
     ("'" . alternate-frame)                ("э" . alternate-frame)                  ("\"" . keyamp-self-insert-and-insert)  ("Э" . keyamp-self-insert-and-insert)
 
-    ("n" . isearch-forward)                ("т" . isearch-forward)                  ("N" . keyamp-insert-N)                 ("Т" . keyamp-self-insert-and-insert)
+    ("n" . isearch-forward)                ("т" . isearch-forward)                  ("N" . keyamp-self-insert-and-insert)   ("Т" . keyamp-self-insert-and-insert)
     ("m" . backward-bracket)               ("ь" . backward-bracket)                 ("M" . keyamp-self-insert-and-insert)   ("Ь" . keyamp-self-insert-and-insert)
     ("," . other-win)                      ("б" . other-win)                        ("<" . keyamp-self-insert-and-insert)   ("Б" . keyamp-self-insert-and-insert)
     ("." . forward-bracket)                ("ю" . forward-bracket)                  (">" . keyamp-self-insert-and-insert)   ("Ю" . keyamp-self-insert-and-insert)
@@ -639,7 +639,7 @@ is enabled.")
 
     ("g" . python-new)
     ("z" . goto-char)
-    ("x" . next-eww-buffer)
+    ("x" . next-eww-buf)
     ("c" . copy-all)
     ("v" . tasks)
     ("b" . title-case-region-or-line)
@@ -693,7 +693,7 @@ is enabled.")
     (beg-of-line    . bookmark-jump)   (end-of-lyne     . switch-to-buffer)
     (kmacro-record  . keyamp-delete)   (other-win       . delete-other-windows)
     (proced-defer   . save-close-buf)  (append-to-r1    . clear-r1)
-    (occur-cur-word . search-string)))
+    (occur-cur-word . search-string)   (vterm-vi-escape . keyamp-command)))
 
 
 ;; Remaps
@@ -869,7 +869,7 @@ is enabled.")
       (shrink-whitespaces  . calendar-split)
       (del-back            . alt-buf)
       (toggle-comment      . view-messages)
-      (cut-line            . prev-eww-buffer)
+      (cut-line            . prev-eww-buf)
       (copy-line           . screen-idle)
       (paste-or-prev       . tasks)
       (toggle-case         . downloads)
@@ -890,9 +890,10 @@ is enabled.")
       delete-other-windows       split-window-below
       delete-window              save-close-buf
       prev-proj-buf              next-proj-buf
-      prev-eww-buffer            next-eww-buffer
-      prev-eshell-buffer         next-eshell-buffer
-      prev-vterm-buffer          next-vterm-buffer
+      prev-eww-buf               next-eww-buf
+      prev-eshell-buf            next-eshell-buf
+      prev-vterm-buf             next-vterm-buf
+      prev-dired-buf             next-dired-buf
       tasks                      config
       previous-buffer            next-buffer
       find-prev-dir-file         find-next-dir-file
@@ -931,24 +932,28 @@ is enabled.")
   (keyamp--map-backtab keymap page-up-half)
   (keyamp--map-tab keymap keyamp-TAB)
   (keyamp--remap keymap
-    '((open-line . prev-eww-buffer) (newline . next-eww-buffer)
-      (del-back  . eww-reload)      (undo    . justify-buffer)))
-  (keyamp--set keymap '(prev-eww-buffer next-eww-buffer)))
+    '((open-line . prev-eww-buf) (newline . next-eww-buf)
+      (del-back  . eww-reload)   (undo    . justify-buffer)))
+  (keyamp--set keymap '(prev-eww-buf next-eww-buf)))
 
 (with-sparse-keymap
   (keyamp--map-backtab keymap page-up-half)
   (keyamp--map-tab keymap keyamp-TAB)
-  (keyamp--remap keymap '((open-line . prev-eshell-buffer) (newline . next-eshell-buffer)))
-  (keyamp--set keymap '(prev-eshell-buffer next-eshell-buffer)))
+  (keyamp--remap keymap '((open-line . prev-eshell-buf) (newline . next-eshell-buf)))
+  (keyamp--set keymap '(prev-eshell-buf next-eshell-buf)))
 
 (with-sparse-keymap
   (keyamp--map-backtab keymap page-up-half)
   (keyamp--map-tab keymap keyamp-TAB)
   (keyamp--remap keymap
-    '((open-line          . prev-vterm-buffer)
-      (newline            . next-vterm-buffer)
+    '((open-line          . prev-vterm-buf)
+      (newline            . next-vterm-buf)
       (shrink-whitespaces . vterm-tmux-prev-window)))
-  (keyamp--set keymap '(prev-vterm-buffer next-vterm-buffer)))
+  (keyamp--set keymap '(prev-vterm-buf next-vterm-buf)))
+
+(with-sparse-keymap
+  (keyamp--remap keymap '((open-line . prev-dired-buf) (newline . next-dired-buf)))
+  (keyamp--set keymap '(prev-dired-buf next-dired-buf)))
 
 (with-sparse-keymap
   (keyamp--remap keymap '((open-line . prev-buf) (newline . tasks)))
@@ -1415,80 +1420,84 @@ is enabled.")
 (with-eval-after-load 'minibuffer
   (with-sparse-keymap
     ;; On minibuffer startup press DEL to list history backwards or
-    ;; SPC to list completion candidates forward or paste. After that
+    ;; SPC to paste. S-RET to start list completion candidates forward.
     ;; I/K or DEL/SPC to list either history or completion candidates
     ;; accordingly choice made. RET to confirm and exit, ESC to quit.
     ;; To switch from history to candidates listing press ESC then double
     ;; SPC `select-word' and DEL/SPC or I/K again to continue move
     ;; backward/forward. Similarly double DEL to activate history move.
     ;; Fast history or completion candidates direction switch to quit.
-    (keyamp--map-leader keymap '(select-block . select-word))
+    (keyamp--map-leader keymap '(select-block . paste-or-prev))
     (keyamp--map-escape keymap keyamp-minibuffer-escape)
     (keyamp--map-return keymap keyamp-minibuffer-return)
+    (keyamp--map keymap '(("C-t" . comp-forw))) ; S-RET
     (keyamp--map-backtab keymap keyamp-minibuffer-backtab)
     (keyamp--map-tab keymap keyamp-minibuffer-tab)
-    (keyamp--remap keymap
-      '((kmacro-record       . keyamp-insert-1)
-        (kmacro-play         . keyamp-insert-2)
-        (kmacro-helper       . keyamp-insert-3)
-        (append-to-r1        . keyamp-insert-4)
-        (terminal            . keyamp-insert-5)
-        (pass                . keyamp-insert-6)
-        (jump-to-register    . keyamp-insert-7)
-        (point-to-register   . keyamp-insert-8)
-        (proced-defer        . keyamp-insert-9)
-        (eshell-split        . keyamp-insert-0)
+    (keyamp--map keymap
+      '(;; left half
+        ("`" . keyamp-self-insert-and-insert)  ("ё" . keyamp-self-insert-and-insert) ("~" . keyamp-self-insert-and-insert)  ("Ë" . keyamp-self-insert-and-insert)
+        ("1" . keyamp-self-insert-and-insert)                                        ("!" . keyamp-self-insert-and-insert)
+        ("2" . keyamp-self-insert-and-insert)                                        ("@" . keyamp-self-insert-and-insert)
+        ("3" . keyamp-self-insert-and-insert)                                        ("#" . keyamp-self-insert-and-insert)  ("№" . keyamp-self-insert-and-insert)
+        ("4" . keyamp-self-insert-and-insert)                                        ("$" . keyamp-self-insert-and-insert)
+        ("5" . keyamp-self-insert-and-insert)                                        ("%" . keyamp-self-insert-and-insert)
 
-        (insert-space-before . keyamp-insert-q)
-        (backward-del-word   . keyamp-insert-w)
-        (undo                . keyamp-insert-e)
-        (del-word            . keyamp-insert-r)
-        (cut-text-block      . keyamp-insert-t)
-        (occur-cur-word      . keyamp-insert-y)
-        (back-word           . keyamp-insert-u)
-        (previous-line       . keyamp-insert-i)
-        (forw-word           . keyamp-insert-o)
-        (jump-mark           . keyamp-insert-p)
-        (alt-buf             . keyamp-insert-bracket)
+        ("q" . keyamp-self-insert-and-insert)  ("й" . keyamp-self-insert-and-insert) ("Q" . keyamp-self-insert-and-insert)  ("Й" . keyamp-self-insert-and-insert)
+        ("w" . keyamp-insert-w)                ("ц" . keyamp-insert-ц)               ("W" . keyamp-self-insert-and-insert)  ("Ц" . keyamp-self-insert-and-insert)
+        ("e" . keyamp-self-insert-and-insert)  ("у" . keyamp-self-insert-and-insert) ("E" . keyamp-self-insert-and-insert)  ("У" . keyamp-self-insert-and-insert)
+        ("r" . keyamp-self-insert-and-insert)  ("к" . keyamp-self-insert-and-insert) ("R" . keyamp-self-insert-and-insert)  ("К" . keyamp-self-insert-and-insert)
+        ("t" . keyamp-self-insert-and-insert)  ("е" . keyamp-self-insert-and-insert) ("T" . keyamp-self-insert-and-insert)  ("Е" . keyamp-self-insert-and-insert)
 
-        (shrink-whitespaces  . keyamp-insert-a)
-        (open-line           . keyamp-insert-s)
-        (del-back            . keyamp-insert-d)
-        (newline             . keyamp-insert-f)
-        (activate-region     . keyamp-insert-g)
-        (beg-of-line         . keyamp-insert-h)
-        (backward-char       . keyamp-insert-j)
-        (next-line           . keyamp-insert-k)
-        (forward-char        . keyamp-insert-l)
-        (end-of-lyne         . keyamp-insert-semicolon)
-        (alternate-frame     . keyamp-insert-quote)
+        ("a" . keyamp-self-insert-and-insert)  ("ф" . keyamp-self-insert-and-insert) ("A" . keyamp-self-insert-and-insert)  ("Ф" . keyamp-self-insert-and-insert)
+        ("s" . keyamp-self-insert-and-insert)  ("ы" . keyamp-self-insert-and-insert) ("S" . keyamp-self-insert-and-insert)  ("Ы" . keyamp-self-insert-and-insert)
+        ("d" . keyamp-insert-d)                ("в" . keyamp-insert-в)               ("D" . keyamp-self-insert-and-insert)  ("В" . keyamp-self-insert-and-insert)
+        ("f" . keyamp-self-insert-and-insert)  ("а" . keyamp-self-insert-and-insert) ("F" . keyamp-self-insert-and-insert)  ("А" . keyamp-self-insert-and-insert)
+        ("g" . keyamp-self-insert-and-insert)  ("п" . keyamp-self-insert-and-insert) ("G" . keyamp-self-insert-and-insert)  ("П" . keyamp-self-insert-and-insert)
 
-        (toggle-comment      . keyamp-insert-z)
-        (cut-line            . keyamp-insert-x)
-        (copy-line           . keyamp-insert-c)
-        (paste-or-prev       . keyamp-insert-v)
-        (toggle-case         . keyamp-insert-b)
-        (isearch-forward     . keyamp-insert-n)
-        (backward-bracket    . keyamp-insert-m)
-        (other-win           . keyamp-insert-comma)
-        (forward-bracket     . keyamp-insert-dot)
-        (goto-match-br       . keyamp-insert-slash)))
+        ("z" . keyamp-self-insert-and-insert)  ("я" . keyamp-self-insert-and-insert) ("Z" . keyamp-self-insert-and-insert)  ("Я" . keyamp-self-insert-and-insert)
+        ("x" . keyamp-self-insert-and-insert)  ("ч" . keyamp-self-insert-and-insert) ("X" . keyamp-self-insert-and-insert)  ("Ч" . keyamp-self-insert-and-insert)
+        ("c" . keyamp-self-insert-and-insert)  ("с" . keyamp-self-insert-and-insert) ("C" . keyamp-self-insert-and-insert)  ("С" . keyamp-self-insert-and-insert)
+        ("v" . keyamp-self-insert-and-insert)  ("м" . keyamp-self-insert-and-insert) ("V" . keyamp-self-insert-and-insert)  ("М" . keyamp-self-insert-and-insert)
+        ("b" . keyamp-self-insert-and-insert)  ("и" . keyamp-self-insert-and-insert) ("B" . keyamp-self-insert-and-insert)  ("И" . keyamp-self-insert-and-insert)
+
+        ;; right half
+        ("6" . keyamp-self-insert-and-insert)                                        ("^" . keyamp-self-insert-and-insert)
+        ("7" . keyamp-self-insert-and-insert)                                        ("&" . keyamp-self-insert-and-insert)
+        ("8" . keyamp-self-insert-and-insert)                                        ("*" . keyamp-self-insert-and-insert)
+        ("9" . keyamp-self-insert-and-insert)                                        ("(" . keyamp-self-insert-and-insert)
+        ("0" . keyamp-self-insert-and-insert)                                        (")" . keyamp-self-insert-and-insert)
+        ("-" . keyamp-self-insert-and-insert)                                        ("_" . keyamp-self-insert-and-insert)
+        ("=" . keyamp-self-insert-and-insert)                                        ("+" . keyamp-self-insert-and-insert)
+
+        ("y"  . keyamp-self-insert-and-insert) ("н" . keyamp-self-insert-and-insert) ("Y" . keyamp-self-insert-and-insert)  ("Н" . keyamp-self-insert-and-insert)
+        ("u"  . keyamp-self-insert-and-insert) ("г" . keyamp-self-insert-and-insert) ("U" . keyamp-self-insert-and-insert)  ("Г" . keyamp-self-insert-and-insert)
+        ("i"  . keyamp-self-insert-and-insert) ("ш" . keyamp-self-insert-and-insert) ("I" . keyamp-self-insert-and-insert)  ("Ш" . keyamp-self-insert-and-insert)
+        ("o"  . keyamp-self-insert-and-insert) ("щ" . keyamp-self-insert-and-insert) ("O" . keyamp-self-insert-and-insert)  ("Щ" . keyamp-self-insert-and-insert)
+        ("p"  . keyamp-self-insert-and-insert) ("з" . keyamp-self-insert-and-insert) ("P" . keyamp-self-insert-and-insert)  ("З" . keyamp-self-insert-and-insert)
+        ("["  . keyamp-self-insert-and-insert) ("х" . keyamp-self-insert-and-insert) ("{" . keyamp-self-insert-and-insert)  ("Х" . keyamp-self-insert-and-insert)
+        ("]"  . keyamp-self-insert-and-insert) ("ъ" . keyamp-self-insert-and-insert) ("}" . keyamp-self-insert-and-insert)  ("Ъ" . keyamp-self-insert-and-insert)
+        ("\\" . keyamp-self-insert-and-insert)                                       ("|" . keyamp-self-insert-and-insert)
+
+        ("h" . keyamp-self-insert-and-insert)  ("р" . keyamp-self-insert-and-insert) ("H"  . keyamp-self-insert-and-insert) ("Р" . keyamp-self-insert-and-insert)
+        ("j" . keyamp-self-insert-and-insert)  ("о" . keyamp-self-insert-and-insert) ("J"  . keyamp-self-insert-and-insert) ("О" . keyamp-self-insert-and-insert)
+        ("k" . keyamp-insert-k)                ("л" . keyamp-insert-л)               ("K"  . keyamp-self-insert-and-insert) ("Л" . keyamp-self-insert-and-insert)
+        ("l" . keyamp-self-insert-and-insert)  ("д" . keyamp-self-insert-and-insert) ("L"  . keyamp-self-insert-and-insert) ("Д" . keyamp-self-insert-and-insert)
+        (";" . keyamp-insert-semicolon)        ("ж" . keyamp-insert-ж)               (":"  . keyamp-self-insert-and-insert) ("Ж" . keyamp-self-insert-and-insert)
+        ("'" . keyamp-self-insert-and-insert)  ("э" . keyamp-self-insert-and-insert) ("\"" . keyamp-self-insert-and-insert) ("Э" . keyamp-self-insert-and-insert)
+
+        ("n" . keyamp-insert-n)                ("т" . keyamp-insert-n)               ("N" . keyamp-insert-N)                ("Т" . keyamp-insert-Т)
+        ("m" . keyamp-self-insert-and-insert)  ("ь" . keyamp-self-insert-and-insert) ("M" . keyamp-self-insert-and-insert)  ("Ь" . keyamp-self-insert-and-insert)
+        ("," . keyamp-self-insert-and-insert)  ("б" . keyamp-self-insert-and-insert) ("<" . keyamp-self-insert-and-insert)  ("Б" . keyamp-self-insert-and-insert)
+        ("." . keyamp-self-insert-and-insert)  ("ю" . keyamp-self-insert-and-insert) (">" . keyamp-self-insert-and-insert)  ("Ю" . keyamp-self-insert-and-insert)
+        ("/" . keyamp-self-insert-and-insert)                                        ("?" . keyamp-self-insert-and-insert)))
 
     ;; The hook is last one run during minibuffer setup and set the keymap.
     (keyamp--hook keymap '(minibuffer-setup-hook) :command nil :repeat))
 
-  (defun keyamp-select-word (fun &rest r)
-    "Execute `paste-or-prev' in empty minibuffer."
-    (if (keyamp-minibuffer-empty)
-        (keyamp-command-execute 'paste-or-prev)
-      (apply fun r)))
-
-  (advice-add 'select-word :around 'keyamp-select-word)
-
   ;; Hit D/DEL for No, K/SPC for Yes to answer non-literal Y or N.
   (keyamp--remap y-or-n-p-map
-    '((select-block . y-or-n-p-insert-n) (del-back  . y-or-n-p-insert-n)
-      (select-word  . y-or-n-p-insert-y) (next-line . y-or-n-p-insert-y)))
+    '((select-block  . y-or-n-p-insert-n) (del-back  . y-or-n-p-insert-n)
+      (paste-or-prev . y-or-n-p-insert-y) (next-line . y-or-n-p-insert-y)))
 
   (keyamp--remap minibuffer-local-map
     '((previous-line . hist-back) (next-line . hist-forw)
@@ -1547,7 +1556,8 @@ is enabled.")
     (keyamp--remap ido-completion-map
       '((keyamp-insert . ido-exit-minibuffer)
         (previous-line . hist-back)      (select-block . hist-back)
-        (next-line     . ido-next-match) (select-word  . ido-next-match)))))
+        (next-line     . ido-next-match) (select-word  . ido-next-match)
+        (comp-forw     . ido-next-match)))))
 
 (with-sparse-keymap
   (keyamp--map-leader keymap '(previous-line . next-line))
@@ -1565,9 +1575,9 @@ is enabled.")
       (del-word            . dired-unmark-all-marks)
       (backward-del-word   . dired-do-chmod)
       (shrink-whitespaces  . dired-hide-details-mode)
-      (open-line           . prev-buf)
+      (open-line           . prev-dired-buf)
       (del-back            . dired-toggle-mark)
-      (newline             . next-buf)
+      (newline             . next-dired-buf)
       (toggle-comment      . revert-buffer)
       (cut-line            . dired-kill-subdir)
       (cut-text-block      . dired-maybe-insert-subdir)
@@ -1637,7 +1647,7 @@ is enabled.")
       (del-back            . alt-buf)
       (newline             . next-buf)
       (toggle-comment      . view-messages)
-      (cut-line            . prev-eww-buffer)
+      (cut-line            . prev-eww-buf)
       (copy-line           . screen-idle)
       (paste-or-prev       . tasks)
       (toggle-case         . downloads)
@@ -1688,9 +1698,9 @@ is enabled.")
         (end-of-lyne     . company-next-page)))
 
     (keyamp--set keymap
-      '(company-select-back company-select-forw company-previous-page
-                            company-next-page company-show-doc-buffer company-search-abort
-                            company-manual-begin))
+      '(company-select-back company-select-forw     company-previous-page
+        company-next-page   company-show-doc-buffer company-search-abort
+        company-manual-begin))
 
     (advice-add 'company-manual-begin :before 'keyamp-command)
 
@@ -1790,7 +1800,7 @@ is enabled.")
       (previous-line       . up-line-rev)
       (next-line           . down-line)
       (toggle-comment      . org-agenda-redo)
-      (cut-line            . prev-eww-buffer)
+      (cut-line            . prev-eww-buf)
       (paste-or-prev       . tasks)
       (toggle-case         . downloads)
       (backward-bracket    . downloads)
@@ -1957,12 +1967,13 @@ is enabled.")
   (keyamp--map-backtab eshell-mode-map undo)
   (keyamp--map-tab eshell-mode-map completion-at-point)
   (keyamp--remap eshell-mode-map
-    '((cut-line        . eshell-clear-input)
-      (next-eww-buffer . eshell-clear)
-      (select-block    . eshell-previous-input)
-      (open-line       . prev-eshell-buffer)
-      (newline         . next-eshell-buffer)
-      (toggle-comment  . ignore)))
+    '((cut-line       . eshell-clear-input)
+      (next-eww-buf   . eshell-clear)
+      (select-block   . eshell-previous-input)
+      (select-word    . eshell-next-input)
+      (open-line      . prev-eshell-buf)
+      (newline        . next-eshell-buf)
+      (toggle-comment . ignore)))
 
   (with-sparse-keymap
     (keyamp--map-leader keymap '(previous-line . next-line))
@@ -2005,21 +2016,24 @@ is enabled.")
   (keyamp--map-backtab vterm-mode-map vterm-send-backtab)
   (keyamp--map-tab vterm-mode-map vterm-send-tab)
   (keyamp--map vterm-mode-map '(("C-r" . delete-other-windows)))
-  (keyamp--map vterm-mode-map '(("C-t" . vterm-tui)))
 
   (keyamp--remap vterm-mode-map
     '((select-block        . vterm-up-vi-cmd)
       (paste-or-prev       . vterm-yank)
       (paste-from-r1       . vterm-yank-pop)
-      (shrink-whitespaces  . vterm-tmux-prev-window)
-      (cut-text-block      . ignore)
-      (open-line           . prev-vterm-buffer)
-      (del-back            . vterm-shell-vi-cmd) ;; sync point prompt position with libvterm
-      (newline             . vterm-tmux-copy)    ;; tmux copy mode
+      (shrink-whitespaces  . vterm-tmux-copy)        ; activate tmux copy mode
+      (cut-text-block      . vterm-vi)               ; activate vi mode
+      (open-line           . vterm-tmux-prev-window)
+      (del-back            . vterm-shell-vi-cmd)     ; sync point position and activate shell vi cmd mode
+      (newline             . next-vterm-buf)
       (toggle-comment      . vterm-read-send-key)
       (cut-line            . vterm-clear)
       (new-empty-buffer    . vterm-tmux-create-window)
-      (insert-space-before . vterm-tmux-close-window)))
+      (insert-space-before . vterm-tmux-close-window)
+      (back-char           . vterm-left)
+      (forw-char           . vterm-right)
+      (up-line             . vterm-up)
+      (down-line           . vterm-down)))
 
   (with-sparse-keymap
     (keyamp--map-leader keymap '(previous-line . next-line))
@@ -2070,7 +2084,7 @@ is enabled.")
         (backward-del-word . vterm-shell-vi-self-insert)))
     (keyamp--set keymap
       '(vterm-up-vi-cmd ; vi cmd mode auto enable
-        vterm-down          vterm-tmux-copy-cancel
+        vterm-down
         vterm-shell-vi-cmd  vterm-shell-vi-self-insert
         vterm-shell-vi-s    vterm-shell-vi-l
         vterm-shell-vi-w    vterm-shell-vi-e))
@@ -2132,6 +2146,7 @@ is enabled.")
   ;;;;;; tmux copy mode vi
   (with-sparse-keymap
     (keyamp--map-leader keymap '(vterm-tmux-copy-self-insert . vterm-tmux-copy-self-insert))
+    (keyamp--map-return keymap vterm-shell-vi-cmd) ; quit and sync prompt position
     (keyamp--remap keymap
       '((previous-line   . vterm-tmux-copy-self-insert)
         (backward-char   . vterm-tmux-copy-self-insert)
@@ -2141,7 +2156,7 @@ is enabled.")
         (forward-char    . vterm-tmux-copy-self-insert)
         (beg-of-line     . vterm-tmux-copy-self-insert)
         (end-of-lyne     . vterm-tmux-copy-self-insert)
-        (del-back        . vterm-tmux-copy-cancel) ; quit and sync prompt position
+        (del-back        . vterm-shell-vi-cmd)
         (copy-line       . vterm-tmux-copy-self-insert)
         (activate-region . vterm-tmux-copy-self-insert)
         (isearch-forward . vterm-tmux-copy-self-insert)))
@@ -2151,7 +2166,8 @@ is enabled.")
   ;; bind -T copy-mode-vi j send-keys -X copy-pipe-and-cancel 'tee > /tmp/tmux-copy~$(date "+%Y-%m-%d_%H%M%S")~'
   ;; if-shell 'uname | grep -q Darwin' { bind -T copy-mode-vi j send-keys -X copy-pipe-and-cancel 'pbcopy' }
 
-  ;; bind -T copy-mode-vi e send-keys -X cancel
+  ;; bind -T copy-mode-vi Escape send-keys -X cancel
+  ;; bind -T copy-mode-vi Enter send-keys -X cancel
 
   ;; bind -T copy-mode-vi d send-keys -X cursor-up
   ;; bind -T copy-mode-vi h send-keys -X cursor-left
@@ -2171,75 +2187,145 @@ is enabled.")
 
   ;; bind -T copy-mode-vi Tab send-keys -X search-reverse
   ;; bind -T copy-mode-vi BTab send-keys -X search-again
-  ;;
 
-  ;;;;;; terminal UI app mode
+  ;;;;;; vi mode
   (with-sparse-keymap
-    (keyamp--map keymap '(("C-h" . keyamp-command))) ; C-t to activate
-    (keyamp--map-leader keymap '(vterm-tui-self-insert . vterm-tui-self-insert))
-    (keyamp--map-escape keymap vterm-tui-self-insert)
-    (keyamp--map-return keymap vterm-tui-self-insert)
+    (keyamp--map-leader keymap '(vterm-vi-self-insert . vterm-vi-self-insert))
+    (keyamp--map-escape keymap vterm-vi-escape) ; double press to quit vi mode
+    (keyamp--map-return keymap vterm-vi-self-insert)
+    (keyamp--map-backtab keymap vterm-vi-self-insert)
+    (keyamp--map-tab keymap vterm-vi-self-insert)
     (keyamp--map keymap
       '(;; left half
-        ("`" . vterm-tui-self-insert)            ("ё" . vterm-tui-self-insert)           ("~" . vterm-tui-self-insert)   ("Ë" . vterm-tui-self-insert)
-        ("1" . vterm-tui-self-insert)                                                    ("!" . vterm-tui-self-insert)
-        ("2" . vterm-tui-self-insert)                                                    ("@" . vterm-tui-self-insert)
-        ("3" . vterm-tui-self-insert)                                                    ("#" . vterm-tui-self-insert)   ("№" . vterm-tui-self-insert)
-        ("4" . vterm-tui-self-insert)                                                    ("$" . vterm-tui-self-insert)
-        ("5" . vterm-tui-self-insert)                                                    ("%" . vterm-tui-self-insert)
+        ("`" . vterm-vi-self-insert)  ("ё" . vterm-vi-self-insert) ("~" . vterm-vi-self-insert)  ("Ë" . vterm-vi-self-insert)
+        ("1" . vterm-vi-self-insert)                               ("!" . vterm-vi-self-insert)
+        ("2" . vterm-vi-self-insert)                               ("@" . vterm-vi-self-insert)
+        ("3" . vterm-vi-self-insert)                               ("#" . vterm-vi-self-insert)  ("№" . vterm-vi-self-insert)
+        ("4" . vterm-vi-self-insert)                               ("$" . vterm-vi-self-insert)
+        ("5" . vterm-vi-self-insert)                               ("%" . vterm-vi-self-insert)
 
-        ("q" . vterm-tui-self-insert)            ("й" . vterm-tui-self-insert)           ("Q" . vterm-tui-self-insert)   ("Й" . vterm-tui-self-insert)
-        ("w" . vterm-tui-self-insert)            ("ц" . vterm-tui-self-insert)           ("W" . vterm-tui-self-insert)   ("Ц" . vterm-tui-self-insert)
-        ("e" . vterm-tui-self-insert)            ("у" . vterm-tui-self-insert)           ("E" . vterm-tui-self-insert)   ("У" . vterm-tui-self-insert)
-        ("r" . vterm-tui-self-insert)            ("к" . vterm-tui-self-insert)           ("R" . vterm-tui-self-insert)   ("К" . vterm-tui-self-insert)
-        ("t" . vterm-tui-self-insert)            ("е" . vterm-tui-self-insert)           ("T" . vterm-tui-self-insert)   ("Е" . vterm-tui-self-insert)
+        ("q" . vterm-vi-self-insert)  ("й" . vterm-vi-self-insert) ("Q" . vterm-vi-self-insert)  ("Й" . vterm-vi-self-insert)
+        ("w" . vterm-vi-self-insert)  ("ц" . vterm-vi-self-insert) ("W" . vterm-vi-self-insert)  ("Ц" . vterm-vi-self-insert)
+        ("e" . vterm-vi-self-insert)  ("у" . vterm-vi-self-insert) ("E" . vterm-vi-self-insert)  ("У" . vterm-vi-self-insert)
+        ("r" . vterm-vi-self-insert)  ("к" . vterm-vi-self-insert) ("R" . vterm-vi-self-insert)  ("К" . vterm-vi-self-insert)
+        ("t" . vterm-vi-self-insert)  ("е" . vterm-vi-self-insert) ("T" . vterm-vi-self-insert)  ("Е" . vterm-vi-self-insert)
 
-        ("a" . vterm-tui-self-insert)            ("ф" . vterm-tui-self-insert)           ("A" . vterm-tui-self-insert)   ("Ф" . vterm-tui-self-insert)
-        ("s" . vterm-tui-self-insert)            ("ы" . vterm-tui-self-insert)           ("S" . vterm-tui-self-insert)   ("Ы" . vterm-tui-self-insert)
-        ("d" . vterm-tui-self-insert)            ("в" . vterm-tui-self-insert)           ("D" . vterm-tui-self-insert)   ("В" . vterm-tui-self-insert)
-        ("f" . vterm-tui-self-insert)            ("а" . vterm-tui-self-insert)           ("F" . vterm-tui-self-insert)   ("А" . vterm-tui-self-insert)
-        ("g" . vterm-tui-self-insert)            ("п" . vterm-tui-self-insert)           ("G" . vterm-tui-self-insert)   ("П" . vterm-tui-self-insert)
+        ("a" . vterm-vi-self-insert)  ("ф" . vterm-vi-self-insert) ("A" . vterm-vi-self-insert)  ("Ф" . vterm-vi-self-insert)
+        ("s" . vterm-vi-self-insert)  ("ы" . vterm-vi-self-insert) ("S" . vterm-vi-self-insert)  ("Ы" . vterm-vi-self-insert)
+        ("d" . vterm-vi-self-insert)  ("в" . vterm-vi-self-insert) ("D" . vterm-vi-self-insert)  ("В" . vterm-vi-self-insert)
+        ("f" . vterm-vi-self-insert)  ("а" . vterm-vi-self-insert) ("F" . vterm-vi-self-insert)  ("А" . vterm-vi-self-insert)
+        ("g" . vterm-vi-self-insert)  ("п" . vterm-vi-self-insert) ("G" . vterm-vi-self-insert)  ("П" . vterm-vi-self-insert)
 
-        ("z" . vterm-tui-self-insert)            ("я" . vterm-tui-self-insert)           ("Z" . vterm-tui-self-insert)   ("Я" . vterm-tui-self-insert)
-        ("x" . vterm-tui-self-insert)            ("ч" . vterm-tui-self-insert)           ("X" . vterm-tui-self-insert)   ("Ч" . vterm-tui-self-insert)
-        ("c" . vterm-tui-self-insert)            ("с" . vterm-tui-self-insert)           ("C" . vterm-tui-self-insert)   ("С" . vterm-tui-self-insert)
-        ("v" . vterm-tui-self-insert)            ("м" . vterm-tui-self-insert)           ("V" . vterm-tui-self-insert)   ("М" . vterm-tui-self-insert)
-        ("b" . vterm-tui-self-insert)            ("и" . vterm-tui-self-insert)           ("B" . vterm-tui-self-insert)   ("И" . vterm-tui-self-insert)
+        ("z" . vterm-vi-self-insert)  ("я" . vterm-vi-self-insert) ("Z" . vterm-vi-self-insert)  ("Я" . vterm-vi-self-insert)
+        ("x" . vterm-vi-self-insert)  ("ч" . vterm-vi-self-insert) ("X" . vterm-vi-self-insert)  ("Ч" . vterm-vi-self-insert)
+        ("c" . vterm-vi-self-insert)  ("с" . vterm-vi-self-insert) ("C" . vterm-vi-self-insert)  ("С" . vterm-vi-self-insert)
+        ("v" . vterm-vi-self-insert)  ("м" . vterm-vi-self-insert) ("V" . vterm-vi-self-insert)  ("М" . vterm-vi-self-insert)
+        ("b" . vterm-vi-self-insert)  ("и" . vterm-vi-self-insert) ("B" . vterm-vi-self-insert)  ("И" . vterm-vi-self-insert)
 
         ;; right half
-        ("6" . vterm-tui-self-insert)                                                    ("^" . vterm-tui-self-insert)
-        ("7" . vterm-tui-self-insert)                                                    ("&" . vterm-tui-self-insert)
-        ("8" . vterm-tui-self-insert)                                                    ("*" . vterm-tui-self-insert)
-        ("9" . vterm-tui-self-insert)                                                    ("(" . vterm-tui-self-insert)
-        ("0" . vterm-tui-self-insert)                                                    (")" . vterm-tui-self-insert)
-        ("-" . vterm-tui-self-insert)                                                    ("_" . vterm-tui-self-insert)
-        ("=" . vterm-tui-self-insert)                                                    ("+" . vterm-tui-self-insert)
+        ("6" . vterm-vi-self-insert)                               ("^" . vterm-vi-self-insert)
+        ("7" . vterm-vi-self-insert)                               ("&" . vterm-vi-self-insert)
+        ("8" . vterm-vi-self-insert)                               ("*" . vterm-vi-self-insert)
+        ("9" . vterm-vi-self-insert)                               ("(" . vterm-vi-self-insert)
+        ("0" . vterm-vi-self-insert)                               (")" . vterm-vi-self-insert)
+        ("-" . vterm-vi-self-insert)                               ("_" . vterm-vi-self-insert)
+        ("=" . vterm-vi-self-insert)                               ("+" . vterm-vi-self-insert)
 
-        ("y"  . vterm-tui-self-insert)           ("н" . vterm-tui-self-insert)           ("Y" . vterm-tui-self-insert)   ("Н" . vterm-tui-self-insert)
-        ("u"  . vterm-tui-self-insert)           ("г" . vterm-tui-self-insert)           ("U" . vterm-tui-self-insert)   ("Г" . vterm-tui-self-insert)
-        ("i"  . vterm-tui-self-insert)           ("ш" . vterm-tui-self-insert)           ("I" . vterm-tui-self-insert)   ("Ш" . vterm-tui-self-insert)
-        ("o"  . vterm-tui-self-insert)           ("щ" . vterm-tui-self-insert)           ("O" . vterm-tui-self-insert)   ("Щ" . vterm-tui-self-insert)
-        ("p"  . vterm-tui-self-insert)           ("з" . vterm-tui-self-insert)           ("P" . vterm-tui-self-insert)   ("З" . vterm-tui-self-insert)
-        ("["  . vterm-tui-self-insert)           ("х" . vterm-tui-self-insert)           ("{" . vterm-tui-self-insert)   ("Х" . vterm-tui-self-insert)
-        ("]"  . vterm-tui-self-insert)           ("ъ" . vterm-tui-self-insert)           ("}" . vterm-tui-self-insert)   ("Ъ" . vterm-tui-self-insert)
-        ("\\" . vterm-tui-self-insert)                                                   ("|" . vterm-tui-self-insert)
+        ("y"  . vterm-vi-self-insert) ("н" . vterm-vi-self-insert) ("Y" . vterm-vi-self-insert)  ("Н" . vterm-vi-self-insert)
+        ("u"  . vterm-vi-self-insert) ("г" . vterm-vi-self-insert) ("U" . vterm-vi-self-insert)  ("Г" . vterm-vi-self-insert)
+        ("i"  . vterm-vi-self-insert) ("ш" . vterm-vi-self-insert) ("I" . vterm-vi-self-insert)  ("Ш" . vterm-vi-self-insert)
+        ("o"  . vterm-vi-self-insert) ("щ" . vterm-vi-self-insert) ("O" . vterm-vi-self-insert)  ("Щ" . vterm-vi-self-insert)
+        ("p"  . vterm-vi-self-insert) ("з" . vterm-vi-self-insert) ("P" . vterm-vi-self-insert)  ("З" . vterm-vi-self-insert)
+        ("["  . vterm-vi-self-insert) ("х" . vterm-vi-self-insert) ("{" . vterm-vi-self-insert)  ("Х" . vterm-vi-self-insert)
+        ("]"  . vterm-vi-self-insert) ("ъ" . vterm-vi-self-insert) ("}" . vterm-vi-self-insert)  ("Ъ" . vterm-vi-self-insert)
+        ("\\" . vterm-vi-self-insert)                              ("|" . vterm-vi-self-insert)
 
-        ("h" . vterm-tui-self-insert)            ("р" . vterm-tui-self-insert)           ("H"  . vterm-tui-self-insert)  ("Р" . vterm-tui-self-insert)
-        ("j" . vterm-tui-self-insert)            ("о" . vterm-tui-self-insert)           ("J"  . vterm-tui-self-insert)  ("О" . vterm-tui-self-insert)
-        ("k" . vterm-tui-self-insert)            ("л" . vterm-tui-self-insert)           ("K"  . vterm-tui-self-insert)  ("Л" . vterm-tui-self-insert)
-        ("l" . vterm-tui-self-insert)            ("д" . vterm-tui-self-insert)           ("L"  . vterm-tui-self-insert)  ("Д" . vterm-tui-self-insert)
-        (";" . vterm-tui-self-insert)            ("ж" . vterm-tui-self-insert)           (":"  . vterm-tui-self-insert)  ("Ж" . vterm-tui-self-insert)
-        ("'" . vterm-tui-self-insert)            ("э" . vterm-tui-self-insert)           ("\"" . vterm-tui-self-insert)  ("Э" . vterm-tui-self-insert)
+        ("h" . vterm-vi-self-insert)  ("р" . vterm-vi-self-insert) ("H"  . vterm-vi-self-insert) ("Р" . vterm-vi-self-insert)
+        ("j" . vterm-vi-self-insert)  ("о" . vterm-vi-self-insert) ("J"  . vterm-vi-self-insert) ("О" . vterm-vi-self-insert)
+        ("k" . vterm-vi-self-insert)  ("л" . vterm-vi-self-insert) ("K"  . vterm-vi-self-insert) ("Л" . vterm-vi-self-insert)
+        ("l" . vterm-vi-self-insert)  ("д" . vterm-vi-self-insert) ("L"  . vterm-vi-self-insert) ("Д" . vterm-vi-self-insert)
+        (";" . vterm-vi-self-insert)  ("ж" . vterm-vi-self-insert) (":"  . vterm-vi-self-insert) ("Ж" . vterm-vi-self-insert)
+        ("'" . vterm-vi-self-insert)  ("э" . vterm-vi-self-insert) ("\"" . vterm-vi-self-insert) ("Э" . vterm-vi-self-insert)
 
-        ("n" . vterm-tui-self-insert)            ("т" . vterm-tui-self-insert)           ("N" . vterm-tui-self-insert)   ("Т" . vterm-tui-self-insert)
-        ("m" . vterm-tui-self-insert)            ("ь" . vterm-tui-self-insert)           ("M" . vterm-tui-self-insert)   ("Ь" . vterm-tui-self-insert)
-        ("," . vterm-tui-self-insert)            ("б" . vterm-tui-self-insert)           ("<" . vterm-tui-self-insert)   ("Б" . vterm-tui-self-insert)
-        ("." . vterm-tui-self-insert)            ("ю" . vterm-tui-self-insert)           (">" . vterm-tui-self-insert)   ("Ю" . vterm-tui-self-insert)
-        ("/" . vterm-tui-self-insert)                                                    ("?" . vterm-tui-self-insert)
+        ("n" . vterm-vi-self-insert)  ("т" . vterm-vi-self-insert) ("N" . vterm-vi-self-insert)  ("Т" . vterm-vi-self-insert)
+        ("m" . vterm-vi-self-insert)  ("ь" . vterm-vi-self-insert) ("M" . vterm-vi-self-insert)  ("Ь" . vterm-vi-self-insert)
+        ("," . vterm-vi-self-insert)  ("б" . vterm-vi-self-insert) ("<" . vterm-vi-self-insert)  ("Б" . vterm-vi-self-insert)
+        ("." . vterm-vi-self-insert)  ("ю" . vterm-vi-self-insert) (">" . vterm-vi-self-insert)  ("Ю" . vterm-vi-self-insert)
+        ("/" . vterm-vi-self-insert)                               ("?" . vterm-vi-self-insert)
 
-        ("<left>" . vterm-tui-self-insert)       ("<right>" . vterm-tui-self-insert)
-        ("<up>"   . vterm-tui-self-insert)       ("<down>"  . vterm-tui-self-insert)))
-    (keyamp--set keymap '(vterm-tui vterm-tui-self-insert) :command)))
+        ("<left>" . vterm-vi-self-insert) ("<right>" . vterm-vi-self-insert)
+        ("<up>"   . vterm-vi-self-insert) ("<down>"  . vterm-vi-self-insert)))
+    (keyamp--set keymap '(vterm-vi vterm-vi-self-insert vterm-vi-escape) :command)))
+
+(defvar keyamp-ignore-map (make-sparse-keymap)
+  "Keymap ignores any key. Maybe trigger action with post command hook.")
+
+(keyamp--map keyamp-ignore-map '(("<mouse-1>" . ignore)))
+(keyamp--map-leader keyamp-ignore-map '(ignore . ignore))
+(keyamp--map-escape keyamp-ignore-map ignore)
+(keyamp--map-return keyamp-ignore-map ignore)
+(keyamp--map-backtab keyamp-ignore-map ignore)
+(keyamp--map-tab keyamp-ignore-map ignore)
+(keyamp--map keyamp-ignore-map
+  '(;; left half
+    ("`" . ignore)  ("ё" . ignore) ("~" . ignore)  ("Ë" . ignore)
+    ("1" . ignore)                 ("!" . ignore)
+    ("2" . ignore)                 ("@" . ignore)
+    ("3" . ignore)                 ("#" . ignore)  ("№" . ignore)
+    ("4" . ignore)                 ("$" . ignore)
+    ("5" . ignore)                 ("%" . ignore)
+
+    ("q" . ignore)  ("й" . ignore) ("Q" . ignore)  ("Й" . ignore)
+    ("w" . ignore)  ("ц" . ignore) ("W" . ignore)  ("Ц" . ignore)
+    ("e" . ignore)  ("у" . ignore) ("E" . ignore)  ("У" . ignore)
+    ("r" . ignore)  ("к" . ignore) ("R" . ignore)  ("К" . ignore)
+    ("t" . ignore)  ("е" . ignore) ("T" . ignore)  ("Е" . ignore)
+
+    ("a" . ignore)  ("ф" . ignore) ("A" . ignore)  ("Ф" . ignore)
+    ("s" . ignore)  ("ы" . ignore) ("S" . ignore)  ("Ы" . ignore)
+    ("d" . ignore)  ("в" . ignore) ("D" . ignore)  ("В" . ignore)
+    ("f" . ignore)  ("а" . ignore) ("F" . ignore)  ("А" . ignore)
+    ("g" . ignore)  ("п" . ignore) ("G" . ignore)  ("П" . ignore)
+
+    ("z" . ignore)  ("я" . ignore) ("Z" . ignore)  ("Я" . ignore)
+    ("x" . ignore)  ("ч" . ignore) ("X" . ignore)  ("Ч" . ignore)
+    ("c" . ignore)  ("с" . ignore) ("C" . ignore)  ("С" . ignore)
+    ("v" . ignore)  ("м" . ignore) ("V" . ignore)  ("М" . ignore)
+    ("b" . ignore)  ("и" . ignore) ("B" . ignore)  ("И" . ignore)
+
+    ;; right half
+    ("6" . ignore)                 ("^" . ignore)
+    ("7" . ignore)                 ("&" . ignore)
+    ("8" . ignore)                 ("*" . ignore)
+    ("9" . ignore)                 ("(" . ignore)
+    ("0" . ignore)                 (")" . ignore)
+    ("-" . ignore)                 ("_" . ignore)
+    ("=" . ignore)                 ("+" . ignore)
+
+    ("y"  . ignore) ("н" . ignore) ("Y" . ignore)  ("Н" . ignore)
+    ("u"  . ignore) ("г" . ignore) ("U" . ignore)  ("Г" . ignore)
+    ("i"  . ignore) ("ш" . ignore) ("I" . ignore)  ("Ш" . ignore)
+    ("o"  . ignore) ("щ" . ignore) ("O" . ignore)  ("Щ" . ignore)
+    ("p"  . ignore) ("з" . ignore) ("P" . ignore)  ("З" . ignore)
+    ("["  . ignore) ("х" . ignore) ("{" . ignore)  ("Х" . ignore)
+    ("]"  . ignore) ("ъ" . ignore) ("}" . ignore)  ("Ъ" . ignore)
+    ("\\" . ignore)                                ("|" . ignore)
+
+    ("h" . ignore)  ("р" . ignore) ("H"  . ignore) ("Р" . ignore)
+    ("j" . ignore)  ("о" . ignore) ("J"  . ignore) ("О" . ignore)
+    ("k" . ignore)  ("л" . ignore) ("K"  . ignore) ("Л" . ignore)
+    ("l" . ignore)  ("д" . ignore) ("L"  . ignore) ("Д" . ignore)
+    (";" . ignore)  ("ж" . ignore) (":"  . ignore) ("Ж" . ignore)
+    ("'" . ignore)  ("э" . ignore) ("\"" . ignore) ("Э" . ignore)
+
+    ("n" . ignore)  ("т" . ignore) ("N" . ignore)  ("Т" . ignore)
+    ("m" . ignore)  ("ь" . ignore) ("M" . ignore)  ("Ь" . ignore)
+    ("," . ignore)  ("б" . ignore) ("<" . ignore)  ("Б" . ignore)
+    ("." . ignore)  ("ю" . ignore) (">" . ignore)  ("Ю" . ignore)
+    ("/" . ignore)                 ("?" . ignore)
+
+    ("<left>" . ignore) ("<right>" . ignore)
+    ("<up>"   . ignore) ("<down>"  . ignore)))
 
 (with-eval-after-load 'info
   (keyamp--remap Info-mode-map
@@ -2308,7 +2394,7 @@ is enabled.")
       (open-line         . prev-buf)
       (del-back          . gnus-group-get-new-news)
       (newline           . next-buf)
-      (cut-line          . prev-eww-buffer)
+      (cut-line          . prev-eww-buf)
       (copy-line         . screen-idle)
       (paste-or-prev     . tasks)
       (backward-bracket  . downloads)
@@ -2365,7 +2451,7 @@ is enabled.")
 (with-eval-after-load 'recentf
   (keyamp--remap recentf-dialog-mode-map
     '((keyamp-escape     . recentf-cancel-dialog)
-      (eshell-split      . recentf-open-most-recent-file-0)
+      (sh                . recentf-open-most-recent-file-0)
       (kmacro-record     . recentf-open-most-recent-file-1)
       (kmacro-play       . recentf-open-most-recent-file-2)
       (kmacro-helper     . recentf-open-most-recent-file-3)
@@ -2381,7 +2467,7 @@ is enabled.")
 
 (with-sparse-keymap
   (keyamp--remap keymap
-    '((eshell-split      . radio-channel-0) (kmacro-record    . radio-channel-1)
+    '((sh                . radio-channel-0) (kmacro-record    . radio-channel-1)
       (kmacro-play       . radio-channel-2) (kmacro-helper    . radio-channel-3)
       (append-to-r1      . radio-channel-4) (terminal         . radio-channel-5)
       (pass              . radio-channel-6) (jump-to-register . radio-channel-7)
@@ -2625,7 +2711,7 @@ is enabled.")
       (next-line         . down-line)
       (backward-del-word . sun-moon)
       (cut-text-block    . calc)
-      (cut-line          . prev-eww-buffer)
+      (cut-line          . prev-eww-buf)
       (backward-bracket  . downloads)
       (forward-bracket   . save-close-buf)
       (kmacro-helper     . config)
@@ -2690,18 +2776,20 @@ is enabled.")
                  gnus-summary-scroll-up                  t
                  list-matching-lines                     t
                  next-buffer                             t
-                 next-eww-buffer                         t
-                 next-eshell-buffer                      t
-                 next-vterm-buffer                       t
+                 next-eww-buf                            t
+                 next-eshell-buf                         t
+                 next-vterm-buf                          t
+                 next-dired-buf                          t
                  next-proj-buf                           t
                  next-buf                                t
                  occur-cur-word                          t
                  open-in-external-app                    t
                  org-agenda-tasks                        t
                  player                                  t
-                 prev-eww-buffer                         t
-                 prev-eshell-buffer                      t
-                 prev-vterm-buffer                       t
+                 prev-eww-buf                            t
+                 prev-eshell-buf                         t
+                 prev-vterm-buf                          t
+                 prev-dired-buf                          t
                  prev-proj-buf                           t
                  prev-buf                                t
                  previous-buffer                         t
@@ -2827,7 +2915,6 @@ is enabled.")
                  comp-back                               t
                  comp-forw                               t
                  copy-line                               t
-                 dired-jump                              t
                  dired-mark                              t
                  dired-unmark                            t
                  doc-view-scroll-down-or-previous-page   t
@@ -2921,6 +3008,9 @@ is enabled.")
                  vterm-down                              t
                  vterm-send-return                       t
                  vterm-up-vi-cmd                         t
+                 vterm-vi                                t
+                 vterm-vi-self-insert                    t
+                 vterm-vi-escape                         t
                  vterm-tmux-copy                         t
                  vterm-tmux-copy-self-insert             t
                  widget-backward                         t
@@ -2954,6 +3044,9 @@ is enabled.")
                  isearch-wforw                           t
                  isearch-back                            t
                  isearch-forw                            t
+                 vterm-vi-self-insert                    t
+                 vterm-vi-escape                         t
+                 vterm-vi                                t
                  vterm-tmux-copy                         t
                  vterm-tmux-copy-self-insert             t
                  scroll-down-command                     t
@@ -2976,14 +3069,15 @@ is enabled.")
 (defconst keyamp-blink-io-commands
   '(vterm-shell-vi-cmd    vterm-shell-vi-self-insert    vterm-shell-vi-s
     vterm-shell-vi-l      vterm-shell-vi-w              vterm-shell-vi-e
-    vterm-tmux-copy       vterm-tmux-copy-cancel        vterm-tmux-copy-self-insert
-    vterm-read-send-key   vterm-tui                     vterm-tui-self-insert
+    vterm-tmux-copy       vterm-tmux-copy-self-insert   vterm-read-send-key
+    vterm-vi              vterm-vi-self-insert          vterm-vi-escape
     vterm-left            vterm-right
     vterm-up              vterm-down)
   "List of commands to `keyamp-blink-io' after.")
 
 (defconst keyamp-insert-commands
-  '(self-insert-command org-self-insert-command isearch-printing-char)
+  '(self-insert-command    org-self-insert-command
+    isearch-printing-char  keyamp-self-insert-and-insert)
   "List of insert commands.")
 
 (defconst keyamp-screen-command-commands
@@ -3179,8 +3273,10 @@ insert cancel the timer.")
 (defun keyamp-self-insert-and-insert ()
   "Self insert and activate insert mode."
   (interactive)
-  (keyamp-insert)
-  (self-insert-command 1))
+  (if buffer-read-only
+      (keyamp-command-execute 'ignore)
+    (keyamp-insert)
+    (self-insert-command 1)))
 
 (defun keyamp-minibuffer-return ()
   "Exit if file completion. It means use content of minibuffer as it is,
@@ -3194,16 +3290,21 @@ Simply hit TAB to minibuffer-complete file name if the name exists."
       (exit-minibuffer)
     (icomplete-force-complete-and-exit)))
 
-(defun keyamp-minibuffer-y-or-n ()
+(defun keyamp-minibuffer-y-or-n-literal ()
   "Return t if asked literal y or n question."
   (if-let ((x (minibuffer-prompt)))
       (string-match "y, n, !\\|yn!q" x)))
+
+(defun keyamp-minibuffer-y-or-n ()
+  "Return t if asked non-literal y or n question."
+  (if-let ((x (minibuffer-prompt)))
+      (string-match "y or n" x)))
 
 (defun keyamp-minibuffer-escape ()
   "If minibuffer input not empty then activate command mode instead
 of quit minibuffer. Answer q to literal y or n question."
   (interactive)
-  (if (keyamp-minibuffer-y-or-n)
+  (if (keyamp-minibuffer-y-or-n-literal)
       (progn (keyamp-insert-init)
              (execute-kbd-macro (kbd "q")))
     (if (keyamp-minibuffer-empty)
@@ -3227,8 +3328,10 @@ of quit minibuffer. Answer q to literal y or n question."
 
 (defun keyamp-copy-minibuffer ()
   "Kill minibuffer content to ring for reuse."
-  (kill-new (buffer-substring-no-properties
-             (1+ (length (minibuffer-prompt))) (point-max))))
+  (let ((x (buffer-substring-no-properties
+            (1+ (length (minibuffer-prompt))) (point-max))))
+    (unless (zerop (length x))
+      (kill-new x))))
 
 (defun keyamp-minibuffer-backtab ()
   "Quit minibuffer and call some other command. Single motion switch."
@@ -3311,82 +3414,63 @@ of quit minibuffer. Answer q to literal y or n question."
 (defun keyamp-input (Key)
   "Activate insert mode and input KEY or answer literal y or n question."
   (keyamp-insert-init)
-  (if (keyamp-minibuffer-y-or-n)
+  (if (keyamp-minibuffer-y-or-n-literal)
       (execute-kbd-macro (kbd (keyamp--convert-kbd-str Key)))
     (insert (keyamp--convert-kbd-str Key))))
 
-(defun keyamp-insert-1 ()         (interactive) (keyamp-input "1"))
-(defun keyamp-insert-2 ()         (interactive) (keyamp-input "2"))
-(defun keyamp-insert-3 ()         (interactive) (keyamp-input "3"))
-(defun keyamp-insert-4 ()         (interactive) (keyamp-input "4"))
-(defun keyamp-insert-5 ()         (interactive) (keyamp-input "5"))
-(defun keyamp-insert-6 ()         (interactive) (keyamp-input "6"))
-(defun keyamp-insert-7 ()         (interactive) (keyamp-input "7"))
-(defun keyamp-insert-8 ()         (interactive) (keyamp-input "8"))
-(defun keyamp-insert-9 ()         (interactive) (keyamp-input "9"))
-(defun keyamp-insert-0 ()         (interactive) (keyamp-input "0"))
+(defun keyamp-insert-w ()
+  "Activate insert mode and input KEY or answer literal y or n question."
+  (interactive)
+  (keyamp-input "w"))
 
-(defun keyamp-insert-q ()         (interactive) (keyamp-input "q"))
-(defun keyamp-insert-w ()         (interactive) (keyamp-input "w"))
-(defun keyamp-insert-e ()         (interactive) (keyamp-input "e"))
-(defun keyamp-insert-r ()         (interactive) (keyamp-input "r"))
-(defun keyamp-insert-t ()         (interactive) (keyamp-input "t"))
-(defun keyamp-insert-y ()         (interactive) (keyamp-input "y"))
-(defun keyamp-insert-u ()         (interactive) (keyamp-input "u"))
-(defun keyamp-insert-i ()         (interactive) (keyamp-input "i"))
-(defun keyamp-insert-o ()         (interactive) (keyamp-input "o"))
-(defun keyamp-insert-p ()         (interactive) (keyamp-input "p"))
-(defun keyamp-insert-bracket ()   (interactive) (keyamp-input "["))
-
-(defun keyamp-insert-a ()         (interactive) (keyamp-input "a"))
-(defun keyamp-insert-s ()         (interactive) (keyamp-input "s"))
+(defun keyamp-insert-ц ()
+  "Activate insert mode and input KEY or answer literal y or n question."
+  (interactive)
+  (keyamp-insert-init)
+  (if (keyamp-minibuffer-y-or-n-literal)
+      (execute-kbd-macro (kbd (keyamp--convert-kbd-str "w")))
+    (insert (keyamp--convert-kbd-str "ц"))))
 
 (defun keyamp-insert-d ()
   "D answers N to y or n question if asked."
   (interactive)
-  (if (string-match "y or n" (minibuffer-prompt))
+  (if (keyamp-minibuffer-y-or-n)
       (y-or-n-p-insert-n)
     (keyamp-input "d")))
 
-(defun keyamp-insert-f ()         (interactive) (keyamp-input "f"))
-
-(defun keyamp-insert-g ()
-  "G switches minibuffer. Input almost never starts with comma.
-Engram layout has comma in place of G. Choose similar for your layout."
+(defun keyamp-insert-в ()
+  "В answers N to y or n question if asked."
   (interactive)
-  (if (string-equal keyamp-current-layout "engineer-engram")
-      (keyamp-minibuffer-tab)
-    (keyamp-input "g")))
-
-(defun keyamp-insert-h ()         (interactive) (keyamp-input "h"))
-(defun keyamp-insert-j ()         (interactive) (keyamp-input "j"))
+  (if (keyamp-minibuffer-y-or-n)
+      (y-or-n-p-insert-n)
+    (keyamp-input "в")))
 
 (defun keyamp-insert-k ()
   "K answers Y to y or n question if asked."
   (interactive)
-  (if (string-match "y or n" (minibuffer-prompt))
+  (if (keyamp-minibuffer-y-or-n)
       (y-or-n-p-insert-y)
     (keyamp-input "k")))
 
-(defun keyamp-insert-l ()         (interactive) (keyamp-input "l"))
-(defun keyamp-insert-semicolon () (interactive) (keyamp-input ";"))
-(defun keyamp-insert-quote ()     (interactive) (keyamp-input "'"))
-
-(defun keyamp-insert-z ()         (interactive) (keyamp-input "z"))
-(defun keyamp-insert-x ()         (interactive) (keyamp-input "x"))
-(defun keyamp-insert-c ()         (interactive) (keyamp-input "c"))
-
-(defun keyamp-insert-v ()
-  "V pastes by default, input preferable sometimes."
+(defun keyamp-insert-л ()
+  "Л answers Y to y or n question if asked."
   (interactive)
-  (if (or (keyamp-minibuffer-match "M-x")
-          (keyamp-minibuffer-match "Jump to bookmark")
-          (keyamp-minibuffer-match "Switch to buffer"))
-      (keyamp-input "v")
-    (setq real-this-command 'paste-or-prev)
-    (keyamp-command-execute 'paste-or-prev)))
+  (if (keyamp-minibuffer-y-or-n)
+      (y-or-n-p-insert-y)
+    (keyamp-input "л")))
 
-(defun keyamp-insert-b ()         (interactive) (keyamp-input "b"))
+(defun keyamp-insert-semicolon ()
+  "Activate insert mode and input KEY or answer literal y or n question."
+  (interactive)
+  (keyamp-input ";"))
+
+(defun keyamp-insert-ж ()
+  "Activate insert mode and input KEY or answer literal y or n question."
+  (interactive)
+  (keyamp-insert-init)
+  (if (keyamp-minibuffer-y-or-n-literal)
+      (execute-kbd-macro (kbd (keyamp--convert-kbd-str ";")))
+    (insert (keyamp--convert-kbd-str "ж"))))
 
 (defun keyamp-insert-n ()
   "N starts I-search in minibuffer, backward to fetch last history first.
@@ -3394,11 +3478,18 @@ Engram layout has ? in place of N."
   (interactive)
   (keyamp-command-execute 'isearch-backward))
 
-(defun keyamp-insert-N ()         (interactive) (keyamp-input "N"))
-(defun keyamp-insert-m ()         (interactive) (keyamp-input "m"))
-(defun keyamp-insert-comma ()     (interactive) (keyamp-input ","))
-(defun keyamp-insert-dot ()       (interactive) (keyamp-input "."))
-(defun keyamp-insert-slash ()     (interactive) (keyamp-input "/"))
+(defun keyamp-insert-N ()
+  "Activate insert mode and input KEY or answer literal y or n question."
+  (interactive)
+  (keyamp-input "N"))
+
+(defun keyamp-insert-Т ()
+  "Activate insert mode and input KEY or answer literal y or n question."
+  (interactive)
+  (keyamp-insert-init)
+  (if (keyamp-minibuffer-y-or-n-literal)
+      (execute-kbd-macro (kbd (keyamp--convert-kbd-str "N")))
+    (insert (keyamp--convert-kbd-str "Т"))))
 
 (setq-default cursor-in-non-selected-windows nil)
 
@@ -3678,10 +3769,14 @@ Cancel after `keyamp-blink-blink'. Double blink."
 (defvar keyamp-idle-timer nil "Idle timer.")
 
 (defun keyamp-idle-init ()
-  "Idle init."
+  "Idle init. Cancel wait key sequence. Cleanup echo area."
   (if isearch-mode
-      (isearch-cancel))
-  (keyamp-command))
+      (isearch-cancel-clean))
+  (keyamp-command)
+  (if-let (x (get-buffer " *Echo Area 0*"))
+      (unless (zerop (buffer-size x))
+        (run-at-time nil nil 'message nil)))
+  (keyboard-quit))
 
 (defun keyamp-idle-detect ()
   "Idle detect."
@@ -3707,7 +3802,7 @@ Cancel after `keyamp-blink-blink'. Double blink."
   (cond ((or keyamp-repeat-p keyamp-insert-p) (keyamp-command))
         ((region-active-p)                    (deactivate-mark))
         ((minibufferp)                        (keyamp-minibuffer-quit))
-        ((< 0 (recursion-depth))              (exit-recursive-edit))
+        ((not (zerop (recursion-depth)))      (exit-recursive-edit))
         (t                                    (keyamp-command))))
 
 (defun keyamp-features ()

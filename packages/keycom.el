@@ -270,9 +270,9 @@
 
 (defun isearch-update-ring-force ()
   "Force push string to isearch ring."
-  (if (and (> (length isearch-string) 0))
-      ;; update the ring data
-      (isearch-update-ring isearch-string isearch-regexp)))
+  (unless (zerop (length isearch-string))
+    ;; update the ring data
+    (isearch-update-ring isearch-string isearch-regexp)))
 
 (defun isearch-cancel-clean ()
   "Like `isearch-cancel' but no quit signal and clean up echo area."
@@ -685,7 +685,7 @@ and `right-brackets'."
       (uncentered-cursor))
   (select-block)
   (sit-for 0.1)
-  (copy-to-register ?1 (region-beginning) (region-end))
+  (copy-line)
   (double-jump-back)
   (if (fboundp 'centered-cursor)
       (centered-cursor)))
@@ -716,7 +716,15 @@ When `universal-argument' is called first, copy whole buffer
             (unless (eq (char-before) 10)
               (copy-region-as-kill (line-beginning-position) (line-end-position))
               (end-of-line))
-          (copy-region-as-kill (line-beginning-position) (line-end-position))
+          ;; animate line first selection
+          (if visual-line-mode
+              (progn (beginning-of-visual-line)
+                     (push-mark (point) t t)
+                     (end-of-visual-line))
+            (push-mark (line-beginning-position) t t)
+            (end-of-line))
+          (sit-for 0.1)
+          (copy-region-as-kill (region-beginning) (region-end))
           (end-of-line)
           (forward-char)))))
   (return-before-copy))
@@ -931,7 +939,7 @@ ToChars is similar, with a special value of \" none \", replace by empty string.
   "Toggle the letter case of current word or selection.
 Cycle in this order: Init Caps, ALL CAPS, all lower. Calculates initial state."
   (interactive)
-  (if buffer-read-only
+  (if (or buffer-read-only (zerop (buffer-size)))
       (setq this-command 'ignore)
     (let ((deactivate-mark nil) xp1 xp2)
       (unless (eq last-command this-command) (put this-command 'state 0))
@@ -1447,7 +1455,7 @@ If a buffer is not file and not dired, copy value of `default-directory'."
                   (not DirPathOnlyQ))
              (let ((xresult (mapconcat #'identity
                                        (dired-get-marked-files) "\n")))
-               (if (equal (length xresult) 0)
+               (if (zerop (length xresult))
                    (progn default-directory)
                  (progn xresult)))
            (if (buffer-file-name)
@@ -1901,7 +1909,7 @@ command, so that next buffer shown is a user buffer."
                    (switch-to-buffer xbuf)))
         (setq i 100)))))
 
-(defun next-eww-buffer ()
+(defun next-eww-buf ()
   "Switch to the next eww buffer."
   (interactive)
   (let ((i 0) (xbuf (current-buffer)))
@@ -1915,7 +1923,7 @@ command, so that next buffer shown is a user buffer."
                    (switch-to-buffer xbuf)))
         (setq i 100)))))
 
-(defun prev-eww-buffer ()
+(defun prev-eww-buf ()
   "Switch to the previous eww buffer."
   (interactive)
   (let ((i 0) (xbuf (current-buffer)))
@@ -1929,7 +1937,7 @@ command, so that next buffer shown is a user buffer."
                    (switch-to-buffer xbuf)))
         (setq i 100)))))
 
-(defun prev-vterm-buffer ()
+(defun prev-vterm-buf ()
   "Switch to the previous vterm buffer."
   (interactive)
   (let ((i 0) (xbuf (current-buffer)))
@@ -1940,11 +1948,11 @@ command, so that next buffer shown is a user buffer."
           (progn (previous-buffer)
                  (setq i (1+ i))
                  (when (= i 99)
-                   (message "%s" "No prev eww buffer")
+                   (message "%s" "No prev vterm buffer")
                    (switch-to-buffer xbuf)))
         (setq i 100)))))
 
-(defun next-vterm-buffer ()
+(defun next-vterm-buf ()
   "Switch to the next vterm buffer."
   (interactive)
   (let ((i 0) (xbuf (current-buffer)))
@@ -1959,7 +1967,7 @@ command, so that next buffer shown is a user buffer."
                    (switch-to-buffer xbuf)))
         (setq i 100)))))
 
-(defun prev-eshell-buffer ()
+(defun prev-eshell-buf ()
   "Switch to the previous eshell buffer."
   (interactive)
   (let ((i 0) (xbuf (current-buffer)))
@@ -1969,11 +1977,11 @@ command, so that next buffer shown is a user buffer."
           (progn (previous-buffer)
                  (setq i (1+ i))
                  (when (= i 99)
-                   (message "%s" "No prev eww buffer")
+                   (message "%s" "No prev eshell buffer")
                    (switch-to-buffer xbuf)))
         (setq i 100)))))
 
-(defun next-eshell-buffer ()
+(defun next-eshell-buf ()
   "Switch to the next eshell buffer."
   (interactive)
   (let ((i 0) (xbuf (current-buffer)))
@@ -1984,6 +1992,34 @@ command, so that next buffer shown is a user buffer."
                  (setq i (1+ i))
                  (when (= i 99)
                    (message "%s" "No next eshell buffer")
+                   (switch-to-buffer xbuf)))
+        (setq i 100)))))
+
+(defun prev-dired-buf ()
+  "Switch to the previous dired buffer."
+  (interactive)
+  (let ((i 0) (xbuf (current-buffer)))
+    (previous-buffer)
+    (while (< i 99)
+      (if (not (eq major-mode 'dired-mode))
+          (progn (previous-buffer)
+                 (setq i (1+ i))
+                 (when (= i 99)
+                   (message "%s" "No prev dired buffer")
+                   (switch-to-buffer xbuf)))
+        (setq i 100)))))
+
+(defun next-dired-buf ()
+  "Switch to the next dired buffer."
+  (interactive)
+  (let ((i 0) (xbuf (current-buffer)))
+    (next-buffer)
+    (while (< i 99)
+      (if (not (eq major-mode 'dired-mode))
+          (progn (next-buffer)
+                 (setq i (1+ i))
+                 (when (= i 99)
+                   (message "%s" "No next dired buffer")
                    (switch-to-buffer xbuf)))
         (setq i 100)))))
 
@@ -2108,9 +2144,9 @@ Similar to `kill-buffer', with the following addition:
 (defun open-last-closed ()
   "Open the last closed file."
   (interactive)
-  (if (> (length recently-closed-buffers) 0)
-      (find-file (cdr (pop recently-closed-buffers)))
-    (message "No recently closed buffers in this session")))
+  (if (zerop (length recently-closed-buffers))
+      (message "No recently closed buffers in this session")
+    (find-file (cdr (pop recently-closed-buffers)))))
 
 (defun describe-foo-at-point-error ()
   "Do `describe-variable' in case of error."
@@ -2535,25 +2571,23 @@ before actually send the cd command."
 (advice-add 'completion-at-point :around
             (lambda (fun &rest r) "no need complete empty command"
               (if (and (eq major-mode 'eshell-mode)
-                       (= 0 (length (buffer-substring-no-properties
-                                     (+ 4 (line-beginning-position))
-                                     (line-end-position)))))
+                       (zerop (length (buffer-substring-no-properties
+                                       (+ 4 (line-beginning-position))
+                                       (line-end-position)))))
                   (change-wd)
                 (apply fun r))))
 
-(defun eshell-split ()
-  "Split eshell window below."
+(defun sh ()
+  "Split eshell window below in not one window."
   (interactive)
   (if (eq major-mode 'eshell-mode)
       (let ((current-prefix-arg '-)
             (inhibit-messages t)
             (message-log-max nil))
         (call-interactively 'eshell))
-    (if (or (> (window-total-height) 30)
-            (one-window-p))
+    (if (one-windowp)
         (progn (split-window-below)
-               (enlarge-window-split)))
-    (other-window 1)
+               (other-window 1)))
     (let ((inhibit-messages t)
           (message-log-max nil))
       (command-execute 'eshell))))
@@ -2587,6 +2621,11 @@ before actually send the cd command."
     (push "" xhist)
     (insert (ido-completing-read "Search input: " xhist))))
 
+(defun one-windowp ()
+  "Custom one window predicate."
+  (or (> (window-total-height) 30)
+      (one-window-p)))
+
 (defun terminal ()
   "Split terminal window below. Switch to terminal if already split.
 Open new terminal if already in terminal."
@@ -2594,10 +2633,8 @@ Open new terminal if already in terminal."
   (if (eq major-mode 'vterm-mode)
       (let ((current-prefix-arg '-))
         (call-interactively 'vterm))
-    (if (or (> (window-total-height) 30)
-            (one-window-p))
+    (if (one-windowp)
         (progn (split-window-below)
-               ;; (enlarge-window-split)
                (other-window 1)))
     (if (and (boundp 'tt-local)
              (get-buffer tt-local))
@@ -2638,17 +2675,33 @@ Custom, added prompt on event read."
   (interactive)
   (vterm-send-key "<right>"))
 
+(defun vterm-send-backtab ()
+  "Send `<backtab>' to the libvterm. Keep custom."
+  (interactive)
+  (vterm-send-key "<backtab>"))
+
 (defun vterm-history-search ()
   "History search. Map C-o to history-incremental-search-backward in zshrc
 and reverse-search-history in bashrc."
   (interactive)
   (vterm-send-key (kbd "C-o")))
 
+(defun vterm-tmux-prefix ()
+  "Send tmux prefix key."
+  (vterm-send-key (kbd "C-b")))
+
 (defun vterm-tmux-copy ()
   "Activate copy mode in tmux."
   (interactive)
-  (vterm-send-key (kbd "C-b"))
-  (vterm-send-key (kbd "[")))
+  (vterm-tmux-prefix)
+  (vterm-send-key (kbd "["))
+  (vterm-reset-cursor-point))
+
+(defun vterm-tmux-split-pane ()
+  "Split pane in tmux."
+  (interactive)
+  (vterm-tmux-prefix)
+  (vterm-send-key (kbd "%")))
 
 (defun vterm-tmux-copy-self-insert ()
   "Send key to tmux copy mode."
@@ -2657,41 +2710,36 @@ and reverse-search-history in bashrc."
       (vterm-send-key (kbd "DEL")) ; vterm-module.c:996 missing DEL
     (vterm--self-insert)))
 
-(defun vterm-tmux-copy-cancel ()
-  "Cancel copy mode in tmux."
-  (interactive)
-  (vterm-send-key (kbd "e")))
-
 (defun vterm-tmux-create-window ()
   "Tmux create window."
   (interactive)
-  (vterm-send-key (kbd "C-b"))
+  (vterm-tmux-prefix)
   (vterm-send-key (kbd "c")))
 
 (defun vterm-tmux-close-window ()
   "Tmux close window."
   (interactive)
-  (vterm-send-key (kbd "C-b"))
+  (vterm-tmux-prefix)
   (vterm-send-key (kbd "&")))
 
 (defun vterm-tmux-next-window ()
   "Tmux next window."
   (interactive)
-  (vterm-send-key (kbd "C-b"))
+  (vterm-tmux-prefix)
   (vterm-send-key (kbd "n")))
 
 (defun vterm-tmux-prev-window ()
   "Tmux prev window."
   (interactive)
-  (vterm-send-key (kbd "C-b"))
+  (vterm-tmux-prefix)
   (vterm-send-key (kbd "p")))
 
 (defun vterm-shell-vi-cmd ()
-  "Activate vi cmd mode in shell prompt."
+  "Activate vi cmd mode in shell prompt. Deactivate tmux copy mode."
   (interactive)
-  (when (and (eq major-mode 'vterm-mode)
-             (vterm-reset-cursor-point))
-    (vterm-send-key (kbd "^["))))
+  (if (and (eq major-mode 'vterm-mode)
+           (vterm-reset-cursor-point))
+      (vterm-send-key (kbd "^["))))
 
 (defun vterm-shell-vi-insert ()
   "Activate vi insert mode in shell prompt."
@@ -2710,11 +2758,10 @@ and reverse-search-history in bashrc."
   (interactive)
   (vterm--self-insert))
 
-(defun vterm-shell-vi-s ()
+(defun vterm-shell-vi-push-right (Key)
   "Send key to shell prompt vi cmd mode."
-  (interactive)
   (let ((x (point)))
-    (vterm-send-key "s")                    ; workaround vi go after last char
+    (vterm-send-key Key)                    ; workaround vi go after last char
     (sit-for 0.05)                          ; need some time to sync
     (if (eq x (point))                      ; point did not move
         (progn (vterm-send-key (kbd "C-m")) ; so activate insert
@@ -2722,28 +2769,33 @@ and reverse-search-history in bashrc."
                (vterm-send-key (kbd "SPC")) ; add space and back to cmd mode
                (vterm-send-key (kbd "^["))))))
 
+(defun vterm-shell-vi-s ()
+  "Send key to shell prompt vi cmd mode."
+  (interactive)
+  (vterm-shell-vi-push-right "s"))
+
 (defun vterm-shell-vi-l ()
-  "Send key to shell prompt vi cmd mode. Need command for transient."
+  "Send key to shell prompt vi cmd mode."
   (interactive)
   (vterm-send-key "l"))
 
 (defun vterm-shell-vi-w ()
-  "Send key to shell prompt vi cmd mode. Need command for transient."
+  "Send key to shell prompt vi cmd mode."
   (interactive)
-  (vterm-send-key "w"))
+  (vterm-shell-vi-push-right "w"))
 
 (defun vterm-shell-vi-e ()
-  "Send key to shell prompt vi cmd mode. Need command for transient."
+  "Send key to shell prompt vi cmd mode."
   (interactive)
   (vterm-send-key "e"))
 
-(defun vterm-tui ()
-  "Activate terminal UI app."
+(defun vterm-vi ()
+  "Activate vi mode transient."
   (interactive)
   (vterm-reset-cursor-point))
 
-(defun vterm-tui-self-insert ()
-  "Send key to terminal UI app."
+(defun vterm-vi-self-insert ()
+  "Send key to vi mode."
   (interactive)
   (cond ((eq last-command-event 127)
          (vterm-send-key (kbd "DEL")))
@@ -2753,13 +2805,22 @@ and reverse-search-history in bashrc."
          (vterm-send-return))
         (t (vterm--self-insert))))
 
+(defun vterm-vi-escape ()
+  "Send key to vi mode. Specialized."
+  (interactive)
+  (vterm--self-insert))
+
 (defun screenshot ()
   "Take screenshot on macOS."
   (interactive)
   (if (string-equal system-type "darwin")
       (call-process "screencapture" nil 0 nil "-W" "-U" "dummy")))
 
-(defun clock () "World clock." (interactive) (world-clock) (other-window 1))
+(defun clock ()
+  "World clock."
+  (interactive)
+  (world-clock)
+  (other-window 1))
 
 (defun player ()
   "Run player."
@@ -2768,7 +2829,10 @@ and reverse-search-history in bashrc."
       (emms-playlist)
     (message "No player")))
 
-(defun text-scale-reset () "Reset text scale." (interactive) (text-scale-adjust 0))
+(defun text-scale-reset ()
+  "Reset text scale."
+  (interactive)
+  (text-scale-adjust 0))
 
 (defun toggle-ibuffer ()
   "Toggle ibuffer. Force switch to current buffer to update `other-buffer'."
@@ -2776,8 +2840,11 @@ and reverse-search-history in bashrc."
   (let ((xbuf (buffer-name)))
     (if (string-equal major-mode "ibuffer-mode")
         (switch-to-buffer (other-buffer))
-      (progn (switch-to-buffer xbuf) (ibuffer)
-             (condition-case nil (ibuffer-jump-to-buffer xbuf) (error nil))))))
+      (progn (switch-to-buffer xbuf)
+             (ibuffer)
+             (condition-case nil
+                 (ibuffer-jump-to-buffer xbuf)
+               (error nil))))))
 
 (defun ibuffer-select-group ()
   "Toggle filter group or visit buffer."
@@ -2902,9 +2969,9 @@ and reverse-search-history in bashrc."
         ;; way to send attach and dot commands along with sql query
         (let ((xres (shell-command-to-string
                      (format "sqlite3 <<EOF\n%s\nEOF" xquery))))
-          (if (> (length xres) 0)
-              (insert xres)
-            (insert "No rows\n"))))
+          (if (zerop (length xres))
+              (insert "No rows\n")
+            (insert xres))))
       (insert (concat (make-string 89 45) "\n")))
     (set-mark-command t)
     (other-window 1)
@@ -3187,9 +3254,7 @@ Use as around advice e.g. for mouse left click after double click."
 (defun rectangle ()
   "Rectangle mark mode or quit minibuffer."
   (interactive)
-  (if (minibufferp)
-      (abort-recursive-edit)
-    (rectangle-mark-mode)))
+  (rectangle-mark-mode))
 
 (provide 'keycom)
 
