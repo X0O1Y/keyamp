@@ -105,7 +105,7 @@ If Direct-p is t, do not remap key to current keyboard layout."
   "Return t is not defining or executing kbd macro."
   (not (or defining-kbd-macro executing-kbd-macro)))
 
-(defmacro keyamp--set (KeymapName CmdList &optional CommandMode InsertMode How TimeOut)
+(defmacro keyamp--set (KeymapName CmdList &optional CommandMode InsertMode How Timeout)
   "Map `set-transient-map' using `advice-add' over a list CMDLIST.
 - Advice default HOW :after might be changed by specific HOW;
 - Activate COMMANDMODE or INSERTMODE mode optionally;
@@ -128,10 +128,10 @@ If Direct-p is t, do not remap key to current keyboard layout."
                                  (keyamp-command))
                              (keyamp-repeat-init ,xkeymapName)
                              (keyamp-cancel-repeat-idle-timer)
-                             (if (and ,TimeOut
+                             (if (and ,Timeout
                                       (not keyamp-insert-p))
                                  (setq keyamp--repeat-idle-timer
-                                       (run-with-idle-timer ,TimeOut nil 'keyamp-escape)))
+                                       (run-with-idle-timer ,Timeout nil 'keyamp-escape)))
                              (if ,InsertMode
                                  (keyamp-insert))))))
           (cadr CmdList)))))
@@ -330,7 +330,8 @@ already, then use existing remap instead. Execute resulting command."
 From character to character code."
   (let ((to (alist-get From keyamp-engineer-engram-to-russian-computer
                        nil nil 'string-equal)))
-    (if (stringp to) (string-to-char to))))
+    (if (stringp to)
+        (string-to-char to))))
 
 (defun keyamp-map-input-source (Input-method)
   "Build reverse mapping for INPUT-METHOD.
@@ -354,7 +355,8 @@ Use Russian input source for command mode. Respect Engineer Engram layout."
 
 (defun input-source (Source)
   "Activate input method CDR SOURCE, message CAR SOURCE."
-  (activate-input-method (cdr Source)) (message "%s" (car Source)))
+  (activate-input-method (cdr Source))
+  (message "%s" (car Source)))
 
 (defun toggle-input-source ()
   "Toggle input method."
@@ -588,7 +590,7 @@ is enabled.")
       '(("i DEL" . nil)        ("i <backspace>" . count-words)
         ("i RET" . nil)        ("i <return>"    . show-in-desktop)
         ("j DEL" . nil)        ("j <backspace>" . hl-line-mode)
-        ("j RET" . nil)        ("j <return>"    . toggle-truncate-lines)
+        ("j RET" . nil)        ("j <return>"    . toggle-word-wrap)
         ("k DEL" . nil)        ("k <backspace>" . ispell-word)
         ("k RET" . nil)        ("k <return>"    . find-file)
         ("<mouse-1>" . ignore)
@@ -660,7 +662,7 @@ is enabled.")
     ("p"  . mark-defun)
     ("["  . ignore)
     ("]"  . ignore)
-    ("\\" . ignore)
+    ("\\" . dslide-deck-start)
 
     ("h" . page-up-half)
     ("j" . isearch-wback)
@@ -1431,6 +1433,7 @@ is enabled.")
     (keyamp--map-escape keymap keyamp-minibuffer-escape)
     (keyamp--map-return keymap keyamp-minibuffer-return)
     (keyamp--map keymap '(("C-t" . comp-forw))) ; S-RET
+    (keyamp--map keymap '(("C-r" . toggle-truncate-lines)))
     (keyamp--map-backtab keymap keyamp-minibuffer-backtab)
     (keyamp--map-tab keymap keyamp-minibuffer-tab)
     (keyamp--map keymap
@@ -1938,14 +1941,13 @@ is enabled.")
       (back-char        . image-previous-file) (forw-char    . image-next-file)
       (previous-line    . image-decrease-size) (next-line    . image-increase-size)
       (open-line        . image-previous-file) (newline      . image-next-file)
-      (undo             . image-dired)         (del-back     . image-rotate)
-      (select-word      . image-next-file)     (select-block . image-previous-file)
+      (undo             . image-dired) (del-back     . image-rotate)
+      (select-word      . image-next-file) (select-block . image-previous-file)
       (backward-bracket . dired-jump)))
 
   (with-sparse-keymap
     (keyamp--map-leader keymap '(backward-char . forward-char))
-    (keyamp--set keymap '(image-previous-file image-next-file))
-    (keyamp--hook keymap '(image-mode-hook) nil nil :repeat))
+    (keyamp--set keymap '(image-previous-file image-next-file)))
 
   (with-sparse-keymap
     (keyamp--map-leader keymap '(previous-line . next-line))
@@ -1970,7 +1972,7 @@ is enabled.")
     '((cut-line       . eshell-clear-input)
       (next-eww-buf   . eshell-clear)
       (select-block   . eshell-previous-input)
-      (select-word    . eshell-next-input)
+      ;; (select-word    . eshell-next-input) ; no
       (open-line      . prev-eshell-buf)
       (newline        . next-eshell-buf)
       (toggle-comment . ignore)))
@@ -2260,7 +2262,8 @@ is enabled.")
 (defvar keyamp-ignore-map (make-sparse-keymap)
   "Keymap ignores any key. Maybe trigger action with post command hook.")
 
-(keyamp--map keyamp-ignore-map '(("<mouse-1>" . ignore)))
+(keyamp--map keyamp-ignore-map
+  '(("<down-mouse-1>" . ignore) ("<mouse-1>" . ignore)))
 (keyamp--map-leader keyamp-ignore-map '(ignore . ignore))
 (keyamp--map-escape keyamp-ignore-map ignore)
 (keyamp--map-return keyamp-ignore-map ignore)
@@ -2632,12 +2635,14 @@ is enabled.")
       (forw-word     . flymake-goto-next-error)))
   (keyamp--set keymap '(flymake-goto-prev-error flymake-goto-next-error)))
 
-(with-eval-after-load 'python-mode
-  (keyamp--map-backtab python-mode-map python-de-indent)
-  (keyamp--map-tab python-mode-map python-indent-or-complete)
-  (keyamp--map-return python-mode-map python-return-and-indent)
-  (keyamp--remap python-mode-map
-    '((newline . python-return-and-indent) (reformat-lines . python-format-buffer)))
+(with-eval-after-load 'python
+  (keyamp--map-backtab python-ts-mode-map python-de-indent)
+  (keyamp--map-tab python-ts-mode-map python-indent-or-complete)
+  (keyamp--map-return python-ts-mode-map python-return-and-indent)
+  (keyamp--remap python-ts-mode-map
+    '((newline               . python-return-and-indent)
+      (reformat-lines        . python-format-buffer)
+      (describe-variable     . xref-find-references)))
   (with-sparse-keymap
     (keyamp--map-leader keymap '(python-de-indent . python-indent-or-complete))
     (keyamp--set keymap '(python-indent-or-complete python-de-indent)
@@ -2646,13 +2651,12 @@ is enabled.")
 (with-eval-after-load 'go-ts-mode
   (keyamp--map-tab go-ts-mode-map company-manual-begin)
   (keyamp--remap go-ts-mode-map
-    '((describe-foo-at-point . xref-find-definitions)
-      (describe-variable     . xref-find-references)
-      (mark-defun            . go-mark-defun)
+    '((mark-defun            . go-mark-defun)
       (stow                  . flymake-show-project-diagnostics)
       (eval-region-or-sexp   . make-run)
       (eval-defun            . make-test)
-      (reformat-lines        . eglot-reconnect))))
+      (reformat-lines        . eglot-reconnect)
+      (describe-variable     . xref-find-references))))
 
 (with-sparse-keymap
   (keyamp--map-leader keymap '(xref-go-back . xref-find-definitions))
@@ -2748,9 +2752,16 @@ is enabled.")
     (advice-add 'keyamp-input-timer-payload :after 'keyamp-input-timer-payload-calc)))
 
 (with-eval-after-load 'dslide
+  (keyamp--map-backtab dslide-mode-map dslide-deck-stop)
+  (keyamp--map-tab dslide-mode-map dslide-deck-start)
   (keyamp--remap dslide-mode-map
-    '((del-back  . dslide-deck-stop)     (undo    . dslide-deck-start)
-      (open-line . dslide-deck-backward) (newline . dslide-deck-forward))))
+    '((del-back  . dslide-deck-start)    (undo    . dslide-deck-stop)
+      (open-line . dslide-deck-backward) (newline . dslide-deck-forward)))
+
+  (with-sparse-keymap
+    (keyamp--map-leader keymap '(dslide-deck-backward . dslide-deck-forward))
+    (keyamp--set keymap
+      '(dslide-deck-backward dslide-deck-forward dslide-deck-start))))
 
 
 ;; Command indication mapping
@@ -2923,6 +2934,9 @@ is enabled.")
                  doc-view-enlarge                        t
                  down-line                               t
                  down-line-rev                           t
+                 dslide-deck-backward                    t
+                 dslide-deck-forward                     t
+                 dslide-deck-start                       t
                  emms-pause                              t
                  emms-playlist-mode-play-smart           t
                  emms-random                             t
@@ -3061,6 +3075,10 @@ is enabled.")
 (defconst keyamp-isearch-not-insert
   '(isearch-forw isearch-wforw isearch-back isearch-wback)
   "List of excluded commands from indicate insert mode in isearch.")
+
+(defconst keyamp-blink-command-commands
+  '(dslide-deck-backward dslide-deck-forward dslide-deck-start)
+  "List of commands to `keyamp-blink-command' after.")
 
 (defconst keyamp-blink-modify-commands
   '(kmacro-record stopwatch python-format-buffer)
@@ -3267,7 +3285,8 @@ insert cancel the timer.")
 (defun keyamp-insert-and-SPC ()
   "Activate insert mode and insert SPC."
   (interactive)
-  (unless keyamp-insert-p (keyamp-insert))
+  (unless keyamp-insert-p
+    (keyamp-insert))
   (insert " "))
 
 (defun keyamp-self-insert-and-insert ()
@@ -3309,7 +3328,7 @@ of quit minibuffer. Answer q to literal y or n question."
              (execute-kbd-macro (kbd "q")))
     (if (keyamp-minibuffer-empty)
         (keyamp-minibuffer-quit)
-      (keyamp-command))))
+      (keyamp-escape))))
 
 (defun keyamp-minibuffer-empty ()
   "Return true if minibuffer prompt empty."
@@ -3650,7 +3669,29 @@ after a delay even if there more read commands follow."
               (eq major-mode 'wdired-mode))
           (keyamp-blink-modify))
       (if (memq this-command keyamp-blink-io-commands)
-          (keyamp-blink-io)))))
+          (keyamp-blink-io))
+      (if (memq this-command keyamp-blink-command-commands)
+          (keyamp-blink-command)))))
+
+(defvar keyamp-indicate-command-timer nil "Indicate command timer.")
+
+(defun keyamp-indicate-command-cancel (Indicator Cursor Color)
+  "Cancel indicate COMMAND."
+  (if (eq keyamp-command-indicator mode-line-front-space)
+      (keyamp-indicate Indicator Cursor Color)))
+
+(defun keyamp-blink-command ()
+  "Blink COMMAND."
+  (let ((xInd mode-line-front-space)
+        (xCur (frame-parameter nil 'cursor-type))
+        (xCol (face-attribute 'mode-line-front-space-face :foreground)))
+    (unless (eq xCol keyamp-command-color)
+      (keyamp-indicate keyamp-command-indicator xCur keyamp-command-color)
+      (if (timerp keyamp-indicate-command-timer)
+          (cancel-timer keyamp-indicate-command-timer))
+      (setq keyamp-indicate-command-timer
+            (run-with-timer keyamp-blink-blink nil
+                            'keyamp-indicate-command-cancel xInd xCur xCol)))))
 
 (defvar keyamp-indicate-modify-timer nil "Indicate modify timer.")
 
@@ -3828,7 +3869,7 @@ Cancel after `keyamp-blink-blink'. Double blink."
     (keyamp-defer-load)
     (keyamp-prefix)
     (add-hook 'post-command-hook     'keyamp-transient)
-    (add-hook 'pre-command-hook      'keyamp-repeat-deactivate)
+    (add-hook 'pre-command-hook      'keyamp-cancel-repeat-idle-timer)
     (add-hook 'minibuffer-exit-hook  'keyamp-command)
     (add-hook 'minibuffer-exit-hook  'keyamp-deactivate-region)
     (add-hook 'isearch-mode-hook     'keyamp-repeat-deactivate)

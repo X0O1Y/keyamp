@@ -872,7 +872,12 @@ If `universal-argument' is called first, do not delete inner text."
                  (kill-region (point) (progn (backward-char 1) (point)))
                (kill-region (point) (progn (forward-char 1) (point))))))))
 
-(defun del-forw () "Delete char forward." (interactive) (delete-char 1))
+(defun del-forw ()
+  "Delete char forward."
+  (interactive)
+  (if buffer-read-only
+      (setq this-command 'ignore)
+    (delete-char 1)))
 
 (defun change-bracket-pairs (FromChars ToChars)
   "Change bracket pairs to another type or none.
@@ -2087,7 +2092,7 @@ Switch to the same buffer type after close, e.g. user or project."
       (widen)
       (when (not (equal (point-max) 1))
         (write-file
-         (format "%sfile-%s-%x.txt"
+         (format "%s%s-%x.txt"
                  (concat user-emacs-directory "temp/")
                  (format-time-string "%Y%m%d-%H%M%S")
                  (random #xfffff))))))
@@ -2149,11 +2154,14 @@ Similar to `kill-buffer', with the following addition:
     (find-file (cdr (pop recently-closed-buffers)))))
 
 (defun describe-foo-at-point-error ()
-  "Do `describe-variable' in case of error."
+  "Do `describe-function' in case of error."
   (condition-case nil
-      (progn
-        (setq this-command 'describe-foo-at-point)
-        (describe-foo-at-point))
+      (progn (if (or (eq major-mode 'python-ts-mode)
+                     (eq major-mode 'go-ts-mode))
+                 (progn (setq this-command 'xref-find-definitions)
+                        (command-execute 'xref-find-definitions))
+               (setq this-command 'describe-foo-at-point)
+               (describe-foo-at-point)))
     (error
      (setq this-command 'describe-function)
      (call-interactively 'describe-function))))
@@ -2960,9 +2968,10 @@ and reverse-search-history in bashrc."
     (push-mark (point) t nil)
     (let ((inhibit-read-only t))
       (when (string-equal sql-type "postgres")
-        (insert (shell-command-to-string
-                 (format "psql %s -c \"%s\" -q" xconn
-                         (string-replace "$" "\\$" xquery)))))
+        (insert
+         (shell-command-to-string
+          (format "psql %s -c \"%s\" -q" xconn
+                  (string-replace  "\"" "\\\"" (string-replace "$" "\\$" xquery))))))
       (when (string-equal sql-type "sqlite")
         ;; attach database can't parse ~
         (setq xquery (replace-regexp-in-string "~" (getenv "HOME") xquery))
