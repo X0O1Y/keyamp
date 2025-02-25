@@ -298,6 +298,23 @@
   "Return t if minibufer is isearch minibuffer."
   (string-match "I-search" (minibuffer-prompt)))
 
+(defun isearch-double-back ()
+  "Isearch double backward for transient use."
+  (interactive)
+  (command-execute 'isearch-repeat-backward)
+  (command-execute 'isearch-repeat-backward))
+
+(defun isearch-direction-switch ()
+  "Do direction switch."
+  (interactive)
+  (if isearch-regexp
+      (if isearch-forward
+          (isearch-backward-regexp)
+        (isearch-forward-regexp))
+    (if isearch-forward
+        (isearch-backward)
+      (isearch-forward))))
+
 (defun isearch-back ()
   "Isearch backward for transient use."
   (interactive)
@@ -726,7 +743,8 @@ When `universal-argument' is called first, copy whole buffer
           (sit-for 0.1)
           (copy-region-as-kill (region-beginning) (region-end))
           (end-of-line)
-          (forward-char)))))
+          (unless (eobp)
+            (forward-char))))))
   (return-before-copy))
 
 (defun cut-line ()
@@ -1970,7 +1988,11 @@ command, so that next buffer shown is a user buffer."
                  (when (= i 99)
                    (message "%s" "No next vterm buffer")
                    (switch-to-buffer xbuf)))
-        (setq i 100)))))
+        (setq i 100)))
+    (when (eq xbuf (current-buffer))
+      (message "%s" "No next vterm buffer")
+      (setq this-command 'ignore)
+      (command-execute 'ignore))))
 
 (defun prev-eshell-buf ()
   "Switch to the previous eshell buffer."
@@ -2770,7 +2792,7 @@ and reverse-search-history in bashrc."
   "Send key to shell prompt vi cmd mode."
   (let ((x (point)))
     (vterm-send-key Key)                    ; workaround vi go after last char
-    (sit-for 0.05)                          ; need some time to sync
+    (sit-for vterm-timer-delay)             ; delay to sync
     (if (eq x (point))                      ; point did not move
         (progn (vterm-send-key (kbd "C-m")) ; so activate insert
                (vterm-send-key "<right>")   ; go after last char
@@ -2817,6 +2839,11 @@ and reverse-search-history in bashrc."
   "Send key to vi mode. Specialized."
   (interactive)
   (vterm--self-insert))
+
+(advice-add 'vterm-reset-cursor-point :after
+              (lambda () "kill local cursor type"
+                (if (eq major-mode 'vterm-mode) ; sometimes binds and hinders indicate
+                    (kill-local-variable 'cursor-type))))
 
 (defun screenshot ()
   "Take screenshot on macOS."
@@ -2999,10 +3026,10 @@ and reverse-search-history in bashrc."
   (interactive)
   (switch-to-buffer "*novel*"))
 
-(defun hippie-expand-undo ()
-  "Undo the expansion."
+(defun hippie-expand-reset ()
+  "Reset hippie expand."
   (interactive)
-  (he-reset-string))
+  (hippie-expand -1))
 
 (defun describe-foo-at-point ()
   "Show the documentation of the Elisp function and variable near point.
@@ -3229,11 +3256,9 @@ Use as around advice e.g. for mouse left click after double click."
   "Cancel isearch and save buffer."
   (interactive)
   (isearch-cancel-clean)
-  (cond
-   ((buffer-file-name)
-    (save-buffer))
-   ((string-match (concat "^" new-buffer-prefix "*.") (buffer-name))
-    (command-execute 'write-file))))
+  (cond ((buffer-file-name) (save-buffer))
+        ((string-match (concat "^" new-buffer-prefix "*.") (buffer-name))
+         (command-execute 'write-file))))
 
 (defun empty-bin ()
   "Empty bin on macOS."
