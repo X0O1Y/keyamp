@@ -10,6 +10,137 @@
                 },
                 "rules": [
                     {
+                        "description": "arrows",
+                        "manipulators": [
+                            {
+                                "from": {
+                                    "key_code": "j",
+                                    "modifiers": {
+                                        "mandatory": ["command"],
+                                        "optional": ["any"]
+                                    }
+                                },
+                                "to": [{ "key_code": "left_arrow" }],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "k",
+                                    "modifiers": {
+                                        "mandatory": ["command"],
+                                        "optional": ["any"]
+                                    }
+                                },
+                                "to": [{ "key_code": "down_arrow" }],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "i",
+                                    "modifiers": {
+                                        "mandatory": ["command"],
+                                        "optional": ["any"]
+                                    }
+                                },
+                                "to": [{ "key_code": "up_arrow" }],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "l",
+                                    "modifiers": {
+                                        "mandatory": ["command"],
+                                        "optional": ["any"]
+                                    }
+                                },
+                                "to": [{ "key_code": "right_arrow" }],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "multitouch_extension_finger_count_total",
+                                        "type": "variable_unless",
+                                        "value": 0
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "i",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [{ "key_code": "up_arrow" }],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "multitouch_extension_finger_count_total",
+                                        "type": "variable_unless",
+                                        "value": 0
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "j",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [{ "key_code": "left_arrow" }],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "multitouch_extension_finger_count_total",
+                                        "type": "variable_unless",
+                                        "value": 0
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "k",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [{ "key_code": "down_arrow" }],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "multitouch_extension_finger_count_total",
+                                        "type": "variable_unless",
+                                        "value": 0
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "l",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [{ "key_code": "right_arrow" }],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "spacebar",
+                                    "modifiers": {
+                                        "mandatory": ["command"],
+                                        "optional": ["any"]
+                                    }
+                                },
+                                "to": [{ "key_code": "down_arrow" }],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "left_command",
+                                    "modifiers": {
+                                        "mandatory": ["command"],
+                                        "optional": ["any"]
+                                    }
+                                },
+                                "to": [{ "key_code": "up_arrow" }],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
                         "description": "spacebar",
                         "manipulators": [
                             {
@@ -4493,7 +4624,7 @@
                             {
                                 "conditions": [
                                     {
-                                        "file_paths": ["/Google Chrome"],
+                                        "file_paths": ["/Brave Browser"],
                                         "type": "frontmost_application_unless"
                                     }
                                 ],
@@ -4506,14 +4637,14 @@
                                         "repeat": false,
                                         "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" }
                                     },
-                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)' && open -a 'Google Chrome'" }
+                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)' && open -a 'Brave Browser'" }
                                 ],
                                 "type": "basic"
                             },
                             {
                                 "conditions": [
                                     {
-                                        "file_paths": ["/Google Chrome"],
+                                        "file_paths": ["/Brave Browser"],
                                         "type": "frontmost_application_if"
                                     }
                                 ],
@@ -4622,7 +4753,7 @@
                             {
                                 "conditions": [
                                     {
-                                        "file_paths": ["/Google Chrome"],
+                                        "file_paths": ["/Brave Browser"],
                                         "type": "frontmost_application_if"
                                     }
                                 ],
@@ -4630,7 +4761,7 @@
                                     "key_code": "f4",
                                     "modifiers": { "optional": ["any"] }
                                 },
-                                "to_after_key_up": [{ "shell_command": "open -a Weather" }],
+                                "to_after_key_up": [{ "shell_command": "open -a 'Docker Desktop'" }],
                                 "to_if_held_down": [
                                     { "key_code": "c" },
                                     {
@@ -4644,7 +4775,7 @@
                             {
                                 "conditions": [
                                     {
-                                        "file_paths": ["/Weather"],
+                                        "file_paths": ["/Docker"],
                                         "type": "frontmost_application_if"
                                     }
                                 ],
@@ -4665,7 +4796,7 @@
                                     "key_code": "f4",
                                     "modifiers": { "optional": ["any"] }
                                 },
-                                "to_after_key_up": [{ "shell_command": "open -a Weather" }],
+                                "to_after_key_up": [{ "shell_command": "open -a 'Docker Desktop'" }],
                                 "type": "basic"
                             }
                         ]
@@ -4886,7 +5017,7 @@
                             {
                                 "conditions": [
                                     {
-                                        "file_paths": ["/Google Chrome"],
+                                        "file_paths": ["/Brave Browser"],
                                         "type": "frontmost_application_unless"
                                     }
                                 ],
@@ -4894,7 +5025,7 @@
                                     "key_code": "f13",
                                     "modifiers": { "optional": ["any"] }
                                 },
-                                "to_after_key_up": [{ "shell_command": "open -a 'Google Chrome'" }],
+                                "to_after_key_up": [{ "shell_command": "open -a 'Brave Browser'" }],
                                 "to_if_held_down": [
                                     { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
                                     {
@@ -4911,7 +5042,7 @@
                             {
                                 "conditions": [
                                     {
-                                        "file_paths": ["/Google Chrome"],
+                                        "file_paths": ["/Brave Browser"],
                                         "type": "frontmost_application_if"
                                     }
                                 ],
@@ -5109,7 +5240,7 @@
                             {
                                 "conditions": [
                                     {
-                                        "file_paths": ["/Google Chrome"],
+                                        "file_paths": ["/Brave Browser"],
                                         "type": "frontmost_application_unless"
                                     }
                                 ],
@@ -5132,7 +5263,7 @@
                                     { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
                                     {
                                         "halt": true,
-                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)' && open -a 'Google Chrome'"
+                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)' && open -a 'Brave Browser'"
                                     }
                                 ],
                                 "type": "basic"
@@ -5140,7 +5271,7 @@
                             {
                                 "conditions": [
                                     {
-                                        "file_paths": ["/Google Chrome"],
+                                        "file_paths": ["/Brave Browser"],
                                         "type": "frontmost_application_if"
                                     }
                                 ],
@@ -5170,115 +5301,6 @@
                                         "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)' && open -a 'Emacs'"
                                     }
                                 ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "arrows",
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "j",
-                                    "modifiers": {
-                                        "mandatory": ["command"],
-                                        "optional": ["any"]
-                                    }
-                                },
-                                "to": [{ "key_code": "left_arrow" }],
-                                "type": "basic"
-                            },
-                            {
-                                "from": {
-                                    "key_code": "k",
-                                    "modifiers": {
-                                        "mandatory": ["command"],
-                                        "optional": ["any"]
-                                    }
-                                },
-                                "to": [{ "key_code": "down_arrow" }],
-                                "type": "basic"
-                            },
-                            {
-                                "from": {
-                                    "key_code": "i",
-                                    "modifiers": {
-                                        "mandatory": ["command"],
-                                        "optional": ["any"]
-                                    }
-                                },
-                                "to": [{ "key_code": "up_arrow" }],
-                                "type": "basic"
-                            },
-                            {
-                                "from": {
-                                    "key_code": "l",
-                                    "modifiers": {
-                                        "mandatory": ["command"],
-                                        "optional": ["any"]
-                                    }
-                                },
-                                "to": [{ "key_code": "right_arrow" }],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "multitouch_extension_finger_count_total",
-                                        "type": "variable_unless",
-                                        "value": 0
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "i",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [{ "key_code": "up_arrow" }],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "multitouch_extension_finger_count_total",
-                                        "type": "variable_unless",
-                                        "value": 0
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "j",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [{ "key_code": "left_arrow" }],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "multitouch_extension_finger_count_total",
-                                        "type": "variable_unless",
-                                        "value": 0
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "k",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [{ "key_code": "down_arrow" }],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "multitouch_extension_finger_count_total",
-                                        "type": "variable_unless",
-                                        "value": 0
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "l",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [{ "key_code": "right_arrow" }],
                                 "type": "basic"
                             }
                         ]

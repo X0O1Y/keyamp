@@ -734,15 +734,19 @@ When `universal-argument' is called first, copy whole buffer
               (copy-region-as-kill (line-beginning-position) (line-end-position))
               (end-of-line))
           ;; animate line first selection
-          (if visual-line-mode
-              (progn (beginning-of-visual-line)
-                     (push-mark (point) t t)
-                     (end-of-visual-line))
-            (push-mark (line-beginning-position) t t)
+          (if (eq major-mode 'org-mode) ; TODO: exception, some issue
+              (progn
+                (copy-region-as-kill (line-beginning-position) (line-end-position))
+                (end-of-line))
+            (if visual-line-mode
+                (progn (beginning-of-visual-line)
+                       (push-mark (point) t t)
+                       (end-of-visual-line))
+              (push-mark (line-beginning-position) t t)
+              (end-of-line))
+            (sit-for 0.1)
+            (copy-region-as-kill (region-beginning) (region-end))
             (end-of-line))
-          (sit-for 0.1)
-          (copy-region-as-kill (region-beginning) (region-end))
-          (end-of-line)
           (unless (eobp)
             (forward-char))))))
   (return-before-copy))
@@ -3286,9 +3290,40 @@ Use as around advice e.g. for mouse left click after double click."
       (async-shell-command x))))
 
 (defun rectangle ()
-  "Rectangle mark mode or quit minibuffer."
+  "Rectangle mark mode."
   (interactive)
   (rectangle-mark-mode))
+
+(defun quoted-insert-custom (arg)
+  "Same as original `quoted-insert' but escape key ignored."
+  (interactive "*p")
+  (let* ((char
+          ;; Avoid "obsolete" warnings for translation-table-for-input.
+          (with-no-warnings
+            (let (translation-table-for-input input-method-function)
+              (if (or (not overwrite-mode)
+                      (eq overwrite-mode 'overwrite-mode-binary))
+                  (read-quoted-char)
+                (read-char))))))
+    ;; This used to assume character codes 0240 - 0377 stand for
+    ;; characters in some single-byte character set, and converted them
+    ;; to Emacs characters.  But in 23.1 this feature is deprecated
+    ;; in favor of inserting the corresponding Unicode characters.
+    ;; (if (and enable-multibyte-characters
+    ;;          (>= char ?\240)
+    ;;          (<= char ?\377))
+    ;;     (setq char (unibyte-char-to-multibyte char)))
+    (unless (characterp char)
+      (user-error "%s is not a valid character"
+                  (key-description (vector char))))
+    (if (eq char 27) ; escape not inserted
+        (ignore)
+      (if (> arg 0)
+          (if (eq overwrite-mode 'overwrite-mode-binary)
+              (delete-char arg)))
+      (while (> arg 0)
+        (insert-and-inherit char)
+        (setq arg (1- arg))))))
 
 (provide 'keycom)
 

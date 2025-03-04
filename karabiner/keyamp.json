@@ -2,6 +2,217 @@
   "title": "Keyamp",
   "rules": [
     {
+      "description": "arrows",
+      "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "j",
+            "modifiers": {
+              "mandatory": [
+                "command"
+              ],
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "to": [
+            {
+              "key_code": "left_arrow"
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "k",
+            "modifiers": {
+              "mandatory": [
+                "command"
+              ],
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "to": [
+            {
+              "key_code": "down_arrow"
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "i",
+            "modifiers": {
+              "mandatory": [
+                "command"
+              ],
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "to": [
+            {
+              "key_code": "up_arrow"
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "l",
+            "modifiers": {
+              "mandatory": [
+                "command"
+              ],
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "to": [
+            {
+              "key_code": "right_arrow"
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "i",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "to": [
+            {
+              "key_code": "up_arrow"
+            }
+          ],
+          "conditions": [
+            {
+              "type": "variable_unless",
+              "name": "multitouch_extension_finger_count_total",
+              "value": 0
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "j",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "to": [
+            {
+              "key_code": "left_arrow"
+            }
+          ],
+          "conditions": [
+            {
+              "type": "variable_unless",
+              "name": "multitouch_extension_finger_count_total",
+              "value": 0
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "k",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "to": [
+            {
+              "key_code": "down_arrow"
+            }
+          ],
+          "conditions": [
+            {
+              "type": "variable_unless",
+              "name": "multitouch_extension_finger_count_total",
+              "value": 0
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "l",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "to": [
+            {
+              "key_code": "right_arrow"
+            }
+          ],
+          "conditions": [
+            {
+              "type": "variable_unless",
+              "name": "multitouch_extension_finger_count_total",
+              "value": 0
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "spacebar",
+            "modifiers": {
+              "mandatory": [
+                "command"
+              ],
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "to": [
+            {
+              "key_code": "down_arrow"
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "left_command",
+            "modifiers": {
+              "mandatory": [
+                "command"
+              ],
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "to": [
+            {
+              "key_code": "up_arrow"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "description": "spacebar",
       "manipulators": [
         {
@@ -6554,7 +6765,7 @@
             {
               "type": "frontmost_application_unless",
               "file_paths": [
-                "/Google Chrome"
+                "/Brave Browser"
               ]
             }
           ],
@@ -6566,7 +6777,7 @@
               "repeat": false
             },
             {
-              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)' && open -a 'Google Chrome'"
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)' && open -a 'Brave Browser'"
             }
           ]
         },
@@ -6584,7 +6795,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Google Chrome"
+                "/Brave Browser"
               ]
             }
           ],
@@ -6731,13 +6942,13 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Google Chrome"
+                "/Brave Browser"
               ]
             }
           ],
           "to_after_key_up": [
             {
-              "shell_command": "open -a Weather"
+              "shell_command": "open -a 'Docker Desktop'"
             }
           ],
           "to_if_held_down": [
@@ -6765,7 +6976,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Weather"
+                "/Docker"
               ]
             }
           ],
@@ -6790,7 +7001,7 @@
           },
           "to_after_key_up": [
             {
-              "shell_command": "open -a Weather"
+              "shell_command": "open -a 'Docker Desktop'"
             }
           ]
         }
@@ -7103,13 +7314,13 @@
             {
               "type": "frontmost_application_unless",
               "file_paths": [
-                "/Google Chrome"
+                "/Brave Browser"
               ]
             }
           ],
           "to_after_key_up": [
             {
-              "shell_command": "open -a 'Google Chrome'"
+              "shell_command": "open -a 'Brave Browser'"
             }
           ],
           "to_if_held_down": [
@@ -7144,7 +7355,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Google Chrome"
+                "/Brave Browser"
               ]
             }
           ],
@@ -7476,7 +7687,7 @@
             {
               "type": "frontmost_application_unless",
               "file_paths": [
-                "/Google Chrome"
+                "/Brave Browser"
               ]
             }
           ],
@@ -7487,7 +7698,7 @@
               }
             },
             {
-              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)' && open -a 'Google Chrome'",
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)' && open -a 'Brave Browser'",
               "halt": true
             }
           ],
@@ -7523,7 +7734,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Google Chrome"
+                "/Brave Browser"
               ]
             }
           ],
@@ -7559,179 +7770,6 @@
             },
             {
               "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "description": "arrows",
-      "manipulators": [
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "j",
-            "modifiers": {
-              "mandatory": [
-                "command"
-              ],
-              "optional": [
-                "any"
-              ]
-            }
-          },
-          "to": [
-            {
-              "key_code": "left_arrow"
-            }
-          ]
-        },
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "k",
-            "modifiers": {
-              "mandatory": [
-                "command"
-              ],
-              "optional": [
-                "any"
-              ]
-            }
-          },
-          "to": [
-            {
-              "key_code": "down_arrow"
-            }
-          ]
-        },
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "i",
-            "modifiers": {
-              "mandatory": [
-                "command"
-              ],
-              "optional": [
-                "any"
-              ]
-            }
-          },
-          "to": [
-            {
-              "key_code": "up_arrow"
-            }
-          ]
-        },
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "l",
-            "modifiers": {
-              "mandatory": [
-                "command"
-              ],
-              "optional": [
-                "any"
-              ]
-            }
-          },
-          "to": [
-            {
-              "key_code": "right_arrow"
-            }
-          ]
-        },
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "i",
-            "modifiers": {
-              "optional": [
-                "any"
-              ]
-            }
-          },
-          "to": [
-            {
-              "key_code": "up_arrow"
-            }
-          ],
-          "conditions": [
-            {
-              "type": "variable_unless",
-              "name": "multitouch_extension_finger_count_total",
-              "value": 0
-            }
-          ]
-        },
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "j",
-            "modifiers": {
-              "optional": [
-                "any"
-              ]
-            }
-          },
-          "to": [
-            {
-              "key_code": "left_arrow"
-            }
-          ],
-          "conditions": [
-            {
-              "type": "variable_unless",
-              "name": "multitouch_extension_finger_count_total",
-              "value": 0
-            }
-          ]
-        },
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "k",
-            "modifiers": {
-              "optional": [
-                "any"
-              ]
-            }
-          },
-          "to": [
-            {
-              "key_code": "down_arrow"
-            }
-          ],
-          "conditions": [
-            {
-              "type": "variable_unless",
-              "name": "multitouch_extension_finger_count_total",
-              "value": 0
-            }
-          ]
-        },
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "l",
-            "modifiers": {
-              "optional": [
-                "any"
-              ]
-            }
-          },
-          "to": [
-            {
-              "key_code": "right_arrow"
-            }
-          ],
-          "conditions": [
-            {
-              "type": "variable_unless",
-              "name": "multitouch_extension_finger_count_total",
-              "value": 0
             }
           ]
         }

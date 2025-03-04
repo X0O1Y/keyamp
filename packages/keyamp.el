@@ -730,7 +730,10 @@ is enabled.")
     ("g" . apropos-command)    ("h" . describe-coding-system)
     ("z" . apropos-variable)   ("x" . apropos-value)))
 
-(keyamp--map global-map '(("C-r" . delete-other-windows) ("C-t" . hippie-expand)))
+(keyamp--map global-map
+  '(("C-r" . delete-other-windows)
+    ("C-t" . hippie-expand)
+    ("C-q" . quoted-insert-custom)))
 
 (when (display-graphic-p)
   (keyamp--map global-map
@@ -772,7 +775,7 @@ is enabled.")
   (keyamp--map-return keymap isearch-direction-switch)
   (keyamp--map keymap '(("C-t" . isearch-forward-regexp)))
   (keyamp--map-backtab keymap isearch-double-back) ; repeat backward
-  ;; Double press N to save buffer.
+  ;; Double N to save buffer.
   (keyamp--map keymap '(("n" . save-buffer-isearch-cancel) ("т" . save-buffer-isearch-cancel)))
   (keyamp--hook keymap '(isearch-mode-hook) nil nil :repeat))
 
@@ -901,7 +904,7 @@ is enabled.")
 
   (keyamp--set keymap
     '(prev-buf                   next-buf
-      delete-other-windows       split-window-below
+      split-window-below
       delete-window              save-close-buf
       prev-proj-buf              next-proj-buf
       prev-eww-buf               next-eww-buf
@@ -1069,10 +1072,6 @@ is enabled.")
   (keyamp--map-return keymap keyamp-RET)
   (keyamp--remap keymap '((previous-line . beg-of-block) (next-line . end-of-block)))
   (keyamp--set keymap '(beg-of-block end-of-block)))
-
-(with-sparse-keymap
-  (keyamp--remap keymap '((beg-of-line . beg-of-buf) (end-of-lyne . end-of-buf)))
-  (keyamp--set keymap '(beg-of-buf end-of-buf)))
 
 (defvar keyamp-beg-of-buf-timer nil "Beg of buf timer.")
 (defvar keyamp-end-of-buf-timer nil "End of buf timer.")
@@ -1462,14 +1461,14 @@ is enabled.")
         ("5" . keyamp-self-insert-and-insert) ("%" . keyamp-self-insert-and-insert)
 
         ("q" . keyamp-self-insert-and-insert) ("й" . keyamp-self-insert-and-insert) ("Q" . keyamp-self-insert-and-insert) ("Й" . keyamp-self-insert-and-insert)
-        ("w" . keyamp-insert-w) ("ц" . keyamp-insert-ц) ("W" . keyamp-self-insert-and-insert) ("Ц" . keyamp-self-insert-and-insert)
+        ("w" . keyamp-insert-w)               ("ц" . keyamp-insert-ц)               ("W" . keyamp-self-insert-and-insert) ("Ц" . keyamp-self-insert-and-insert)
         ("e" . keyamp-self-insert-and-insert) ("у" . keyamp-self-insert-and-insert) ("E" . keyamp-self-insert-and-insert) ("У" . keyamp-self-insert-and-insert)
         ("r" . keyamp-self-insert-and-insert) ("к" . keyamp-self-insert-and-insert) ("R" . keyamp-self-insert-and-insert) ("К" . keyamp-self-insert-and-insert)
         ("t" . keyamp-self-insert-and-insert) ("е" . keyamp-self-insert-and-insert) ("T" . keyamp-self-insert-and-insert) ("Е" . keyamp-self-insert-and-insert)
 
         ("a" . keyamp-self-insert-and-insert) ("ф" . keyamp-self-insert-and-insert) ("A" . keyamp-self-insert-and-insert) ("Ф" . keyamp-self-insert-and-insert)
         ("s" . keyamp-self-insert-and-insert) ("ы" . keyamp-self-insert-and-insert) ("S" . keyamp-self-insert-and-insert) ("Ы" . keyamp-self-insert-and-insert)
-        ("d" . keyamp-insert-d) ("в" . keyamp-insert-в) ("D" . keyamp-self-insert-and-insert) ("В" . keyamp-self-insert-and-insert)
+        ("d" . keyamp-insert-d)               ("в" . keyamp-insert-в)               ("D" . keyamp-self-insert-and-insert) ("В" . keyamp-self-insert-and-insert)
         ("f" . keyamp-self-insert-and-insert) ("а" . keyamp-self-insert-and-insert) ("F" . keyamp-self-insert-and-insert) ("А" . keyamp-self-insert-and-insert)
         ("g" . keyamp-self-insert-and-insert) ("п" . keyamp-self-insert-and-insert) ("G" . keyamp-self-insert-and-insert) ("П" . keyamp-self-insert-and-insert)
 
@@ -1499,12 +1498,12 @@ is enabled.")
 
         ("h" . keyamp-self-insert-and-insert) ("р" . keyamp-self-insert-and-insert) ("H"  . keyamp-self-insert-and-insert) ("Р" . keyamp-self-insert-and-insert)
         ("j" . keyamp-self-insert-and-insert) ("о" . keyamp-self-insert-and-insert) ("J"  . keyamp-self-insert-and-insert) ("О" . keyamp-self-insert-and-insert)
-        ("k" . keyamp-insert-k) ("л" . keyamp-insert-л) ("K"  . keyamp-self-insert-and-insert) ("Л" . keyamp-self-insert-and-insert)
+        ("k" . keyamp-insert-k)               ("л" . keyamp-insert-л)               ("K"  . keyamp-self-insert-and-insert) ("Л" . keyamp-self-insert-and-insert)
         ("l" . keyamp-self-insert-and-insert) ("д" . keyamp-self-insert-and-insert) ("L"  . keyamp-self-insert-and-insert) ("Д" . keyamp-self-insert-and-insert)
-        (";" . keyamp-insert-semicolon) ("ж" . keyamp-insert-ж) (":"  . keyamp-self-insert-and-insert) ("Ж" . keyamp-self-insert-and-insert)
+        (";" . keyamp-insert-semicolon)       ("ж" . keyamp-insert-ж)               (":"  . keyamp-self-insert-and-insert) ("Ж" . keyamp-self-insert-and-insert)
         ("'" . keyamp-self-insert-and-insert) ("э" . keyamp-self-insert-and-insert) ("\"" . keyamp-self-insert-and-insert) ("Э" . keyamp-self-insert-and-insert)
 
-        ("n" . keyamp-self-insert-and-insert) ("т" . keyamp-self-insert-and-insert) ("N" . keyamp-insert-N) ("Т" . keyamp-insert-Т)
+        ("n" . keyamp-self-insert-and-insert) ("т" . keyamp-self-insert-and-insert) ("N" . keyamp-insert-N)               ("Т" . keyamp-insert-Т)
         ("m" . keyamp-self-insert-and-insert) ("ь" . keyamp-self-insert-and-insert) ("M" . keyamp-self-insert-and-insert) ("Ь" . keyamp-self-insert-and-insert)
         ("," . keyamp-self-insert-and-insert) ("б" . keyamp-self-insert-and-insert) ("<" . keyamp-self-insert-and-insert) ("Б" . keyamp-self-insert-and-insert)
         ("." . keyamp-self-insert-and-insert) ("ю" . keyamp-self-insert-and-insert) (">" . keyamp-self-insert-and-insert) ("Ю" . keyamp-self-insert-and-insert)
@@ -1522,8 +1521,8 @@ is enabled.")
     '((previous-line . hist-back) (next-line . hist-forw)
       (select-block  . hist-back)))
 
-  (keyamp--map-tab minibuffer-local-completion-map comp-forw)
-  (keyamp--map minibuffer-local-completion-map '(("C-t" . minibuffer-complete)))
+  (keyamp--map-tab minibuffer-local-completion-map minibuffer-complete)
+  (keyamp--map minibuffer-local-completion-map '(("C-t" . keyamp-minibuffer-shift)))
   (keyamp--remap minibuffer-mode-map
     '((previous-line . hist-back) (next-line . hist-forw)
       (select-block  . hist-back)))
@@ -2789,7 +2788,6 @@ is enabled.")
                  calendar-split                          t
                  clock                                   t
                  config                                  t
-                 delete-other-windows                    t
                  delete-window                           t
                  describe-char                           t
                  describe-face                           t
@@ -3725,14 +3723,17 @@ Cancel after `keyamp-blink-blink'. Double blink."
 (defconst keyamp-prefix-idle '([32] [127] [backspace] [8])
   "Indicate idle prefixes list: [SPC] [DEL] [backspace] [C-h].")
 
-(defconst keyam-prefix-modify '([32 101] [32 97] [32 111] [17])
-  "Indicate modify prefixes list: [SPC D] [SPC F] [SPC E] [C-q] [C-u].")
+(defconst keyam-prefix-modify '([32 101] [32 97] [32 111])
+  "Indicate modify prefixes list: [SPC D] [SPC F] [SPC E] [C-u].")
 
 (defun keyamp-indicate-prefix ()
   "Indicate prefix."
   (cond ((member (this-single-command-keys) keyamp-prefix-idle)
          (keyamp-blink-stop)
          (keyamp-indicate-idle))
+        ((equal (this-single-command-keys) [17]) ; C-q
+         (keyamp-blink-stop)
+         (keyamp-indicate-insert))
         ((or (member (this-single-command-keys) keyam-prefix-modify)
              prefix-arg)
          (keyamp-blink-stop)
