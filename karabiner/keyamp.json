@@ -6765,7 +6765,7 @@
             {
               "type": "frontmost_application_unless",
               "file_paths": [
-                "/Brave Browser"
+                "/Brave"
               ]
             }
           ],
@@ -6795,7 +6795,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Brave Browser"
+                "/Brave"
               ]
             }
           ],
@@ -6942,7 +6942,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Brave Browser"
+                "/Brave"
               ]
             }
           ],
@@ -7314,7 +7314,7 @@
             {
               "type": "frontmost_application_unless",
               "file_paths": [
-                "/Brave Browser"
+                "/Brave"
               ]
             }
           ],
@@ -7355,7 +7355,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Brave Browser"
+                "/Brave"
               ]
             }
           ],
@@ -7364,12 +7364,6 @@
               "select_input_source": {
                 "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
               }
-            },
-            {
-              "key_code": "h",
-              "modifiers": [
-                "command"
-              ]
             },
             {
               "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)' && open -a 'Emacs'"
@@ -7687,7 +7681,7 @@
             {
               "type": "frontmost_application_unless",
               "file_paths": [
-                "/Brave Browser"
+                "/Brave"
               ]
             }
           ],
@@ -7734,7 +7728,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Brave Browser"
+                "/Brave"
               ]
             }
           ],

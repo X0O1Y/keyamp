@@ -423,10 +423,25 @@ switch via K to half page move."
           (progn (setq this-command 'page-up-half)
                  (page-up-half))
         (command-execute 'back-block)
-        (setq this-command 'dummy)
-        (command-execute 'dummy))
+        (setq this-command 'ignore)
+        (command-execute 'ignore))
     (command-execute 'back-block)
     (if (eq last-command 'end-of-block)
+        (before-last-command)))
+  (setq last-command-keys (this-command-keys)))
+
+(defun beg-of-block-rev ()
+  "Back block. For reverse transient."
+  (interactive)
+  (if (equal before-last-command this-command)
+      (if (equal last-command-keys "t") ; else SPC
+          (progn (setq this-command 'page-up-half)
+                 (page-up-half))
+        (command-execute 'back-block)
+        (setq this-command 'ignore)
+        (command-execute 'ignore))
+    (command-execute 'back-block)
+    (if (eq last-command 'end-of-block-rev)
         (before-last-command)))
   (setq last-command-keys (this-command-keys)))
 
@@ -439,13 +454,27 @@ switch via I to half page move."
           (progn (setq this-command 'page-dn-half)
                  (page-dn-half))
         (command-execute 'forw-block)
-        (setq this-command 'dummy)
-        (command-execute 'dummy))
+        (setq this-command 'ignore)
+        (command-execute 'ignore))
     (command-execute 'forw-block)
     (if (eq last-command 'beg-of-block)
         (before-last-command)))
-  (setq last-command-keys
-        (this-command-keys)))
+  (setq last-command-keys (this-command-keys)))
+
+(defun end-of-block-rev ()
+  "Forw block. For reverse transient."
+  (interactive)
+  (if (equal before-last-command this-command)
+      (if (equal last-command-keys "d") ; else DEL
+          (progn (setq this-command 'page-dn-half)
+                 (page-dn-half))
+        (command-execute 'forw-block)
+        (setq this-command 'ignore)
+        (command-execute 'ignore))
+    (command-execute 'forw-block)
+    (if (eq last-command 'beg-of-block-rev)
+        (before-last-command)))
+  (setq last-command-keys (this-command-keys)))
 
 (defun beg-of-buf ()
   "Go to the beginning of buffer, next press to the end of buffer."
@@ -560,20 +589,18 @@ and `right-brackets'."
       (setq xp1 (car xbds) xp2 (cdr xbds)))
     (narrow-to-region xp1 xp2)))
 
-(defun dummy () "Dummy command." (interactive))
-
 (defun back-word ()
   "Backward word. Fast double direction switch breaks beat to char move."
   (interactive)
-  (if (and (member (this-command-keys) (list "l" [1075]))
+  (if (and (member (this-command-keys) (list "l" [?г]))
            (not (or (eq last-command 'select-word)
                     (eq last-command 'back-word)
                     (eq last-command 'jump-mark))))
       (push-mark (point) t)) ; virtual leader
   (if (equal before-last-command this-command)
       (progn (backward-word)
-             (setq this-command 'dummy)
-             (command-execute 'dummy))
+             (setq this-command 'ignore)
+             (command-execute 'ignore))
     (command-execute 'backward-word)
     (if (eq last-command 'forw-word)
         (before-last-command))))
@@ -583,8 +610,8 @@ and `right-brackets'."
   (interactive)
   (if (equal before-last-command this-command)
       (progn (backward-word)
-             (setq this-command 'dummy)
-             (command-execute 'dummy))
+             (setq this-command 'ignore)
+             (command-execute 'ignore))
     (command-execute 'backward-word)
     (if (eq last-command 'forw-word-repeat)
         (before-last-command))))
@@ -592,14 +619,14 @@ and `right-brackets'."
 (defun forw-word ()
   "Forward word."
   (interactive)
-  (if (and (member (this-command-keys) (list "w" [1097]))
+  (if (and (member (this-command-keys) (list "w" [?щ]))
            (not (or (eq last-command 'select-word)
                     (eq last-command 'forw-word))))
       (push-mark (point) t)) ; virtual leader
   (if (equal before-last-command this-command)
       (progn (forward-word)
-             (setq this-command 'dummy)
-             (command-execute 'dummy))
+             (setq this-command 'ignore)
+             (command-execute 'ignore))
     (command-execute 'forward-word)
     (if (eq last-command 'back-word)
         (before-last-command))))
@@ -609,8 +636,8 @@ and `right-brackets'."
   (interactive)
   (if (equal before-last-command this-command)
       (progn (forward-word)
-             (setq this-command 'dummy)
-             (command-execute 'dummy))
+             (setq this-command 'ignore)
+             (command-execute 'ignore))
     (command-execute 'forward-word)
     (if (eq last-command 'back-word-repeat)
         (before-last-command))))
@@ -620,8 +647,8 @@ and `right-brackets'."
   (interactive)
   (if (equal before-last-command this-command)
       (progn (command-execute 'backward-char)
-             (setq this-command 'dummy)
-             (command-execute 'dummy))
+             (setq this-command 'ignore)
+             (command-execute 'ignore))
     (command-execute 'left-char)
     (if (eq last-command 'forw-char)
         (before-last-command))))
@@ -631,8 +658,8 @@ and `right-brackets'."
   (interactive)
   (if (equal before-last-command this-command)
       (progn (command-execute 'forward-char)
-             (setq this-command 'dummy)
-             (command-execute 'dummy))
+             (setq this-command 'ignore)
+             (command-execute 'ignore))
     (command-execute 'right-char)
     (if (eq last-command 'back-char)
         (before-last-command))))
@@ -657,8 +684,8 @@ and `right-brackets'."
   (interactive)
   (if (equal before-last-command this-command)
       (progn (command-execute 'View-scroll-half-page-backward)
-             (setq this-command 'dummy)
-             (command-execute 'dummy))
+             (setq this-command 'ignore)
+             (command-execute 'ignore))
     (command-execute 'View-scroll-half-page-backward)
     (if (eq last-command 'page-dn-half)
         (before-last-command)))
@@ -669,8 +696,8 @@ and `right-brackets'."
   (interactive)
   (if (equal before-last-command this-command)
       (progn (command-execute 'View-scroll-half-page-forward)
-             (setq this-command 'dummy)
-             (command-execute 'dummy))
+             (setq this-command 'ignore)
+             (command-execute 'ignore))
     (command-execute 'View-scroll-half-page-forward)
     (if (eq last-command 'page-up-half)
         (before-last-command)))
@@ -2189,8 +2216,8 @@ Similar to `kill-buffer', with the following addition:
                (setq this-command 'describe-foo-at-point)
                (describe-foo-at-point)))
     (error
-     (setq this-command 'describe-function)
-     (call-interactively 'describe-function))))
+     (setq this-command 'ignore)
+     (command-execute 'ignore))))
 
 (defun open-file ()
   "Open the file path under cursor. Or do something depending on context.
@@ -2387,7 +2414,7 @@ If the current buffer is not associated with a file nor dired, nothing's done."
                (save-buffer)))
     (make-backup)))
 
-(defun make-backup-and-copy ()
+(defun backup-and-copy ()
   "Make backup and copy file path."
   (interactive)
   (make-backup-and-save)
@@ -2441,31 +2468,27 @@ If the current buffer is not associated with a file nor dired, nothing's done."
   (isearch-repeat-backward)
   (setq this-command 'isearch-wback))
 
-(defvar occur-cur-word-defer-timer nil "Timer to defer `occur-cur-word'.")
-
 (defun occur-cur-word-run ()
   "Call `occur' on current word."
   (interactive)
-  (setq occur-cur-word-defer-timer nil)
+  (setq defer-timer nil)
   (occur (cur-word))
   (enlarge-window-split))
 
 (defun occur-cur-word ()
   "Defer in order to reuse double key press for another command."
   (interactive)
-  (if (timerp occur-cur-word-defer-timer)
-      (progn (cancel-timer occur-cur-word-defer-timer)
-             (setq occur-cur-word-defer-timer nil))
-    (setq occur-cur-word-defer-timer
-          (run-with-timer wait-double nil 'occur-cur-word-run))))
+  (if (timerp defer-timer)
+      (progn (cancel-timer defer-timer)
+             (setq defer-timer nil))
+    (setq defer-timer (run-with-timer defer-timeout nil 'occur-cur-word-run))))
 
 (defun search-string ()
   "Search string in all files of current directory."
   (interactive)
   (let ((xdefault (cur-word)))
     (find-text
-     (read-string (format "Search (%s): " xdefault)
-                  nil 'query-replace-history xdefault)
+     (read-string (format "Search (%s): " xdefault) nil 'query-replace-history xdefault)
      (expand-file-name "") ".[A-Za-z0-9]+$" t t)))
 
 (defun show-in-desktop ()
@@ -2520,42 +2543,39 @@ If there more than one frame, switch to next frame."
   (if (< 1 (length (frame-list)))
       (other-frame -1)
     (unless (minibufferp)
-      (if (string-equal (buffer-name) "*Ibuffer*")
-          (progn
-            (setq this-command 'screen-idle)
-            (screen-idle))
-        (alt-buf)))))
+      (alt-buf))))
 
-(defvar wait-double (/ 250 1000.0) "Wait double press timeout.")
+(defvar defer-timer nil "Defer timer.")
+(defvar defer-timeout (/ 200 1000.0) "Defer timeout.")
 
-(defvar proced-defer-timer nil "Timer to defer `proced-defer'.")
-(defun proced-run () "Run proced." (setq proced-defer-timer nil) (proced))
+(defun proced-run ()
+  "Run proced."
+  (setq defer-timer nil)
+  (proced))
 
 (defun proced-defer ()
   "Defer in order to reuse double key press for another command."
   (interactive)
-  (if (timerp proced-defer-timer)
-      (progn (cancel-timer proced-defer-timer)
-             (setq proced-defer-timer nil))
-    (setq proced-defer-timer (run-with-timer wait-double nil 'proced-run))))
-
-(defvar kmacro-record-timer nil "Timer to defer `kmacro-record'.")
+  (if (timerp defer-timer)
+      (progn (cancel-timer defer-timer)
+             (setq defer-timer nil))
+    (setq defer-timer (run-with-timer defer-timeout nil 'proced-run))))
 
 (defun kmacro-start ()
   "Defer in order to reuse double key press for another command."
-  (kmacro-start-macro nil)
-  (setq kmacro-record-timer nil))
+  (setq defer-timer nil)
+  (kmacro-start-macro nil))
 
 (defun kmacro-record ()
   "Start or stop macro recording."
   (interactive)
   (if (or defining-kbd-macro executing-kbd-macro)
       (kmacro-end-macro nil)
-    (if (timerp kmacro-record-timer)
-        (progn (cancel-timer kmacro-record-timer)
-               (setq kmacro-record-timer nil))
-      (setq kmacro-record-timer
-            (run-with-timer wait-double nil 'kmacro-start)))))
+    (if (timerp defer-timer)
+        (progn (cancel-timer defer-timer)
+               (setq defer-timer nil))
+      (setq defer-timer
+            (run-with-timer defer-timeout nil 'kmacro-start)))))
 
 (defun terminal-prompt (Prompt)
   "Compare PROMPT and actual prompt."
@@ -2600,13 +2620,17 @@ before actually send the cd command."
            (if (change-wd-p)
                (vterm-send-return))))))
 
-(defun change-wd () "Change working directory." (interactive) (get-wd) (set-wd))
+(defun change-wd ()
+  "Change working directory."
+  (interactive)
+  (get-wd)
+  (set-wd))
 
 (advice-add 'completion-at-point :around
             (lambda (fun &rest r) "no need complete empty command"
               (if (and (eq major-mode 'eshell-mode)
                        (zerop (length (buffer-substring-no-properties
-                                       (+ 4 (line-beginning-position))
+                                       (+ (length "└ $ ") (line-beginning-position))
                                        (line-end-position)))))
                   (change-wd)
                 (apply fun r))))
@@ -2626,13 +2650,57 @@ before actually send the cd command."
           (message-log-max nil))
       (command-execute 'eshell))))
 
+(defun sh-run ()
+  "Run sh."
+  (setq defer-timer nil)
+  (command-execute 'sh))
+
+(defun sh-defer ()
+  "Defer in order to reuse double key press for another command."
+  (interactive)
+  (if (timerp defer-timer)
+      (progn (cancel-timer defer-timer)
+             (setq defer-timer nil))
+    (setq defer-timer (run-with-timer defer-timeout nil 'sh-run))))
+
 (defun kmacro-helper ()
   "Keyboard macro helper. Ad hoc redefine."
   (interactive)
   (setq this-command 'config)
   (command-execute 'config))
 
-(defalias 'kmacro-play 'call-last-kbd-macro)
+(defvar kmacro-playp nil "Keyboard macro playback predicate.")
+(defvar kmacro-play-timer nil "Keyboard macro playback timer.")
+(defvar kmacro-play-timeout 60 "Keyboard macro playback timeout.")
+
+(defun kmacro-play-toggle ()
+  "Toggle keyboard macro playback. Auto disable."
+  (interactive)
+  (setq kmacro-playp (if kmacro-playp nil t))
+  (let ((message-log-max nil))
+    (if kmacro-playp
+        (progn
+          (message "%s" "Macro playback on")
+          (if (timerp kmacro-play-timer)
+              (cancel-timer kmacro-play-timer))
+          (setq kmacro-play-timer
+                (run-with-idle-timer kmacro-play-timeout nil
+                                     (lambda ()
+                                       (setq kmacro-playp nil)
+                                       (setq kmacro-play-timer nil)))))
+      (message "%s" "Macro playback off")
+      (if (timerp kmacro-play-timer)
+          (cancel-timer kmacro-play-timer)))))
+
+(defun kmacro-play ()
+  "Play keyboard macro."
+  (interactive)
+  (if kmacro-playp
+      (call-last-kbd-macro)
+    (let ((message-log-max nil))
+      (message "%s" "Enable macro playback")
+      (setq this-command 'ignore)
+      (command-execute 'ignore))))
 
 (defun eshell-clear()
   "Clear screen eshell."
@@ -3260,9 +3328,15 @@ Use as around advice e.g. for mouse left click after double click."
   "Cancel isearch and save buffer."
   (interactive)
   (isearch-cancel-clean)
-  (cond ((buffer-file-name) (save-buffer))
+  (cond ((buffer-file-name)
+         (if (buffer-modified-p)
+             (save-buffer)
+           (setq this-command 'ignore) ; indicate only if modified
+           (command-execute 'ignore)))
         ((string-match (concat "^" new-buffer-prefix "*.") (buffer-name))
-         (command-execute 'write-file))))
+         (command-execute 'write-file))
+        (t (setq this-command 'ignore)
+           (command-execute 'ignore))))
 
 (defun empty-bin ()
   "Empty bin on macOS."
