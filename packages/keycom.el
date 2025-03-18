@@ -1,4 +1,4 @@
-;;; keycom.el --- Keyboard commands -*- coding: utf-8; lexical-binding: t; -*-
+;;; keycom.el --- Keyboard Commands -*- coding: utf-8; lexical-binding: t; -*-
 
 ;;; Commentary:
 
@@ -1613,8 +1613,11 @@ If there is selection, delete it first."
                 "org mode:  <2018-04-12 Thu>"
                 "all digits:  20180412224611"
                 "weekday:  2018-04-12 Thursday"))
-           "org mode: <2018-04-12 Thu>")))
-    (when (region-active-p) (delete-region (region-beginning) (region-end)))
+           (if (eq major-mode 'org-mode)
+               "org mode: <2018-04-12 Thu>"
+             "ISO date: 2018-04-12"))))
+    (when (region-active-p)
+      (delete-region (region-beginning) (region-end)))
     (insert
      (cond
       ((string-match "^ISO date" xstyle) (format-time-string "%Y-%m-%d"))
@@ -1729,7 +1732,9 @@ LBracket and RBracket are strings. WrapMethod must be either `line' or
 (defun insert-space-before ()
   "Insert space before cursor."
   (interactive)
-  (if buffer-read-only (setq this-command 'ignore) (insert " ")))
+  (if buffer-read-only
+      (setq this-command 'ignore)
+    (insert " ")))
 
 (defun insert-formfeed ()
   "Insert a form feed char (codepoint 12)." (interactive) (insert "\n\u000c\n"))
@@ -3000,7 +3005,7 @@ and reverse-search-history in bashrc."
   (interactive)
   (condition-case user-error
       (org-agenda-switch-to)
-    (error (tasks))))
+    (error (toggle-ibuffer))))
 
 (defun todo ()
   "Modification of `org-todo'. Capitalize task."
@@ -3009,9 +3014,12 @@ and reverse-search-history in bashrc."
         ((eq major-mode 'org-agenda-mode)
          (if (org-get-at-bol 'org-marker) ; avoid error
              (org-agenda-todo)
-           (novel))))
+           (novel)))
+        (t (setq this-command 'ignore)
+           (command-execute 'ignore)))
   (when (eq major-mode 'org-mode)
-    (beginning-of-line) (title-case-region-or-line)))
+    (beginning-of-line)
+    (title-case-region-or-line)))
 
 (defun toggle-gnus ()
   "Toggle gnus."
@@ -3153,9 +3161,10 @@ This checks in turn:
 (defun dired-toggle-mark ()
   "Toggle mark for the current file."
   (interactive)
-  (if (string-equal " "
-                    (buffer-substring-no-properties
-                     (line-beginning-position) (1+ (line-beginning-position))))
+  (if (string-equal
+       " " (buffer-substring-no-properties
+            (line-beginning-position)
+            (1+ (line-beginning-position))))
       (dired-mark 1)
     (dired-unmark 1)))
 
@@ -3166,7 +3175,7 @@ This checks in turn:
 
 (defun return-before-copy (&rest _)
   "Return to the point before copy selection."
-  (when (memq last-command '(select-word select-quote))
+  (when (memq last-command '(select-word select-quote mark-whole-buffer))
     (double-jump-back)
     (setq this-command 'set-mark-command)))
 
