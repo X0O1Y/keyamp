@@ -2048,13 +2048,8 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Emacs"
+                "/Windows"
               ]
-            },
-            {
-              "type": "variable_if",
-              "name": "insert mode activated",
-              "value": 2
             }
           ],
           "to_after_key_up": [
@@ -6440,6 +6435,41 @@
           },
           "conditions": [
             {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/UTM",
+                "/Windows"
+              ]
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "return_or_enter"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "r",
+              "modifiers": [
+                "control"
+              ],
+              "repeat": false,
+              "halt": true
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "return_or_enter",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
               "type": "frontmost_application_unless",
               "file_paths": [
                 "/Emacs"
@@ -6763,21 +6793,20 @@
           },
           "conditions": [
             {
-              "type": "frontmost_application_unless",
+              "type": "frontmost_application_if",
               "file_paths": [
-                "/Brave"
+                "/Windows"
               ]
             }
           ],
           "to": [
             {
-              "select_input_source": {
-                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
-              },
+              "key_code": "tab",
+              "modifiers": [
+                "command"
+              ],
+              "halt": true,
               "repeat": false
-            },
-            {
-              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)' && open -a 'Brave Browser'"
             }
           ]
         },
@@ -6791,29 +6820,16 @@
               ]
             }
           },
-          "conditions": [
+          "to_after_key_up": [
             {
-              "type": "frontmost_application_if",
-              "file_paths": [
-                "/Brave"
-              ]
+              "shell_command": "open -a 'Windows App'"
             }
           ],
-          "to": [
+          "to_if_held_down": [
             {
-              "select_input_source": {
-                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
-              },
-              "repeat": false
-            },
-            {
-              "key_code": "h",
-              "modifiers": [
-                "command"
-              ]
-            },
-            {
-              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)' && open -a 'Emacs'"
+              "shell_command": "open -a Safari",
+              "repeat": false,
+              "halt": true
             }
           ]
         }
@@ -6825,7 +6841,12 @@
         {
           "type": "basic",
           "from": {
-            "key_code": "f2"
+            "key_code": "f2",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
           },
           "to_after_key_up": [
             {
