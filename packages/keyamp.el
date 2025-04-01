@@ -16,7 +16,7 @@
 ;; space color indicates active transient keymap. Repeat mode switched
 ;; automatically either by advice or with timer.
 
-;; Try Keyboard Amplifier:
+;; Plug Keyboard Amplifier in:
 ;;
 ;; (require 'keyamp)
 ;; (keyamp)
@@ -305,9 +305,9 @@ Activate command, insert or repeat mode optionally."
   "Map S-<tab> and <backtab> keys to CMD using `keyamp--map'."
   (declare (indent defun))
   (let ((keymapName (make-symbol "keymap-name")))
-    `(if-let ((,keymapName ,KeymapName)
-              ((display-graphic-p)))
-         (keyamp--map ,keymapName '(("S-<tab>" . ,Cmd)))
+    `(let ((,keymapName ,KeymapName))
+       (if (display-graphic-p)
+           (keyamp--map ,keymapName '(("S-<tab>" . ,Cmd))))
        (keyamp--map ,keymapName '(("<backtab>" . ,Cmd))))))
 
 (defmacro keyamp--map-return (KeymapName Cmd)
@@ -750,6 +750,9 @@ is enabled.")
 (keyamp--map global-map '(("C-r" . delete-other-windows) ("C-t" . hippie-expand)))
 (keyamp--remap global-map '((quoted-insert . quoted-insert-custom)))
 
+;; Pass single key through the network
+(keyamp--map global-map '(("<f2>" . delete-other-windows)))
+
 (when (display-graphic-p)
   (keyamp--map global-map
     '(("<prior>"          . page-up-half) ("<next>"    . page-dn-half)
@@ -1138,7 +1141,7 @@ is enabled.")
    dired-do-delete               deactivate-region)
 :before 'return-before)
 
-(with-sparse-keymap ; Left/right arrows repeat by DEL/SPC.
+(with-sparse-keymap ; left/right arrows repeat by DEL/SPC
   (keyamp--map-leader keymap '(back-char . forw-char))
   (keyamp--set keymap '(back-char forw-char)))
 
@@ -1404,7 +1407,7 @@ is enabled.")
     ;; SPC `select-word' and DEL/SPC or I/K again to continue move
     ;; backward/forward. Similarly double DEL to activate history move.
     ;; Fast history or completion candidates direction switch to quit.
-    (keyamp--map-leader keymap '(select-block . keyamp-minibuffer-paste-or-prev))
+    (keyamp--map-leader keymap '(select-block . paste-or-prev))
     (keyamp--map-escape keymap keyamp-minibuffer-escape)
     (keyamp--map-return keymap keyamp-minibuffer-return)
     (keyamp--map keymap '(("C-t" . keyamp-minibuffer-shift))) ; S-<return>
@@ -1418,7 +1421,8 @@ is enabled.")
   ;; Hit D/DEL for No, K/SPC for Yes to answer non-literal Y or N.
   (keyamp--remap y-or-n-p-map
     '((select-block  . y-or-n-p-insert-n) (del-back  . y-or-n-p-insert-n)
-      (paste-or-prev . y-or-n-p-insert-y) (next-line . y-or-n-p-insert-y)))
+      (paste-or-prev . y-or-n-p-insert-y) (next-line . y-or-n-p-insert-y)
+      (select-word   . y-or-n-p-insert-y)))
 
   (keyamp--remap minibuffer-local-map
     '((previous-line . hist-back) (next-line . hist-forw)
@@ -3050,16 +3054,13 @@ insert cancel the timer.")
                   :after 'keyamp-spc-spc)
 
 (defun keyamp-spc-del (&rest _)
-  "Insert fast SPC DEL to activate command mode."
+  "Insert fast SPC DEL to start move by chars."
   (if-let (((keyamp-unless-kbd-macro))
            (space ?\s)
            ((eq before-last-command-event space)))
-      (if isearch-mode
-          (isearch-cancel-clean)
-        (keyamp-command-execute 'keyamp-escape))))
+      (keyamp-command-execute 'forward-char)))
 
-(advice-add-macro '(delete-backward-char isearch-del-char)
-                  :after 'keyamp-spc-del)
+(advice-add 'delete-backward-char :after 'keyamp-spc-del)
 
 (defun keyamp-command-if-insert (&rest _)
   "Activate command mode if insert mode."
@@ -3067,7 +3068,7 @@ insert cancel the timer.")
       (keyamp-command)))
 
 (defun keyamp-insert-and-spc ()
-  "Activate insert mode and insert SPC."
+  "Activate insert mode and insert space."
   (interactive)
   (unless keyamp-insert-p
     (keyamp-insert))
@@ -3124,13 +3125,6 @@ Else activate insert mode and self insert."
           (setq key (car (rassoc key keyamp--convert-table))))
       (execute-kbd-macro (kbd key))) ; key press required
      (t (keyamp-insert-and-self-insert)))))
-
-(defun keyamp-minibuffer-paste-or-prev ()
-  "Ignore if literal y or n question if asked. Else `paste-or-prev'."
-  (interactive)
-  (if (keyamp-minibuffer-y-or-n-literal)
-      (keyamp-command-execute 'ignore)
-    (keyamp-command-execute 'paste-or-prev)))
 
 (defun keyamp-minibuffer-escape ()
   "If minibuffer input not empty then activate command mode instead

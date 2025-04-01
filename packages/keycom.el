@@ -7,6 +7,7 @@
 ;;; Code:
 
 
+
 ;; Cursor movement
 
 (defun get-bounds-of-block ()
@@ -1566,9 +1567,12 @@ If a buffer is not file and not dired, copy value of `default-directory'."
     (kill-new
      (if DirPathOnlyQ
          (file-name-directory xfpath)
-       (let* ((xx (concat xfpath ":" (format-mode-line "%l")))
+       (let* ((xx (if (eq major-mode 'dired-mode)
+                      xfpath
+                    (concat xfpath ":" (format-mode-line "%l"))))
               (x (replace-regexp-in-string (getenv "HOME") "~" xx)))
-         (message "Copy %s" x) x)))))
+         (message "Copy %s" x)
+         x)))))
 
 (defun cut-text-block ()
   "Cut text block plus blank lines or selection."
@@ -2277,7 +2281,7 @@ Similar to `kill-buffer', with the following addition:
     (find-file (cdr (pop recently-closed-buffers)))))
 
 (defun describe-foo-at-point-error ()
-  "Do `describe-function' in case of error."
+  "Ignore in case of error."
   (condition-case nil
       (progn
         (if (or (eq major-mode 'python-ts-mode)
@@ -2288,6 +2292,8 @@ Similar to `kill-buffer', with the following addition:
           (setq this-command 'describe-foo-at-point)
           (describe-foo-at-point)))
     (error
+     ;; (if (eq major-mode 'org-mode)
+         ;; (org-open-at-point))
      (setq this-command 'ignore)
      (command-execute 'ignore))))
 
@@ -2577,14 +2583,24 @@ If the current buffer is not associated with a file nor dired, nothing's done."
   "Show current file in desktop.
 This command can be called when in a file buffer or in `dired'."
   (interactive)
-  (let ((xpath (if (eq major-mode 'dired-mode)
-                   (if (eq nil (dired-get-marked-files))
-                       default-directory
-                     (car (dired-get-marked-files)))
-                 (if (buffer-file-name) (buffer-file-name) default-directory))))
+  (let ((path (if (eq major-mode 'dired-mode)
+                  (if (eq nil (dired-get-marked-files))
+                      default-directory
+                    (car (dired-get-marked-files)))
+                (if (buffer-file-name) (buffer-file-name) default-directory))))
     (cond
+     ((eq system-type 'windows-nt)
+      ;; (shell-command (format "PowerShell -Command invoke-item '%s'"
+      ;; (expand-file-name default-directory)))
+      (let ((cmd (format "Explorer /select,%s"
+                         (replace-regexp-in-string "/" "\\" path t t)
+                         ;; (shell-quote-argument (replace-regexp-in-string "/" "\\" xpath t t ))
+                         ))
+            (inhibit-message t)
+            (message-log-max nil))
+        (shell-command cmd)))
      ((string-equal system-type "darwin")
-      (call-process "open" nil 0 nil "-R" xpath)))))
+      (call-process "open" nil 0 nil "-R" path)))))
 
 (defun open-in-external-app (&optional Fname)
   "Open the current file or dired marked files in external app.
@@ -2597,7 +2613,8 @@ When called in Emacs Lisp, if Fname is given, open that."
             (if (string-equal major-mode "dired-mode")
                 (dired-get-marked-files)
               (list (buffer-file-name)))))
-    (setq xdoIt (if (<= (length xfileList) 50) t
+    (setq xdoIt (if (<= (length xfileList) 50)
+                    t
                   (y-or-n-p (format "Open %s files?" (length xfileList)))))
     (when xdoIt
       (cond
@@ -2608,13 +2625,25 @@ When called in Emacs Lisp, if Fname is given, open that."
                      video-extensions))
         (mapc (lambda (xfpath) (movie xfpath)) xfileList))
        ((or (and (string-equal major-mode 'dired-mode)
-                 (string-match (concat (getenv "HOME") "/Sound")  (dired-get-filename)))
+                 (string-match (concat (getenv "HOME") "/Sound") (dired-get-filename)))
             (string-equal "mp3"
                           (file-name-extension
                            (downcase (file-truename (nth 0 xfileList))))))
         (if (get-buffer emms-playlist-buffer-name)
             (emms-add-dired)
           (emms-play-dired)))
+       ((eq system-type 'windows-nt)
+        (let ((xoutBuf (get-buffer-create "*open in external app*"))
+              (xcmdlist (list "PowerShell" "-Command" "Invoke-Item" "-LiteralPath")))
+          (mapc
+           (lambda (x)
+             (message "%s" x)
+             (apply 'start-process (append (list "open in external app" xoutBuf)
+                                           xcmdlist
+                                           (list (format "'%s'" (if (string-match "'" x)
+                                                                    (replace-match "`'" t t x)
+                                                                  x))) nil)))
+           xfileList)))
        ((string-equal system-type "darwin")
         (mapc (lambda (xfpath) (call-process "open" nil 0 nil xfpath))
               xfileList))))))
@@ -2821,17 +2850,19 @@ before actually send the cd command."
   "Split terminal window below. Switch to terminal if already split.
 Open new terminal if already in terminal."
   (interactive)
-  (if (eq major-mode 'vterm-mode)
-      (let ((current-prefix-arg '-))
-        (call-interactively 'vterm))
-    (if (one-windowp)
-        (progn
-          (split-window-below)
-          (other-window 1)))
-    (if (and (boundp 'tt-local)
-             (get-buffer tt-local))
-        (switch-to-buffer tt-local)
-      (vterm))))
+  (if (fboundp 'vterm)
+      (if (eq major-mode 'vterm-mode)
+          (let ((current-prefix-arg '-))
+            (call-interactively 'vterm))
+        (if (one-windowp)
+            (progn
+              (split-window-below)
+              (other-window 1)))
+        (if (and (boundp 'tt-local)
+                 (get-buffer tt-local))
+            (switch-to-buffer tt-local)
+          (vterm)))
+    (shell)))
 
 (defun vterm-read-send-key ()
   "Read next input event and send it to the libvterm.
@@ -3134,50 +3165,62 @@ and reverse-search-history in bashrc."
 
 (defvar sql-type "postgres" "SQL type for client.")
 
+(defconst sql-type-list '("postgres" "sqlite" "mssql") "List of SQL types.")
+
 (defun toggle-sql-type ()
   "Toggle `sql-type'."
   (interactive)
-  (setq sql-type (if (equal sql-type "sqlite") "postgres" "sqlite")))
+  (setq sql-type
+        (nth (mod (1+ (cl-position sql-type sql-type-list :test 'string-equal))
+                  (length sql-type-list))
+             sql-type-list)))
 
 (defun exec-query ()
   "Execute SQL statement separated by semicolon or selected region."
   (interactive)
   (unless (eq major-mode 'sql-mode)
     (error "Not SQL"))
-  (let ((xconn (getenv "CONNINFO"))
-        (xbuf (concat "*exec query*"))
-        xquery xp1 xp2 (xsepRegex ";"))
+  (let ((conn (getenv "CONNINFO"))
+        (buf (concat "*exec query*"))
+        query p1 p2 (sepRegex ";"))
     (if (region-active-p)
-        (setq xp1 (region-beginning) xp2 (region-end))
+        (setq p1 (region-beginning) p2 (region-end))
       (save-excursion
-        (setq xp1 (if (re-search-backward xsepRegex nil 1)
-                      (goto-char (match-end 0))
-                    (point)))
-        (setq xp2 (if (re-search-forward xsepRegex nil 1)
-                      (match-beginning 0)
-                    (point)))))
-    (setq xquery (string-trim
-                  (concat (buffer-substring-no-properties xp1 xp2))))
-    (switch-to-buffer-other-window (get-buffer-create xbuf))
-    (with-current-buffer xbuf
+        (setq p1 (if (re-search-backward sepRegex nil 1)
+                     (goto-char (match-end 0))
+                   (point)))
+        (setq p2 (if (re-search-forward sepRegex nil 1)
+                     (match-beginning 0)
+                   (point)))))
+    (setq query (string-trim
+                 (concat (buffer-substring-no-properties p1 p2))))
+    (switch-to-buffer-other-window (get-buffer-create buf))
+    (with-current-buffer buf
       (read-only-mode))
     (goto-char (point-max))
     (push-mark (point) t nil)
     (let ((inhibit-read-only t))
-      (when (string-equal sql-type "postgres")
-        (insert
-         (shell-command-to-string
-          (format "psql -c \"%s\" -q %s"
-                  (string-replace  "\"" "\\\"" (string-replace "$" "\\$" xquery)) xconn))))
-      (when (string-equal sql-type "sqlite")
+      (cond
+       ((string-equal sql-type "mssql")
+        (let ((conn (getenv "CONNMSSQL")))
+          (insert
+           (shell-command-to-string
+            (format "sqlcmd -S %s -Q \"%s\"" conn query)))))
+       ((string-equal sql-type "postgres")
+        (let ((q (string-replace  "\"" "\\\"" (string-replace "$" "\\$" query))))
+          (if (eq system-type 'windows-nt)
+              (setq q (string-replace "%" "%%" q)))
+          (insert
+           (shell-command-to-string (format "psql -c \"%s\" -q %s" q conn)))))
+       ((string-equal sql-type "sqlite")
         ;; attach database can't parse ~
-        (setq xquery (replace-regexp-in-string "~" (getenv "HOME") xquery))
+        (setq query (replace-regexp-in-string "~" (getenv "HOME") query))
         ;; way to send attach and dot commands along with sql query
-        (let ((xres (shell-command-to-string
-                     (format "sqlite3 <<EOF\n%s\nEOF" xquery))))
-          (if (zerop (length xres))
+        (let ((res (shell-command-to-string
+                    (format "sqlite3 <<EOF\n%s\nEOF" query))))
+          (if (zerop (length res))
               (insert "No rows\n")
-            (insert xres))))
+            (insert res)))))
       (insert (concat (make-string 89 45) "\n")))
     (set-mark-command t)
     (other-window 1)
@@ -3228,7 +3271,7 @@ This checks in turn:
 (defconst video-extensions '("mkv" "mp4" "avi" "mov" "ts" "mts" "m2ts" "webm" "vob" "aiff")
   "Open these video file extensions with `open-in-external-app'.")
 
-(defconst external-extensions `("mp3" "m4a" "flac" "torrent")
+(defconst external-extensions `("mp3" "m4a" "flac" "torrent" "exe" "xlsx")
   "Open these file extensions with `open-in-external-app'.")
 
 (setq external-extensions (append external-extensions video-extensions))
