@@ -575,9 +575,10 @@ is enabled.")
 
     ("h"  . go-new)
 
+                                           ("j i"   . widen)
                                            ("j l"   . narrow-to-region-or-block)
                                            ("j k"   . narrow-to-defun)
-                                           ("j j"   . widen)
+                                           ("j j"   . diff-buffers)
     ("j DEL" . hl-line-mode)               ("j SPC" . whitespace-mode)
     ("j <escape>" . ignore)                ("j RET" . toggle-word-wrap)
 
@@ -751,7 +752,7 @@ is enabled.")
 (keyamp--remap global-map '((quoted-insert . quoted-insert-custom)))
 
 ;; Pass single key through the network
-(keyamp--map global-map '(("<f2>" . delete-other-windows)))
+(keyamp--map global-map '(("<f12>" . delete-other-windows)))
 
 (when (display-graphic-p)
   (keyamp--map global-map
@@ -1107,24 +1108,24 @@ is enabled.")
 (advice-add-macro '(up-line down-line) :before 'keyamp-cancel-defer-command-timer)
 
 (with-sparse-keymap
-  (keyamp--map-leader keymap '(up-line . end-of-block))
+  (keyamp--map-leader keymap '(up-line . copy-line))
   (keyamp--remap keymap
     '((previous-line . beg-of-block)  (next-line     . select-block)
       (keyamp-escape . return-before) (hippie-expand . exec-query)))
   (keyamp--set keymap '(select-block)))
 
 (with-sparse-keymap
-  (keyamp--map-leader keymap '(beg-of-block . down-line))
+  (keyamp--map-leader keymap '(copy-line . down-line))
   (keyamp--remap keymap '((keyamp-escape . return-before)))
   (keyamp--set keymap '(select-word)))
 
 (with-sparse-keymap
-  (keyamp--map-leader keymap '(back-word . forw-char))
+  (keyamp--map-leader keymap '(copy-line . copy-line))
   (keyamp--map-escape keymap return-before)
   (keyamp--set keymap '(select-quote)))
 
 (with-sparse-keymap
-  (keyamp--map-leader keymap '(back-char . forw-word))
+  (keyamp--map-leader keymap '(copy-line . copy-line))
   (keyamp--map-escape keymap return-before)
   (keyamp--map-return keymap deactivate-region)
   (keyamp--set keymap '(select-line)))
@@ -2876,7 +2877,8 @@ is enabled.")
     vterm-tmux-copy       vterm-tmux-copy-self-insert   vterm-read-send-key
     vterm-vi              vterm-vi-self-insert          vterm-vi-escape
     vterm-left            vterm-right
-    vterm-up              vterm-down)
+    vterm-up              vterm-down
+    copy-to-r1            append-to-r1)
   "List of commands to blink io after.")
 
 (defconst keyamp-insert-commands
@@ -2903,13 +2905,13 @@ is enabled.")
   "/Library/Application Support/org.pqrs/Karabiner-Elements/bin/karabiner_cli"
   "Karabiner-Elements CLI executable. Optional for mode sync.")
 
-(defconst keyamp-idle-indicator    "∙" "Idle indicator.")
-(defconst keyamp-screen-indicator  "∙" "Screen indicator.")
-(defconst keyamp-read-indicator    "∙" "Read indicator.")
-(defconst keyamp-command-indicator "∙" "Command indicator.")
-(defconst keyamp-io-indicator      "∙" "IO indicator.")
-(defconst keyamp-insert-indicator  "∙" "Insert indicator.")
-(defconst keyamp-modify-indicator  "∙" "Modify indicator.")
+(defconst keyamp-idle-indicator    "•" "Idle indicator.")
+(defconst keyamp-screen-indicator  "•" "Screen indicator.")
+(defconst keyamp-read-indicator    "•" "Read indicator.")
+(defconst keyamp-command-indicator "•" "Command indicator.")
+(defconst keyamp-io-indicator      "•" "IO indicator.")
+(defconst keyamp-insert-indicator  "•" "Insert indicator.")
+(defconst keyamp-modify-indicator  "•" "Modify indicator.")
 
 (defvar keyamp-idle-color    "#ab82ff" "Idle color.")
 (defvar keyamp-screen-color  "#1e90ff" "Screen color.")
