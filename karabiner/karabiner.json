@@ -10,170 +10,6 @@
                 },
                 "rules": [
                     {
-                        "description": "f1",
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": ["/Windows"],
-                                        "type": "frontmost_application_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "f1",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [{ "key_code": "f1" }],
-                                "to_if_held_down": [
-                                    {
-                                        "halt": true,
-                                        "repeat": false,
-                                        "shell_command": "open -a Emacs.app"
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "from": {
-                                    "key_code": "f1",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [{ "shell_command": "open -a 'Windows App' && sleep 0.2 && osascript -e 'tell application \"System Events\" to key code 48 using {option down}'" }],
-                                "to_if_held_down": [
-                                    {
-                                        "halt": true,
-                                        "repeat": false,
-                                        "shell_command": "open -a Emacs.app"
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "return_or_enter",
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": ["/Windows"],
-                                        "type": "frontmost_application_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "return_or_enter",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [{ "key_code": "return_or_enter" }],
-                                "to_if_held_down": [
-                                    {
-                                        "halt": true,
-                                        "key_code": "f2",
-                                        "repeat": false
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": ["/Emacs"],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "insert mode activated",
-                                        "type": "variable_if",
-                                        "value": 0
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "return_or_enter",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [{ "key_code": "return_or_enter" }],
-                                "to_if_held_down": [
-                                    {
-                                        "halt": true,
-                                        "key_code": "m",
-                                        "modifiers": ["control"],
-                                        "repeat": false
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": ["/Emacs"],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "insert mode activated",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "return_or_enter",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [{ "key_code": "return_or_enter" }],
-                                "to_if_held_down": [
-                                    {
-                                        "halt": true,
-                                        "key_code": "m",
-                                        "modifiers": ["left_control"],
-                                        "repeat": false
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": ["/UTM", "/Windows"],
-                                        "type": "frontmost_application_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "return_or_enter",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [{ "key_code": "return_or_enter" }],
-                                "to_if_held_down": [
-                                    {
-                                        "halt": true,
-                                        "key_code": "r",
-                                        "modifiers": ["control"],
-                                        "repeat": false
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": ["/Emacs"],
-                                        "type": "frontmost_application_unless"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "return_or_enter",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [{ "key_code": "return_or_enter" }],
-                                "to_if_held_down": [
-                                    {
-                                        "halt": true,
-                                        "repeat": false,
-                                        "shell_command": "open -a Emacs.app"
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
                         "description": "f15",
                         "manipulators": [
                             {
@@ -189,24 +25,22 @@
                                 },
                                 "to_after_key_up": [
                                     {
+                                        "repeat": false,
+                                        "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" }
+                                    },
+                                    {
                                         "key_code": "tab",
                                         "modifiers": ["command"]
-                                    }
-                                ],
-                                "to_if_held_down": [
-                                    {
-                                        "halt": true,
-                                        "key_code": "tab",
-                                        "modifiers": ["option"]
-                                    }
+                                    },
+                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'" }
                                 ],
                                 "type": "basic"
                             },
                             {
                                 "conditions": [
                                     {
-                                        "file_paths": ["/Brave"],
-                                        "type": "frontmost_application_unless"
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_if"
                                     }
                                 ],
                                 "from": {
@@ -234,12 +68,6 @@
                                 "type": "basic"
                             },
                             {
-                                "conditions": [
-                                    {
-                                        "file_paths": ["/Brave"],
-                                        "type": "frontmost_application_if"
-                                    }
-                                ],
                                 "from": {
                                     "key_code": "f15",
                                     "modifiers": { "optional": ["any"] }
@@ -271,6 +99,242 @@
                         ]
                     },
                     {
+                        "description": "u",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 0
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "u",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [{ "key_code": "u" }],
+                                "to_if_held_down": [
+                                    {
+                                        "key_code": "b",
+                                        "modifiers": ["left_shift", "left_control"]
+                                    },
+                                    {
+                                        "halt": true,
+                                        "key_code": "u",
+                                        "repeat": false
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 2
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "u",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [{ "key_code": "u" }],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "o",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 0
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "o",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [{ "key_code": "o" }],
+                                "to_if_held_down": [
+                                    {
+                                        "key_code": "b",
+                                        "modifiers": ["left_shift", "left_control"]
+                                    },
+                                    {
+                                        "halt": true,
+                                        "key_code": "o",
+                                        "repeat": false
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 2
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "o",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [{ "key_code": "o" }],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "`",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 0
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "grave_accent_and_tilde",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [{ "key_code": "grave_accent_and_tilde" }],
+                                "to_if_held_down": [
+                                    {
+                                        "key_code": "equal_sign",
+                                        "modifiers": ["left_shift", "left_control"]
+                                    },
+                                    {
+                                        "halt": true,
+                                        "key_code": "grave_accent_and_tilde",
+                                        "repeat": false
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "grave_accent_and_tilde",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [{ "key_code": "grave_accent_and_tilde" }],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "grave_accent_and_tilde",
+                                        "modifiers": ["left_command"],
+                                        "repeat": false
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "f3",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Windows"],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f3",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [{ "key_code": "f3" }],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/GuruPro"],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f3",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "h",
+                                        "modifiers": ["command"]
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Activity Monitor"],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f3",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [
+                                    {
+                                        "key_code": "h",
+                                        "modifiers": ["command"]
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "f3",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [
+                                    {
+                                        "halt": true,
+                                        "shell_command": "open -a GuruPro"
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "repeat": false,
+                                        "shell_command": "open -a 'Activity Monitor'"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
                         "description": "f2",
                         "manipulators": [
                             {
@@ -284,7 +348,14 @@
                                     "key_code": "f2",
                                     "modifiers": { "optional": ["any"] }
                                 },
-                                "to": [{ "key_code": "f2" }],
+                                "to_after_key_up": [{ "key_code": "f2" }],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "display_brightness_decrement",
+                                        "repeat": true
+                                    }
+                                ],
                                 "type": "basic"
                             },
                             {
@@ -305,327 +376,132 @@
                         ]
                     },
                     {
-                        "description": "f14",
+                        "description": "arrows",
                         "manipulators": [
                             {
-                                "conditions": [
-                                    {
-                                        "file_paths": ["/Windows"],
-                                        "type": "frontmost_application_if"
-                                    }
-                                ],
                                 "from": {
-                                    "key_code": "f14",
-                                    "modifiers": { "optional": ["any"] }
+                                    "key_code": "j",
+                                    "modifiers": {
+                                        "mandatory": ["command"],
+                                        "optional": ["any"]
+                                    }
                                 },
-                                "to": [{ "key_code": "grave_accent_and_tilde" }],
+                                "to": [{ "key_code": "left_arrow" }],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "k",
+                                    "modifiers": {
+                                        "mandatory": ["command"],
+                                        "optional": ["any"]
+                                    }
+                                },
+                                "to": [{ "key_code": "down_arrow" }],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "i",
+                                    "modifiers": {
+                                        "mandatory": ["command"],
+                                        "optional": ["any"]
+                                    }
+                                },
+                                "to": [{ "key_code": "up_arrow" }],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "l",
+                                    "modifiers": {
+                                        "mandatory": ["command"],
+                                        "optional": ["any"]
+                                    }
+                                },
+                                "to": [{ "key_code": "right_arrow" }],
                                 "type": "basic"
                             },
                             {
                                 "conditions": [
                                     {
-                                        "file_paths": ["/Emacs"],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "input_sources": [{ "input_source_id": "com.apple.keylayout.RussianWin" }],
-                                        "type": "input_source_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "f14",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [
-                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'" },
-                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } }
-                                ],
-                                "to_if_held_down": [
-                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
-                                    {
-                                        "halt": true,
-                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": ["/Emacs"],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "input_sources": [{ "input_source_id": "com.apple.keylayout.ABC" }],
-                                        "type": "input_source_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "f14",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [
-                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'" },
-                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } }
-                                ],
-                                "to_if_held_down": [
-                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
-                                    {
-                                        "halt": true,
-                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": ["/Emacs"],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "input_sources": [{ "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" }],
-                                        "type": "input_source_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "f14",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [
-                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-ru)'" },
-                                    { "select_input_source": { "input_source_id": "com.apple.keylayout.RussianWin" } }
-                                ],
-                                "to_if_held_down": [
-                                    {
-                                        "halt": true,
-                                        "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" }
-                                    },
-                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'" }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "input_sources": [{ "input_source_id": "com.apple.keylayout.RussianWin" }],
-                                        "type": "input_source_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "f14",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [
-                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
-                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'" }
-                                ],
-                                "to_if_held_down": [
-                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
-                                    {
-                                        "halt": true,
-                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "input_sources": [{ "input_source_id": "com.apple.keylayout.ABC" }],
-                                        "type": "input_source_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "f14",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [
-                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
-                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'" }
-                                ],
-                                "to_if_held_down": [
-                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
-                                    {
-                                        "halt": true,
-                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "input_sources": [{ "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" }],
-                                        "type": "input_source_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "f14",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [
-                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-ru)'" },
-                                    { "select_input_source": { "input_source_id": "com.apple.keylayout.RussianWin" } }
-                                ],
-                                "to_if_held_down": [
-                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
-                                    {
-                                        "halt": true,
-                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "left_control",
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": ["/Terminal"],
-                                        "type": "frontmost_application_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "left_control",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "left_control",
-                                        "lazy": true
-                                    }
-                                ],
-                                "to_if_alone": [
-                                    {
-                                        "key_code": "h",
-                                        "modifiers": ["command"]
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "from": {
-                                    "key_code": "left_control",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "left_control",
-                                        "lazy": true
-                                    }
-                                ],
-                                "to_if_alone": [{ "shell_command": "open -a Terminal" }],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "escape",
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": ["/Emacs"],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "insert mode activated",
-                                        "type": "variable_if",
+                                        "name": "multitouch_extension_finger_count_total",
+                                        "type": "variable_unless",
                                         "value": 0
                                     }
                                 ],
                                 "from": {
-                                    "key_code": "escape",
+                                    "key_code": "i",
                                     "modifiers": { "optional": ["any"] }
                                 },
-                                "to_after_key_up": [{ "key_code": "escape" }],
-                                "to_if_held_down": [
-                                    {
-                                        "halt": true,
-                                        "key_code": "quote",
-                                        "modifiers": ["control"],
-                                        "repeat": false
-                                    }
-                                ],
+                                "to": [{ "key_code": "up_arrow" }],
                                 "type": "basic"
                             },
                             {
                                 "conditions": [
                                     {
-                                        "file_paths": ["/Emacs"],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "insert mode activated",
-                                        "type": "variable_if",
-                                        "value": 1
+                                        "name": "multitouch_extension_finger_count_total",
+                                        "type": "variable_unless",
+                                        "value": 0
                                     }
                                 ],
                                 "from": {
-                                    "key_code": "escape",
+                                    "key_code": "j",
                                     "modifiers": { "optional": ["any"] }
                                 },
-                                "to_after_key_up": [
-                                    { "key_code": "escape" },
-                                    {
-                                        "set_variable": {
-                                            "name": "spacebar pressed",
-                                            "value": 0
-                                        }
-                                    }
-                                ],
-                                "to_if_held_down": [
-                                    {
-                                        "halt": true,
-                                        "key_code": "quote",
-                                        "modifiers": ["left_control"],
-                                        "repeat": false
-                                    }
-                                ],
+                                "to": [{ "key_code": "left_arrow" }],
                                 "type": "basic"
                             },
                             {
                                 "conditions": [
                                     {
-                                        "file_paths": ["/Windows"],
-                                        "type": "frontmost_application_if"
+                                        "name": "multitouch_extension_finger_count_total",
+                                        "type": "variable_unless",
+                                        "value": 0
                                     }
                                 ],
                                 "from": {
-                                    "key_code": "escape",
+                                    "key_code": "k",
                                     "modifiers": { "optional": ["any"] }
                                 },
-                                "to": [
-                                    {
-                                        "key_code": "left_control",
-                                        "lazy": true
-                                    }
-                                ],
-                                "to_if_alone": [{ "key_code": "escape" }],
+                                "to": [{ "key_code": "down_arrow" }],
                                 "type": "basic"
                             },
                             {
                                 "conditions": [
                                     {
-                                        "file_paths": ["/Emacs"],
-                                        "type": "frontmost_application_unless"
+                                        "name": "multitouch_extension_finger_count_total",
+                                        "type": "variable_unless",
+                                        "value": 0
                                     }
                                 ],
                                 "from": {
-                                    "key_code": "escape",
+                                    "key_code": "l",
                                     "modifiers": { "optional": ["any"] }
                                 },
-                                "to": [
-                                    {
-                                        "key_code": "left_command",
-                                        "lazy": true
+                                "to": [{ "key_code": "right_arrow" }],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "spacebar",
+                                    "modifiers": {
+                                        "mandatory": ["command"],
+                                        "optional": ["any"]
                                     }
-                                ],
-                                "to_if_alone": [{ "key_code": "escape" }],
+                                },
+                                "to": [{ "key_code": "down_arrow" }],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "left_command",
+                                    "modifiers": {
+                                        "mandatory": ["command"],
+                                        "optional": ["any"]
+                                    }
+                                },
+                                "to": [{ "key_code": "up_arrow" }],
                                 "type": "basic"
                             }
                         ]
@@ -828,137 +704,6 @@
                                     "modifiers": { "optional": ["any"] }
                                 },
                                 "to": [{ "key_code": "delete_or_backspace" }],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "arrows",
-                        "manipulators": [
-                            {
-                                "from": {
-                                    "key_code": "j",
-                                    "modifiers": {
-                                        "mandatory": ["command"],
-                                        "optional": ["any"]
-                                    }
-                                },
-                                "to": [{ "key_code": "left_arrow" }],
-                                "type": "basic"
-                            },
-                            {
-                                "from": {
-                                    "key_code": "k",
-                                    "modifiers": {
-                                        "mandatory": ["command"],
-                                        "optional": ["any"]
-                                    }
-                                },
-                                "to": [{ "key_code": "down_arrow" }],
-                                "type": "basic"
-                            },
-                            {
-                                "from": {
-                                    "key_code": "i",
-                                    "modifiers": {
-                                        "mandatory": ["command"],
-                                        "optional": ["any"]
-                                    }
-                                },
-                                "to": [{ "key_code": "up_arrow" }],
-                                "type": "basic"
-                            },
-                            {
-                                "from": {
-                                    "key_code": "l",
-                                    "modifiers": {
-                                        "mandatory": ["command"],
-                                        "optional": ["any"]
-                                    }
-                                },
-                                "to": [{ "key_code": "right_arrow" }],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "multitouch_extension_finger_count_total",
-                                        "type": "variable_unless",
-                                        "value": 0
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "i",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [{ "key_code": "up_arrow" }],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "multitouch_extension_finger_count_total",
-                                        "type": "variable_unless",
-                                        "value": 0
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "j",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [{ "key_code": "left_arrow" }],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "multitouch_extension_finger_count_total",
-                                        "type": "variable_unless",
-                                        "value": 0
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "k",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [{ "key_code": "down_arrow" }],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "multitouch_extension_finger_count_total",
-                                        "type": "variable_unless",
-                                        "value": 0
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "l",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [{ "key_code": "right_arrow" }],
-                                "type": "basic"
-                            },
-                            {
-                                "from": {
-                                    "key_code": "spacebar",
-                                    "modifiers": {
-                                        "mandatory": ["command"],
-                                        "optional": ["any"]
-                                    }
-                                },
-                                "to": [{ "key_code": "down_arrow" }],
-                                "type": "basic"
-                            },
-                            {
-                                "from": {
-                                    "key_code": "left_command",
-                                    "modifiers": {
-                                        "mandatory": ["command"],
-                                        "optional": ["any"]
-                                    }
-                                },
-                                "to": [{ "key_code": "up_arrow" }],
                                 "type": "basic"
                             }
                         ]
@@ -1429,60 +1174,6 @@
                                         "repeat": true
                                     }
                                 ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "o",
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": ["/Emacs"],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "insert mode activated",
-                                        "type": "variable_if",
-                                        "value": 0
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "o",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [{ "key_code": "o" }],
-                                "to_if_held_down": [
-                                    {
-                                        "key_code": "b",
-                                        "modifiers": ["left_shift", "left_control"]
-                                    },
-                                    {
-                                        "halt": true,
-                                        "key_code": "o",
-                                        "repeat": false
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": ["/Emacs"],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "insert mode activated",
-                                        "type": "variable_if",
-                                        "value": 2
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "o",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [{ "key_code": "o" }],
                                 "type": "basic"
                             }
                         ]
@@ -2930,41 +2621,6 @@
                                     "modifiers": { "optional": ["any"] }
                                 },
                                 "to_after_key_up": [{ "key_code": "slash" }],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "`",
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": ["/Emacs"],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "insert mode activated",
-                                        "type": "variable_if",
-                                        "value": 0
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "grave_accent_and_tilde",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [{ "key_code": "grave_accent_and_tilde" }],
-                                "to_if_held_down": [
-                                    {
-                                        "key_code": "equal_sign",
-                                        "modifiers": ["left_shift", "left_control"]
-                                    },
-                                    {
-                                        "halt": true,
-                                        "key_code": "grave_accent_and_tilde",
-                                        "repeat": false
-                                    }
-                                ],
                                 "type": "basic"
                             }
                         ]
@@ -4945,6 +4601,129 @@
                         ]
                     },
                     {
+                        "description": "return_or_enter",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Windows"],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "return_or_enter",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [{ "key_code": "return_or_enter" }],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "f12",
+                                        "repeat": false
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 0
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "return_or_enter",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [{ "key_code": "return_or_enter" }],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "m",
+                                        "modifiers": ["control"],
+                                        "repeat": false
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "return_or_enter",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [{ "key_code": "return_or_enter" }],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "m",
+                                        "modifiers": ["left_control"],
+                                        "repeat": false
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/UTM", "/Windows"],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "return_or_enter",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [{ "key_code": "return_or_enter" }],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "r",
+                                        "modifiers": ["control"],
+                                        "repeat": false
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_unless"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "return_or_enter",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [{ "key_code": "return_or_enter" }],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "repeat": false,
+                                        "shell_command": "open -a Emacs.app"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
                         "description": "tab",
                         "manipulators": [
                             {
@@ -4980,8 +4759,173 @@
                         ]
                     },
                     {
+                        "description": "escape",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 0
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "escape",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [{ "key_code": "escape" }],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "quote",
+                                        "modifiers": ["control"],
+                                        "repeat": false
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "escape",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [
+                                    { "key_code": "escape" },
+                                    {
+                                        "set_variable": {
+                                            "name": "spacebar pressed",
+                                            "value": 0
+                                        }
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "quote",
+                                        "modifiers": ["left_control"],
+                                        "repeat": false
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Windows"],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "escape",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "left_control",
+                                        "lazy": true
+                                    }
+                                ],
+                                "to_if_alone": [{ "key_code": "escape" }],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_unless"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "escape",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "left_command",
+                                        "lazy": true
+                                    }
+                                ],
+                                "to_if_alone": [{ "key_code": "escape" }],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "left_control",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Terminal"],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "left_control",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "left_control",
+                                        "lazy": true
+                                    }
+                                ],
+                                "to_if_alone": [
+                                    {
+                                        "key_code": "h",
+                                        "modifiers": ["command"]
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "left_control",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "left_control",
+                                        "lazy": true
+                                    }
+                                ],
+                                "to_if_alone": [{ "shell_command": "open -a Terminal" }],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
                         "description": "left_option",
                         "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Windows"],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "left_option",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [{ "key_code": "left_option" }],
+                                "type": "basic"
+                            },
                             {
                                 "conditions": [
                                     {
@@ -5024,62 +4968,40 @@
                         ]
                     },
                     {
-                        "description": "f3",
+                        "description": "f1",
                         "manipulators": [
                             {
                                 "conditions": [
                                     {
-                                        "file_paths": ["/GuruPro"],
+                                        "file_paths": ["/Windows"],
                                         "type": "frontmost_application_if"
                                     }
                                 ],
                                 "from": {
-                                    "key_code": "f3",
+                                    "key_code": "f1",
                                     "modifiers": { "optional": ["any"] }
                                 },
-                                "to_after_key_up": [
-                                    {
-                                        "key_code": "h",
-                                        "modifiers": ["command"]
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": ["/Activity Monitor"],
-                                        "type": "frontmost_application_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "f3",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [
-                                    {
-                                        "key_code": "h",
-                                        "modifiers": ["command"]
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "from": {
-                                    "key_code": "f3",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [
+                                "to_after_key_up": [{ "key_code": "f1" }],
+                                "to_if_held_down": [
                                     {
                                         "halt": true,
-                                        "shell_command": "open -a GuruPro"
+                                        "key_code": "f11",
+                                        "repeat": false
                                     }
                                 ],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "f1",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [{ "shell_command": "open -a 'Windows App'" }],
                                 "to_if_held_down": [
                                     {
                                         "halt": true,
                                         "repeat": false,
-                                        "shell_command": "open -a 'Activity Monitor'"
+                                        "shell_command": "open -a Emacs.app"
                                     }
                                 ],
                                 "type": "basic"
@@ -5399,6 +5321,181 @@
                                         "key_code": "tab",
                                         "modifiers": ["command"]
                                     },
+                                    {
+                                        "halt": true,
+                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "f14",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Windows"],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f14",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [{ "key_code": "grave_accent_and_tilde" }],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "input_sources": [{ "input_source_id": "com.apple.keylayout.RussianWin" }],
+                                        "type": "input_source_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f14",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [
+                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'" },
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } }
+                                ],
+                                "to_if_held_down": [
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
+                                    {
+                                        "halt": true,
+                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "input_sources": [{ "input_source_id": "com.apple.keylayout.ABC" }],
+                                        "type": "input_source_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f14",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [
+                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'" },
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } }
+                                ],
+                                "to_if_held_down": [
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
+                                    {
+                                        "halt": true,
+                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "input_sources": [{ "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" }],
+                                        "type": "input_source_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f14",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [
+                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-ru)'" },
+                                    { "select_input_source": { "input_source_id": "com.apple.keylayout.RussianWin" } }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" }
+                                    },
+                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'" }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "input_sources": [{ "input_source_id": "com.apple.keylayout.RussianWin" }],
+                                        "type": "input_source_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f14",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
+                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'" }
+                                ],
+                                "to_if_held_down": [
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
+                                    {
+                                        "halt": true,
+                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "input_sources": [{ "input_source_id": "com.apple.keylayout.ABC" }],
+                                        "type": "input_source_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f14",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
+                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'" }
+                                ],
+                                "to_if_held_down": [
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
+                                    {
+                                        "halt": true,
+                                        "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "input_sources": [{ "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" }],
+                                        "type": "input_source_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f14",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [
+                                    { "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-ru)'" },
+                                    { "select_input_source": { "input_source_id": "com.apple.keylayout.RussianWin" } }
+                                ],
+                                "to_if_held_down": [
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } },
                                     {
                                         "halt": true,
                                         "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"

@@ -3345,6 +3345,32 @@
               "halt": true
             }
           ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "grave_accent_and_tilde",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "to_after_key_up": [
+            {
+              "key_code": "grave_accent_and_tilde"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "grave_accent_and_tilde",
+              "modifiers": [
+                "left_command"
+              ],
+              "repeat": false,
+              "halt": true
+            }
+          ]
         }
       ]
     },
@@ -6370,7 +6396,7 @@
           ],
           "to_if_held_down": [
             {
-              "key_code": "f2",
+              "key_code": "f12",
               "repeat": false,
               "halt": true
             }
@@ -6794,6 +6820,30 @@
           },
           "to": [
             {
+              "key_code": "left_option"
+            }
+          ],
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Windows"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "left_option",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "to": [
+            {
               "key_code": "left_option",
               "lazy": true
             }
@@ -6867,7 +6917,7 @@
           ],
           "to_if_held_down": [
             {
-              "shell_command": "open -a Emacs.app",
+              "key_code": "f11",
               "repeat": false,
               "halt": true
             }
@@ -6911,6 +6961,37 @@
               ]
             }
           },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Windows"
+              ]
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "f2"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "display_brightness_decrement",
+              "repeat": true,
+              "halt": true
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "f2",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
           "to_after_key_up": [
             {
               "key_code": "display_brightness_increment"
@@ -6929,6 +7010,30 @@
     {
       "description": "f3",
       "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "f3",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Windows"
+              ]
+            }
+          ],
+          "to": [
+            {
+              "key_code": "f3"
+            }
+          ]
+        },
         {
           "type": "basic",
           "from": {
@@ -7793,21 +7898,21 @@
               ]
             }
           ],
-          "to_if_held_down": [
-            {
-              "key_code": "tab",
-              "modifiers": [
-                "option"
-              ],
-              "halt": true
-            }
-          ],
           "to_after_key_up": [
+            {
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              },
+              "repeat": false
+            },
             {
               "key_code": "tab",
               "modifiers": [
                 "command"
               ]
+            },
+            {
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
             }
           ]
         },
@@ -7823,9 +7928,9 @@
           },
           "conditions": [
             {
-              "type": "frontmost_application_unless",
+              "type": "frontmost_application_if",
               "file_paths": [
-                "/Brave"
+                "/Emacs"
               ]
             }
           ],
@@ -7868,14 +7973,6 @@
               ]
             }
           },
-          "conditions": [
-            {
-              "type": "frontmost_application_if",
-              "file_paths": [
-                "/Brave"
-              ]
-            }
-          ],
           "to_if_held_down": [
             {
               "select_input_source": {

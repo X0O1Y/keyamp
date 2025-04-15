@@ -958,7 +958,7 @@ is enabled.")
       view-messages           sun-moon
       clock                   async-shell-command
       sync                    calendar-split
-      isearch-occur)))
+      isearch-occur           exec-query-async)))
 
 (with-sparse-keymap
   (keyamp--remap keymap '((open-line . prev-buf) (newline . next-buf)))
@@ -1055,7 +1055,7 @@ is enabled.")
   ;; I/K or DEL/SPC to move by lines. See `return-before'.
   (keyamp--map-leader keymap '(up-line . down-line))
   (keyamp--map-return keymap keyamp-ret)
-  (keyamp--map-backtab keymap page-up-half)
+  (keyamp--map-backtab keymap hscroll-left)
   (keyamp--map-tab keymap keyamp-tab)
   (keyamp--map keymap '(("<up>" . up-line-rev)))
   (keyamp--remap keymap '((previous-line . up-line-rev) (next-line . down-line)))
@@ -1111,7 +1111,7 @@ is enabled.")
   (keyamp--map-leader keymap '(up-line . copy-line))
   (keyamp--remap keymap
     '((previous-line . beg-of-block)  (next-line     . select-block)
-      (keyamp-escape . return-before) (hippie-expand . exec-query)))
+      (keyamp-escape . return-before) (hippie-expand . exec-query-async)))
   (keyamp--set keymap '(select-block)))
 
 (with-sparse-keymap
@@ -1289,6 +1289,11 @@ is enabled.")
   (unless (display-graphic-p) ; touch reader
     (keyamp--remap keymap '((down-line . page-up-half) (up-line . page-dn-half))))
   (keyamp--set keymap '(scroll-down-command scroll-up-command)))
+
+(with-sparse-keymap
+  (keyamp--map-leader keymap '(backward-char . forward-char))
+  (keyamp--remap keymap '((backward-char . hscroll-right) (forward-char . hscroll-left)))
+  (keyamp--set keymap '(hscroll-left hscroll-right)))
 
 (with-sparse-keymap
   (keyamp--map-leader keymap '(next-line . next-line))
@@ -1877,6 +1882,15 @@ is enabled.")
   (keyamp--remap proced-mode-map
     '((keyamp-insert . proced-refine))))
 
+(with-eval-after-load 'sql
+  (keyamp--remap sql-interactive-mode-map '((select-block . comint-previous-input)))
+
+  (with-sparse-keymap
+    (keyamp--map-leader keymap '(previous-line . next-line))
+    (keyamp--remap keymap
+      '((previous-line . comint-previous-input) (next-line . comint-next-input)))
+    (keyamp--set keymap '(comint-previous-input comint-next-input) :command)))
+
 (with-eval-after-load 'esh-mode
   (keyamp--map-backtab eshell-mode-map undo)
   (keyamp--map-tab eshell-mode-map completion-at-point)
@@ -2464,7 +2478,7 @@ is enabled.")
       (newline . sqlite-mode-list-columns) (open-line . sqlite-mode-list-tables))))
 
 (with-eval-after-load 'sql
-  (keyamp--remap sql-mode-map '((eval-defun . exec-query)))
+  (keyamp--remap sql-mode-map '((eval-defun . exec-query-async)))
   (with-sparse-keymap
     (keyamp--remap keymap '((point-to-register . toggle-sql-type)))
     (keyamp--set keymap '(sql toggle-sql-type exec-query))))
@@ -2567,6 +2581,7 @@ is enabled.")
                  describe-mode                           t
                  describe-variable                       t
                  exec-query                              t
+                 exec-query-async                        t
                  find-next-dir-file                      t
                  find-prev-dir-file                      t
                  gnus-summary-scroll-up                  t
@@ -2694,7 +2709,6 @@ is enabled.")
                 (back-word-repeat                        t
                  button-back                             t
                  back-char                               t
-                 backward-punct                          t
                  beg-of-block                            t
                  beg-of-block-rev                        t
                  beg-of-buf                              t
@@ -2703,6 +2717,8 @@ is enabled.")
                  calendar-goto-today                     t
                  calendar-scroll-left                    t
                  calendar-scroll-right                   t
+                 comint-previous-input                   t
+                 comint-next-input                       t
                  company-manual-begin                    t
                  company-next-page                       t
                  company-previous-page                   t
@@ -2748,7 +2764,6 @@ is enabled.")
                  forw-char                               t
                  forw-word-repeat                        t
                  button-forw                             t
-                 forward-punct                           t
                  gnus-beg-of-buf                         t
                  gnus-delete-window-article              t
                  gnus-end-of-buf                         t
@@ -2761,6 +2776,8 @@ is enabled.")
                  page-dn-half                            t
                  hist-forw                               t
                  hist-back                               t
+                 hscroll-left                            t
+                 hscroll-right                           t
                  ibuffer-backward-filter-group           t
                  ibuffer-forward-filter-group            t
                  ibuffer-toggle-filter-group             t
@@ -3056,7 +3073,7 @@ insert cancel the timer.")
                   :after 'keyamp-spc-spc)
 
 (defun keyamp-spc-del (&rest _)
-  "Insert fast SPC DEL to start move by chars."
+  "Insert fast SPC DEL to move char forward while in insert mode."
   (if-let (((keyamp-unless-kbd-macro))
            (space ?\s)
            ((eq before-last-command-event space)))
@@ -3529,7 +3546,7 @@ after a delay even if there more read commands follow."
 (defun keyamp-idle-init ()
   "Idle init.
 Cancel isearch. Deactivate region. Deactivate transient keymaps.
-Cleanup echo area. Quit minibuffer. Quit wait key sequnce."
+Cleanup echo area. Quit minibuffer. Quit wait key sequence."
   (if isearch-mode
       (isearch-cancel-clean))
   (if (region-active-p)

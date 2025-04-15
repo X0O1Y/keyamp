@@ -2654,8 +2654,9 @@ When called in Emacs Lisp, if Fname is given, open that."
                                                                   x))) nil)))
            fileList)))
        ((string-equal system-type "darwin")
-        (mapc (lambda (fpath) (call-process "open" nil 0 nil fpath))
-              fileList))))))
+        (mapc
+         (lambda (fpath) (call-process "open" nil 0 nil fpath))
+         fileList))))))
 
 (defun alternate-frame ()
   "Switch to alternate buffer or frame.
@@ -3237,7 +3238,7 @@ and reverse-search-history in bashrc."
           (if (zerop (length res))
               (insert "No rows\n")
             (insert res)))))
-      (insert (concat (make-string 89 45) "\n")))
+      (insert (concat (make-string 200 45) "\n")))
     (set-mark-command t)
     (other-window 1)
     (enlarge-window-split))
@@ -3569,6 +3570,18 @@ Use as around advice e.g. for mouse left click after double click."
       (while (> arg 0)
         (insert-and-inherit char)
         (setq arg (1- arg))))))
+
+(defvar hscroll-columns 4 "Scroll selected window display columns.")
+
+(defun hscroll-left ()
+  "Horizontal scroll left."
+  (interactive)
+  (scroll-left hscroll-columns))
+
+(defun hscroll-right ()
+  "Horizontal scroll right."
+  (interactive)
+  (scroll-right hscroll-columns))
 
 (provide 'keycom)
 
