@@ -2762,7 +2762,7 @@ before actually send the cd command."
                 (apply fun r))))
 
 (defun sh ()
-  "Split eshell window below in not one window."
+  "Split eshell window below if not one window."
   (interactive)
   (if (eq major-mode 'eshell-mode)
       (let ((current-prefix-arg '-)
@@ -3173,9 +3173,9 @@ and reverse-search-history in bashrc."
       (toggle-sql-type)
     (find-file "~/.sql")))
 
-(defvar sql-type "postgres" "SQL type for client.")
+(defvar sql-type "async" "SQL type for client.")
 
-(defconst sql-type-list '("postgres" "sqlite" "mssql") "List of SQL types.")
+(defconst sql-type-list '("async" "MS SQL" "Postgres" "SQLite") "List of SQL types.")
 
 (defun toggle-sql-type ()
   "Toggle `sql-type'."
@@ -3211,11 +3211,11 @@ and reverse-search-history in bashrc."
     (push-mark (point) t nil)
     (let ((inhibit-read-only t))
       (cond
-       ((string-equal sql-type "mssql")
-        (let ((conn (getenv "CONNMSSQL")))
+       ((string-equal sql-type "MS SQL")
+        (let ((conn (getenv "SQLCMDSERVER")))
           (insert
            (shell-command-to-string (format "sqlcmd -S %s -Q \"%s\"" conn query)))))
-       ((string-equal sql-type "postgres")
+       ((string-equal sql-type "Postgres")
         (if (eq system-type 'windows-nt) ; use temp file
             (let* ((localapp (string-replace "\\" "/" (getenv "localappdata")))
                    (file (format "%s%s-%x.sql" (concat localapp "/Temp/")
@@ -3229,7 +3229,7 @@ and reverse-search-history in bashrc."
           (setq query (string-replace  "\"" "\\\"" (string-replace "$" "\\$" query)))
           (insert
            (shell-command-to-string (format "psql --command \"%s\" --quiet %s" query conn)))))
-       ((string-equal sql-type "sqlite")
+       ((string-equal sql-type "SQLite")
         ;; attach database can't parse ~
         (setq query (replace-regexp-in-string "~" (getenv "HOME") query))
         ;; way to send attach and dot commands along with sql query

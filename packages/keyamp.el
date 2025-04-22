@@ -11,7 +11,7 @@
 
 ;; Keyamp provides 3 modes: insert, command and repeat. Command mode
 ;; based on persistent transient keymap. Repeat mode adds transient
-;; remaps on top of command mode for easy repeat of command chains
+;; remaps on top of command mode for command chains easy repeat
 ;; during screen positioning, cursor move and editing. Mode line front
 ;; space color indicates active transient keymap. Repeat mode switched
 ;; automatically either by advice or with timer.
@@ -1086,19 +1086,19 @@ is enabled.")
 (with-sparse-keymap
   (keyamp--map-leader keymap '(up-line . down-line))
   (keyamp--map-return keymap keyamp-ret)
-  (keyamp--remap keymap '((previous-line . beg-of-block-rev) (next-line . end-of-block)))
+  (keyamp--remap keymap '((previous-line . beg-of-block) (next-line . end-of-block)))
   (keyamp--set keymap '(beg-of-buf end-of-buf)))
 
 (with-sparse-keymap
-  (keyamp--map-leader keymap '(previous-line . next-line))
+  (keyamp--map-leader keymap '(beg-of-block . end-of-block))
   (keyamp--map-return keymap keyamp-ret)
-  (keyamp--remap keymap '((previous-line . beg-of-block) (next-line . end-of-block)))
+  (keyamp--remap keymap '((previous-line . beg-of-block-rev) (next-line . end-of-block)))
   (keyamp--set keymap '(beg-of-block end-of-block)))
 
 (with-sparse-keymap
-  (keyamp--map-leader keymap '(next-line . previous-line))
+  (keyamp--map-leader keymap '(end-of-block-rev . beg-of-block-rev))
   (keyamp--map-return keymap keyamp-ret)
-  (keyamp--remap keymap '((previous-line . beg-of-block-rev) (next-line . end-of-block-rev)))
+  (keyamp--remap keymap '((previous-line . beg-of-block) (next-line . end-of-block)))
   (keyamp--set keymap '(beg-of-block-rev end-of-block-rev)))
 
 ;; In case triple DEL received during `keyamp-key-repeat-delay',
@@ -1111,7 +1111,7 @@ is enabled.")
   (keyamp--map-leader keymap '(up-line . copy-line))
   (keyamp--remap keymap
     '((previous-line . beg-of-block)  (next-line     . select-block)
-      (keyamp-escape . return-before) (hippie-expand . exec-query-async)))
+      (keyamp-escape . return-before) (hippie-expand . exec-query)))
   (keyamp--set keymap '(select-block)))
 
 (with-sparse-keymap
@@ -1180,20 +1180,20 @@ is enabled.")
 
 (defun keyamp-leader-init (Keymap)
   "Set virtual leader transient KEYMAP."
-  (let* ((umap (car (rassoc "u" keyamp-input-method-to-ascii)))
-         (uchar (string-to-char (if umap umap "")))
-         (omap (car (rassoc "o" keyamp-input-method-to-ascii)))
-         (ochar (string-to-char (if omap omap ""))))
-    (when (and (keyamp-unless-kbd-macro)
-               (member (this-command-keys)
-                       (list (keyamp--convert-kbd-str "u") (vector uchar)
-                             (keyamp--convert-kbd-str "o") (vector ochar))))
-      (setq keyamp--deactivate-leader-fun (set-transient-map Keymap))
-      (if (timerp keyamp-leader-timer)
-          (cancel-timer keyamp-leader-timer))
-      (setq keyamp-leader-timer
-            (run-with-timer keyamp-double-press-timeout
-                            nil 'keyamp--leader-deactivate)))))
+  (when-let (((keyamp-unless-kbd-macro))
+             (umap (car (rassoc "u" keyamp-input-method-to-ascii)))
+             (uchar (string-to-char (if umap umap "")))
+             (omap (car (rassoc "o" keyamp-input-method-to-ascii)))
+             (ochar (string-to-char (if omap omap "")))
+             ((member (this-command-keys)
+                      (list (keyamp--convert-kbd-str "u") (vector uchar)
+                            (keyamp--convert-kbd-str "o") (vector ochar)))))
+    (setq keyamp--deactivate-leader-fun (set-transient-map Keymap))
+    (if (timerp keyamp-leader-timer)
+        (cancel-timer keyamp-leader-timer))
+    (setq keyamp-leader-timer
+          (run-with-timer keyamp-double-press-timeout
+                          nil 'keyamp--leader-deactivate))))
 
 (define-prefix-command 'keyamp-lleader-i-map)
 
@@ -1455,7 +1455,7 @@ is enabled.")
                     :after 'keyamp-insert-init)
 
   (keyamp--map minibuffer-inactive-mode-map
-    '(("<mouse-1>" . radio) ("<double-mouse-1>" . ignore)))
+    '(("<mouse-1>" . toggle-ibuffer) ("<double-mouse-1>" . ignore)))
   (keyamp--remap minibuffer-inactive-mode-map '((mouse-3 . radio-next))))
 
 (with-eval-after-load 'icomplete
@@ -2478,10 +2478,12 @@ is enabled.")
       (newline . sqlite-mode-list-columns) (open-line . sqlite-mode-list-tables))))
 
 (with-eval-after-load 'sql
-  (keyamp--remap sql-mode-map '((eval-defun . exec-query-async)))
+  (keyamp--remap sql-mode-map '((eval-defun . exec-query)))
+  (keyamp--remap sql-mode-map '((number-to-register . toggle-sql-async-conn)))
   (with-sparse-keymap
     (keyamp--remap keymap '((point-to-register . toggle-sql-type)))
-    (keyamp--set keymap '(sql toggle-sql-type exec-query))))
+    (keyamp--remap keymap '((jump-to-register . toggle-sql-async-conn)))
+    (keyamp--set keymap '(sql toggle-sql-type exec-query toggle-sql-async-conn))))
 
 (with-eval-after-load 'speedbar
   (keyamp--remap speedbar-mode-map
@@ -2885,7 +2887,7 @@ is enabled.")
 (defconst keyamp-blink-modify-commands
   '(kmacro-record               stopwatch
     python-format-buffer        save-buffer-isearch-cancel
-    toggle-input-method)
+    toggle-input-method         emacs-lisp-indent)
   "List of commands to blink modify after.")
 
 (defconst keyamp-blink-io-commands
