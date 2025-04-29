@@ -752,7 +752,7 @@ is enabled.")
 (keyamp--remap global-map '((quoted-insert . quoted-insert-custom)))
 
 ;; Pass single key through the network
-(keyamp--map global-map '(("<f12>" . delete-other-windows)))
+(keyamp--map global-map '(("<f10>" . exec-query) ("<f12>" . delete-other-windows)))
 
 (when (display-graphic-p)
   (keyamp--map global-map
@@ -1108,14 +1108,14 @@ is enabled.")
 (advice-add-macro '(up-line down-line) :before 'keyamp-cancel-defer-command-timer)
 
 (with-sparse-keymap
-  (keyamp--map-leader keymap '(up-line . copy-line))
+  (keyamp--map-leader keymap '(up-line . next-buf))
   (keyamp--remap keymap
     '((previous-line . beg-of-block)  (next-line     . select-block)
       (keyamp-escape . return-before) (hippie-expand . exec-query)))
   (keyamp--set keymap '(select-block)))
 
 (with-sparse-keymap
-  (keyamp--map-leader keymap '(copy-line . down-line))
+  (keyamp--map-leader keymap '(prev-buf . down-line))
   (keyamp--remap keymap '((keyamp-escape . return-before)))
   (keyamp--set keymap '(select-word)))
 
@@ -1324,28 +1324,22 @@ is enabled.")
 
 ;; Repeat mode - modify commands
 
-(with-sparse-keymap
-  ;; After hit delete backward/forward char, shrink whitespaces or insert
-  ;; space before while in command mode, DEL/SPC start to do delete/space.
-  (keyamp--map-leader keymap '(delete-forward-char . insert-space-before))
-  (keyamp--set keymap '(delete-forward-char) nil nil nil keyamp-delay-2))
+;; (with-sparse-keymap
+;;   ;; After hit delete backward/forward char, shrink whitespaces or insert
+;;   ;; space before while in command mode, DEL/SPC start to do delete/space.
+;;   ;; (keyamp--map-leader keymap '(delete-forward-char . insert-space-before))
+;;   (keyamp--set keymap '(delete-forward-char) nil nil nil keyamp-delay-2))
 
 (with-sparse-keymap
-  (keyamp--map-leader keymap '(del-back . insert-space-before))
-  (keyamp--set keymap '(del-back insert-space-before) nil nil nil keyamp-delay-2))
+  (keyamp--remap keymap '((del-back . insert-space-before)))
+  (keyamp--set keymap '(insert-space-before) nil nil nil keyamp-delay-2))
 
 (with-sparse-keymap
-  (keyamp--map-leader keymap '(del-forw . insert-space-before))
   (keyamp--remap keymap '((del-back . del-forw)))
   (keyamp--set keymap '(del-forw) nil nil nil keyamp-delay-2))
 
 (with-sparse-keymap
-  (keyamp--map-leader keymap '(open-line . newline))
-  (keyamp--remap keymap '((open-line . backward-del-word) (newline . del-word)))
-  (keyamp--set keymap '(backward-del-word del-word) nil nil nil keyamp-delay-2))
-
-(with-sparse-keymap
-  (keyamp--map-leader keymap '(undo-only . undo-redo))
+  (keyamp--remap keymap '((undo . undo-only) (del-back . undo-redo)))
   (keyamp--set keymap '(undo undo-redo)))
 
 (with-sparse-keymap
@@ -1353,22 +1347,18 @@ is enabled.")
   (keyamp--set keymap '(cut-text-block)))
 
 (with-sparse-keymap
-  (keyamp--map-leader keymap '(del-back . insert-space-before))
   (keyamp--remap keymap '((del-back . shrink-whitespaces)))
   (keyamp--set keymap '(shrink-whitespaces) nil nil nil keyamp-delay-1))
 
 (with-sparse-keymap
-  (keyamp--map-leader keymap '(del-back . del-back))
   (keyamp--remap keymap '((del-back . toggle-comment)))
   (keyamp--set keymap '(toggle-comment) nil nil nil keyamp-delay-1))
 
 (with-sparse-keymap
-  (keyamp--map-leader keymap '(del-back . del-back))
   (keyamp--remap keymap '((del-back . cut-line)))
   (keyamp--set keymap '(cut-line) nil nil nil keyamp-delay-1))
 
 (with-sparse-keymap
-  (keyamp--map-leader keymap '(del-back . del-back))
   (keyamp--remap keymap '((del-back . copy-line)))
   (keyamp--set keymap '(copy-line)))
 
@@ -1377,24 +1367,16 @@ is enabled.")
   (keyamp--set keymap '(toggle-case) nil nil nil keyamp-delay-1))
 
 (with-sparse-keymap
-  (keyamp--map-leader keymap '(del-back . undo))
   (keyamp--remap keymap '((undo . org-shiftup) (del-back . org-shiftdown)))
   (keyamp--set keymap '(org-shiftup org-shiftdown) nil nil nil keyamp-delay-3))
 
 (with-sparse-keymap
-  (keyamp--map-leader keymap '(screen-idle . todo))
-  (keyamp--remap keymap '((undo . todo) (copy-line . screen-idle)))
+  (keyamp--remap keymap '((undo . todo)))
   (keyamp--set keymap '(todo insert-date) nil nil nil keyamp-delay-1))
 
 (with-sparse-keymap
   (keyamp--remap keymap '((del-back . cycle-hyphen-lowline-space)))
   (keyamp--set keymap '(cycle-hyphen-lowline-space) nil nil nil keyamp-delay-1))
-
-(with-sparse-keymap
-  ;; SPC S then SPC to clean whitespaces and save the buffer or DEL to close.
-  (keyamp--map-leader keymap '(save-close-buf . save-buffer))
-  (keyamp--remap keymap '((backward-bracket . dired-jump)))
-  (keyamp--set keymap '(clean-whitespace) nil nil nil keyamp-delay-1))
 
 (with-sparse-keymap ; easy undo with DEL
   (keyamp--map-leader keymap '(undo . nil))
@@ -2478,12 +2460,20 @@ is enabled.")
       (newline . sqlite-mode-list-columns) (open-line . sqlite-mode-list-tables))))
 
 (with-eval-after-load 'sql
-  (keyamp--remap sql-mode-map '((eval-defun . exec-query)))
-  (keyamp--remap sql-mode-map '((number-to-register . toggle-sql-async-conn)))
+  (keyamp--remap sql-mode-map
+    '((eval-defun          . exec-query)
+      (eval-region-or-sexp . exec-query-remote)
+      (number-to-register  . toggle-sql-async-conn)
+      (quit                . toggle-sql-async-remote)))
   (with-sparse-keymap
-    (keyamp--remap keymap '((point-to-register . toggle-sql-type)))
+    (keyamp--remap keymap
+      '((point-to-register  . toggle-sql-type)
+        (jump-to-register   . toggle-sql-async-conn)
+        (pass               . toggle-sql-async-remote)))
     (keyamp--remap keymap '((jump-to-register . toggle-sql-async-conn)))
-    (keyamp--set keymap '(sql toggle-sql-type exec-query toggle-sql-async-conn))))
+    (keyamp--set keymap
+      '(sql toggle-sql-type exec-query
+        toggle-sql-async-conn toggle-sql-async-remote))))
 
 (with-eval-after-load 'speedbar
   (keyamp--remap speedbar-mode-map
@@ -2527,7 +2517,8 @@ is enabled.")
     '((undo              . del-win)
       (del-back          . alt-buf)
       (open-line         . prev-buf)
-      (newline           . next-buf))))
+      (newline           . next-buf)
+      (eval-defun        . exec-query))))
 
 (with-eval-after-load 'calc
   (advice-add 'calcDigit-start :after 'keyamp-insert)

@@ -1836,25 +1836,21 @@ If region is active, extend selection downward by block."
   "Select current line. If region is active, extend selection downward by line.
 If `visual-line-mode' is on, consider line as visual line."
   (interactive)
-  (if (bolp)
-      (progn
-        (setq this-command 'prev-buf)
-        (prev-buf))
-    (push-mark (point) t nil)
-    (if (region-active-p)
-        (if visual-line-mode
-            (let ((p1 (point)))
-              (end-of-visual-line 1)
-              (if (eq p1 (point)) (end-of-visual-line 2)))
-          (forward-line 1)
-          (end-of-line))
+  (push-mark (point) t nil)
+  (if (region-active-p)
       (if visual-line-mode
-          (progn
-            (beginning-of-visual-line)
-            (push-mark (point) t t)
-            (end-of-visual-line))
-        (push-mark (line-beginning-position) t t)
-        (end-of-line)))))
+          (let ((xp1 (point)))
+            (end-of-visual-line 1)
+            (if (eq xp1 (point)) (end-of-visual-line 2)))
+        (forward-line 1)
+        (end-of-line))
+    (if visual-line-mode
+        (progn
+          (beginning-of-visual-line)
+          (push-mark (point) t t)
+          (end-of-visual-line))
+      (push-mark (line-beginning-position) t t)
+      (end-of-line))))
 
 (defvar cur-hl-regexp nil "Current highlight regexp.")
 
@@ -1911,18 +1907,14 @@ This command ignores nesting. For example, if text is
     (a(b)c▮)
 the selected char is “c”, not “a(b)c”."
   (interactive)
-  (if (bolp)
-      (progn
-        (setq this-command 'next-buf)
-        (next-buf))
-    (push-mark (point) t nil)
-    (let ((skipChars (concat "^\"`'" (mapconcat #'identity brackets ""))))
+  (push-mark (point) t nil)
+  (let ((skipChars (concat "^\"`'" (mapconcat #'identity brackets ""))))
       (skip-chars-backward skipChars)
       (setq skipChar (buffer-substring-no-properties (- (point) 1) (point)))
       (if (member skipChar left-brackets)
           (setq skipChar (cdr (assoc skipChar pair-brackets))))
       (push-mark (point) t t)
-      (skip-chars-forward (concat "^" skipChar)))))
+      (skip-chars-forward (concat "^" skipChar))))
 
 (defun deactivate-mark-if-active (&rest _)
   "Deactivate mark if region active."
