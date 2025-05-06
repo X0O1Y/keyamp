@@ -44,18 +44,17 @@ throughout the code.")
 (activate-input-method keyamp-input-method)
 (activate-input-method nil)
 
-(defvar keyamp-input-method-to-ascii
-  (if quail-current-package
-      (let ((alist))
-        (mapc
-         (lambda (map)
-           (if-let ((to (char-to-string (car map)))
-                    (from (quail-get-translation (cadr map) to 1))
-                    ((characterp from))
-                    (from (char-to-string from)))
-               (push (cons from to) alist)))
-         (cdr (quail-map)))
-        alist)) "Input method to ASCII char.")
+(defvar keyamp-input-method-to-ascii nil "Input method to ASCII char.")
+
+(if quail-current-package
+    (mapc
+     (lambda (map)
+       (if-let ((to (char-to-string (car map)))
+                (from (quail-get-translation (cadr map) to 1))
+                ((characterp from))
+                (from (char-to-string from)))
+           (push (cons from to) keyamp-input-method-to-ascii)))
+     (cdr (quail-map))))
 
 (push '("engineer-engram" . "\
                               \
@@ -1324,11 +1323,9 @@ is enabled.")
 
 ;; Repeat mode - modify commands
 
-;; (with-sparse-keymap
-;;   ;; After hit delete backward/forward char, shrink whitespaces or insert
-;;   ;; space before while in command mode, DEL/SPC start to do delete/space.
-;;   ;; (keyamp--map-leader keymap '(delete-forward-char . insert-space-before))
-;;   (keyamp--set keymap '(delete-forward-char) nil nil nil keyamp-delay-2))
+(with-sparse-keymap
+  (keyamp--remap keymap '((del-back . delete-forward-char)))
+  (keyamp--set keymap '(delete-forward-char) nil nil nil keyamp-delay-2))
 
 (with-sparse-keymap
   (keyamp--remap keymap '((del-back . insert-space-before)))
@@ -1590,7 +1587,6 @@ is enabled.")
   (keyamp--map ibuffer-name-map '(("<mouse-1>" . mouse-set-point))))
 
 (with-sparse-keymap
-  (keyamp--map-leader keymap '(del-back . del-back))
   (keyamp--remap keymap '((del-back . ibuffer-do-delete) (kmacro-record . ibuffer-do-delete)))
   (keyamp--set keymap '(ibuffer-do-delete) nil nil nil keyamp-delay-3))
 
@@ -1696,28 +1692,28 @@ is enabled.")
   (keyamp--map org-agenda-mode-map
     '(("<double-mouse-1>" . org-agenda-tasks) ("<mouse-3>" . mouse-3)))
   (keyamp--remap org-agenda-mode-map
-    '((keyamp-insert       . org-agenda-tasks)
-      (del-word            . toggle-gnus)
-      (goto-match-br       . view-messages)
-      (open-line           . prev-buf)
-      (del-back            . calendar-split)
-      (newline             . next-buf)
-      (previous-line       . up-line-rev)
-      (next-line           . down-line)
-      (toggle-comment      . org-agenda-redo)
-      (cut-line            . prev-eww-buf)
-      (paste-or-prev       . tasks)
-      (toggle-case         . downloads)
-      (backward-bracket    . dired-jump)
-      (kmacro-helper       . config)
-      (forw-char           . screen-idle-escape)
-      (back-char           . screen-idle-return)
-      (kmacro-record       . alarm)
-      (pass                . stopwatch-lap)
-      (jump-to-register    . stopwatch)
-      (point-to-register   . timer)
-      (insert-register     . timer-stop)
-      (proced-defer        . timer-display))))
+    '((keyamp-insert     . org-agenda-tasks)
+      (del-word          . toggle-gnus)
+      (goto-match-br     . view-messages)
+      (open-line         . prev-buf)
+      (del-back          . calendar-split)
+      (newline           . next-buf)
+      (previous-line     . up-line-rev)
+      (next-line         . down-line)
+      (toggle-comment    . org-agenda-redo)
+      (cut-line          . prev-eww-buf)
+      (paste-or-prev     . tasks)
+      (toggle-case       . downloads)
+      (backward-bracket  . dired-jump)
+      (kmacro-helper     . config)
+      (forw-char         . screen-idle-escape)
+      (back-char         . screen-idle-return)
+      (kmacro-record     . alarm)
+      (pass              . stopwatch-lap)
+      (jump-to-register  . stopwatch)
+      (point-to-register . timer)
+      (insert-register   . timer-stop)
+      (proced-defer      . timer-display))))
 
 (defvar screen-idle-keymap (make-sparse-keymap))
 (keyamp--map-tab screen-idle-keymap novel)
@@ -2118,13 +2114,14 @@ is enabled.")
 
 (with-eval-after-load 'info
   (keyamp--remap Info-mode-map
-    '((keyamp-insert . Info-follow-nearest-node)
-      (open-line     . Info-backward-node)
-      (newline       . Info-forward-node)
-      (undo          . Info-up)
-      (del-back      . Info-next-reference)
-      (previous-line . up-line-rev)
-      (next-line     . down-line)))
+    '((keyamp-insert      . Info-follow-nearest-node)
+      (open-line          . Info-backward-node)
+      (newline            . Info-forward-node)
+      (undo               . Info-up)
+      (del-back           . Info-next-reference)
+      (shrink-whitespaces . Info-history-back)
+      (previous-line      . up-line-rev)
+      (next-line          . down-line)))
 
   (with-sparse-keymap
     (keyamp--map-leader keymap '(open-line . newline))

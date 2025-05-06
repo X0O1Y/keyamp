@@ -1679,7 +1679,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 0
+              "value": 3
             }
           ],
           "to_after_key_up": [
@@ -7131,6 +7131,30 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
+                "/Windows"
+              ]
+            }
+          ],
+          "to": [
+            {
+              "key_code": "f4"
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "f4",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
                 "/Brave"
               ]
             }
@@ -7432,6 +7456,30 @@
     {
       "description": "f10",
       "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "f10",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Windows"
+              ]
+            }
+          ],
+          "to": [
+            {
+              "key_code": "f10"
+            }
+          ]
+        },
         {
           "type": "basic",
           "from": {
@@ -8188,12 +8236,17 @@
               ]
             }
           },
-          "to": [
+          "to_if_alone": [
             {
               "sticky_modifier": {
                 "left_shift": "toggle"
               }
             },
+            {
+              "key_code": "left_shift"
+            }
+          ],
+          "to": [
             {
               "key_code": "left_shift"
             }
