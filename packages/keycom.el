@@ -35,7 +35,7 @@
 
 (defun down-line-wrap (fun &rest r)
   "On the last line go to the first line of buffer."
-  (if (= (line-number-at-pos) (+ 1 (count-lines (point-min) (point-max))))
+  (if (= (line-number-at-pos) (1+ (count-lines (point-min) (point-max))))
       (forward-line (- (count-lines (point-min) (point-max))))
     (apply fun r)))
 
@@ -365,9 +365,9 @@ Save point to register 6 before repeated call."
       (exchange-point-and-mark)
     (unless (eq this-command last-command)
       (point-to-register ?6))
-    (let ((xp (point)))
+    (let ((p (point)))
       (set-mark-command t)
-      (if (eql xp (point))
+      (if (eql p (point))
           (set-mark-command t)))))
 
 (defun jump-6 ()
@@ -3344,7 +3344,7 @@ This checks in turn:
   "Toggle mark for the current file."
   (interactive)
   (if (string-equal
-       " " (buffer-substring-no-properties
+       " " (buffer-substring
             (line-beginning-position)
             (1+ (line-beginning-position))))
       (dired-mark 1)

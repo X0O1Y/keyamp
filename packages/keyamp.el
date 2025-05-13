@@ -5,7 +5,7 @@
 ;;          __   _____   __
 ;;         |__| |_____| |__|
 ;;
-;; DEL SPC RET keys provide IDE workflow for ordinary on-screen keyboard.
+;; IDE workflow with ordinary on-screen keyboard
 
 ;;; Commentary:
 
@@ -132,17 +132,17 @@ When a char is not in this alist, they are assumed to be the same.")
 in `quail-keyboard-layout-alist'."
   (unless (assoc Layout quail-keyboard-layout-alist)
     (user-error "Unable to push %s to keyamp-layouts" Layout))
-  (unless (assoc Layout keyamp-layouts)
-    (let ((layout quail-keyboard-layout-type))
-      (quail-set-keyboard-layout Layout)
-      (let ((map))
-        (mapc
-         (lambda (char)
-           (push (cons (char-to-string (quail-keyboard-translate char))
-                       (char-to-string char)) map))
-         keyamp-ascii-chars)
-        (push (cons Layout map) keyamp-layouts))
-      (quail-set-keyboard-layout layout))))
+  (when-let (((not (assoc Layout keyamp-layouts)))
+             (layout quail-keyboard-layout-type))
+    (quail-set-keyboard-layout Layout)
+    (push (cons Layout nil) keyamp-layouts)
+    (mapc
+     (lambda (char)
+       (push (cons (char-to-string (quail-keyboard-translate char))
+                   (char-to-string char))
+             (cdr (assoc Layout keyamp-layouts))))
+     keyamp-ascii-chars)
+    (quail-set-keyboard-layout layout)))
 
 (keyamp-layouts-quail-push "engineer-engram")
 
