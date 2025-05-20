@@ -1582,7 +1582,9 @@ If a buffer is not file and not dired, copy value of `default-directory'."
        (let* ((xx (if (eq major-mode 'dired-mode)
                       fpath
                     (concat fpath ":" (format-mode-line "%l"))))
-              (x (replace-regexp-in-string (getenv "HOME") "~" xx)))
+              (x (if prefix-arg
+                     xx
+                   (replace-regexp-in-string (getenv "HOME") "~" xx))))
          (message "Copy %s" x)
          x)))))
 
@@ -2532,18 +2534,16 @@ If the current buffer is not associated with a file, nothing's done."
 For detail, see `make-backup'.
 If the current buffer is not associated with a file nor dired, nothing's done."
   (interactive)
-  (if (buffer-file-name)
-      (progn
-        (make-backup)
-        (when (buffer-modified-p)
-          (save-buffer)))
-    (make-backup)))
+  (if (and (buffer-file-name)
+           (buffer-modified-p))
+      (save-buffer))
+  (make-backup))
 
 (defun backup-and-copy ()
   "Make backup and copy file path."
   (interactive)
-  (make-backup-and-save)
-  (copy-file-path))
+  (copy-file-path)
+  (make-backup-and-save))
 
 (defun save-buffer-silent ()
   "Save buffer without message."
@@ -2555,7 +2555,7 @@ If the current buffer is not associated with a file nor dired, nothing's done."
 (defun save-buffer-silent-defer ()
   "Defer `save-buffer-silent'."
   (unless (eq major-mode 'emacs-lisp-mode)
-    (run-with-timer 0.5 nil 'save-buffer-silent)))
+    (run-with-timer nil nil 'save-buffer-silent)))
 
 
 
@@ -2628,12 +2628,8 @@ This command can be called when in a file buffer or in `dired'."
                 (if (buffer-file-name) (buffer-file-name) default-directory))))
     (cond
      ((eq system-type 'windows-nt)
-      ;; (shell-command (format "PowerShell -Command invoke-item '%s'"
-      ;; (expand-file-name default-directory)))
       (let ((cmd (format "Explorer /select,%s"
-                         (replace-regexp-in-string "/" "\\" path t t)
-                         ;; (shell-quote-argument (replace-regexp-in-string "/" "\\" xpath t t ))
-                         ))
+                         (replace-regexp-in-string "/" "\\" path t t)))
             (inhibit-message t)
             (message-log-max nil))
         (shell-command cmd)))
@@ -3073,10 +3069,12 @@ and reverse-search-history in bashrc."
   (interactive)
   (vterm--self-insert))
 
-(advice-add 'vterm-reset-cursor-point :after
-              (lambda () "kill local cursor type"
-                (if (eq major-mode 'vterm-mode) ; sometimes binds and hinders indicate
-                    (kill-local-variable 'cursor-type))))
+(defun vterm-reset-cursor-shape ()
+  "Kill local cursor type variable in order to restore cursor change shape."
+  (if (eq major-mode 'vterm-mode) ; sometimes binds and hinders indicate
+      (kill-local-variable 'cursor-type)))
+
+(advice-add 'vterm-reset-cursor-point :after 'vterm-reset-cursor-shape)
 
 (defun screenshot ()
   "Take screenshot on macOS."
@@ -3214,7 +3212,8 @@ and reverse-search-history in bashrc."
              sql-type-list)))
 
 (defun exec-query ()
-  "Execute SQL statement separated by semicolon or selected region."
+  "Execute SQL statement separated by semicolon or selected region.
+This is toy version. Target is async version over comint not included here."
   (interactive)
   (unless (eq major-mode 'sql-mode)
     (error "Not SQL"))

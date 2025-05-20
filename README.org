@@ -10,8 +10,9 @@ Input model based on [[file:packages/keyamp.el][Keyamp]] for Emacs.
 
 * ANSI keyboard
 
-- [[file:karabiner/karabiner.json][Karabiner]] config file. Emacs Keyamp mode integration
-- [[http://www.keyboard-layout-editor.com/#/gists/106550cd49793787784ed1b9c9117c3d][Layout]] based on [[file:layouts/Engram.bundle][Engineer Engram]]:
+- [[file:layouts/mac/karabiner/karabiner.json][Karabiner]] config file. Emacs Keyamp mode integration
+- [[http://www.keyboard-layout-editor.com/#/gists/106550cd49793787784ed1b9c9117c3d][Layout]] based on [[file:layouts/mac/ukelele/Engram.bundle][Engineer Engram]]
+- QWERTY included by default
 - Automatic Russian layout support for command bindings
 
 [[screenshots/ansi-keyboard.png]]
@@ -80,7 +81,7 @@ Emacs in pocket with unicode support. [[https://apps.apple.com/us/app/termius-te
 *** Custom
 - Engineer Engram and Russian layouts
   - [[https://apps.apple.com/us/app/xkeyboard-custom-keyboard/id1440245962][xKeyboard - Custom Keyboard]]
-  - Layout file: [[file:layouts/Engineer-Engram.xkeyboard][Engineer-Engram.xkeyboard]]
+  - Layout file: [[file:layouts/ios/xkeyboard/Engineer-Engram.xkeyboard][Engineer-Engram.xkeyboard]]
 
 *** Preferences
 - Set terminal and keyboard coding system to utf-8:
@@ -100,6 +101,6 @@ Emacs in pocket with unicode support. [[https://apps.apple.com/us/app/termius-te
 
 * Split keyboard
 
-- Kinesis Advantage2 [[http://www.keyboard-layout-editor.com/#/gists/6a1a62133ab9f741589bd556cb946792][layout]] and [[file:layouts/qwerty2.txt][config]]:
+- Kinesis Advantage2 [[http://www.keyboard-layout-editor.com/#/gists/6a1a62133ab9f741589bd556cb946792][layout]] and [[file:layouts/kinesis/advantage2/qwerty2.txt][config]]:
 
 [[screenshots/advantage2.png]]

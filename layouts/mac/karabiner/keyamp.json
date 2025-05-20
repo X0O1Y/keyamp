@@ -1679,7 +1679,7 @@
             {
               "type": "variable_if",
               "name": "insert mode activated",
-              "value": 3
+              "value": 0
             }
           ],
           "to_after_key_up": [
@@ -1689,18 +1689,14 @@
           ],
           "to_if_held_down": [
             {
-              "key_code": "equal_sign",
-              "modifiers": [
-                "left_shift",
-                "left_control"
-              ]
-            },
-            {
               "key_code": "d",
-              "repeat": false,
+              "repeat": true,
               "halt": true
             }
-          ]
+          ],
+          "parameters": {
+            "basic.to_if_held_down_threshold_milliseconds": 120
+          }
         },
         {
           "type": "basic",
@@ -1732,18 +1728,14 @@
           ],
           "to_if_held_down": [
             {
-              "key_code": "equal_sign",
-              "modifiers": [
-                "left_shift",
-                "left_control"
-              ]
-            },
-            {
               "key_code": "d",
-              "repeat": false,
+              "repeat": true,
               "halt": true
             }
-          ]
+          ],
+          "parameters": {
+            "basic.to_if_held_down_threshold_milliseconds": 120
+          }
         }
       ]
     },
@@ -6933,16 +6925,9 @@
               ]
             }
           },
-          "to_after_key_up": [
+          "to": [
             {
-              "shell_command": "open -a 'Windows App'"
-            }
-          ],
-          "to_if_held_down": [
-            {
-              "shell_command": "open -a Emacs.app",
-              "repeat": false,
-              "halt": true
+              "key_code": "display_brightness_decrement"
             }
           ]
         }
@@ -6999,7 +6984,7 @@
           ],
           "to_if_held_down": [
             {
-              "key_code": "display_brightness_decrement",
+              "key_code": "display_brightness_increment",
               "repeat": true,
               "halt": true
             }
@@ -7692,7 +7677,7 @@
           "to_if_held_down": [
             {
               "select_input_source": {
-                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+                "input_source_id": "com.apple.keylayout.Hebrew"
               }
             },
             {
@@ -7740,7 +7725,7 @@
           "to_if_held_down": [
             {
               "select_input_source": {
-                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+                "input_source_id": "com.apple.keylayout.Hebrew"
               }
             },
             {
@@ -7788,7 +7773,7 @@
           "to_if_held_down": [
             {
               "select_input_source": {
-                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+                "input_source_id": "com.apple.keylayout.Hebrew"
               },
               "halt": true
             },
@@ -7830,7 +7815,7 @@
           "to_if_held_down": [
             {
               "select_input_source": {
-                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+                "input_source_id": "com.apple.keylayout.Hebrew"
               }
             },
             {
@@ -7872,7 +7857,7 @@
           "to_if_held_down": [
             {
               "select_input_source": {
-                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+                "input_source_id": "com.apple.keylayout.Hebrew"
               }
             },
             {
@@ -7909,6 +7894,48 @@
               "select_input_source": {
                 "input_source_id": "com.apple.keylayout.RussianWin"
               }
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "select_input_source": {
+                "input_source_id": "com.apple.keylayout.Hebrew"
+              }
+            },
+            {
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'",
+              "halt": true
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "f14",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "input_sources": [
+                {
+                  "input_source_id": "com.apple.keylayout.Hebrew"
+                }
+              ],
+              "type": "input_source_if"
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              }
+            },
+            {
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
             }
           ],
           "to_if_held_down": [
@@ -8236,17 +8263,12 @@
               ]
             }
           },
-          "to_if_alone": [
+          "to": [
             {
               "sticky_modifier": {
                 "left_shift": "toggle"
               }
             },
-            {
-              "key_code": "left_shift"
-            }
-          ],
-          "to": [
             {
               "key_code": "left_shift"
             }
