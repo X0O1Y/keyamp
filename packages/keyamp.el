@@ -47,7 +47,6 @@ throughout the code.")
 (mapc
  (lambda (method)
    (activate-input-method method)
-   (activate-input-method nil)
    (mapc
     (lambda (map)
       (if-let ((to (char-to-string (car map)))
@@ -55,7 +54,8 @@ throughout the code.")
                ((characterp from))
                (from (char-to-string from)))
           (push (cons from to) keyamp-input-method-to-ascii)))
-    (cdr (quail-map))))
+    (cdr (quail-map)))
+   (activate-input-method nil))
  keyamp-input-methods)
 
 (push '("engineer-engram" . "\
@@ -1971,7 +1971,6 @@ ascii CHAR."
   (advice-add-macro '(vterm-send-return term-interrupt-subjob) :after 'keyamp-input-timer)
 
   (with-sparse-keymap
-    (keyamp--map-leader keymap '(vterm-tmux-prev-window . vterm-tmux-next-window))
     (keyamp--map-return keymap keyamp-ret)
     (keyamp--remap keymap '((open-line . vterm-tmux-prev-window) (newline . vterm-tmux-next-window)))
     (keyamp--set keymap '(vterm-tmux-prev-window vterm-tmux-next-window)))

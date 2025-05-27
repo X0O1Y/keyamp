@@ -2457,7 +2457,12 @@ Output is printed to buffer “*run output*”.
 File suffix is used to determine which program to run, set in the variable
 `run-current-file-map'."
   (interactive)
-  (if (y-or-n-p (concat "Run? " (buffer-file-name)))
+  (if (and (memq major-mode '(emacs-lisp-mode
+                              python-ts-mode
+                              bash-ts-mode
+                              sh-mode
+                              go-ts-mode))
+            (y-or-n-p (concat "Run? " (buffer-file-name))))
       (progn
         (when (not buffer-file-name) (save-buffer))
         (let* ((outBuffer "*run output*")

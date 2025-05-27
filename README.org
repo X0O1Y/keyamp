@@ -13,7 +13,7 @@ Input model based on [[file:packages/keyamp.el][Keyamp]] for Emacs.
 - [[file:layouts/mac/karabiner/karabiner.json][Karabiner]] config file. Emacs Keyamp mode integration
 - [[http://www.keyboard-layout-editor.com/#/gists/106550cd49793787784ed1b9c9117c3d][Layout]] based on [[file:layouts/mac/ukelele/Engram.bundle][Engineer Engram]]
 - QWERTY included by default
-- Automatic Russian layout support for command bindings
+- Automatic non-ASCII layouts support for command bindings
 
 [[screenshots/ansi-keyboard.png]]
 
