@@ -759,6 +759,10 @@ is enabled.")
 ;; Pass single key through the network
 (keyamp--map global-map '(("<f10>" . exec-query) ("<f12>" . delete-other-windows)))
 
+(unless (display-graphic-p)
+  (keymap-set key-translation-map "<deletechar>" "DEL")
+  (keymap-set key-translation-map "<insertchar>" "SPC"))
+
 (when (display-graphic-p)
   (keyamp--map global-map
     '(("<prior>"          . page-up-half) ("<next>"    . page-dn-half)
@@ -937,7 +941,6 @@ is enabled.")
       prev-proj-buf              next-proj-buf
       prev-eww-buf               next-eww-buf
       prev-eshell-buf            next-eshell-buf
-      prev-vterm-buf             next-vterm-buf
       prev-dired-buf             next-dired-buf
       tasks                      config
       tools
@@ -988,15 +991,6 @@ is enabled.")
   (keyamp--map-tab keymap keyamp-tab)
   (keyamp--remap keymap '((open-line . prev-eshell-buf) (newline . next-eshell-buf)))
   (keyamp--set keymap '(prev-eshell-buf next-eshell-buf)))
-
-(with-sparse-keymap
-  (keyamp--map-backtab keymap page-up-half)
-  (keyamp--map-tab keymap keyamp-tab)
-  (keyamp--remap keymap
-    '((open-line          . prev-vterm-buf)
-      (newline            . next-vterm-buf)
-      (shrink-whitespaces . vterm-tmux-prev-window)))
-  (keyamp--set keymap '(prev-vterm-buf next-vterm-buf)))
 
 (with-sparse-keymap
   (keyamp--remap keymap '((open-line . prev-dired-buf) (newline . next-dired-buf)))
@@ -2013,26 +2007,26 @@ ascii CHAR."
     (keyamp--map-leader keymap '(vterm-shell-vi-e . nil))
     (keyamp--set keymap '(vterm-shell-vi-e)))
 
-  ;; terminal config examples Engram layout
+  ;; Terminal config examples:
 
   ;;;;;; .inputrc
   ;; $if mode=vi
   ;;    set keymap vi-command
   ;;    "\C-m": vi-insertion-mode
-  ;;    "d": previous-history
-  ;;    "t": next-history
-  ;;    "h": backward-char
-  ;;    "l": backward-word
-  ;;    "s": forward-char
-  ;;    "w": forward-word
-  ;;    "e": backward-delete-char
-  ;;    ".": beginning-of-line
-  ;;    "n": end-of-line
-  ;;    "u": kill-word
-  ;;    "y": backward-kill-word
+  ;;    "i": previous-history
+  ;;    "k": next-history
+  ;;    "j": backward-char
+  ;;    "u": backward-word
+  ;;    "l": forward-char
+  ;;    "o": forward-word
+  ;;    "d": backward-delete-char
+  ;;    "h": beginning-of-line
+  ;;    ";": end-of-line
+  ;;    "r": kill-word
+  ;;    "w": backward-kill-word
   ;;    "\C-?": previous-history
   ;;    " ": next-history
-  ;;    "o": undo
+  ;;    "e": undo
   ;;    "^[": vi-movement-mode
   ;; $endif
 
@@ -2042,20 +2036,20 @@ ascii CHAR."
 
   ;; bindkey -M vicmd "\C-m" vi-insert
   ;; bindkey -M vicmd "\C-j" vi-insert
-  ;; bindkey -M vicmd "h" vi-backward-char
-  ;; bindkey -M vicmd "t" down-line-or-history
-  ;; bindkey -M vicmd "d" up-line-or-history
-  ;; bindkey -M vicmd "s" vi-forward-char
-  ;; bindkey -M vicmd "l" vi-backward-word
-  ;; bindkey -M vicmd "w" vi-forward-word
-  ;; bindkey -M vicmd "e" vi-backward-delete-char
-  ;; bindkey -M vicmd "." vi-beginning-of-line
-  ;; bindkey -M vicmd "n" vi-end-of-line
-  ;; bindkey -M vicmd "u" kill-word
-  ;; bindkey -M vicmd "y" vi-backward-kill-word
+  ;; bindkey -M vicmd "j" vi-backward-char
+  ;; bindkey -M vicmd "k" down-line-or-history
+  ;; bindkey -M vicmd "i" up-line-or-history
+  ;; bindkey -M vicmd "l" vi-forward-char
+  ;; bindkey -M vicmd "u" vi-backward-word
+  ;; bindkey -M vicmd "o" vi-forward-word
+  ;; bindkey -M vicmd "d" vi-backward-delete-char
+  ;; bindkey -M vicmd "h" vi-beginning-of-line
+  ;; bindkey -M vicmd ";" vi-end-of-line
+  ;; bindkey -M vicmd "r" kill-word
+  ;; bindkey -M vicmd "w" vi-backward-kill-word
   ;; bindkey -M vicmd " " down-line-or-history
   ;; bindkey -M vicmd "^?" up-line-or-history
-  ;; bindkey -M vicmd "o" undo
+  ;; bindkey -M vicmd "e" undo
 
   ;;;;;; tmux copy mode vi
   (with-sparse-keymap
@@ -2077,32 +2071,32 @@ ascii CHAR."
     (keyamp--set keymap '(vterm-tmux-copy vterm-tmux-copy-self-insert) :command))
 
   ;;;;;; tmux.conf
-  ;; bind -T copy-mode-vi j send-keys -X copy-pipe-and-cancel 'tee > /tmp/tmux-copy~$(date "+%Y-%m-%d_%H%M%S")~'
-  ;; if-shell 'uname | grep -q Darwin' { bind -T copy-mode-vi j send-keys -X copy-pipe-and-cancel 'pbcopy' }
+  ;; bind -T copy-mode-vi c send-keys -X copy-pipe-and-cancel 'tee > /tmp/tmux-copy~$(date "+%Y-%m-%d_%H%M%S")~'
+  ;; if-shell 'uname | grep -q Darwin' { bind -T copy-mode-vi c send-keys -X copy-pipe-and-cancel 'pbcopy' }
 
   ;; bind -T copy-mode-vi Escape send-keys -X cancel
   ;; bind -T copy-mode-vi Enter send-keys -X cancel
 
-  ;; bind -T copy-mode-vi d send-keys -X cursor-up
-  ;; bind -T copy-mode-vi h send-keys -X cursor-left
-  ;; bind -T copy-mode-vi t send-keys -X cursor-down
-  ;; bind -T copy-mode-vi s send-keys -X cursor-right
+  ;; bind -T copy-mode-vi i send-keys -X cursor-up
+  ;; bind -T copy-mode-vi j send-keys -X cursor-left
+  ;; bind -T copy-mode-vi k send-keys -X cursor-down
+  ;; bind -T copy-mode-vi l send-keys -X cursor-right
 
-  ;; bind -T copy-mode-vi l send-keys -X previous-word
-  ;; bind -T copy-mode-vi w send-keys -X next-word-end
+  ;; bind -T copy-mode-vi u send-keys -X previous-word
+  ;; bind -T copy-mode-vi o send-keys -X next-word-end
 
   ;; bind -T copy-mode-vi C-? send-keys -X halfpage-up
   ;; bind -T copy-mode-vi BSpace send-keys -X halfpage-up
   ;; bind -T copy-mode-vi Space send-keys -X halfpage-down
-  ;; bind -T copy-mode-vi . send-keys -X start-of-line
-  ;; bind -T copy-mode-vi n send-keys -X end-of-line
+  ;; bind -T copy-mode-vi h send-keys -X start-of-line
+  ;; bind -T copy-mode-vi ; send-keys -X end-of-line
 
-  ;; bind -T copy-mode-vi ? command-prompt -T search -p "(search up)" { send-keys -X search-backward "%%" }
+  ;; bind -T copy-mode-vi n command-prompt -T search -p "(search up)" { send-keys -X search-backward "%%" }
 
   ;; bind -T copy-mode-vi Tab send-keys -X search-reverse
   ;; bind -T copy-mode-vi BTab send-keys -X search-again
 
-  ;;;;;; vi mode
+  ;;;;;; vi mode - run Vim inside Emacs
   (with-sparse-keymap
     (keyamp--map-leader keymap '(vterm-vi-self-insert . vterm-vi-self-insert))
     (keyamp--map-escape keymap vterm-vi-escape) ; double press to quit vi mode
