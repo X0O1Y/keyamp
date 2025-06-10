@@ -2897,9 +2897,10 @@ Open new terminal if already in terminal."
             (progn
               (split-window-below)
               (other-window 1)))
-        (if (and (boundp 'tt-local)
-                 (get-buffer tt-local))
-            (switch-to-buffer tt-local)
+        (if (and (boundp 'tt-buffer)
+                 tt-buffer
+                 (get-buffer tt-buffer))
+            (switch-to-buffer tt-buffer)
           (vterm)))
     (shell)))
 

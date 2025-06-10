@@ -37,10 +37,10 @@
   "Input methods, activate when not available otherwise. See
 `toggle-input-method', first one is primary.
 
-On activation also Quail package loaded which required for mapping
+On activation Quail package also loaded which required for mapping
 translation of corresponding non-ASCII command key sequences and
 mapping to non-QWERTY layouts. Mappings defined in QWERTY notation
-throughout the code.")
+throughout the code of the package.")
 
 (defvar keyamp-input-method-to-ascii nil "Input method to ASCII char.")
 
@@ -759,9 +759,9 @@ is enabled.")
 ;; Pass single key through the network
 (keyamp--map global-map '(("<f10>" . exec-query) ("<f12>" . delete-other-windows)))
 
-(unless (display-graphic-p)
-  (keymap-set key-translation-map "<deletechar>" "DEL")
-  (keymap-set key-translation-map "<insertchar>" "SPC"))
+;; Useful in Termius add-on
+(keymap-set key-translation-map "<deletechar>" "DEL")
+(keymap-set key-translation-map "<insertchar>" "SPC")
 
 (when (display-graphic-p)
   (keyamp--map global-map
@@ -1567,7 +1567,6 @@ ascii CHAR."
       (newline             . next-buf)
       (toggle-comment      . view-messages)
       (cut-line            . prev-eww-buf)
-      (copy-line           . screen-idle)
       (paste-or-prev       . tasks)
       (toggle-case         . downloads)
       (forward-bracket     . save-close-buf)
@@ -1928,14 +1927,14 @@ ascii CHAR."
       (paste-or-prev       . vterm-yank)
       (paste-from-r1       . vterm-yank-pop)
       (shrink-whitespaces  . vterm-tmux-copy)        ; activate tmux copy mode
-      (cut-text-block      . vterm-vi)               ; activate vi mode
+      (cut-text-block      . ignore)
       (open-line           . vterm-tmux-prev-window)
       (del-back            . vterm-shell-vi-cmd)     ; sync point position and activate shell vi cmd mode
       (newline             . vterm-tmux-next-window)
       (toggle-comment      . vterm-read-send-key)
       (cut-line            . vterm-clear)
       (new-empty-buffer    . vterm-tmux-create-window)
-      (insert-space-before . ignore)
+      (insert-space-before . vterm-vi)               ; activate vi mode
       (reformat-lines      . vterm-tmux-close-window)
       (back-char           . vterm-left)
       (forw-char           . vterm-right)
@@ -3578,8 +3577,7 @@ Cleanup echo area. Quit minibuffer. Quit wait key sequence."
                (lambda ()
                  (mapc
                   (lambda (fun)
-                    (if (fboundp fun)
-                        (funcall fun)))
+                    (funcall fun))
                   keyamp-minibuffer-quit-funs)))
   (abort-recursive-edit))
 
