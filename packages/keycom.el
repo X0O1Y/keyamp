@@ -2892,15 +2892,16 @@ Open new terminal if already in terminal."
   (if (fboundp 'vterm)
       (if (eq major-mode 'vterm-mode)
           (let ((current-prefix-arg '-))
-            (call-interactively 'vterm))
-        (if (one-windowp)
-            (progn
-              (split-window-below)
-              (other-window 1)))
+            (call-interactively 'next-vterm-buf))
+        ;; (if (one-windowp)
+            ;; (progn
+              ;; (split-window-below)
+              ;; (other-window 1)))
         (if (and (boundp 'tt-buffer)
                  tt-buffer
                  (get-buffer tt-buffer))
             (switch-to-buffer tt-buffer)
+          ;; to be switch to first vterm buf or
           (vterm)))
     (shell)))
 
@@ -3026,10 +3027,11 @@ and reverse-search-history in bashrc."
   (let ((x (point)))
     (vterm-send-key Key)        ; workaround vi go after last char
     (sit-for vterm-timer-delay) ; delay to sync
-    (if (eq x (point))          ; point did not move
+    (if (and (eq x (point))
+             (eq (1- (line-end-position)) (point))) ; point did not move
         (progn
-          (vterm-send-key (kbd "C-m"))    ; so activate insert
-          (vterm-send-key "<right>")      ; go after last char
+          (vterm-send-key (kbd "C-m")) ; so activate insert
+          (vterm-send-key "<right>")   ; go after last char
           (vterm-send-key (kbd "SPC")) ; add space and back to cmd mode
           (vterm-send-key (kbd "^["))))))
 
@@ -3074,6 +3076,22 @@ and reverse-search-history in bashrc."
   "Send key to vi mode. Specialized."
   (interactive)
   (vterm--self-insert))
+
+(defun vterm-vi-quit ()
+  "Quit vi without save."
+  (interactive)
+  (when (y-or-n-p "Quit vi?")
+    (vterm-send-key (kbd "^["))
+    (vterm-send-key "Z")
+    (vterm-send-key "Q")))
+
+(defun vterm-vi-save-quit ()
+  "Save and quit vi."
+  (interactive)
+  (when (y-or-n-p "Save and quit vi?")
+    (vterm-send-key (kbd "^["))
+    (vterm-send-key "Z")
+    (vterm-send-key "Z")))
 
 (defun vterm-reset-cursor-shape ()
   "Kill local cursor type variable in order to restore cursor change shape."
@@ -3338,12 +3356,27 @@ This checks in turn:
 (defun org-insert-source-code ()
   "Insert source code block."
   (interactive)
-  (if (eq major-mode 'org-mode)
-      (progn
-        (org-insert-structure-template "src")
-        (insert "bash")
-        (newline))
-    (message "%s" "Not org")))
+  (cond
+   ((eq major-mode 'org-mode)
+    (org-insert-structure-template "src")
+    (insert "bash")
+    (newline))
+   ((eq major-mode 'vterm-mode)
+    (setq this-command 'vterm-vi-save-quit)
+    (vterm-vi-save-quit))
+   (t
+    (message "%s" "Not org"))))
+
+(defun repeat-command ()
+  "Custom `repeat-complex-command'."
+  (interactive)
+  (cond
+   ((eq major-mode 'vterm-mode)
+    (setq this-command 'vterm-vi-quit)
+    (vterm-vi-quit))
+   (t
+    (setq this-command 'repeat-complex-command)
+    (call-interactively repeat-complex-command))))
 
 (defun dired-toggle-mark ()
   "Toggle mark for the current file."
@@ -3615,6 +3648,20 @@ Use as around advice e.g. for mouse left click after double click."
   "Horizontal scroll right."
   (interactive)
   (scroll-right hscroll-columns))
+
+(defun eval-defun-visual ()
+  "Same as `eval-defun' but highlight defun."
+  (interactive)
+  (if (fboundp 'uncentered-cursor)
+      (uncentered-cursor))
+  (command-execute 'eval-defun)
+  (push-mark (point) t nil)
+  (mark-defun)
+  (sit-for 0.1)
+  (set-mark-command t)
+  (set-mark-command t)
+  (if (fboundp 'centered-cursor)
+      (centered-cursor)))
 
 (provide 'keycom)
 

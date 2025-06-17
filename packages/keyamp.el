@@ -536,7 +536,7 @@ is enabled.")
     ("2" . kmacro-play-toggle)
     ("3" . delete-window)
     ("4" . clear-r1)
-    ("5" . repeat-complex-command)
+    ("5" . repeat-command)
 
     ("q" . reformat-lines)
     ("w" . org-ctrl-c-ctrl-c)
@@ -651,7 +651,7 @@ is enabled.")
     ("D"     . repeat)                     ("В"     . repeat)
     ("d e"   . org-shiftup)                ("d i"   . async-shell-command)
     ("d d"   . eval-region-or-sexp)        ("d k"   . run-current-file)
-    ("d DEL" . stow)                       ("d SPC" . eval-defun)
+    ("d DEL" . stow)                       ("d SPC" . eval-defun-visual)
     ("d <escape>" . ignore)                ("d RET" . shell-command)
 
     ("f e"   . insert-emacs-quote)         ("f i"   . insert-ascii-single-quote)
@@ -1926,15 +1926,15 @@ ascii CHAR."
     '((select-block        . vterm-up-vi-cmd)
       (paste-or-prev       . vterm-yank)
       (paste-from-r1       . vterm-yank-pop)
-      (shrink-whitespaces  . vterm-tmux-copy)        ; activate tmux copy mode
+      (shrink-whitespaces  . vterm-tmux-copy) ; activate tmux copy mode
       (cut-text-block      . ignore)
       (open-line           . vterm-tmux-prev-window)
-      (del-back            . vterm-shell-vi-cmd)     ; sync point position and activate shell vi cmd mode
+      (del-back            . vterm-shell-vi-cmd) ; sync point position and activate shell vi cmd mode
       (newline             . vterm-tmux-next-window)
       (toggle-comment      . vterm-read-send-key)
       (cut-line            . vterm-clear)
       (new-empty-buffer    . vterm-tmux-create-window)
-      (insert-space-before . vterm-vi)               ; activate vi mode
+      (insert-space-before . vterm-vi) ; activate vi mode
       (reformat-lines      . vterm-tmux-close-window)
       (back-char           . vterm-left)
       (forw-char           . vterm-right)
@@ -1953,6 +1953,7 @@ ascii CHAR."
     (keyamp--map-backtab keymap vterm-history-search)
     (keyamp--map-tab keymap change-wd)
     (keyamp--set keymap '(vterm-send-return term-interrupt-subjob) nil :insert)
+    (keyamp--set keymap '(vterm-vi-save-quit vterm-vi-quit))
 
     (defun keyamp-input-timer-payload-vterm ()
       "Set transient keymap for vterm after input timer timeout."
@@ -1970,11 +1971,11 @@ ascii CHAR."
 
   (with-sparse-keymap
     (keyamp--remap keymap
-      '((backward-char . vterm-left)  (forward-char  . vterm-right)
-        (previous-line . vterm-up)    (next-line     . vterm-down)))
+      '((backward-char . vterm-left) (forward-char  . vterm-right)
+        (previous-line . vterm-up)   (next-line     . vterm-down)))
     (keyamp--set keymap '(vterm-left vterm-right vterm-up vterm-down)))
 
-  ;;;;;; shell prompt vi cmd mode
+;;;;;; shell prompt vi cmd mode
   (with-sparse-keymap
     (keyamp--remap keymap
       '((backward-char     . vterm-shell-vi-self-insert)
@@ -2008,7 +2009,7 @@ ascii CHAR."
 
   ;; Terminal config examples:
 
-  ;;;;;; .inputrc
+;;;;;; .inputrc
   ;; $if mode=vi
   ;;    set keymap vi-command
   ;;    "\C-m": vi-insertion-mode
@@ -2029,7 +2030,7 @@ ascii CHAR."
   ;;    "^[": vi-movement-mode
   ;; $endif
 
-  ;;;;;; .zshrc
+;;;;;; .zshrc
   ;; set -o vi
   ;; bindkey "^[" vi-cmd-mode
 
@@ -2050,7 +2051,7 @@ ascii CHAR."
   ;; bindkey -M vicmd "^?" up-line-or-history
   ;; bindkey -M vicmd "e" undo
 
-  ;;;;;; tmux copy mode vi
+;;;;;; tmux copy mode vi
   (with-sparse-keymap
     (keyamp--map-leader keymap '(vterm-tmux-copy-self-insert . vterm-tmux-copy-self-insert))
     (keyamp--map-return keymap vterm-shell-vi-cmd) ; quit and sync prompt position
@@ -2069,7 +2070,7 @@ ascii CHAR."
         (isearch-forward . vterm-tmux-copy-self-insert)))
     (keyamp--set keymap '(vterm-tmux-copy vterm-tmux-copy-self-insert) :command))
 
-  ;;;;;; tmux.conf
+;;;;;; tmux.conf
   ;; bind -T copy-mode-vi c send-keys -X copy-pipe-and-cancel 'tee > /tmp/tmux-copy~$(date "+%Y-%m-%d_%H%M%S")~'
   ;; if-shell 'uname | grep -q Darwin' { bind -T copy-mode-vi c send-keys -X copy-pipe-and-cancel 'pbcopy' }
 
@@ -2095,7 +2096,7 @@ ascii CHAR."
   ;; bind -T copy-mode-vi Tab send-keys -X search-reverse
   ;; bind -T copy-mode-vi BTab send-keys -X search-again
 
-  ;;;;;; vi mode - run Vim inside Emacs
+;;;;;; vi mode - run Vim inside Emacs
   (with-sparse-keymap
     (keyamp--map-leader keymap '(vterm-vi-self-insert . vterm-vi-self-insert))
     (keyamp--map-escape keymap vterm-vi-escape) ; double press to quit vi mode
@@ -2106,7 +2107,26 @@ ascii CHAR."
     (keyamp--map keymap
       '(("<left>"  . vterm-vi-self-insert) ("<right>" . vterm-vi-self-insert)
         ("<up>"    . vterm-vi-self-insert) ("<down>"  . vterm-vi-self-insert)))
-    (keyamp--set keymap '(vterm-vi vterm-vi-self-insert vterm-vi-escape) :command)))
+    (keyamp--set keymap '(vterm-vi vterm-vi-self-insert vterm-vi-escape) :command))
+
+  (defconst vterm-vi-auto-delay 0.5 "Delay before `vterm-vi-auto'.")
+  (defconst vterm-vi-auto-pattern "1 " "Pattern for `vterm-vi-auto'.")
+
+  (defsubst vterm-vi-autop ()
+    "Predicate for `vterm-vi-auto'. Maybe vi opened if buffer starts with
+  `vterm-vi-auto-pattern'."
+    (string-equal (buffer-substring-no-properties 1 3) vterm-vi-auto-pattern))
+
+  (defun vterm-vi-auto (&rest _)
+    "Suppose vi just opened, auto enable vi mode. "
+    (run-with-timer vterm-vi-auto-delay nil
+                    (lambda ()
+                      (when (vterm-vi-autop)
+                        (keyamp-cancel-input-timer)
+                        (keyamp-command-execute 'keyamp-escape)
+                        (keyamp-command-execute 'vterm-vi)))))
+
+  (advice-add 'vterm-send-return :after 'vterm-vi-auto))
 
 (defvar keyamp-ignore-map (make-sparse-keymap)
   "Keymap ignores any key. Maybe trigger action with post command hook.")
@@ -2158,10 +2178,10 @@ ascii CHAR."
   (keyamp--map gnus-topic-mode-map '(("<mouse-1>" . gnus-topic-select-group)))
   (keyamp--remap gnus-topic-mode-map
     '((keyamp-insert . gnus-topic-select-group)
-      (previous-line . up-line-rev)        (next-line     . down-line)
-      (beg-of-line   . gnus-topic-prev)    (end-of-lyne   . gnus-topic-next)
-      (beg-of-block  . gnus-topic-prev)    (end-of-block  . gnus-topic-next)
-      (back-char     . screen-idle-escape) (forw-char     . screen-idle)))
+      (previous-line . up-line-rev)        (next-line    . down-line)
+      (beg-of-line   . gnus-topic-prev)    (end-of-lyne  . gnus-topic-next)
+      (beg-of-block  . gnus-topic-prev)    (end-of-block . gnus-topic-next)
+      (back-char     . screen-idle-escape) (forw-char    . screen-idle)))
 
   (with-sparse-keymap
     (keyamp--map-leader keymap '(previous-line . next-line))
@@ -2445,7 +2465,7 @@ ascii CHAR."
     '((mark-defun          . go-mark-defun)
       (stow                . flymake-show-project-diagnostics)
       (eval-region-or-sexp . make-run)
-      (eval-defun          . make-test)
+      (eval-defun-visual   . make-test)
       (reformat-lines      . eglot-reconnect)
       (describe-variable   . xref-find-references))))
 
@@ -2468,7 +2488,7 @@ ascii CHAR."
 
 (with-eval-after-load 'sql
   (keyamp--remap sql-mode-map
-    '((eval-defun          . exec-query)
+    '((eval-defun-visual   . exec-query)
       (eval-region-or-sexp . exec-query-remote)
       (number-to-register  . toggle-sql-async-conn)
       (quit                . toggle-sql-async-remote)))
@@ -2525,7 +2545,7 @@ ascii CHAR."
       (del-back          . alt-buf)
       (open-line         . prev-buf)
       (newline           . next-buf)
-      (eval-defun        . exec-query))))
+      (eval-defun-visual . exec-query))))
 
 (with-eval-after-load 'calc
   (advice-add 'calcDigit-start :after 'keyamp-insert)
@@ -2590,7 +2610,6 @@ ascii CHAR."
                  next-buffer                             t
                  next-eww-buf                            t
                  next-eshell-buf                         t
-                 next-vterm-buf                          t
                  next-dired-buf                          t
                  next-proj-buf                           t
                  next-buf                                t
@@ -2612,9 +2631,7 @@ ascii CHAR."
                  sync                                    t
                  tasks                                   t
                  tools                                   t
-                 view-messages                           t
-                 vterm-tmux-prev-window                  t
-                 vterm-tmux-next-window                  t)))
+                 view-messages                           t)))
 
 (defconst keyamp-screen-read-commands-hash
   #s(hash-table test equal data
@@ -2656,7 +2673,7 @@ ascii CHAR."
                  delete-non-matching-line                t
                  dired-toggle-mark                       t
                  emoji-insert                            t
-                 eval-defun                              t
+                 eval-defun-visual                       t
                  eval-region-or-sexp                     t
                  fill-or-unfil                           t
                  hippie-expand                           t
@@ -2826,6 +2843,8 @@ ascii CHAR."
                  volume-decrease                         t
                  vterm-down                              t
                  vterm-send-return                       t
+                 vterm-vi-save-quit                      t
+                 vterm-vi-quit                           t
                  vterm-up-vi-cmd                         t
                  vterm-vi                                t
                  vterm-vi-self-insert                    t
@@ -3143,7 +3162,8 @@ Else activate insert mode and self insert."
       (if (get 'toggle-ascii-to-current-layout 'state) ; convert back to current layout
           (setq key (car (rassoc key keyamp--convert-table))))
       (execute-kbd-macro (kbd key))) ; key press required
-     (t (keyamp-insert-and-self-insert)))))
+     (t
+      (keyamp-insert-and-self-insert)))))
 
 (defun keyamp-minibuffer-escape ()
   "If minibuffer input not empty then activate command mode instead
