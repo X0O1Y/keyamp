@@ -185,19 +185,19 @@
               (eq major-mode 'dired-mode))
     (beginning-of-visual-line)))
 
-(advice-add 'up-line       :before 'up-line-wrap)
-(advice-add 'down-line     :around 'down-line-wrap)
-(advice-add 'up-line       :after 'beginning-of-visual-line-once)
-(advice-add 'down-line     :after 'beginning-of-visual-line-once)
-(advice-add 'up-line-rev   :after 'beginning-of-visual-line-once)
-(advice-add 'down-line-rev :after 'beginning-of-visual-line-once)
+(advice-add 'up-line       :before #'up-line-wrap)
+(advice-add 'down-line     :around #'down-line-wrap)
+(advice-add 'up-line       :after #'beginning-of-visual-line-once)
+(advice-add 'down-line     :after #'beginning-of-visual-line-once)
+(advice-add 'up-line-rev   :after #'beginning-of-visual-line-once)
+(advice-add 'down-line-rev :after #'beginning-of-visual-line-once)
 
 (defun goto-point-max (&rest _)
   "Go to point max if not there."
   (unless (eq (point) (point-max))
     (goto-char (point-max))))
 
-(advice-add 'hist-forw :before 'goto-point-max)
+(advice-add 'hist-forw :before #'goto-point-max)
 
 (defun comp-back ()
   "Completion backward for transient use."
@@ -739,7 +739,7 @@ and `right-brackets'."
         (before-last-command)))
   (beginning-of-visual-line-once))
 
-(advice-add 'mark-defun :after 'exchange-point-and-mark)
+(advice-add 'mark-defun :after #'exchange-point-and-mark)
 
 
 ;; Editing commands
@@ -2122,11 +2122,13 @@ command, so that next buffer shown is a user buffer."
             (next-buffer)
             (setq i (1+ i))
             (when (= i buf-count-limit)
-              (message "%s" err)
               (switch-to-buffer buf)))
         (setq i (1+ buf-count-limit))))
     (if (eq buf (current-buffer))
-        (user-error "%s" err))))
+        (vterm)
+      (if (or (eq (point) (point-min))
+              (eq (point) (line-beginning-position)))
+          (vterm-reset-cursor-point)))))
 
 (defun prev-eshell-buf ()
   "Switch to the previous eshell buffer."
@@ -2893,17 +2895,36 @@ Open new terminal if already in terminal."
       (if (eq major-mode 'vterm-mode)
           (let ((current-prefix-arg '-))
             (call-interactively 'next-vterm-buf))
-        ;; (if (one-windowp)
-            ;; (progn
-              ;; (split-window-below)
-              ;; (other-window 1)))
         (if (and (boundp 'tt-buffer)
                  tt-buffer
                  (get-buffer tt-buffer))
-            (switch-to-buffer tt-buffer)
-          ;; to be switch to first vterm buf or
-          (vterm)))
+            (progn
+              (switch-to-buffer tt-buffer)
+              (if (or (eq (point) (point-min))
+                      (eq (point) (line-beginning-position)))
+                  (vterm-reset-cursor-point)))
+          (call-interactively 'next-vterm-buf)))
     (shell)))
+
+(defvar vterm-last-command "" "Vterm last command.")
+(defconst vterm-prompt-regexp "└" "Vterm prompt regexp.")
+
+(defun vterm-capture-command ()
+  "Advice for `vterm-send-return' to capture the command."
+  (let (p1 p2)
+    (save-excursion
+      (goto-char (point-max))
+      (re-search-backward vterm-prompt-regexp nil t 1)
+      (when (< (point) (point-max))
+        (setq p1 (1+ (point)))
+        (end-of-line)
+        (setq p2 (point))))
+    (if (and p1 p2)
+        (setq vterm-last-command
+              (string-trim
+               (buffer-substring-no-properties p1 p2))))))
+
+(advice-add 'vterm-send-return :before #'vterm-capture-command)
 
 (defun vterm-read-send-key ()
   "Read next input event and send it to the libvterm.
@@ -3009,8 +3030,9 @@ and reverse-search-history in bashrc."
   "Activate vi insert mode in shell prompt."
   (interactive)
   (when (and (eq major-mode 'vterm-mode)
-             (string-match "└" (buffer-substring-no-properties
-                                (line-beginning-position) (line-end-position)))
+             (string-match vterm-prompt-regexp
+                           (buffer-substring-no-properties
+                            (line-beginning-position) (line-end-position)))
              (not (eq this-command 'term-interrupt-subjob))
              (not (eq this-command 'vterm-send-return))
              (not (eq this-command 'vterm-history-search)))
@@ -3080,7 +3102,8 @@ and reverse-search-history in bashrc."
 (defun vterm-vi-quit ()
   "Quit vi without save."
   (interactive)
-  (when (y-or-n-p "Quit vi?")
+  (when (and (y-or-n-p "Quit vi?")
+             (eq major-mode 'vterm-mode))
     (vterm-send-key (kbd "^["))
     (vterm-send-key "Z")
     (vterm-send-key "Q")))
@@ -3088,7 +3111,8 @@ and reverse-search-history in bashrc."
 (defun vterm-vi-save-quit ()
   "Save and quit vi."
   (interactive)
-  (when (y-or-n-p "Save and quit vi?")
+  (when (and (y-or-n-p "Save and quit vi?")
+             (eq major-mode 'vterm-mode))
     (vterm-send-key (kbd "^["))
     (vterm-send-key "Z")
     (vterm-send-key "Z")))
@@ -3098,7 +3122,7 @@ and reverse-search-history in bashrc."
   (if (eq major-mode 'vterm-mode) ; sometimes binds and hinders indicate
       (kill-local-variable 'cursor-type)))
 
-(advice-add 'vterm-reset-cursor-point :after 'vterm-reset-cursor-shape)
+(advice-add 'vterm-reset-cursor-point :after #'vterm-reset-cursor-shape)
 
 (defun screenshot ()
   "Take screenshot on macOS."
@@ -3466,7 +3490,7 @@ Use as around advice e.g. for mouse left click after double click."
         (enlarge-window-split))
     (apply fun r)))
 
-(advice-add 'enlarge-window :around 'enlarge-window-around)
+(advice-add 'enlarge-window :around #'enlarge-window-around)
 
 (defun window-half-height-p ()
   "Return t if WINDOW is as half high as its containing frame."
@@ -3522,8 +3546,8 @@ Use as around advice e.g. for mouse left click after double click."
 
 (defun completion-at-point-after (&rest _)
   "Setup after run completion at point."
-  (when-let* ((buf "*Completions*")
-              (win (get-buffer-window buf)))
+  (when-let ((buf "*Completions*")
+             (win (get-buffer-window buf)))
     (with-current-buffer buf
       (save-excursion
         (let ((inhibit-read-only t))
@@ -3532,7 +3556,7 @@ Use as around advice e.g. for mouse left click after double click."
     (shrink-completion-win))
   (setq this-command 'completion-at-point))
 
-(advice-add 'completion-at-point :after 'completion-at-point-after)
+(advice-add 'completion-at-point :after #'completion-at-point-after)
 
 (defun delete-completion-win ()
   "Delete completion window."
@@ -3662,6 +3686,14 @@ Use as around advice e.g. for mouse left click after double click."
   (set-mark-command t)
   (if (fboundp 'centered-cursor)
       (centered-cursor)))
+
+(defun copy-char ()
+  "Prompt for a character and copy it to the kill-ring."
+  (interactive)
+  (let* ((char (read-char-by-name "Copy char: "))
+         (charName (or (get-char-code-property char 'name) "")))
+    (kill-new (char-to-string char))
+    (message "Copied: %c (%s)" char charName)))
 
 (provide 'keycom)
 
