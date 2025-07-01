@@ -221,6 +221,14 @@
     (if (eq last-command 'comp-back)
         (before-last-command))))
 
+(defun undo-comp-forw ()
+  "Undo then completion forward."
+  (interactive)
+  (when (minibufferp)
+    (undo)
+    (setq this-command 'comp-forw)
+    (comp-forw)))
+
 (defun hist-back ()
   "History backward for transient use."
   (interactive)
@@ -695,6 +703,34 @@ and `right-brackets'."
         (command-execute 'ignore))
     (command-execute 'right-char)
     (if (eq last-command 'back-char)
+        (before-last-command))))
+
+(defun bchar ()
+  "Backward char."
+  (interactive)
+  (if (equal before-last-command this-command)
+      (progn
+        (command-execute 'backward-char)
+        (if (region-active-p)
+            (progn
+              (setq this-command 'deactivate-region)
+              (command-execute 'deactivate-region))))
+    (command-execute 'backward-char)
+    (if (eq last-command 'fchar)
+        (before-last-command))))
+
+(defun fchar ()
+  "Forward char."
+  (interactive)
+  (if (equal before-last-command this-command)
+      (progn
+        (command-execute 'forward-char)
+        (if (region-active-p)
+            (progn
+              (setq this-command 'deactivate-region)
+              (command-execute 'deactivate-region))))
+    (command-execute 'forward-char)
+    (if (eq last-command 'bchar)
         (before-last-command))))
 
 (defun activate-region ()
@@ -1894,7 +1930,13 @@ including bracket, else select current word."
              (looking-at "[:blank:]") (forward-char))) ; left and right both space
     (skip-chars-backward "[:blank:]") (push-mark (point) t t)
     (skip-chars-forward "[:blank:]"))
-   (t (mark-sexp) (exchange-point-and-mark)))
+   ((and (eq major-mode 'js-mode)
+         (looking-back "}" (- (point) 1)))
+    (bchar) ; no time to figure it out
+    (select-word))
+   (t
+    (mark-sexp)
+    (exchange-point-and-mark)))
   (let ((r (buffer-substring-no-properties (region-beginning) (region-end))))
     (when (and (region-active-p) (< 5 (length r)))
       (setq cur-hl-regexp r)
@@ -1996,8 +2038,8 @@ command, so that next buffer shown is a user buffer."
   (interactive)
   (if (equal before-last-command this-command)
       (progn
-        (setq this-command 'toggle-ibuffer)
-        (command-execute 'toggle-ibuffer))
+        (setq this-command 'switch-to-buffer)
+        (command-execute 'switch-to-buffer))
     (command-execute 'back-buf)
     (if (eq last-command 'next-buf)
         (before-last-command))))
@@ -2007,8 +2049,8 @@ command, so that next buffer shown is a user buffer."
   (interactive)
   (if (equal before-last-command this-command)
       (progn
-        (setq this-command 'toggle-ibuffer)
-        (command-execute 'toggle-ibuffer))
+        (setq this-command 'switch-to-buffer)
+        (command-execute 'switch-to-buffer))
     (command-execute 'forw-buf)
     (if (eq last-command 'prev-buf)
         (before-last-command))))

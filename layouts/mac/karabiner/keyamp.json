@@ -2,6 +2,133 @@
   "title": "Keyamp",
   "rules": [
     {
+      "description": "mouse",
+      "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "i",
+            "modifiers": {
+              "mandatory": [
+                "left_option"
+              ],
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "to": [
+            {
+              "mouse_key": {
+                "y": -1536
+              }
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "k",
+            "modifiers": {
+              "mandatory": [
+                "left_option"
+              ],
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "to": [
+            {
+              "mouse_key": {
+                "y": 1536
+              }
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "j",
+            "modifiers": {
+              "mandatory": [
+                "left_option"
+              ],
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "to": [
+            {
+              "mouse_key": {
+                "x": -1536
+              }
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "l",
+            "modifiers": {
+              "mandatory": [
+                "left_option"
+              ],
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "to": [
+            {
+              "mouse_key": {
+                "x": 1536
+              }
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "u",
+            "modifiers": {
+              "mandatory": [
+                "left_option"
+              ],
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "to": [
+            {
+              "pointing_button": "button1"
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "o",
+            "modifiers": {
+              "mandatory": [
+                "left_option"
+              ],
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "to": [
+            {
+              "pointing_button": "button2"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "description": "arrows",
       "manipulators": [
         {
@@ -395,30 +522,6 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Books"
-              ]
-            }
-          ],
-          "to": [
-            {
-              "key_code": "left_arrow"
-            }
-          ]
-        },
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "left_command",
-            "modifiers": {
-              "optional": [
-                "any"
-              ]
-            }
-          },
-          "conditions": [
-            {
-              "type": "frontmost_application_if",
-              "file_paths": [
                 "/Emacs"
               ]
             },
@@ -495,7 +598,73 @@
             {
               "key_code": "delete_or_backspace"
             }
+          ],
+          "to_after_key_up": [
+            {
+              "shell_command": "'/Library/Application Support/org.pqrs/Karabiner-Elements/bin/karabiner_cli' --set-variables '{\"left_command pressed\": 1}'; sleep 0.5; '/Library/Application Support/org.pqrs/Karabiner-Elements/bin/karabiner_cli' --set-variables '{\"left_command pressed\": 0}'"
+            }
+          ],
+          "conditions": [
+            {
+              "type": "variable_if",
+              "name": "left_command pressed",
+              "value": 1
+            }
           ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "left_command",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_unless",
+              "file_paths": [
+                "/Emacs"
+              ]
+            }
+          ],
+          "to": [
+            {
+              "set_variable": {
+                "name": "left_command pressed",
+                "value": 1
+              }
+            },
+            {
+              "key_code": "left_command",
+              "lazy": true
+            }
+          ],
+          "to_if_alone": [
+            {
+              "key_code": "delete_or_backspace"
+            }
+          ],
+          "to_delayed_action": {
+            "to_if_invoked": [
+              {
+                "set_variable": {
+                  "name": "left_command pressed",
+                  "value": 0
+                }
+              }
+            ],
+            "to_if_canceled": [
+              {
+                "set_variable": {
+                  "name": "left_command pressed",
+                  "value": 0
+                }
+              }
+            ]
+          }
         }
       ]
     },
@@ -6424,14 +6593,20 @@
           ],
           "to_if_held_down": [
             {
-              "key_code": "m",
-              "modifiers": [
-                "control"
-              ],
+              "key_code": "escape",
               "repeat": false,
               "halt": true
+            },
+            {
+              "set_variable": {
+                "name": "left_command pressed",
+                "value": 0
+              }
             }
-          ]
+          ],
+          "parameters": {
+            "basic.to_if_held_down_threshold_milliseconds": 120
+          }
         },
         {
           "type": "basic",
@@ -6463,12 +6638,15 @@
           ],
           "to_if_held_down": [
             {
-              "key_code": "m",
-              "modifiers": [
-                "left_control"
-              ],
+              "key_code": "escape",
               "repeat": false,
               "halt": true
+            },
+            {
+              "set_variable": {
+                "name": "left_command pressed",
+                "value": 0
+              }
             }
           ]
         },
@@ -6532,9 +6710,15 @@
           ],
           "to_if_held_down": [
             {
-              "shell_command": "open -a Emacs.app",
+              "key_code": "escape",
               "repeat": false,
               "halt": true
+            },
+            {
+              "set_variable": {
+                "name": "left_command pressed",
+                "value": 0
+              }
             }
           ]
         }
@@ -6649,6 +6833,12 @@
                 "name": "spacebar pressed",
                 "value": 0
               }
+            },
+            {
+              "set_variable": {
+                "name": "left_command pressed",
+                "value": 0
+              }
             }
           ],
           "to_if_held_down": [
@@ -6724,6 +6914,12 @@
             {
               "key_code": "left_command",
               "lazy": true
+            },
+            {
+              "set_variable": {
+                "name": "left_command pressed",
+                "value": 0
+              }
             }
           ],
           "conditions": [
@@ -6787,11 +6983,6 @@
             {
               "key_code": "left_control",
               "lazy": true
-            }
-          ],
-          "to_if_alone": [
-            {
-              "shell_command": "open -a Terminal"
             }
           ]
         }
@@ -7140,7 +7331,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Brave"
+                "/Thorium"
               ]
             }
           ],
@@ -7154,7 +7345,7 @@
               "key_code": "c"
             },
             {
-              "shell_command": "sleep 0.2 && /Applications/emacsclient --no-wait --eval '(url-paste-and-go)' && sleep 0.05 && open -a 'Emacs' && osascript -e \"tell application \\\"Finder\\\" to set visible of process \\\"Brave\\\" to false\"",
+              "shell_command": "sleep 0.2 && /Applications/emacsclient --no-wait --eval '(url-paste-and-go)' && sleep 0.05 && open -a 'Emacs' && osascript -e \"tell application \\\"Finder\\\" to set visible of process \\\"Thorium\\\" to false\"",
               "repeat": false,
               "halt": true
             }
@@ -7218,43 +7409,9 @@
               ]
             }
           },
-          "conditions": [
-            {
-              "type": "frontmost_application_if",
-              "file_paths": [
-                "/Preview"
-              ]
-            }
-          ],
           "to": [
             {
-              "key_code": "h",
-              "modifiers": [
-                "command"
-              ]
-            }
-          ]
-        },
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "f5",
-            "modifiers": {
-              "optional": [
-                "any"
-              ]
-            }
-          },
-          "to_after_key_up": [
-            {
-              "shell_command": "open -a Preview"
-            }
-          ],
-          "to_if_held_down": [
-            {
-              "shell_command": "open -a /opt/homebrew/bin/mpv",
-              "repeat": false,
-              "halt": true
+              "key_code": "f5"
             }
           ]
         }
@@ -7420,7 +7577,7 @@
           },
           "to_after_key_up": [
             {
-              "shell_command": "/Applications/emacsclient --no-wait --eval '(let ((message-log-max nil)) (message \"Play next\"))' && /Applications/emacsclient --no-wait --eval '(play-next)'"
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(let ((echo-cleanup-timeout 1) (message-log-max nil)) (message \"Play next\"))' && /Applications/emacsclient --no-wait --eval '(play-next)'"
             },
             {
               "key_code": "fastforward"
@@ -7428,7 +7585,7 @@
           ],
           "to_if_held_down": [
             {
-              "shell_command": "/Applications/emacsclient --no-wait --eval '(let ((message-log-max nil)) (message \"Play prev\"))' && /Applications/emacsclient --no-wait --eval '(play-prev)'",
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(let ((echo-cleanup-timeout 1) (message-log-max nil)) (message \"Play prev\"))' && /Applications/emacsclient --no-wait --eval '(play-prev)'",
               "halt": true
             },
             {
@@ -7536,16 +7693,21 @@
             {
               "type": "frontmost_application_unless",
               "file_paths": [
-                "/Brave"
+                "/Thorium"
               ]
             }
           ],
           "to_after_key_up": [
             {
-              "shell_command": "open -a 'Brave Browser'"
+              "shell_command": "open -a 'Thorium'"
             }
           ],
           "to_if_held_down": [
+            {
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              }
+            },
             {
               "select_input_source": {
                 "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
@@ -7577,7 +7739,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Brave"
+                "/Thorium"
               ]
             }
           ],
@@ -7588,10 +7750,20 @@
               }
             },
             {
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              }
+            },
+            {
               "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)' && open -a 'Emacs'"
             }
           ],
           "to_if_held_down": [
+            {
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              }
+            },
             {
               "select_input_source": {
                 "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
@@ -7666,12 +7838,17 @@
           ],
           "to_after_key_up": [
             {
-              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
+              "select_input_source": {
+                "input_source_id": "com.apple.keylayout.RussianWin"
+              }
             },
             {
               "select_input_source": {
                 "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
               }
+            },
+            {
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
             }
           ],
           "to_if_held_down": [
@@ -7683,6 +7860,9 @@
             {
               "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'",
               "halt": true
+            },
+            {
+              "shell_command": "osascript -e 'tell application \"Emacs\" to activate'"
             }
           ]
         },
@@ -7714,12 +7894,20 @@
           ],
           "to_after_key_up": [
             {
-              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
+              "select_input_source": {
+                "input_source_id": "com.apple.keylayout.ABC"
+              }
             },
             {
               "select_input_source": {
                 "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
               }
+            },
+            {
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
+            },
+            {
+              "shell_command": "osascript -e 'tell application \"Emacs\" to activate'"
             }
           ],
           "to_if_held_down": [
@@ -7731,6 +7919,9 @@
             {
               "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'",
               "halt": true
+            },
+            {
+              "shell_command": "osascript -e 'tell application \"Emacs\" to activate'"
             }
           ]
         },
@@ -7762,12 +7953,12 @@
           ],
           "to_after_key_up": [
             {
-              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-ru)'"
-            },
-            {
               "select_input_source": {
                 "input_source_id": "com.apple.keylayout.RussianWin"
               }
+            },
+            {
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-ru)'"
             }
           ],
           "to_if_held_down": [
@@ -7779,6 +7970,9 @@
             },
             {
               "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)'"
+            },
+            {
+              "shell_command": "osascript -e 'tell application \"Emacs\" to activate'"
             }
           ]
         },
@@ -7805,6 +7999,11 @@
           "to_after_key_up": [
             {
               "select_input_source": {
+                "input_source_id": "com.apple.keylayout.RussianWin"
+              }
+            },
+            {
+              "select_input_source": {
                 "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
               }
             },
@@ -7845,6 +8044,11 @@
             }
           ],
           "to_after_key_up": [
+            {
+              "select_input_source": {
+                "input_source_id": "com.apple.keylayout.ABC"
+              }
+            },
             {
               "select_input_source": {
                 "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
@@ -7888,12 +8092,12 @@
           ],
           "to_after_key_up": [
             {
-              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-ru)'"
-            },
-            {
               "select_input_source": {
                 "input_source_id": "com.apple.keylayout.RussianWin"
               }
+            },
+            {
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-ru)'"
             }
           ],
           "to_if_held_down": [
@@ -7931,6 +8135,11 @@
           "to_after_key_up": [
             {
               "select_input_source": {
+                "input_source_id": "com.apple.keylayout.Hebrew"
+              }
+            },
+            {
+              "select_input_source": {
                 "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
               }
             },
@@ -7939,6 +8148,11 @@
             }
           ],
           "to_if_held_down": [
+            {
+              "select_input_source": {
+                "input_source_id": "com.apple.keylayout.Hebrew"
+              }
+            },
             {
               "select_input_source": {
                 "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
@@ -7977,6 +8191,11 @@
             {
               "select_input_source": {
                 "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              }
+            },
+            {
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
               },
               "repeat": false
             },
@@ -8016,11 +8235,21 @@
               }
             },
             {
-              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)' && open -a 'Brave Browser'",
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              }
+            },
+            {
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(frame-title-en)' && open -a 'Thorium'",
               "halt": true
             }
           ],
           "to_after_key_up": [
+            {
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              }
+            },
             {
               "select_input_source": {
                 "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
@@ -8055,6 +8284,11 @@
               }
             },
             {
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              }
+            },
+            {
               "key_code": "h",
               "modifiers": [
                 "command"
@@ -8066,6 +8300,11 @@
             }
           ],
           "to_after_key_up": [
+            {
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              }
+            },
             {
               "select_input_source": {
                 "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
