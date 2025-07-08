@@ -960,7 +960,9 @@ If `universal-argument' is called first, do not delete inner text."
       (delete-region (region-beginning) (region-end))
     (cond
      ((looking-back "\\s)" 1)
-      (if current-prefix-arg (cut-bracket-pair) (cut-bracket-text)))
+      (if current-prefix-arg
+          (cut-bracket-pair)
+        (cut-bracket-text)))
      ((looking-back "\\s(" 1)
       ;; (message "Left of cursor is opening bracket")
       (let (pOpenBracketLeft (pOpenBracketRight (point)) isComment)
@@ -1980,6 +1982,7 @@ command, so that next buffer shown is a user buffer."
   (cond
    ((string-equal "*" (substring (buffer-name) 0 1)) nil)
    ((memq major-mode '(eww-mode dired-mode help-mode doc-view-mode diary-mode)) nil)
+   ((string-equal (buffer-name) "scratch.el") nil)
    ((string-equal (buffer-name) "tetris-scores") nil)
    ((string-equal (buffer-name) "snake-scores") nil)
    ((string-equal buffer-file-truename org-agenda-file-1) nil)
@@ -3037,7 +3040,7 @@ and reverse-search-history in bashrc."
       (vterm-send-key (kbd "DEL")) ; vterm-module.c:996 missing DEL
     (vterm--self-insert)))
 
-(defun vterm-tmux-create-window ()
+(defun vterm-tmux-new-window ()
   "Tmux create window."
   (interactive)
   (vterm-tmux-prefix)
@@ -3118,6 +3121,11 @@ and reverse-search-history in bashrc."
   "Send key to shell prompt vi cmd mode."
   (interactive)
   (vterm-send-key "e"))
+
+(defun vterm-shell-vi-a ()
+  "Send key to shell prompt vi cmd mode."
+  (interactive)
+  (vterm-send-key "a"))
 
 (defun vterm-vi ()
   "Activate vi mode transient."
@@ -3442,7 +3450,7 @@ This checks in turn:
     (vterm-vi-quit))
    (t
     (setq this-command 'repeat-complex-command)
-    (call-interactively repeat-complex-command))))
+    (call-interactively 'repeat-complex-command))))
 
 (defun dired-toggle-mark ()
   "Toggle mark for the current file."
@@ -3736,6 +3744,30 @@ Use as around advice e.g. for mouse left click after double click."
          (charName (or (get-char-code-property char 'name) "")))
     (kill-new (char-to-string char))
     (message "Copied: %c (%s)" char charName)))
+
+(defconst prog-commands
+  '(("python-new" . "New Python file.")
+    ("go-new" . "New Go file.")
+    ("bash-new" . "New Bash file."))
+  "Alist of commands and their descriptions.")
+
+(defun prog-new (Cmd)
+  "New prog file, commands defined in `prog-commands'.
+Marginalia annotation support."
+  (interactive
+   (list (completing-read
+          "New prog file: "
+          (lambda (str pred action)
+            (if (eq action 'metadata)
+                `(metadata
+                  (annotation-function
+                   . ,(lambda (key)
+                        (format " %s" (cdr (assoc key prog-commands))))))
+              (complete-with-action action (mapcar #'car prog-commands) str pred))))))
+  (if-let ((cmd (intern Cmd))
+           ((fboundp cmd)))
+      (funcall cmd)
+    (message "No command %s" Cmd)))
 
 (provide 'keycom)
 
