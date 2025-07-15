@@ -303,11 +303,11 @@ Activate command, insert or repeat mode optionally."
   (declare (indent defun))
   `(if (display-graphic-p)
        (keyamp--map ,KeymapName
-         '(("<backspace>" . ,(car (cadr CmdCons)))
-           ("SPC" . ,(cdr (cadr CmdCons)))))
+         '(("SPC" . ,(car (cadr CmdCons)))
+           ("<backspace>" . ,(cdr (cadr CmdCons)))))
      (keyamp--map ,KeymapName
-       '(("DEL" . ,(car (cadr CmdCons)))
-         ("SPC" . ,(cdr (cadr CmdCons)))))))
+       '(("SPC" . ,(car (cadr CmdCons)))
+         ("DEL" . ,(cdr (cadr CmdCons)))))))
 
 (defmacro keyamp--map-tab (KeymapName Cmd)
   "Map TAB or <tab> keys to CMD using `keyamp--map'."
@@ -574,7 +574,7 @@ is enabled.")
     ("u" . flymake-goto-prev-error)
 
     ("i i"   . copy-file-path)
-    ("i DEL" . count-words)                ("i SPC" . count-matches)
+    ("i DEL" . count-matches)              ("i SPC" . count-words)
     ("i <escape>" . ignore)                ("i RET" . show-in-desktop)
 
     ("o"  . flymake-goto-next-error)
@@ -589,7 +589,7 @@ is enabled.")
                                            ("j l"   . narrow-to-region-or-block)
                                            ("j k"   . narrow-to-defun)
                                            ("j j"   . diff-buffers)
-    ("j DEL" . hl-line-mode)               ("j SPC" . whitespace-mode)
+    ("j DEL" . whitespace-mode)            ("j SPC" . hl-line-mode)
     ("j <escape>" . ignore)                ("j RET" . toggle-word-wrap)
 
     ("k s"   . space-to-newline)
@@ -601,7 +601,7 @@ is enabled.")
     ("k w"   . sort-lines-key-value)       ("k o"   . slash-to-backslash)
     ("k x"   . insert-column-a-z)          ("k ."   . sort-lines-block-or-region)
     ("k c"   . cycle-hyphen-lowline-space) ("k ,"   . sort-numeric-fields)
-    ("k DEL" . ispell-word)                ("k SPC" . flyspell-buffer)
+    ("k DEL" . flyspell-buffer)            ("k SPC" . ispell-word)
     ("k <escape>" . ignore)                ("k RET" . list-matching-lines)
 
     ("l" . screen-idle)
@@ -615,11 +615,11 @@ is enabled.")
 
 (if (display-graphic-p)
     (keyamp--map keyamp-lleader-map
-      '(("i DEL" . nil)        ("i <backspace>" . count-words)
+      '(("i DEL" . nil)        ("i <backspace>" . count-matches)
         ("i RET" . nil)        ("i <return>"    . show-in-desktop)
-        ("j DEL" . nil)        ("j <backspace>" . hl-line-mode)
+        ("j DEL" . nil)        ("j <backspace>" . whitespace-mode)
         ("j RET" . nil)        ("j <return>"    . toggle-word-wrap)
-        ("k DEL" . nil)        ("k <backspace>" . ispell-word)
+        ("k DEL" . nil)        ("k <backspace>" . flyspell-buffer)
         ("k RET" . nil)        ("k <return>"    . find-file)
         ("<mouse-1>" . ignore)
         ("<mouse-2>" . ignore)
@@ -645,7 +645,7 @@ is enabled.")
     ("w" . sun-moon)
 
     ("e e"   . todo)                       ("e k"   . weather)
-    ("e DEL" . clock)                      ("e SPC" . calendar)
+    ("e SPC" . clock)                      ("e DEL" . calendar)
     ("e <escape>" . ignore)                ("e RET" . insert-date)
 
     ("r" . query-replace-regexp)
@@ -656,7 +656,7 @@ is enabled.")
     ("D"     . repeat)                     ("В"     . repeat)
     ("d e"   . org-shiftup)                ("d i"   . async-shell-command)
     ("d d"   . eval-region-or-sexp)        ("d k"   . run-current-file)
-    ("d DEL" . stow)                       ("d SPC" . eval-defun-visual)
+    ("d SPC" . stow)                       ("d DEL" . eval-defun-visual)
     ("d <escape>" . ignore)                ("d RET" . shell-command)
 
     ("f e"   . insert-emacs-quote)         ("f i"   . insert-ascii-single-quote)
@@ -664,7 +664,7 @@ is enabled.")
     ("f k"   . insert-paren)
     ("f s"   . insert-formfeed)            ("f l"   . insert-square-bracket)
     ("f g"   . insert-double-angle-quote)  ("f h"   . insert-double-curly-quote)
-    ("f DEL" . insert-backtick-quote)      ("f SPC" . insert-ascii-double-quote)
+    ("f DEL" . insert-ascii-double-quote)  ("f SPC" . insert-backtick-quote)
     ("f <escape>" . ignore)                ("f RET" . emoji-insert)
 
     ("g" . scratch)
@@ -708,11 +708,11 @@ is enabled.")
 
 (if (display-graphic-p)
     (keyamp--map keyamp-rleader-map
-      '(("e DEL" . nil)        ("e <backspace>" . clock)
+      '(("e DEL" . nil)        ("e <backspace>" . calendar)
         ("e RET" . nil)        ("e <return>"    . insert-date)
-        ("d DEL" . nil)        ("d <backspace>" . stow)
+        ("d DEL" . nil)        ("d <backspace>" . eval-defun-visual)
         ("d RET" . nil)        ("d <return>"    . shell-command)
-        ("f DEL" . nil)        ("f <backspace>" . insert-backtick-quote)
+        ("f DEL" . nil)        ("f <backspace>" . insert-ascii-double-quote)
         ("f RET" . nil)        ("f <return>"    . emoji-insert)
         ("<mouse-1>" . ignore)
         ("<mouse-2>" . ignore)
@@ -814,15 +814,15 @@ is enabled.")
   (keyamp--map-leader keymap '(isearch-ring-retreat . isearch-yank-kill))
   (keyamp--map-return keymap isearch-direction-switch)
   (keyamp--map keymap '(("C-t" . isearch-forward-regexp) ("n" . save-buffer-isearch-cancel)))
-  (keyamp--map-backtab keymap isearch-double-back) ; repeat backward
+  (keyamp--map-tab keymap isearch-double-back) ; repeat backward
   (keyamp--hook keymap '(isearch-mode-hook) nil nil :repeat))
 
 ;; Hit TAB to repeat after typing in search string and set following transient
 ;; map. Backtab to repeat backward. S-DEL/S-SPC for Backtab/TAB.
-(keyamp--map-leader isearch-mode-map '(isearch-del-char . isearch-printing-char))
+(keyamp--map-leader isearch-mode-map '(isearch-printing-char . isearch-del-char))
 (keyamp--map-escape isearch-mode-map isearch-cancel)
-(keyamp--map-backtab isearch-mode-map isearch-back)
-(keyamp--map-tab isearch-mode-map isearch-forw)
+(keyamp--map-tab isearch-mode-map isearch-back)
+(keyamp--map-backtab isearch-mode-map isearch-forw)
 (keyamp--map isearch-mode-map '(("C-^" . keyamp-lleader-map) ("C-t" . isearch-complete)))
 (keyamp--remap isearch-mode-map '((paste-from-r1 . isearch-yank-r1)))
 
@@ -1057,6 +1057,10 @@ is enabled.")
 
 
 ;; Repeat mode - read commands
+
+(with-sparse-keymap ; hold down RET to ESC, second press for double ESC
+  (keyamp--map-return keymap keyamp-escape)
+  (keyamp--set keymap '(keyamp-escape) nil nil nil keyamp-blink-idle-duration))
 
 (with-sparse-keymap
   ;; Initiate by triple DEL/SPC (hold down).
@@ -1419,8 +1423,8 @@ ascii CHAR."
     (keyamp--map-escape keymap keyamp-minibuffer-escape)
     (keyamp--map-return keymap keyamp-minibuffer-return)
     (keyamp--map keymap '(("C-t" . keyamp-minibuffer-shift))) ; S-<return>
-    (keyamp--map-backtab keymap isearch-backward)
-    (keyamp--map-tab keymap comp-forw)
+    (keyamp--map-backtab keymap comp-forw)
+    (keyamp--map-tab keymap isearch-backward)
     (keyamp--map-ascii keymap 'keyamp-insert-minibuffer)
     (keyamp--map keymap
       '(("<left>" . isearch-backward) ("<right>" . keyamp-minibuffer-shift)
@@ -1456,8 +1460,8 @@ ascii CHAR."
     (keyamp--map-leader keymap '(minibuffer-previous-completion . minibuffer-next-completion))
     (keyamp--map-escape keymap delete-completion-win)
     (keyamp--map-return keymap minibuffer-choose-completion)
-    (keyamp--map-backtab keymap minibuffer-previous-completion)
-    (keyamp--map-tab keymap minibuffer-next-completion)
+    (keyamp--map-backtab keymap minibuffer-next-completion)
+    (keyamp--map-tab keymap minibuffer-previous-completion)
     (keyamp--set keymap
       '(completion-at-point minibuffer-previous-completion minibuffer-next-completion)))
 
@@ -1665,8 +1669,8 @@ ascii CHAR."
 
   (advice-add 'company-search-candidates :after #'keyamp-insert-init)
   (keyamp--map-escape company-search-map company-search-abort)
-  (keyamp--map-backtab company-search-map company-search-repeat-backward)
-  (keyamp--map-tab company-search-map company-search-repeat-forward)
+  (keyamp--map-backtab company-search-map company-search-repeat-forward)
+  (keyamp--map-tab company-search-map company-search-repeat-backward)
 
   (with-sparse-keymap
     (keyamp--map-leader keymap '(company-search-repeat-backward . company-search-repeat-forward))
@@ -2115,8 +2119,8 @@ ascii CHAR."
   ;; bind -T copy-mode-vi o send-keys -X next-word-end
 
   ;; bind -T copy-mode-vi C-? send-keys -X halfpage-up
-  ;; bind -T copy-mode-vi BSpace send-keys -X halfpage-up
-  ;; bind -T copy-mode-vi Space send-keys -X halfpage-down
+  ;; bind -T copy-mode-vi Space send-keys -X halfpage-up
+  ;; bind -T copy-mode-vi BSpace send-keys -X halfpage-down
   ;; bind -T copy-mode-vi h send-keys -X start-of-line
   ;; bind -T copy-mode-vi ; send-keys -X end-of-line
 
@@ -2510,7 +2514,8 @@ ascii CHAR."
     '((eval-defun-visual   . exec-query)
       (eval-region-or-sexp . exec-query-remote)
       (number-to-register  . toggle-sql-async-conn)
-      (quit                . toggle-sql-async-remote)))
+      (quit                . toggle-sql-async-remote)
+      (reformat-lines      . sql-format-buffer)))
   (with-sparse-keymap
     (keyamp--remap keymap
       '((point-to-register . toggle-sql-type)
@@ -3434,9 +3439,11 @@ after a delay even if there more read commands follow."
               (memq this-command keyamp-blink-modify-commands)
               (eq major-mode 'wdired-mode))
           (keyamp-blink keyamp-blinker-modify))
-      (if (or (eq this-command 'ignore)
-              (eq this-command 'keyamp-escape))
+      (if (eq this-command 'ignore)
           (keyamp-blink keyamp-blinker-idle))
+      (when (eq this-command 'keyamp-escape)
+        (keyamp-blink keyamp-blinker-idle)
+        (modify-all-frames-parameters '((cursor-type . hollow))))
       (if (memq this-command keyamp-blink-io-commands)
           (keyamp-blink keyamp-blinker-io))
       (if (memq this-command keyamp-blink-command-commands)
@@ -3516,8 +3523,11 @@ after a delay even if there more read commands follow."
   (if (eq (oref obj indicator) mode-line-front-space)
       (keyamp-indicate (oref obj curIndicator) (oref obj curCursor) (oref obj curColor))))
 
+(defconst keyamp-blink-idle-duration (/ keyamp-blink-duration 2) "Blink idle duration.")
+
 (defconst keyamp-blinker-idle
-  (keyamp-blinker :indicator keyamp-idle-indicator :color 'keyamp-idle-color)
+  (keyamp-blinker :indicator keyamp-idle-indicator :color 'keyamp-idle-color
+                  :duration keyamp-blink-idle-duration)
   "Blinker idle.")
 
 (defconst keyamp-blinker-command

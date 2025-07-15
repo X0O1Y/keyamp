@@ -61,8 +61,8 @@
 (defvar last-command-keys nil "Last command keys.")
 
 (defconst triple-press-direction-commands-list
-  '(backward-char
-    forward-char
+  '(bchar
+    fchar
     previous-line
     dired-previous-line
     back-word
@@ -79,7 +79,7 @@
    ((equal before-last-command 'back-word)
     (setq this-command 'back-word-repeat)
     (back-word-repeat))
-   ((equal before-last-command 'backward-char)
+   ((equal before-last-command 'bchar)
     (setq this-command 'back-char)
     (back-char))
    ((equal before-last-command this-command)
@@ -112,7 +112,7 @@
         (equal before-last-command 'dired-previous-line)) ; before select-word
     (setq this-command 'up-line-rev)
     (up-line-rev))
-   ((equal before-last-command 'forward-char)
+   ((equal before-last-command 'fchar)
     (setq this-command 'forw-char)
     (forw-char))
    ((equal before-last-command this-command)
@@ -894,7 +894,8 @@ paste that many times."
 (defun show-kill-ring ()
   "Insert all `kill-ring' content in a new buffer named *copy stack*."
   (interactive)
-  (let ((buf (generate-new-buffer "*copy stack*")) (inhibit-read-only t))
+  (let ((buf (generate-new-buffer "*copy stack*"))
+        (inhibit-read-only t))
     (progn
       (switch-to-buffer buf)
       (mapc (lambda (x)
@@ -3413,7 +3414,7 @@ This checks in turn:
 (defconst video-extensions '("mkv" "mp4" "avi" "mov" "ts" "mts" "m2ts" "webm" "vob" "aiff")
   "Open these video file extensions with `open-in-external-app'.")
 
-(defconst external-extensions `("mp3" "m4a" "flac" "torrent" "exe" "xlsx")
+(defconst external-extensions `("mp3" "m4a" "flac" "torrent" "exe" "xlsx" "docx")
   "Open these file extensions with `open-in-external-app'.")
 
 (setq external-extensions (append external-extensions video-extensions))
