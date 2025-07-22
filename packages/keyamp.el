@@ -528,12 +528,12 @@ is enabled.")
     ("<up>"    . up-line)
     ("<down>"  . down-line)))
 
-(keyamp--map-leader keyamp-lleader-map '(select-block . select-quote))
+(keyamp--map-leader keyamp-lleader-map '(select-word . select-quote))
 (keyamp--map-return keyamp-lleader-map execute-extended-command)
 (keyamp--map keyamp-lleader-map '(("C-t" . display-line-numbers-mode)))
 (keyamp--map-escape keyamp-lleader-map ignore)
-(keyamp--map-backtab keyamp-lleader-map volume-decrease)
 (keyamp--map-tab keyamp-lleader-map read-only-mode)
+(keyamp--map-backtab keyamp-lleader-map volume-decrease)
 (keyamp--map keyamp-lleader-map
   '(;; left leader left half
     ("`" . revert-buffer)
@@ -581,7 +581,7 @@ is enabled.")
     ("p"  . show-kill-ring)
     ("["  . toggle-frame-maximized)
     ("]"  . gptel-menu)
-    ("\\" . ignore)
+    ("\\" . tt-conn)
 
     ("h"  . prog-new)
 
@@ -626,7 +626,7 @@ is enabled.")
         ("<mouse-3>" . ignore)
         ("<down-mouse-1>" . mouse-drag-region-rectangle))))
 
-(keyamp--map-leader keyamp-rleader-map '(select-line . select-word))
+(keyamp--map-leader keyamp-rleader-map '(select-line . select-block))
 (keyamp--map-return keyamp-rleader-map open-file)
 (keyamp--map keyamp-rleader-map '(("C-t" . toggle-truncate-lines)))
 (keyamp--map-escape keyamp-rleader-map ignore)
@@ -740,11 +740,11 @@ is enabled.")
 (setq help-map (make-sparse-keymap))
 (fset 'help-command help-map)
 
-(keyamp--map-leader help-map '(lookup-word-definition . translate))
+(keyamp--map-leader help-map '(translate . lookup-word-definition))
 (keyamp--map-escape help-map ignore)
 (keyamp--map-return help-map lookup-web)
-(keyamp--map-backtab help-map lookup-etymology)
 (keyamp--map-tab help-map lookup-wikipedia)
+(keyamp--map-backtab help-map lookup-etymology)
 (keyamp--map help-map
   '(("e" . describe-char)      ("i" . info)
     ("s" . info-lookup-symbol) ("j" . describe-function)
@@ -796,12 +796,12 @@ is enabled.")
 (with-sparse-keymap
   ;; S-RET to call `hippie-expand'. Press RET to insert a possible expansion.
   ;; SPC to confirm, DEL to reset.
-  (keyamp--map-leader keymap '(hippie-expand-reset . insert-space-before))
+  (keyamp--map-leader keymap '(insert-space-before . hippie-expand-reset))
   (keyamp--map-return keymap hippie-expand)
   (keyamp--set keymap '(hippie-expand)))
 
 (with-sparse-keymap ; next DEL to exit or RET to start over
-  (keyamp--map-leader keymap '(delete-backward-char . insert-space-before))
+  (keyamp--map-leader keymap '(insert-space-before . delete-backward-char))
   (keyamp--map-return keymap hippie-expand)
   (keyamp--set keymap '(hippie-expand-reset)))
 
@@ -811,7 +811,7 @@ is enabled.")
 (with-sparse-keymap
   ;; After starting up an isearch press DEL to retreat to the previous
   ;; search string. Press SPC to pull string from kill ring into search string.
-  (keyamp--map-leader keymap '(isearch-ring-retreat . isearch-yank-kill))
+  (keyamp--map-leader keymap '(isearch-yank-kill . isearch-ring-retreat))
   (keyamp--map-return keymap isearch-direction-switch)
   (keyamp--map keymap '(("C-t" . isearch-forward-regexp) ("n" . save-buffer-isearch-cancel)))
   (keyamp--map-tab keymap isearch-double-back) ; repeat backward
@@ -821,8 +821,8 @@ is enabled.")
 ;; map. Backtab to repeat backward. S-DEL/S-SPC for Backtab/TAB.
 (keyamp--map-leader isearch-mode-map '(isearch-printing-char . isearch-del-char))
 (keyamp--map-escape isearch-mode-map isearch-cancel)
-(keyamp--map-tab isearch-mode-map isearch-back)
-(keyamp--map-backtab isearch-mode-map isearch-forw)
+(keyamp--map-tab isearch-mode-map isearch-forw)
+(keyamp--map-backtab isearch-mode-map isearch-back)
 (keyamp--map isearch-mode-map '(("C-^" . keyamp-lleader-map) ("C-t" . isearch-complete)))
 (keyamp--remap isearch-mode-map '((paste-from-r1 . isearch-yank-r1)))
 
@@ -830,7 +830,7 @@ is enabled.")
   ;; Find the occurrence of the current search string with J/L or DEL/SPC.
   ;; Press I/K or DEL/SPC to get search strings from the ring.
   ;; S-SPC to find the occurrence of the last search string.
-  (keyamp--map-leader keymap '(isearch-back . isearch-forw))
+  (keyamp--map-leader keymap '(isearch-forw . isearch-back))
   (keyamp--map-return keymap isearch-exit)
   (keyamp--map keymap
     '(("i" . isearch-ring-retreat) ("j" . isearch-back)
@@ -856,10 +856,10 @@ is enabled.")
 (with-sparse-keymap
   ;; Press I/K or DEL/SPC to get search strings from the ring
   ;; then S-DEL/S-SPC to find the occurrence of the search string.
-  (keyamp--map-leader keymap '(hist-back . hist-forw))
+  (keyamp--map-leader keymap '(hist-forw . hist-back))
   (keyamp--map-escape keymap isearch-cancel-clean-are)
-  (keyamp--map-backtab keymap exit-minibuffer)
   (keyamp--map-tab keymap exit-minibuffer)
+  (keyamp--map-backtab keymap exit-minibuffer)
 
  (defun isearch-mode-setup-minibuffer ()
    "Setup isearch transient in minibuffer before choice from the ring."
@@ -918,7 +918,7 @@ is enabled.")
 (with-sparse-keymap
   ;; Leader layer to become transient main. Base map for next leaders adjustment
   ;; by transient maps which set by following target commands subsets.
-  (keyamp--map-leader keymap '(open-line . newline))
+  (keyamp--map-leader keymap '(newline . open-line))
   (keyamp--map-return keymap keyamp-escape)
   (keyamp--map-backtab keymap page-up-half)
   (keyamp--map-tab keymap keyamp-tab)
@@ -946,13 +946,12 @@ is enabled.")
 
   (keyamp--set keymap
     '(prev-buf                   next-buf
-      split-window-below         save-close-buf
+      save-close-buf             tools
       prev-proj-buf              next-proj-buf
       prev-eww-buf               next-eww-buf
       prev-eshell-buf            next-eshell-buf
       prev-dired-buf             next-dired-buf
       tasks                      config
-      tools
       previous-buffer            next-buffer
       find-prev-dir-file         find-next-dir-file
       shrink-window              enlarge-window
@@ -980,7 +979,7 @@ is enabled.")
 (with-sparse-keymap
   (keyamp--remap keymap '((open-line . prev-buf) (newline . next-buf)))
   (keyamp--set keymap
-    '(prev-buf next-buf delete-other-windows delete-window split-window-below
+    '(prev-buf next-buf delete-other-windows delete-window
       split-window-horizontally)))
 
 (with-sparse-keymap
@@ -988,16 +987,16 @@ is enabled.")
   (keyamp--set keymap '(prev-proj-buf next-proj-buf)))
 
 (with-sparse-keymap
-  (keyamp--map-backtab keymap page-up-half)
   (keyamp--map-tab keymap keyamp-tab)
+  (keyamp--map-backtab keymap page-up-half)
   (keyamp--remap keymap
     '((open-line . prev-eww-buf) (newline . next-eww-buf)
       (del-back  . eww-reload)   (undo    . justify-buffer)))
   (keyamp--set keymap '(prev-eww-buf next-eww-buf)))
 
 (with-sparse-keymap
-  (keyamp--map-backtab keymap page-up-half)
   (keyamp--map-tab keymap keyamp-tab)
+  (keyamp--map-backtab keymap page-up-half)
   (keyamp--remap keymap '((open-line . prev-eshell-buf) (newline . next-eshell-buf)))
   (keyamp--set keymap '(prev-eshell-buf next-eshell-buf)))
 
@@ -1006,7 +1005,7 @@ is enabled.")
   (keyamp--set keymap '(prev-dired-buf next-dired-buf)))
 
 (with-sparse-keymap
-  (keyamp--remap keymap '((open-line . prev-buf) (newline . tasks)))
+  (keyamp--remap keymap '((open-line . tasks) (newline . next-buf)))
   (keyamp--set keymap '(tasks org-agenda-tasks)))
 
 (with-sparse-keymap
@@ -1065,10 +1064,10 @@ is enabled.")
 (with-sparse-keymap
   ;; Initiate by triple DEL/SPC (hold down).
   ;; I/K or DEL/SPC to move by lines. See `return-before'.
-  (keyamp--map-leader keymap '(up-line . down-line))
+  (keyamp--map-leader keymap '(down-line . up-line))
   (keyamp--map-return keymap keyamp-ret)
-  (keyamp--map-backtab keymap hscroll-left)
   (keyamp--map-tab keymap keyamp-tab)
+  (keyamp--map-backtab keymap hscroll-left)
   (keyamp--map keymap '(("<up>" . up-line-rev)))
   (keyamp--remap keymap '((previous-line . up-line-rev) (next-line . down-line)))
   (keyamp--set keymap '(up-line down-line))
@@ -1090,25 +1089,25 @@ is enabled.")
    :after 'keyamp-lines-move))
 
 (with-sparse-keymap ; swap leaders up/down
-  (keyamp--map-leader keymap '(down-line-rev . up-line-rev))
+  (keyamp--map-leader keymap '(up-line-rev . down-line-rev))
   (keyamp--map-return keymap keyamp-ret)
   (keyamp--remap keymap '((previous-line . up-line) (next-line . down-line)))
   (keyamp--set keymap '(up-line-rev down-line-rev)))
 
 (with-sparse-keymap
-  (keyamp--map-leader keymap '(up-line . down-line))
+  (keyamp--map-leader keymap '(down-line . up-line))
   (keyamp--map-return keymap keyamp-ret)
   (keyamp--remap keymap '((previous-line . beg-of-block) (next-line . end-of-block)))
   (keyamp--set keymap '(beg-of-buf end-of-buf)))
 
 (with-sparse-keymap
-  (keyamp--map-leader keymap '(beg-of-block . end-of-block))
+  (keyamp--map-leader keymap '(end-of-block . beg-of-block))
   (keyamp--map-return keymap keyamp-ret)
   (keyamp--remap keymap '((previous-line . beg-of-block-rev) (next-line . end-of-block)))
   (keyamp--set keymap '(beg-of-block end-of-block)))
 
 (with-sparse-keymap
-  (keyamp--map-leader keymap '(end-of-block-rev . beg-of-block-rev))
+  (keyamp--map-leader keymap '(beg-of-block-rev . end-of-block-rev))
   (keyamp--map-return keymap keyamp-ret)
   (keyamp--remap keymap '((previous-line . beg-of-block) (next-line . end-of-block)))
   (keyamp--set keymap '(beg-of-block-rev end-of-block-rev)))
@@ -1116,20 +1115,20 @@ is enabled.")
 ;; In case triple DEL received during `keyamp-key-repeat-delay',
 ;; `select-block' would be ignored. Must call before following transient maps.
 ;; Same for triple SPC and `select-word'.
-(advice-add-macro '(select-block select-word) :around 'keyamp-defer-command-around)
+(advice-add-macro '(select-word select-block) :around 'keyamp-defer-command-around)
 (advice-add-macro '(up-line down-line) :before 'keyamp-cancel-defer-command-timer)
 
 (with-sparse-keymap
-  (keyamp--map-leader keymap '(up-line . keyamp-escape))
-  (keyamp--remap keymap
-    '((previous-line . beg-of-block)  (next-line     . select-block)
-      (keyamp-escape . return-before) (hippie-expand . exec-query)))
-  (keyamp--set keymap '(select-block)))
-
-(with-sparse-keymap
-  (keyamp--map-leader keymap '(keyamp-escape . down-line))
+  (keyamp--map-leader keymap '(down-line . keyamp-escape))
   (keyamp--remap keymap '((keyamp-escape . return-before)))
   (keyamp--set keymap '(select-word)))
+
+(with-sparse-keymap
+  (keyamp--map-leader keymap '(keyamp-escape . up-line))
+  (keyamp--remap keymap
+    '((previous-line . beg-of-block)  (next-line     . select-word)
+      (keyamp-escape . return-before) (hippie-expand . exec-query)))
+  (keyamp--set keymap '(select-block)))
 
 (with-sparse-keymap
   (keyamp--map-leader keymap '(copy-line . copy-line))
@@ -1155,7 +1154,7 @@ is enabled.")
 :before 'return-before)
 
 (with-sparse-keymap ; left/right arrows repeat by DEL/SPC
-  (keyamp--map-leader keymap '(back-char . forw-char))
+  (keyamp--map-leader keymap '(forw-char . back-char))
   (keyamp--set keymap '(back-char forw-char)))
 
 ;; touch screen
@@ -1172,7 +1171,7 @@ is enabled.")
   (keyamp--set keymap '(back-word forw-word)))
 
 (with-sparse-keymap
-  (keyamp--map-leader keymap '(bchar . fchar))
+  (keyamp--map-leader keymap '(fchar . bchar))
   (keyamp--remap keymap '((bchar . back-word-repeat) (fchar . forw-word-repeat)))
   (keyamp--set keymap '(back-word-repeat forw-word-repeat)))
 
@@ -1226,15 +1225,15 @@ ascii CHAR."
 (with-sparse-keymap
   (keyamp--map keymap '(("i" . keyamp-lleader-i-map)))
   (keyamp--map keyamp-lleader-i-map '(("i" . backup-and-copy)))
-  (keyamp--remap keymap '((back-word . select-block) (forw-word . select-quote)))
+  (keyamp--remap keymap '((back-word . select-word) (forw-word . select-quote)))
   (advice-add 'back-word :after
               (lambda () "virtual leader" (keyamp-virtual-leader-init keymap))))
 
 (with-sparse-keymap
-  (keyamp--map-leader keymap '(open-line . newline))
+  (keyamp--map-leader keymap '(newline . open-line))
   (keyamp--remap keymap '((open-line . downloads) (newline . tools)))
   (keyamp--remap keymap
-    '((back-word     . select-line)   (forw-word        . select-word)
+    '((back-word     . select-line)   (forw-word        . select-block)
       (previous-line . beg-of-block)  (next-line        . end-of-block)
       (bchar . isearch-wback)         (backward-bracket . dired-jump)))
   (advice-add 'forw-word :after
@@ -1245,23 +1244,23 @@ ascii CHAR."
   (if (timerp keyamp-virtual-leader-timer)
       (set-mark-command t)))
 
-(advice-add-macro '(select-block     select-quote
-                    select-line      select-word
+(advice-add-macro '(select-word      select-quote
+                    select-line      select-block
                     backup-and-copy  isearch-wback
                     prev-buf         tools)
                   :before 'keyamp-virtual-leader-return-before)
 
 ;; G acts as leader key.
 (with-sparse-keymap
-  (keyamp--map-leader keymap '(open-line . newline))
+  (keyamp--map-leader keymap '(newline . open-line))
   (keyamp--map-escape keymap deactivate-region)
   (keyamp--map-return keymap toggle-ibuffer)
   (keyamp--remap keymap
     '((undo               . todo)
       (shrink-whitespaces . screen-idle)
-      (open-line          . prev-buf)
+      (open-line          . tools)
       (del-back           . del-forw)
-      (newline            . tools)
+      (newline            . prev-buf)
       (activate-region    . rectangle)
       (toggle-case        . downloads)
       (other-win          . jump-7)
@@ -1291,10 +1290,10 @@ ascii CHAR."
 
 (with-sparse-keymap
   ;; Repeat half page up/down with I/K or DEL/SPC.
-  (keyamp--map-leader keymap '(previous-line . next-line))
+  (keyamp--map-leader keymap '(next-line . previous-line))
   (keyamp--map-return keymap keyamp-ret)
-  (keyamp--map-backtab keymap scroll-down-command)
   (keyamp--map-tab keymap scroll-up-command)
+  (keyamp--map-backtab keymap scroll-down-command)
   (keyamp--remap keymap
     '((previous-line . page-up-half) (next-line . page-dn-half)
       (down-line     . page-dn-half) (up-line   . page-up-half)))
@@ -1305,10 +1304,10 @@ ascii CHAR."
 (with-sparse-keymap
   ;; Initially TAB makes half page forward, following presses do full page.
   ;; Arrows always do half page and keep TAB transient, see previous keymap.
-  (keyamp--map-leader keymap '(previous-line . next-line))
+  (keyamp--map-leader keymap '(next-line . previous-line))
   (keyamp--map-return keymap keyamp-ret)
-  (keyamp--map-backtab keymap previous-line)
   (keyamp--map-tab keymap next-line)
+  (keyamp--map-backtab keymap previous-line)
   (keyamp--remap keymap
     '((previous-line . scroll-down-command) (next-line . scroll-up-command)
       (down-line     . page-dn-half) (up-line   . page-up-half)))
@@ -1317,7 +1316,7 @@ ascii CHAR."
   (keyamp--set keymap '(scroll-down-command scroll-up-command)))
 
 (with-sparse-keymap
-  (keyamp--map-leader keymap '(bchar . fchar))
+  (keyamp--map-leader keymap '(fchar . bchar))
   (keyamp--remap keymap '((bchar . hscroll-right) (fchar . hscroll-left)))
   (keyamp--set keymap '(hscroll-left hscroll-right)))
 
@@ -1334,7 +1333,7 @@ ascii CHAR."
   (keyamp--set keymap '(text-scale-decrease text-scale-increase text-scale-reset)))
 
 (with-sparse-keymap
-  (keyamp--map-leader keymap '(up-line . down-line))
+  (keyamp--map-leader keymap '(down-line . up-line))
   (keyamp--remap keymap '((undo . button-back) (del-back . button-forw)))
   (keyamp--set keymap '(button-back button-forw)))
 
@@ -1403,7 +1402,7 @@ ascii CHAR."
   (keyamp--set keymap '(cycle-hyphen-lowline-space) nil nil nil keyamp-delay-1))
 
 (with-sparse-keymap ; easy undo with DEL
-  (keyamp--map-leader keymap '(undo . nil))
+  (keyamp--map-leader keymap '(nil . undo))
   (keyamp--set keymap '(newline python-return-and-indent open-line)))
 
 
@@ -1416,33 +1415,33 @@ ascii CHAR."
     ;; I/K or DEL/SPC to list either history or completion candidates
     ;; accordingly choice made. RET to confirm and exit, ESC to quit.
     ;; To switch from history to candidates listing press ESC then double
-    ;; SPC `select-word' and DEL/SPC or I/K again to continue move
+    ;; SPC `select-block' and DEL/SPC or I/K again to continue move
     ;; backward/forward. Similarly double DEL to activate history move.
     ;; Fast history or completion candidates direction switch to quit.
-    (keyamp--map-leader keymap '(select-block . paste-or-prev))
+    (keyamp--map-leader keymap '(paste-or-prev . select-block))
     (keyamp--map-escape keymap keyamp-minibuffer-escape)
     (keyamp--map-return keymap keyamp-minibuffer-return)
     (keyamp--map keymap '(("C-t" . keyamp-minibuffer-shift))) ; S-<return>
-    (keyamp--map-backtab keymap comp-forw)
-    (keyamp--map-tab keymap isearch-backward)
+    (keyamp--map-tab keymap comp-forw)
+    (keyamp--map-backtab keymap isearch-backward)
     (keyamp--map-ascii keymap 'keyamp-insert-minibuffer)
     (keyamp--map keymap
       '(("<left>" . isearch-backward) ("<right>" . keyamp-minibuffer-shift)
-        ("<up>"   . select-block)     ("<down>"  . comp-forw)))
+        ("<up>"   . select-word)      ("<down>"  . comp-forw)))
 
     ;; The hook is last one run during minibuffer setup and set the keymap.
     (keyamp--hook keymap '(minibuffer-setup-hook) :command nil :repeat))
 
-  (with-sparse-keymap ; SPC to paste, next to undo
-    (keyamp--map-leader keymap '(nil . undo-comp-forw))
+  (with-sparse-keymap ; SPC to paste, next SPC to undo and go down
+    (keyamp--map-leader keymap '(undo-comp-forw . nil))
     (advice-add 'paste-or-prev :after
                 (lambda () (when (minibufferp) (set-transient-map keymap)))))
 
   ;; Hit D/DEL for No, K/SPC for Yes to answer non-literal Y or N.
   (keyamp--remap y-or-n-p-map
-    '((select-block  . y-or-n-p-insert-n) (del-back  . y-or-n-p-insert-n)
+    '((select-word   . y-or-n-p-insert-n) (del-back  . y-or-n-p-insert-n)
       (paste-or-prev . y-or-n-p-insert-y) (next-line . y-or-n-p-insert-y)
-      (select-word   . y-or-n-p-insert-y)))
+      (select-block  . y-or-n-p-insert-n)))
 
   (keyamp--remap minibuffer-local-map
     '((previous-line . hist-back) (next-line . hist-forw)
@@ -1457,11 +1456,11 @@ ascii CHAR."
       (up-line       . hist-back) (down-line . comp-forw)))
 
   (with-sparse-keymap
-    (keyamp--map-leader keymap '(minibuffer-previous-completion . minibuffer-next-completion))
+    (keyamp--map-leader keymap '(minibuffer-next-completion . minibuffer-previous-completion))
     (keyamp--map-escape keymap delete-completion-win)
     (keyamp--map-return keymap minibuffer-choose-completion)
-    (keyamp--map-backtab keymap minibuffer-next-completion)
-    (keyamp--map-tab keymap minibuffer-previous-completion)
+    (keyamp--map-tab keymap minibuffer-next-completion)
+    (keyamp--map-backtab keymap minibuffer-previous-completion)
     (keyamp--set keymap
       '(completion-at-point minibuffer-previous-completion minibuffer-next-completion)))
 
@@ -1478,10 +1477,10 @@ ascii CHAR."
   (keyamp--map-return icomplete-minibuffer-map keyamp-minibuffer-return)
   (keyamp--remap icomplete-minibuffer-map
     '((previous-line . comp-back) (next-line . comp-forw) (select-word . comp-forw)
-      (up-line       . comp-back) (donw-line . comp-forw)))
+      (up-line       . comp-back) (down-line . comp-forw)))
 
   (with-sparse-keymap
-    (keyamp--map-leader keymap '(previous-line . next-line))
+    (keyamp--map-leader keymap '(next-line . previous-line))
     (keyamp--map-escape keymap abort-recursive-edit)
     (keyamp--map-return keymap keyamp-minibuffer-return)
     (keyamp--remap keymap '((previous-line . comp-back) (next-line . comp-forw)))
@@ -1494,7 +1493,7 @@ ascii CHAR."
     (keyamp--hook keymap '(icomplete-minibuffer-setup-hook) nil nil :repeat))
 
   (with-sparse-keymap
-    (keyamp--map-leader keymap '(previous-line . next-line))
+    (keyamp--map-leader keymap '(next-line . previous-line))
     (keyamp--map-escape keymap abort-recursive-edit)
     (keyamp--map-return keymap exit-minibuffer)
     (keyamp--remap keymap '((previous-line . hist-back) (next-line . hist-forw)))
@@ -1511,7 +1510,7 @@ ascii CHAR."
         (comp-forw     . ido-next-match) (ido-complete-space . self-insert-command)))))
 
 (with-sparse-keymap
-  (keyamp--map-leader keymap '(previous-line . next-line))
+  (keyamp--map-leader keymap '(next-line . previous-line))
   (keyamp--remap keymap '((previous-line . ido-prev-match) (next-line . ido-next-match)))
   (keyamp--remap keymap '((up-line . ido-prev-match) (down-line . ido-next-match)))
   (keyamp--set keymap '(ido-prev-match ido-next-match)))
@@ -1551,14 +1550,14 @@ ascii CHAR."
   (advice-add-macro '(wdired-abort-changes wdired-finish-edit) :after 'keyamp-command))
 
 (with-eval-after-load 'dired-utils
-  (keyamp--map-backtab dired-mode-map dired-lleader-map)
-  (keyamp--map-backtab (define-prefix-command 'dired-lleader-map) dired-omit-mode)
-  (keyamp--map-leader dired-lleader-map '(dired-size . nil))
-
-  (keyamp--map-tab dired-mode-map dired-rleader-map)
-  (keyamp--map-tab (define-prefix-command 'dired-rleader-map) dired-omit-mode)
+  (keyamp--map-backtab dired-mode-map dired-rleader-map)
+  (keyamp--map-backtab (define-prefix-command 'dired-rleader-map) dired-omit-mode)
   (keyamp--map-leader dired-rleader-map '(nil . dired-size))
-  (keyamp--map dired-rleader-map
+
+  (keyamp--map-tab dired-mode-map dired-lleader-map)
+  (keyamp--map-tab (define-prefix-command 'dired-lleader-map) dired-omit-mode)
+  (keyamp--map-leader dired-lleader-map '(dired-size . nil))
+  (keyamp--map dired-lleader-map
     '(("e"  . dired-optimize-png)     ("u" . dired-2drawing)
       ("o"  . dired-rotate-img-right) ("p" . dired-rotate-img-left)
       ("a"  . dired-image-autocrop)   ("s" . dired-open-marked)
@@ -1581,8 +1580,8 @@ ascii CHAR."
 
 (with-eval-after-load 'ibuf-ext
   (keyamp--map ibuffer-mode-map '(("<double-mouse-1>" . ibuffer-visit-buffer)))
-  (keyamp--map-backtab ibuffer-mode-map ibuffer-backward-filter-group)
   (keyamp--map-tab ibuffer-mode-map ibuffer-visit-buffer)
+  (keyamp--map-backtab ibuffer-mode-map ibuffer-backward-filter-group)
   (keyamp--remap ibuffer-mode-map
     '((previous-line       . up-line)
       (next-line           . down-line)
@@ -1616,12 +1615,12 @@ ascii CHAR."
       (forw-char     . screen-idle-return)))
 
   (with-sparse-keymap
-    (keyamp--map-leader keymap '(previous-line . next-line))
+    (keyamp--map-leader keymap '(next-line . previous-line))
     (keyamp--remap keymap '((previous-line . up-line-rev) (next-line . down-line)))
     (keyamp--set keymap '(ibuffer-toggle-filter-group)))
 
   (with-sparse-keymap
-    (keyamp--map-leader keymap '(ibuffer-backward-filter-group . ibuffer-forward-filter-group))
+    (keyamp--map-leader keymap '(ibuffer-forward-filter-group . ibuffer-backward-filter-group))
     (keyamp--set keymap '(ibuffer-backward-filter-group ibuffer-forward-filter-group))))
 
 (with-eval-after-load 'ibuffer
@@ -1635,7 +1634,7 @@ ascii CHAR."
   (keyamp--map-tab company-active-map company-complete-common)
 
   (with-sparse-keymap
-    (keyamp--map-leader keymap '(previous-line . next-line))
+    (keyamp--map-leader keymap '(next-line . previous-line))
     (keyamp--map-escape keymap company-abort)
     (keyamp--map-return keymap company-complete-selection)
     (keyamp--remap keymap
@@ -1664,16 +1663,16 @@ ascii CHAR."
     ;; then activate insert mode and insert SPC. DEL to undo the completion.
     (advice-add-macro '(company-search-abort company-complete-selection)
                       :after 'keyamp-command-if-insert)
-    (keyamp--map-leader keymap '(undo . keyamp-insert-and-spc))
+    (keyamp--map-leader keymap '(keyamp-insert-and-spc . undo))
     (keyamp--set keymap '(company-search-abort company-complete-selection)))
 
   (advice-add 'company-search-candidates :after #'keyamp-insert-init)
   (keyamp--map-escape company-search-map company-search-abort)
-  (keyamp--map-backtab company-search-map company-search-repeat-forward)
-  (keyamp--map-tab company-search-map company-search-repeat-backward)
+  (keyamp--map-tab company-search-map company-search-repeat-forward)
+  (keyamp--map-backtab company-search-map company-search-repeat-backward)
 
   (with-sparse-keymap
-    (keyamp--map-leader keymap '(company-search-repeat-backward . company-search-repeat-forward))
+    (keyamp--map-leader keymap '(company-search-repeat-forward . company-search-repeat-backward))
     (keyamp--set keymap '(company-search-repeat-backward company-search-repeat-forward))))
 
 (with-eval-after-load 'transient
@@ -1703,7 +1702,7 @@ ascii CHAR."
       (del-back      . next-match)))
 
   (with-sparse-keymap
-    (keyamp--map-leader keymap '(nil . next-match))
+    (keyamp--map-leader keymap '(next-match . nil))
     (keyamp--set keymap '(next-match)))
 
   (keyamp--map-return query-replace-map edit-replacement)
@@ -1719,18 +1718,18 @@ ascii CHAR."
 (with-eval-after-load 'wid-edit
   (keyamp--remap widget-link-keymap '((keyamp-insert . widget-button-press)))
   (with-sparse-keymap
-    (keyamp--map-leader keymap '(widget-backward . widget-forward))
+    (keyamp--map-leader keymap '(widget-forward . widget-backward))
     (keyamp--set keymap '(widget-backward widget-forward))))
 
 (with-eval-after-load 'org
-  (keyamp--map-backtab org-mode-map undo)
   (keyamp--map-tab org-mode-map org-cycle)
+  (keyamp--map-backtab org-mode-map undo)
   (keyamp--remap org-mode-map
     '((eval-region-or-sexp . insert-date) (insert-date . org-time-stamp))))
 
 (with-eval-after-load 'org-agenda
-  (keyamp--map-backtab org-agenda-mode-map ignore)
   (keyamp--map-tab org-agenda-mode-map todo)
+  (keyamp--map-backtab org-agenda-mode-map ignore)
   (keyamp--map org-agenda-mode-map
     '(("<double-mouse-1>" . org-agenda-tasks) ("<mouse-3>" . mouse-3)))
   (keyamp--remap org-agenda-mode-map
@@ -1800,7 +1799,7 @@ ascii CHAR."
 
 (with-eval-after-load 'emms
   (with-sparse-keymap
-    (keyamp--map-leader keymap '(open-line . newline))
+    (keyamp--map-leader keymap '(newline . open-line))
     (keyamp--remap keymap
       '((open-line         . emms-seek-backward-or-previous)
         (del-back          . emms-pause)
@@ -1814,7 +1813,7 @@ ascii CHAR."
         emms-playlist-mode-play-smart  emms-pause emms-random)))
 
   (with-sparse-keymap
-    (keyamp--map-leader keymap '(open-line . newline))
+    (keyamp--map-leader keymap '(newline . open-line))
     (keyamp--remap keymap '((open-line . emms-seek-backward) (newline . emms-seek-forward)))
     (keyamp--set keymap '(emms-seek-backward emms-seek-forward))))
 
@@ -1833,7 +1832,7 @@ ascii CHAR."
 
 (with-eval-after-load 'flyspell
   (with-sparse-keymap
-    (keyamp--map-leader keymap '(open-line . newline))
+    (keyamp--map-leader keymap '(newline . open-line))
     (keyamp--remap keymap
       '((del-back  . ispell-word)
         (open-line . flyspell-goto-prev-error)
@@ -1856,11 +1855,11 @@ ascii CHAR."
       (enlarge-window . doc-view-enlarge)))
 
   (with-sparse-keymap
-    (keyamp--map-leader keymap '(doc-view-shrink . doc-view-enlarge))
+    (keyamp--map-leader keymap '(doc-view-enlarge . doc-view-shrink))
     (keyamp--set keymap '(doc-view-shrink doc-view-enlarge) nil nil nil keyamp-delay-2))
 
   (with-sparse-keymap
-    (keyamp--map-leader keymap '(previous-line . next-line))
+    (keyamp--map-leader keymap '(next-line . previous-line))
     (keyamp--remap keymap
       '((previous-line . doc-view-scroll-down-or-previous-page)
         (next-line     . doc-view-scroll-up-or-next-page)
@@ -1881,11 +1880,11 @@ ascii CHAR."
       (backward-bracket . dired-jump)))
 
   (with-sparse-keymap
-    (keyamp--map-leader keymap '(bchar . fchar))
+    (keyamp--map-leader keymap '(fchar . bchar))
     (keyamp--set keymap '(image-previous-file image-next-file)))
 
   (with-sparse-keymap
-    (keyamp--map-leader keymap '(previous-line . next-line))
+    (keyamp--map-leader keymap '(next-line . previous-line))
     (keyamp--set keymap '(image-decrease-size image-increase-size))))
 
 (with-eval-after-load 'image-dired
@@ -1904,14 +1903,14 @@ ascii CHAR."
   (keyamp--remap sql-interactive-mode-map '((select-block . comint-previous-input)))
 
   (with-sparse-keymap
-    (keyamp--map-leader keymap '(previous-line . next-line))
+    (keyamp--map-leader keymap '(next-line . previous-line))
     (keyamp--remap keymap
       '((previous-line . comint-previous-input) (next-line . comint-next-input)))
     (keyamp--set keymap '(comint-previous-input comint-next-input) :command)))
 
 (with-eval-after-load 'esh-mode
-  (keyamp--map-backtab eshell-mode-map undo)
   (keyamp--map-tab eshell-mode-map completion-at-point)
+  (keyamp--map-backtab eshell-mode-map undo)
   (keyamp--remap eshell-mode-map
     '((cut-line       . eshell-clear)
       (select-block   . eshell-previous-input)
@@ -1920,7 +1919,7 @@ ascii CHAR."
       (toggle-comment . ignore)))
 
   (with-sparse-keymap
-    (keyamp--map-leader keymap '(previous-line . next-line))
+    (keyamp--map-leader keymap '(next-line . previous-line))
     (keyamp--remap keymap
       '((previous-line . eshell-previous-input) (next-line . eshell-next-input)))
     (keyamp--set keymap
@@ -1929,9 +1928,9 @@ ascii CHAR."
   (with-sparse-keymap
     ;; Insert mode primary for eshell. The keymap ready after eshell start,
     ;; command submit or cancel. DEL to list history, SPC to paste.
-    (keyamp--map-leader keymap '(eshell-previous-input . paste-or-prev))
-    (keyamp--map-backtab keymap eshell-search-input)
+    (keyamp--map-leader keymap '(paste-or-prev . eshell-previous-input))
     (keyamp--map-tab keymap change-wd)
+    (keyamp--map-backtab keymap eshell-search-input)
     (keyamp--set keymap '(eshell-send-input eshell-interrupt-process) nil :insert)
 
     (defun keyamp-input-timer-payload-eshell ()
@@ -1949,8 +1948,8 @@ ascii CHAR."
 
 ;;; vterm
 (with-eval-after-load 'vterm
-  (keyamp--map-backtab vterm-mode-map vterm-send-backtab)
   (keyamp--map-tab vterm-mode-map vterm-send-tab)
+  (keyamp--map-backtab vterm-mode-map vterm-send-backtab)
 
   (keyamp--remap vterm-mode-map
     '((select-block        . vterm-up-vi-cmd)
@@ -1972,16 +1971,19 @@ ascii CHAR."
       (down-line           . vterm-down)
       (toggle-case         . prev-vterm-buf)))
 
+  ;; sync point on insert
+  (add-hook 'keyamp-insert-hook 'vterm-reset-cursor-point)
+
   (with-sparse-keymap
-    (keyamp--map-leader keymap '(previous-line . next-line))
+    (keyamp--map-leader keymap '(next-line . previous-line))
     (keyamp--remap keymap '((previous-line . vterm-up-vi-cmd) (next-line . vterm-down)))
     (keyamp--set keymap '(vterm-history-search) nil :insert)
     (keyamp--set keymap '(vterm-up-vi-cmd vterm-down vterm-yank-pop) :command))
 
   (with-sparse-keymap
-    (keyamp--map-leader keymap '(vterm-up-vi-cmd . vterm-tmux-copy))
-    (keyamp--map-backtab keymap vterm-history-search)
+    (keyamp--map-leader keymap '(vterm-tmux-copy . vterm-up-vi-cmd))
     (keyamp--map-tab keymap change-wd)
+    (keyamp--map-backtab keymap vterm-history-search)
     (keyamp--set keymap '(vterm-send-return term-interrupt-subjob) nil :insert)
     (keyamp--set keymap '(vterm-vi-save-quit vterm-vi-quit))
 
@@ -2003,7 +2005,7 @@ ascii CHAR."
   (with-sparse-keymap
     (keyamp--remap keymap
       '((bchar         . vterm-left) (fchar     . vterm-right)
-        (previous-line . vterm-up) (next-line . vterm-down)))
+        (previous-line . vterm-up)   (next-line . vterm-down)))
     (keyamp--set keymap '(vterm-left vterm-right vterm-up vterm-down)))
 
 ;;;;;; shell prompt vi cmd mode
@@ -2035,7 +2037,7 @@ ascii CHAR."
     (keyamp--set keymap '(vterm-shell-vi-l vterm-shell-vi-w)))
 
   (with-sparse-keymap ; delete char repeat
-    (keyamp--map-leader keymap '(vterm-shell-vi-e . vterm-shell-vi-a))
+    (keyamp--map-leader keymap '(vterm-shell-vi-a . vterm-shell-vi-e))
     (keyamp--set keymap '(vterm-shell-vi-e vterm-shell-vi-a)))
 
   ;; Terminal config examples:
@@ -2134,8 +2136,8 @@ ascii CHAR."
     (keyamp--map-leader keymap '(vterm-vi-self-insert . vterm-vi-self-insert))
     (keyamp--map-escape keymap vterm-vi-escape)
     (keyamp--map-return keymap vterm-vi-self-insert)
-    (keyamp--map-backtab keymap vterm-vi-self-insert)
     (keyamp--map-tab keymap vterm-vi-self-insert)
+    (keyamp--map-backtab keymap vterm-vi-self-insert)
     (keyamp--map-ascii keymap 'vterm-vi-self-insert)
     (keyamp--map keymap
       '(("<left>" . vterm-vi-self-insert) ("<right>" . vterm-vi-self-insert)
@@ -2158,8 +2160,8 @@ ascii CHAR."
 (keyamp--map-leader keyamp-ignore-map '(ignore . ignore))
 (keyamp--map-escape keyamp-ignore-map ignore)
 (keyamp--map-return keyamp-ignore-map ignore)
-(keyamp--map-backtab keyamp-ignore-map ignore)
 (keyamp--map-tab keyamp-ignore-map ignore)
+(keyamp--map-backtab keyamp-ignore-map ignore)
 (keyamp--map-ascii keyamp-ignore-map 'ignore)
 (keyamp--map keyamp-ignore-map
   '(("<down-mouse-1>" . ignore) ("<mouse-1>" . ignore) ("<drag-mouse-1>" . ignore)
@@ -2178,11 +2180,11 @@ ascii CHAR."
       (next-line          . down-line)))
 
   (with-sparse-keymap
-    (keyamp--map-leader keymap '(open-line . newline))
+    (keyamp--map-leader keymap '(newline . open-line))
     (keyamp--set keymap '(Info-backward-node Info-forward-node)))
 
   (with-sparse-keymap
-    (keyamp--map-leader keymap '(Info-prev-reference . Info-next-reference))
+    (keyamp--map-leader keymap '(Info-next-reference . Info-prev-reference))
     (keyamp--remap keymap '((undo . Info-prev-reference) (del-back . Info-next-reference)))
     (keyamp--set keymap '(Info-prev-reference Info-next-reference))))
 
@@ -2208,12 +2210,12 @@ ascii CHAR."
       (back-char     . screen-idle-escape) (forw-char    . screen-idle)))
 
   (with-sparse-keymap
-    (keyamp--map-leader keymap '(previous-line . next-line))
+    (keyamp--map-leader keymap '(next-line . previous-line))
     (keyamp--remap keymap '((previous-line . up-line-rev) (next-line . down-line)))
     (keyamp--set keymap '(gnus-topic-select-group)))
 
   (with-sparse-keymap
-    (keyamp--map-leader keymap '(previous-line . next-line))
+    (keyamp--map-leader keymap '(next-line . previous-line))
     (keyamp--remap keymap
       '((previous-line . gnus-topic-prev) (next-line    . gnus-topic-next)
         (beg-of-line   . gnus-beg-of-buf) (end-of-lyne  . gnus-end-of-buf)
@@ -2263,7 +2265,7 @@ ascii CHAR."
       (save-buffer   . gnus-summary-save-parts)))
 
   (with-sparse-keymap
-    (keyamp--map-leader keymap '(up-line . down-line))
+    (keyamp--map-leader keymap '(down-line . up-line))
     (keyamp--map-tab keymap keyamp-tab)
     (keyamp--remap keymap
       '((open-line . gnus-summary-prev-group) (newline . gnus-summary-next-group)
@@ -2300,7 +2302,7 @@ ascii CHAR."
       (point-to-register  . recentf-open-most-recent-file-8)
       (proced-defer       . recentf-open-most-recent-file-9)))
   (with-sparse-keymap
-    (keyamp--map-leader keymap '(widget-backward . widget-forward))
+    (keyamp--map-leader keymap '(widget-forward . widget-backward))
     (keyamp--set keymap '(recentf-open-files))))
 
 (with-sparse-keymap
@@ -2437,13 +2439,13 @@ ascii CHAR."
       ("/ l" . html-open-in-safari))))
 
 (with-eval-after-load 'find-replace
-  (keyamp--map-backtab find-output-mode-map find-previous-match)
   (keyamp--map-tab find-output-mode-map find-next-match)
+  (keyamp--map-backtab find-output-mode-map find-previous-match)
   (keyamp--remap find-output-mode-map '((keyamp-insert . find--jump-to-place)))
   (keyamp--map find-output-mode-map '(("<mouse-1>" . find--jump-to-place)))
 
   (with-sparse-keymap
-    (keyamp--map-leader keymap '(bchar . fchar))
+    (keyamp--map-leader keymap '(fchar . bchar))
     (keyamp--remap keymap
       '((previous-line . find-previous-file)  (next-line . find-next-file)
         (bchar         . find-previous-match) (fchar     . find-next-match)))
@@ -2452,8 +2454,8 @@ ascii CHAR."
     (keyamp--hook keymap '(find-output-mode-hook) nil nil :repeat)))
 
 (with-eval-after-load 'emacs-lisp-mode
-  (keyamp--map-backtab emacs-lisp-mode-map undo)
   (keyamp--map-tab emacs-lisp-mode-map emacs-lisp-indent)
+  (keyamp--map-backtab emacs-lisp-mode-map undo)
   (keyamp--remap emacs-lisp-mode-map
     '((reformat-lines . emacs-lisp-remove-paren-pair))))
 
@@ -2461,7 +2463,7 @@ ascii CHAR."
   (keyamp--map-backtab perl-mode-map undo))
 
 (with-sparse-keymap
-  (keyamp--map-leader keymap '(bchar . fchar))
+  (keyamp--map-leader keymap '(fchar . bchar))
   (keyamp--remap keymap
     '((bchar     . flymake-goto-prev-error)
       (fchar     . flymake-goto-next-error)
@@ -2470,15 +2472,15 @@ ascii CHAR."
   (keyamp--set keymap '(flymake-goto-prev-error flymake-goto-next-error)))
 
 (with-eval-after-load 'python
-  (keyamp--map-backtab python-ts-mode-map python-de-indent)
   (keyamp--map-tab python-ts-mode-map python-indent-or-complete)
+  (keyamp--map-backtab python-ts-mode-map python-de-indent)
   (keyamp--map-return python-ts-mode-map python-return-and-indent)
   (keyamp--remap python-ts-mode-map
     '((newline           . python-return-and-indent)
       (reformat-lines    . python-format-buffer)
       (describe-variable . xref-find-references)))
   (with-sparse-keymap
-    (keyamp--map-leader keymap '(python-de-indent . python-indent-or-complete))
+    (keyamp--map-leader keymap '(python-indent-or-complete . python-de-indent))
     (keyamp--set keymap '(python-indent-or-complete python-de-indent)
       nil nil nil keyamp-delay-1)))
 
@@ -2493,7 +2495,7 @@ ascii CHAR."
       (describe-variable   . xref-find-references))))
 
 (with-sparse-keymap
-  (keyamp--map-leader keymap '(xref-go-back . xref-find-definitions))
+  (keyamp--map-leader keymap '(xref-find-definitions . xref-go-back))
   (keyamp--set keymap '(xref-go-back xref-find-definitions)))
 
 (with-eval-after-load 'xref
@@ -2544,7 +2546,7 @@ ascii CHAR."
       (undo        . delete-window)))
 
   (with-sparse-keymap
-    (keyamp--map-leader keymap '(calendar-scroll-right . calendar-scroll-left))
+    (keyamp--map-leader keymap '(calendar-scroll-left . calendar-scroll-right))
     (keyamp--map-tab keymap calendar-other-month)
     (keyamp--set keymap '(calendar-scroll-left calendar-scroll-right calendar-goto-today))))
 
@@ -2585,7 +2587,7 @@ ascii CHAR."
       (paste-or-prev . calc-yank)))
 
   (with-sparse-keymap
-    (keyamp--map-leader keymap '(undo . del-back))
+    (keyamp--map-leader keymap '(del-back . undo))
     (keyamp--remap keymap '((del-back . calc-redo)))
     (keyamp--set keymap '(calc-undo calc-redo))
 
@@ -2604,7 +2606,7 @@ ascii CHAR."
       (open-line . dslide-deck-backward) (newline . dslide-deck-forward)))
 
   (with-sparse-keymap
-    (keyamp--map-leader keymap '(dslide-deck-backward . dslide-deck-forward))
+    (keyamp--map-leader keymap '(dslide-deck-forward . dslide-deck-backward))
     (keyamp--set keymap
       '(dslide-deck-backward dslide-deck-forward dslide-deck-start))))
 
@@ -2653,7 +2655,6 @@ ascii CHAR."
                  prev-buf                                t
                  previous-buffer                         t
                  save-close-buf                          t
-                 split-window-below                      t
                  split-window-horizontally               t
                  sun-moon                                t
                  sync                                    t
@@ -2799,7 +2800,7 @@ ascii CHAR."
                  eshell-next-input                       t
                  eshell-previous-input                   t
                  eshell-search-input                     t
-                 select-word                             t
+                 select-block                            t
                  find-next-file                          t
                  find-next-match                         t
                  find-previous-file                      t
@@ -2857,7 +2858,7 @@ ascii CHAR."
                  screen-idle-return                      t
                  scroll-down-command                     t
                  scroll-up-command                       t
-                 select-block                            t
+                 select-word                             t
                  select-line                             t
                  select-quote                            t
                  shrink-window                           t
@@ -3144,10 +3145,15 @@ insert cancel the timer.")
 (defun keyamp-insert-and-self-insert ()
   "Self insert and activate insert mode."
   (interactive)
-  (if buffer-read-only
-      (keyamp-command-execute 'ignore)
+  (cond
+   ((eq major-mode 'vterm-mode)
     (keyamp-insert)
-    (self-insert-command 1)))
+    (vterm--self-insert))
+   (buffer-read-only
+    (keyamp-command-execute 'ignore))
+   (t
+    (keyamp-insert)
+    (self-insert-command 1))))
 
 (defun keyamp-minibuffer-return ()
   "Exit if file completion. It means use content of minibuffer as it is,
@@ -3643,11 +3649,11 @@ Cleanup echo area. Quit minibuffer. Quit wait key sequence."
   (abort-recursive-edit))
 
 (defun keyamp-escape ()
-  "Return to command mode, clear selection or quit minibuffer."
+  "Return to clear selection, command mode or quit minibuffer."
   (interactive)
   (cond
+   ((region-active-p)                    (deactivate-region))
    ((or keyamp-repeat-p keyamp-insert-p) (keyamp-command))
-   ((region-active-p)                    (keyamp-command-execute 'deactivate-region))
    ((minibufferp)                        (keyamp-minibuffer-quit))
    ((cl-plusp (recursion-depth))         (exit-recursive-edit))
    (t                                    (keyamp-command))))

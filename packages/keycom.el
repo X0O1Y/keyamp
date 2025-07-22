@@ -1986,6 +1986,7 @@ command, so that next buffer shown is a user buffer."
    ((string-equal (buffer-name) "scratch.el") nil)
    ((string-equal (buffer-name) "tetris-scores") nil)
    ((string-equal (buffer-name) "snake-scores") nil)
+   ((string-equal (buffer-name) "ai") nil)
    ((string-equal buffer-file-truename org-agenda-file-1) nil)
    ((string-equal buffer-file-truename org-agenda-file-2) nil)
    ((string-equal buffer-file-truename org-agenda-file-3) nil)
@@ -2170,7 +2171,8 @@ command, so that next buffer shown is a user buffer."
             (when (= i buf-count-limit)
               (switch-to-buffer buf)))
         (setq i (1+ buf-count-limit))))
-    (if (eq buf (current-buffer))
+    (if (and (eq buf (current-buffer))
+             (not (eq major-mode 'vterm-mode)))
         (vterm)
       (if (or (eq (point) (point-min))
               (eq (point) (line-beginning-position)))
@@ -3095,8 +3097,10 @@ and reverse-search-history in bashrc."
   (let ((x (point)))
     (vterm-send-key Key)        ; workaround vi go after last char
     (sit-for vterm-timer-delay) ; delay to sync
-    (if (and (eq x (point))
-             (eq (1- (line-end-position)) (point))) ; point did not move
+    (if (and (eq x (point)) ; point did not move
+             (eq (char-after (1+ (point))) 10) ; new line
+             (not (looking-at "\s"))           ; space
+             )
         (progn
           (vterm-send-key (kbd "C-m")) ; so activate insert
           (vterm-send-key "<right>")   ; go after last char
