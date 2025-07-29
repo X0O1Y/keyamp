@@ -52,14 +52,18 @@ throughout the code of the package.")
 (mapc
  (lambda (method)
    (activate-input-method method)
-   (mapc
-    (lambda (map)
-      (if-let ((to (char-to-string (car map)))
-               (from (quail-get-translation (cadr map) to 1))
-               ((characterp from))
-               (from (char-to-string from)))
-          (push (cons from to) keyamp-input-method-to-ascii)))
-    (cdr (quail-map)))
+   (let ((var-name (intern (concat "keyamp-standard-to-" (symbol-name method)))))
+     (eval `(defvar ,var-name nil ,(concat "Standard layout to input method "
+                                           (symbol-name method) ".")))
+     (mapc
+      (lambda (map)
+        (when-let ((to (char-to-string (car map)))
+                   (from (quail-get-translation (cadr map) to 1))
+                   ((characterp from))
+                   (from (char-to-string from)))
+          (push (cons from to) keyamp-input-method-to-ascii)
+          (push (cons to from) (symbol-value var-name))))
+      (cdr (quail-map))))
    (activate-input-method nil))
  keyamp-input-methods)
 
@@ -97,29 +101,28 @@ Single non-ASCII chars mapped in `keyamp--map' macro."
   (activate-input-method nil))
 
 (defun toggle-input-method ()
-  "Toggle input method command.
-Activate when input method not available in OS."
+  "Toggle input method command. Activate when input method not available in OS."
   (interactive)
   (let ((method (car keyamp-input-methods)))
     (activate-input-method (if current-input-method nil method))
     (message "%s %s" method (if current-input-method "activated" "deactivated"))))
 
-(defun toggle-ascii-to-current-layout ()
-  "Toggle translation ASCII keyboard to `keyamp-current-layout' command.
+(defun toggle-standard-to-current-layout ()
+  "Toggle translation standard keyboard to `keyamp-current-layout' command.
 Activate when `keyamp-current-layout' not available in OS. The layout must
 present in `quail-keyboard-layout-alist'."
   (interactive)
-  (if (get 'toggle-ascii-to-current-layout 'state)
+  (if (get 'toggle-standard-to-current-layout 'state)
       (progn
         (quail-set-keyboard-layout "standard")
-        (put 'toggle-ascii-to-current-layout 'state nil)
-        (message "Deactivated ASCII keyboard to %s" keyamp-current-layout))
+        (put 'toggle-standard-to-current-layout 'state nil)
+        (message "Deactivated standard keyboard to %s" keyamp-current-layout))
     (if (assoc keyamp-current-layout quail-keyboard-layout-alist)
         (quail-set-keyboard-layout keyamp-current-layout)
-      (user-error "Unable to activate ASCII keyboard to %s" keyamp-current-layout))
-    (put 'toggle-ascii-to-current-layout 'state t)
-    (message "Activated ASCII keyboard to %s" keyamp-current-layout))
-  (let ((define (get 'toggle-ascii-to-current-layout 'state)))
+      (user-error "Unable to activate standard keyboard to %s" keyamp-current-layout))
+    (put 'toggle-standard-to-current-layout 'state t)
+    (message "Activated standard keyboard to %s" keyamp-current-layout))
+  (let ((define (get 'toggle-standard-to-current-layout 'state)))
     (mapc
      (lambda (pair)
        (keymap-set key-translation-map (car pair) (if define (cdr pair))))
@@ -467,7 +470,7 @@ is enabled.")
 (keyamp--map-return keyamp-command-map keyamp-insert)
 (keyamp--map keyamp-command-map
   '(;; left half
-    ("`" . make-frame-command)   ("~" . toggle-ascii-to-current-layout)
+    ("`" . make-frame-command)   ("~" . keyamp-insert-and-self-insert)
     ("1" . kmacro-record)        ("!" . keyamp-insert-and-self-insert)
     ("2" . kmacro-play)          ("@" . keyamp-insert-and-self-insert)
     ("3" . kmacro-helper)        ("#" . keyamp-insert-and-self-insert)
@@ -507,7 +510,7 @@ is enabled.")
     ("o"  . forw-word)           ("O" . keyamp-insert-and-self-insert)
     ("p"  . jump-mark)           ("P" . keyamp-insert-and-self-insert)
     ("["  . alternate-frame)     ("{" . keyamp-insert-and-self-insert)
-    ("]"  . ai)                  ("}" . keyamp-insert-and-self-insert)
+    ("]"  . list-timers)         ("}" . keyamp-insert-and-self-insert)
     ("\\" . bookmark-set)        ("|" . keyamp-insert-and-self-insert)
 
     ("h" . beg-of-line)          ("H"  . keyamp-insert-and-self-insert)
@@ -581,7 +584,7 @@ is enabled.")
     ("p"  . show-kill-ring)
     ("["  . toggle-frame-maximized)
     ("]"  . gptel-menu)
-    ("\\" . tt-conn)
+    ("\\" . yt-dlp)
 
     ("h"  . prog-new)
 
@@ -607,9 +610,9 @@ is enabled.")
     ("l" . screen-idle)
     (";" . recentf-open-files)
     ("'" . sync)
-    ("n" . list-timers)
-    ("m" . yt-dlp)
-    ("," . list-processes)
+    ("n" . list-processes)
+    ("m" . tt-conn)
+    ("," . ai)
     ("." . open-last-closed)
     ("/" . goto-line)))
 
@@ -634,7 +637,7 @@ is enabled.")
 (keyamp--map-tab keyamp-rleader-map next-proj-buf)
 (keyamp--map keyamp-rleader-map
   '(;; right leader left half
-    ("`" . toggle-input-method)
+    ("`" . toggle-input-method)            ("~" . toggle-standard-to-current-layout)
     ("1" . view-lossage)
     ("2" . insert-kbd-macro)
     ("3" . config)
@@ -720,7 +723,7 @@ is enabled.")
 
 (keyamp--map-double
   '((keyamp-escape  . alternate-frame) (other-win     . bookmark-jump)
-    (beg-of-line    . beg-of-buf)      (end-of-lyne   . end-of-buf)
+    (beg-of-line    . end-of-buf)      (end-of-lyne   . beg-of-buf)
     (proced-defer   . save-close-buf)  (sh-defer      . delete-other-windows)
     (occur-cur-word . search-string)   (kmacro-record . keyamp-delete)))
 
@@ -734,8 +737,9 @@ is enabled.")
   (keymap-set key-translation-map "S-<return>"    "C-t")
   (keymap-set key-translation-map "S-<escape>"    "C-q"))
 
+(keymap-set global-map "C-o"    'touchid)
 (keymap-set global-map "<home>" 'beg-of-buf)
-(keymap-set global-map "<end>" 'end-of-buf)
+(keymap-set global-map "<end>"  'end-of-buf)
 
 (setq help-map (make-sparse-keymap))
 (fset 'help-command help-map)
@@ -1362,7 +1366,7 @@ ascii CHAR."
   (keyamp--set keymap '(del-forw) nil nil nil keyamp-delay-2))
 
 (with-sparse-keymap
-  (keyamp--remap keymap '((undo . undo-only) (del-back . undo-redo)))
+  (keyamp--remap keymap '((del-win . undo-redo)))
   (keyamp--set keymap '(undo undo-redo)))
 
 (with-sparse-keymap
@@ -1400,10 +1404,6 @@ ascii CHAR."
 (with-sparse-keymap
   (keyamp--remap keymap '((del-back . cycle-hyphen-lowline-space)))
   (keyamp--set keymap '(cycle-hyphen-lowline-space) nil nil nil keyamp-delay-1))
-
-(with-sparse-keymap ; easy undo with DEL
-  (keyamp--map-leader keymap '(nil . undo))
-  (keyamp--set keymap '(newline python-return-and-indent open-line)))
 
 
 ;; Modes Remaps
@@ -1956,7 +1956,7 @@ ascii CHAR."
       (paste-or-prev       . vterm-yank)
       (paste-from-r1       . vterm-yank-pop)
       (shrink-whitespaces  . vterm-tmux-copy) ; activate tmux copy mode
-      (cut-text-block      . tt-conn-restart)
+      (cut-text-block      . tt-conn-reconnect)
       (open-line           . vterm-tmux-prev-window)
       (del-back            . vterm-shell-vi-cmd) ; sync point position and activate shell vi cmd mode
       (newline             . vterm-tmux-next-window)
@@ -1969,7 +1969,8 @@ ascii CHAR."
       (forw-char           . vterm-right)
       (up-line             . vterm-up)
       (down-line           . vterm-down)
-      (toggle-case         . prev-vterm-buf)))
+      (toggle-case         . prev-vterm-buf)
+      (dired-jump          . tt-conn-tramp)))
 
   ;; sync point on insert
   (add-hook 'keyamp-insert-hook 'vterm-reset-cursor-point)
@@ -2993,7 +2994,7 @@ ascii CHAR."
 (defconst keyamp-command-cursor 'box        "Command cursor.")
 (defconst keyamp-insert-cursor  '(hbar . 2) "Insert cursor.")
 (defconst keyamp-read-cursor    'hollow     "Read cursor.")
-(defconst keyamp-screen-cursor  nil         "Screen cursor.")
+(defconst keyamp-screen-cursor  'hollow     "Screen cursor.")
 (defconst keyamp-modify-cursor  '(bar . 2)  "Modify cursor.")
 
 (defconst keyamp-idle-timeout 60 "Idle timeout.")
@@ -3194,7 +3195,7 @@ Else activate insert mode and self insert."
         (y-or-n-p-insert-n)))
      ((keyamp-minibuffer-y-or-n-literal)
       (keyamp-insert-init) ; no hook run for single char insert
-      (if (get 'toggle-ascii-to-current-layout 'state) ; convert back to current layout
+      (if (get 'toggle-standard-to-current-layout 'state) ; convert back to current layout
           (setq key (car (rassoc key keyamp--convert-table))))
       (execute-kbd-macro (kbd key))) ; key press required
      (t
@@ -3208,7 +3209,7 @@ of quit minibuffer. Answer q to literal y or n question."
       (progn
         (keyamp-insert-init)
         (let ((key "q"))
-          (if (get 'toggle-ascii-to-current-layout 'state)
+          (if (get 'toggle-standard-to-current-layout 'state)
               (setq key (car (rassoc key keyamp--convert-table))))
           (execute-kbd-macro (kbd key))))
     (if (keyamp-minibuffer-empty)
@@ -3379,7 +3380,8 @@ after a delay even if there more read commands follow."
     (keyamp-blink-start keyamp-read-color keyamp-screen-color))
    ((eq this-command 'save-close-buf)
     (keyamp-blink-start keyamp-modify-color keyamp-screen-color))
-   (t (keyamp-blink-start keyamp-command-color keyamp-screen-color))))
+   (t (keyamp-blink-start keyamp-command-color keyamp-screen-color)))
+  (blink-cursor-mode 1))
 
 (defun keyamp-indicate-command ()
   "Indicate command."
@@ -3388,7 +3390,8 @@ after a delay even if there more read commands follow."
   (cond
    ((memq this-command keyamp-screen-command-commands)
     (keyamp-blink-start keyamp-screen-color keyamp-command-color))
-   (t (keyamp-blink-start keyamp-accent-color keyamp-command-color))))
+   (t (keyamp-blink-start keyamp-accent-color keyamp-command-color)))
+  (blink-cursor-mode 0))
 
 (defun keyamp-indicate-io (&rest _)
   "Indicate io feedback from emacsclient evals or processes calls."

@@ -6747,20 +6747,18 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Windows"
+                "/Delo_Space"
               ]
             }
           ],
-          "to_after_key_up": [
+          "to": [
             {
-              "key_code": "f1"
-            }
-          ],
-          "to_if_held_down": [
-            {
-              "key_code": "f11",
-              "repeat": false,
-              "halt": true
+              "key_code": "tab",
+              "modifiers": [
+                "command"
+              ],
+              "halt": true,
+              "repeat": false
             }
           ]
         },
@@ -6774,9 +6772,45 @@
               ]
             }
           },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Толк"
+              ]
+            }
+          ],
           "to": [
             {
-              "key_code": "display_brightness_decrement"
+              "key_code": "tab",
+              "modifiers": [
+                "command"
+              ],
+              "halt": true,
+              "repeat": false
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "f1",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "to_after_key_up": [
+            {
+              "shell_command": "open -a 'Delo_Space'"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "shell_command": "open -a 'Толк'",
+              "repeat": false,
+              "halt": true
             }
           ]
         }
@@ -6799,20 +6833,47 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Windows"
+                "/soffice"
               ]
             }
           ],
-          "to_after_key_up": [
+          "to": [
             {
-              "key_code": "f2"
+              "key_code": "tab",
+              "modifiers": [
+                "command"
+              ],
+              "halt": true,
+              "repeat": false
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "f2",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Termius"
+              ]
             }
           ],
-          "to_if_held_down": [
+          "to": [
             {
-              "key_code": "display_brightness_decrement",
-              "repeat": true,
-              "halt": true
+              "key_code": "tab",
+              "modifiers": [
+                "command"
+              ],
+              "halt": true,
+              "repeat": false
             }
           ]
         },
@@ -6828,13 +6889,13 @@
           },
           "to_after_key_up": [
             {
-              "key_code": "display_brightness_increment"
+              "shell_command": "open -a 'LibreOffice'"
             }
           ],
           "to_if_held_down": [
             {
-              "key_code": "display_brightness_increment",
-              "repeat": true,
+              "shell_command": "open -a 'Termius'",
+              "repeat": false,
               "halt": true
             }
           ]
@@ -6882,7 +6943,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/GuruPro"
+                "/dbeaver"
               ]
             }
           ],
@@ -6934,7 +6995,7 @@
           },
           "to_after_key_up": [
             {
-              "shell_command": "open -a GuruPro",
+              "shell_command": "open -a dbeaver",
               "halt": true
             }
           ],
@@ -7117,38 +7178,9 @@
               ]
             }
           },
-          "conditions": [
-            {
-              "type": "frontmost_application_if",
-              "file_paths": [
-                "/Толк"
-              ]
-            }
-          ],
-          "to": [
-            {
-              "key_code": "tab",
-              "modifiers": [
-                "command"
-              ],
-              "halt": true,
-              "repeat": false
-            }
-          ]
-        },
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "f6",
-            "modifiers": {
-              "optional": [
-                "any"
-              ]
-            }
-          },
           "to_after_key_up": [
             {
-              "shell_command": "open -a 'Толк'"
+              "shell_command": "open -a SwitchBetweenAudioDevices.app"
             }
           ],
           "to_if_held_down": [
@@ -7329,6 +7361,80 @@
             {
               "shell_command": "open -a Karabiner-EventViewer",
               "halt": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "f11",
+      "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "f11",
+            "modifiers": {
+              "mandatory": [
+                "control"
+              ]
+            }
+          },
+          "to": [
+            {
+              "key_code": "display_brightness_decrement"
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "f11",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "to": [
+            {
+              "key_code": "volume_decrement"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "f12",
+      "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "f12",
+            "modifiers": {
+              "mandatory": [
+                "control"
+              ]
+            }
+          },
+          "to": [
+            {
+              "key_code": "display_brightness_increment"
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "f12",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "to": [
+            {
+              "key_code": "volume_increment"
             }
           ]
         }
@@ -7996,6 +8102,35 @@
               ]
             }
           },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Толк"
+              ]
+            }
+          ],
+          "to": [
+            {
+              "key_code": "tab",
+              "modifiers": [
+                "command"
+              ],
+              "halt": true,
+              "repeat": false
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "f16",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
           "to_after_key_up": [
             {
               "shell_command": "open -a 'Delo_Space'"
@@ -8003,7 +8138,7 @@
           ],
           "to_if_held_down": [
             {
-              "shell_command": "open -a SwitchBetweenAudioDevices.app",
+              "shell_command": "open -a 'Толк'",
               "repeat": false,
               "halt": true
             }

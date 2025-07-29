@@ -3418,7 +3418,7 @@ This checks in turn:
 (defconst video-extensions '("mkv" "mp4" "avi" "mov" "ts" "mts" "m2ts" "webm" "vob" "aiff")
   "Open these video file extensions with `open-in-external-app'.")
 
-(defconst external-extensions `("mp3" "m4a" "flac" "torrent" "exe" "xlsx" "docx")
+(defconst external-extensions `("mp3" "m4a" "flac" "torrent" "exe" "xlsx" "docx" "dmg")
   "Open these file extensions with `open-in-external-app'.")
 
 (setq external-extensions (append external-extensions video-extensions))
