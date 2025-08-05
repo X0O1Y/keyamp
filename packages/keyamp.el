@@ -723,7 +723,7 @@ is enabled.")
 
 (keyamp--map-double
   '((keyamp-escape  . alternate-frame) (other-win     . bookmark-jump)
-    (beg-of-line    . end-of-buf)      (end-of-lyne   . beg-of-buf)
+    (beg-of-line    . beg-of-buf)      (end-of-lyne   . end-of-buf)
     (proced-defer   . save-close-buf)  (sh-defer      . delete-other-windows)
     (occur-cur-word . search-string)   (kmacro-record . keyamp-delete)))
 
@@ -1954,7 +1954,6 @@ ascii CHAR."
   (keyamp--remap vterm-mode-map
     '((select-block        . vterm-up-vi-cmd)
       (paste-or-prev       . vterm-yank)
-      (paste-from-r1       . vterm-yank-pop)
       (shrink-whitespaces  . vterm-tmux-copy) ; activate tmux copy mode
       (cut-text-block      . tt-conn-reconnect)
       (open-line           . vterm-tmux-prev-window)
@@ -2514,8 +2513,8 @@ ascii CHAR."
 
 (with-eval-after-load 'sql
   (keyamp--remap sql-mode-map
-    '((eval-defun-visual   . exec-query)
-      (eval-region-or-sexp . exec-query-remote)
+    '((eval-defun-visual   . exec-query-remote)
+      (eval-region-or-sexp . exec-query)
       (number-to-register  . toggle-sql-async-conn)
       (quit                . toggle-sql-async-remote)
       (reformat-lines      . sql-format-buffer)))
@@ -2650,7 +2649,6 @@ ascii CHAR."
                  player                                  t
                  prev-eww-buf                            t
                  prev-eshell-buf                         t
-                 prev-vterm-buf                          t
                  prev-dired-buf                          t
                  prev-proj-buf                           t
                  prev-buf                                t
@@ -2994,7 +2992,7 @@ ascii CHAR."
 (defconst keyamp-command-cursor 'box        "Command cursor.")
 (defconst keyamp-insert-cursor  '(hbar . 2) "Insert cursor.")
 (defconst keyamp-read-cursor    'hollow     "Read cursor.")
-(defconst keyamp-screen-cursor  'hollow     "Screen cursor.")
+(defconst keyamp-screen-cursor  'box        "Screen cursor.")
 (defconst keyamp-modify-cursor  '(bar . 2)  "Modify cursor.")
 
 (defconst keyamp-idle-timeout 60 "Idle timeout.")
@@ -3104,16 +3102,20 @@ insert cancel the timer.")
   (run-hooks 'keyamp-insert-hook))
 
 (defun keyamp-spc-spc (&rest _)
-  "Insert fast SPC SPC to activate command mode and save."
+  "Insert fast SPC SPC to activate command mode and save. Quit minibuffer."
   (if-let (((keyamp-unless-kbd-macro))
            (space ?\s)
            ((eq before-last-command-event space))
            ((eq last-command-event space)))
-      (if isearch-mode
-          (isearch-cancel-clean)
+      (cond
+       (isearch-mode
+        (isearch-cancel-clean))
+       ((minibufferp)
+        (keyamp-minibuffer-quit))
+       (t
         (delete-char (1- -1))
         (save-buffer-silent-defer)
-        (keyamp-command-execute 'keyamp-escape))
+        (keyamp-command-execute 'keyamp-escape)))
     (if (eq last-command-event space)
         (before-last-command-event space)
       (setq before-last-command-event nil))))
@@ -3467,6 +3469,8 @@ after a delay even if there more read commands follow."
 (defun keyamp-blinking (Color1 Color2)
   "Blinking."
   (keyamp-indicator-color Color1)
+  (if (timerp keyamp-blink-off-timer)
+      (cancel-timer keyamp-blink-off-timer))
   (setq keyamp-blink-off-timer
         (run-with-timer keyamp-blink-duration nil 'keyamp-indicator-color Color2)))
 

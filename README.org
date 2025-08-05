@@ -17,13 +17,6 @@ Input model based on [[file:packages/keyamp.el][Keyamp]] for Emacs.
 
 [[screenshots/ansi-keyboard.png]]
 
-#+begin_src bash
-brew tap xEgorka/emacsmacport
-brew install emacs-mac --with-natural-title-bar --with-native-comp
-defaults write org.gnu.Emacs TransparentTitleBar DARK
-defaults write org.gnu.Emacs HideDocumentIcon YES
-#+end_src
-
 [[screenshots/desktop.png]]
 
 [[screenshots/desktop2.png]]

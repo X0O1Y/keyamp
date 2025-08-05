@@ -526,6 +526,12 @@
           ],
           "to": [
             {
+              "set_variable": {
+                "name": "spacebar pressed",
+                "value": 0
+              }
+            },
+            {
               "key_code": "delete_or_backspace"
             }
           ]
@@ -7153,7 +7159,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Safari"
+                "/Google Chrome"
               ]
             }
           ],
@@ -7180,12 +7186,12 @@
           },
           "to_after_key_up": [
             {
-              "shell_command": "open -a SwitchBetweenAudioDevices.app"
+              "shell_command": "open -a 'Google Chrome'"
             }
           ],
           "to_if_held_down": [
             {
-              "shell_command": "open -a Safari",
+              "shell_command": "open -a SwitchBetweenAudioDevices.app",
               "repeat": false,
               "halt": true
             }
@@ -7455,6 +7461,105 @@
           },
           "conditions": [
             {
+              "type": "frontmost_application_unless",
+              "file_paths": [
+                "/Thorium"
+              ]
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "shell_command": "open -a 'Thorium'",
+              "repeat": false,
+              "halt": true
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "tab",
+              "modifiers": [
+                "command"
+              ]
+            },
+            {
+              "shell_command": "sleep 0.1 && /Applications/emacsclient --no-wait --eval '(frame-title-en)'"
+            },
+            {
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              }
+            },
+            {
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              }
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "f13",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Thorium"
+              ]
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "shell_command": "open -a 'Emacs' && /Applications/emacsclient --no-wait --eval '(frame-title-en)'",
+              "repeat": false,
+              "halt": true
+            },
+            {
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              }
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "tab",
+              "modifiers": [
+                "command"
+              ]
+            },
+            {
+              "shell_command": "sleep 0.1 && /Applications/emacsclient --no-wait --eval '(frame-title-en)'"
+            },
+            {
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "f14",
+      "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "f14",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
               "type": "frontmost_application_if",
               "file_paths": [
                 "/Windows"
@@ -7470,7 +7575,7 @@
         {
           "type": "basic",
           "from": {
-            "key_code": "f13",
+            "key_code": "f14",
             "modifiers": {
               "optional": [
                 "any"
@@ -7524,7 +7629,7 @@
         {
           "type": "basic",
           "from": {
-            "key_code": "f13",
+            "key_code": "f14",
             "modifiers": {
               "optional": [
                 "any"
@@ -7578,7 +7683,7 @@
         {
           "type": "basic",
           "from": {
-            "key_code": "f13",
+            "key_code": "f14",
             "modifiers": {
               "optional": [
                 "any"
@@ -7627,7 +7732,7 @@
         {
           "type": "basic",
           "from": {
-            "key_code": "f13",
+            "key_code": "f14",
             "modifiers": {
               "optional": [
                 "any"
@@ -7675,7 +7780,7 @@
         {
           "type": "basic",
           "from": {
-            "key_code": "f13",
+            "key_code": "f14",
             "modifiers": {
               "optional": [
                 "any"
@@ -7723,7 +7828,7 @@
         {
           "type": "basic",
           "from": {
-            "key_code": "f13",
+            "key_code": "f14",
             "modifiers": {
               "optional": [
                 "any"
@@ -7766,7 +7871,7 @@
         {
           "type": "basic",
           "from": {
-            "key_code": "f13",
+            "key_code": "f14",
             "modifiers": {
               "optional": [
                 "any"
@@ -7819,105 +7924,6 @@
       ]
     },
     {
-      "description": "f14",
-      "manipulators": [
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "f14",
-            "modifiers": {
-              "optional": [
-                "any"
-              ]
-            }
-          },
-          "conditions": [
-            {
-              "type": "frontmost_application_unless",
-              "file_paths": [
-                "/Thorium"
-              ]
-            }
-          ],
-          "to_if_held_down": [
-            {
-              "shell_command": "open -a 'Thorium'",
-              "repeat": false,
-              "halt": true
-            }
-          ],
-          "to_after_key_up": [
-            {
-              "key_code": "tab",
-              "modifiers": [
-                "command"
-              ]
-            },
-            {
-              "shell_command": "sleep 0.1 && /Applications/emacsclient --no-wait --eval '(frame-title-en)'"
-            },
-            {
-              "select_input_source": {
-                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
-              }
-            },
-            {
-              "select_input_source": {
-                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
-              }
-            }
-          ]
-        },
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "f14",
-            "modifiers": {
-              "optional": [
-                "any"
-              ]
-            }
-          },
-          "conditions": [
-            {
-              "type": "frontmost_application_if",
-              "file_paths": [
-                "/Thorium"
-              ]
-            }
-          ],
-          "to_if_held_down": [
-            {
-              "shell_command": "open -a 'Emacs' && /Applications/emacsclient --no-wait --eval '(frame-title-en)'",
-              "repeat": false,
-              "halt": true
-            },
-            {
-              "select_input_source": {
-                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
-              }
-            }
-          ],
-          "to_after_key_up": [
-            {
-              "key_code": "tab",
-              "modifiers": [
-                "command"
-              ]
-            },
-            {
-              "shell_command": "sleep 0.1 && /Applications/emacsclient --no-wait --eval '(frame-title-en)'"
-            },
-            {
-              "select_input_source": {
-                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
       "description": "f15",
       "manipulators": [
         {
@@ -7934,6 +7940,63 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
+                "/Emacs"
+              ]
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "shell_command": "open -a 'Thorium' && sleep 0.1 && /Applications/emacsclient --no-wait --eval '(frame-title-en)'"
+            },
+            {
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              }
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "f15",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "to_after_key_up": [
+            {
+              "shell_command": "open -a 'Emacs' && /Applications/emacsclient --no-wait --eval '(frame-title-en)'",
+              "repeat": false,
+              "halt": true
+            },
+            {
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "f16",
+      "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "f16",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
                 "/Thorium"
               ]
             }
@@ -7970,7 +8033,7 @@
         {
           "type": "basic",
           "from": {
-            "key_code": "f15",
+            "key_code": "f16",
             "modifiers": {
               "optional": [
                 "any"
@@ -8017,7 +8080,7 @@
         {
           "type": "basic",
           "from": {
-            "key_code": "f15",
+            "key_code": "f16",
             "modifiers": {
               "optional": [
                 "any"
@@ -8055,92 +8118,6 @@
               "select_input_source": {
                 "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
               }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "description": "f16",
-      "manipulators": [
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "f16",
-            "modifiers": {
-              "optional": [
-                "any"
-              ]
-            }
-          },
-          "conditions": [
-            {
-              "type": "frontmost_application_if",
-              "file_paths": [
-                "/Delo_Space"
-              ]
-            }
-          ],
-          "to": [
-            {
-              "key_code": "tab",
-              "modifiers": [
-                "command"
-              ],
-              "halt": true,
-              "repeat": false
-            }
-          ]
-        },
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "f16",
-            "modifiers": {
-              "optional": [
-                "any"
-              ]
-            }
-          },
-          "conditions": [
-            {
-              "type": "frontmost_application_if",
-              "file_paths": [
-                "/Толк"
-              ]
-            }
-          ],
-          "to": [
-            {
-              "key_code": "tab",
-              "modifiers": [
-                "command"
-              ],
-              "halt": true,
-              "repeat": false
-            }
-          ]
-        },
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "f16",
-            "modifiers": {
-              "optional": [
-                "any"
-              ]
-            }
-          },
-          "to_after_key_up": [
-            {
-              "shell_command": "open -a 'Delo_Space'"
-            }
-          ],
-          "to_if_held_down": [
-            {
-              "shell_command": "open -a 'Толк'",
-              "repeat": false,
-              "halt": true
             }
           ]
         }
