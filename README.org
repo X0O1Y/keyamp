@@ -21,52 +21,6 @@ Input model based on [[file:packages/keyamp.el][Keyamp]] for Emacs.
 
 [[screenshots/desktop2.png]]
 
-*** Titlebar
-#+begin_src elisp
-(when (display-graphic-p)
-  (setq display-time-default-load-average nil
-        battery-mode-line-format "%b%p%%   "
-        display-time-format "%a %e %b %R"
-        ns-use-proxy-icon nil
-        icon-title-format t)
-  (setq frame-title-format
-        (list (make-string 200 ?\t) 'battery-mode-line-string 'display-time-string))
-  (display-battery-mode)
-  (display-time-mode))
-#+end_src
-
-*** Modeline in minibuffer
-#+begin_src elisp
-(setq-default mode-line-format   nil
-              header-line-format nil
-              minibuffer-line-format
-              (list " "
-               ;; mode indicator
-               '(:eval (propertize mode-line-front-space
-                                   'face 'modeline-front-space))
-               " "
-               ;; buffer name
-               '(:eval (propertize (mode-line-buffer-name)
-                                   'face
-                                   (if (and (buffer-modified-p) (buffer-file-name))
-                                       'font-lock-string-face-buf-name
-                                     'font-lock-builtin-face-buf-name)
-                                   'help-echo
-                                   (buffer-file-name)))
-               ;; vc branch
-               '(:eval (propertize (mode-line-vc) 'face 'font-lock-type-face))
-               ;; align right spacer
-               '(:eval (propertize
-                        " " 'display
-                        `((space :align-to
-                                 (- (+ right right-fringe right-margin)
-                                    1
-                                    ,(+ (length (mode-line-buffer-position))))))))
-               ;; position in buffer
-               '(:eval (propertize (mode-line-buffer-position)
-                                   'face 'font-lock-builtin-face))))
-#+end_src
-
 * Virtual keyboard
 
 Emacs in pocket with unicode support. [[https://apps.apple.com/us/app/termius-terminal-ssh-client/id549039908][Termius]] client. Custom keyboard.

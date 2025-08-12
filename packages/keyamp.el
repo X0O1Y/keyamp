@@ -27,6 +27,7 @@
 
 (require 'cl-lib)
 (require 'eieio)
+(require 'bookmark)
 
 (require 'keycom)
 
@@ -509,7 +510,7 @@ is enabled.")
     ("i"  . previous-line)       ("I" . keyamp-insert-and-self-insert)
     ("o"  . forw-word)           ("O" . keyamp-insert-and-self-insert)
     ("p"  . jump-mark)           ("P" . keyamp-insert-and-self-insert)
-    ("["  . alternate-frame)     ("{" . keyamp-insert-and-self-insert)
+    ("["  . scratch)             ("{" . keyamp-insert-and-self-insert)
     ("]"  . list-timers)         ("}" . keyamp-insert-and-self-insert)
     ("\\" . bookmark-set)        ("|" . keyamp-insert-and-self-insert)
 
@@ -518,7 +519,7 @@ is enabled.")
     ("k" . next-line)            ("K"  . keyamp-insert-and-self-insert)
     ("l" . fchar)                ("L"  . keyamp-insert-and-self-insert)
     (";" . end-of-lyne)          (":"  . keyamp-insert-and-self-insert)
-    ("'" . help-command)         ("\"" . keyamp-insert-and-self-insert)
+    ("'" . alt-buf)              ("\"" . keyamp-insert-and-self-insert)
 
     ("n" . isearch-forward)      ("N" . keyamp-insert-and-self-insert)
     ("m" . backward-bracket)     ("M" . keyamp-insert-and-self-insert)
@@ -548,7 +549,7 @@ is enabled.")
 
     ("q" . reformat-lines)
     ("w" . org-ctrl-c-ctrl-c)
-    ("e" . del-win)
+    ("e" . split-window-below)
     ("r" . query-replace)
     ("t" . copy-text-block)
 
@@ -609,7 +610,7 @@ is enabled.")
 
     ("l" . screen-idle)
     (";" . recentf-open-files)
-    ("'" . sync)
+    ("'" . alternate-frame)
     ("n" . list-processes)
     ("m" . tt-conn)
     ("," . ai)
@@ -670,7 +671,7 @@ is enabled.")
     ("f DEL" . insert-ascii-double-quote)  ("f SPC" . insert-backtick-quote)
     ("f <escape>" . ignore)                ("f RET" . emoji-insert)
 
-    ("g" . scratch)
+    ("g" . tools)
     ("z" . goto-char)
     ("x" . next-eww-buf)
     ("c" . copy-all)
@@ -702,7 +703,7 @@ is enabled.")
     (";" . page-dn-half)
     ("'" . describe-mode)
 
-    ("n" . save-buffer)
+    ("n" . help-command)
     ("m" . dired-jump)
     ("," . delete-other-windows)
     ("." . save-close-buf)
@@ -722,7 +723,7 @@ is enabled.")
         ("<mouse-3>" . ignore))))
 
 (keyamp--map-double
-  '((keyamp-escape  . alternate-frame) (other-win     . bookmark-jump)
+  '((keyamp-escape  . alternate-frame) (other-win     . jump-buffer-or-bookmark)
     (beg-of-line    . beg-of-buf)      (end-of-lyne   . end-of-buf)
     (proced-defer   . save-close-buf)  (sh-defer      . delete-other-windows)
     (occur-cur-word . search-string)   (kmacro-record . keyamp-delete)))
@@ -751,16 +752,15 @@ is enabled.")
 (keyamp--map-backtab help-map lookup-etymology)
 (keyamp--map help-map
   '(("e" . describe-char)      ("i" . info)
-    ("s" . info-lookup-symbol) ("j" . describe-function)
+    ("s" . info-lookup-symbol) ("j" . describe-mode)
     ("d" . man)                ("k" . describe-key)
     ("f" . elisp-index-search) ("l" . describe-variable)
     ("q" . describe-syntax)    ("p" . apropos-documentation)
     ("w" . describe-bindings)  ("o" . lookup-all-dictionaries)
-    ("r" . describe-mode)      ("u" . lookup-all-synonyms)
+    ("r" . ignore)             ("u" . lookup-all-synonyms)
     ("a" . describe-face)      (";" . lookup-wiktionary)
     ("g" . apropos-command)    ("h" . describe-coding-system)
-    ("z" . apropos-variable)   ("x" . apropos-value)
-    ("'" . switch-to-buffer)))
+    ("n" . describe-function)))
 
 (dotimes (n 10) ; help command + number to send corresponding fn key
   (keymap-set help-map (format "%d" (% n 10))
@@ -886,7 +886,7 @@ is enabled.")
    ((eq major-mode 'gnus-group-mode)
     (keyamp-command-execute 'gnus-topic-select-group))
    ((eq last-command 'up-line)
-    (keyamp-command-execute 'del-win)) ; below down-line default
+    (keyamp-command-execute 'split-window-below)) ; below down-line default
    (t (keyamp-command-execute 'page-dn-half))))
 
 (defun keyamp-ret ()
@@ -935,11 +935,11 @@ is enabled.")
       (cut-text-block      . ignore)
       (goto-match-br       . ignore)
       (shrink-whitespaces  . ignore)
-      (del-back            . ignore)
+      (del-back            . switch-to-buffer)
       (toggle-comment      . ignore)
       (cut-line            . ignore)
       (copy-line           . ignore)
-      (paste-or-prev       . ignore)
+      (paste-or-prev       . tasks)
       (backward-bracket    . dired-jump)
       (forward-bracket     . save-close-buf)
       (kmacro-helper       . config)
@@ -1056,12 +1056,12 @@ is enabled.")
 
 (with-sparse-keymap
   (keyamp--remap keymap '((make-frame-command . delete-frame)))
-  (keyamp--set keymap '(alternate-frame)))
+  (keyamp--set keymap '(scratch)))
 
 
 ;; Repeat mode - read commands
 
-(with-sparse-keymap ; hold down RET to ESC, second press for double ESC
+(with-sparse-keymap ; hold down RET to ESC, fast second RET press for double ESC
   (keyamp--map-return keymap keyamp-escape)
   (keyamp--set keymap '(keyamp-escape) nil nil nil keyamp-blink-idle-duration))
 
@@ -1269,7 +1269,7 @@ ascii CHAR."
       (toggle-case        . downloads)
       (other-win          . jump-7)
       (isearch-forward    . jump-8)
-      (alternate-frame    . player)
+      (scratch            . player)
       (kmacro-helper      . toggle-pin-window)))
 
   (advice-add 'activate-region :after
@@ -1366,7 +1366,7 @@ ascii CHAR."
   (keyamp--set keymap '(del-forw) nil nil nil keyamp-delay-2))
 
 (with-sparse-keymap
-  (keyamp--remap keymap '((del-win . undo-redo)))
+  (keyamp--remap keymap '((split-window-below . undo-redo)))
   (keyamp--set keymap '(undo undo-redo)))
 
 (with-sparse-keymap
@@ -1590,7 +1590,7 @@ ascii CHAR."
       (beg-of-block        . ibuffer-backward-filter-group)
       (insert-space-before . clock)
       (backward-del-word   . sun-moon)
-      (undo                . del-win)
+      (undo                . split-window-below)
       (cut-text-block      . calc)
       (goto-match-br       . view-messages)
       (shrink-whitespaces  . calendar-split)
@@ -1823,7 +1823,7 @@ ascii CHAR."
       (mouse-set-point   . emms-playlist-mode-play-smart)
       (open-line         . emms-seek-backward-or-previous)
       (newline           . emms-seek-forward-or-next)
-      (undo              . del-win)
+      (undo              . split-window-below)
       (backward-del-word . emms-seek-backward)
       (del-word          . emms-seek-forward)
       (del-back          . emms-playlist-mode-center-current)
@@ -1969,7 +1969,8 @@ ascii CHAR."
       (up-line             . vterm-up)
       (down-line           . vterm-down)
       (toggle-case         . prev-vterm-buf)
-      (dired-jump          . tt-conn-tramp)))
+      (dired-jump          . tt-conn-tramp)
+      (bookmark-set        . tt-sftp)))
 
   ;; sync point on insert
   (add-hook 'keyamp-insert-hook 'vterm-reset-cursor-point)
@@ -2025,9 +2026,9 @@ ascii CHAR."
     (keyamp--set keymap
       '(vterm-up-vi-cmd ; vi cmd mode auto enable
         vterm-down
-        vterm-shell-vi-cmd  vterm-shell-vi-self-insert
-        vterm-shell-vi-s    vterm-shell-vi-l
-        vterm-shell-vi-w    vterm-shell-vi-e
+        vterm-shell-vi-cmd    vterm-shell-vi-self-insert
+        vterm-shell-vi-s      vterm-shell-vi-l
+        vterm-shell-vi-w      vterm-shell-vi-e
         vterm-shell-vi-a))
     ;; vi insert sync with keyamp
     (add-hook 'keyamp-insert-hook 'vterm-shell-vi-insert))
@@ -2228,7 +2229,7 @@ ascii CHAR."
     '((back-char          . screen-idle-escape)
       (forw-char          . screen-idle)
       (backward-del-word  . sun-moon)
-      (undo               . del-win)
+      (undo               . split-window-below)
       (del-word           . gnus-group-enter-server-mode)
       (cut-text-block     . calc)
       (goto-match-br      . view-messages)
@@ -2261,8 +2262,7 @@ ascii CHAR."
       (del-back      . toggle-gnus)
       (newline       . gnus-summary-next-group)
       (paste-or-prev . tasks)
-      (paste-from-r1 . gnus-summary-save-parts)
-      (save-buffer   . gnus-summary-save-parts)))
+      (paste-from-r1 . gnus-summary-save-parts)))
 
   (with-sparse-keymap
     (keyamp--map-leader keymap '(down-line . up-line))
@@ -2553,7 +2553,7 @@ ascii CHAR."
 (with-eval-after-load 'simple
   (keyamp--remap messages-buffer-mode-map
     '((keyamp-insert     . keyamp-escape)
-      (undo              . del-win)
+      (undo              . split-window-below)
       (del-back          . alt-buf)
       (open-line         . prev-buf)
       (newline           . next-buf)
@@ -2567,7 +2567,7 @@ ascii CHAR."
       (forward-bracket   . save-close-buf)
       (kmacro-helper     . config)))
   (keyamp--remap special-mode-map
-    '((undo              . del-win)
+    '((undo              . split-window-below)
       (del-back          . alt-buf)
       (open-line         . prev-buf)
       (newline           . next-buf)
@@ -2992,7 +2992,7 @@ ascii CHAR."
 (defconst keyamp-command-cursor 'box        "Command cursor.")
 (defconst keyamp-insert-cursor  '(hbar . 2) "Insert cursor.")
 (defconst keyamp-read-cursor    'hollow     "Read cursor.")
-(defconst keyamp-screen-cursor  'box        "Screen cursor.")
+(defconst keyamp-screen-cursor  nil         "Screen cursor.")
 (defconst keyamp-modify-cursor  '(bar . 2)  "Modify cursor.")
 
 (defconst keyamp-idle-timeout 60 "Idle timeout.")
@@ -3157,6 +3157,15 @@ insert cancel the timer.")
    (t
     (keyamp-insert)
     (self-insert-command 1))))
+
+(defun minibuffer-complete-around (fun &rest r)
+  "Minibuffer complete by TAB applied only for file path completion, otherwise
+completion forward."
+  (if (eq (icomplete--category) 'file)
+      (apply fun r)
+    (comp-forw)))
+
+(advice-add 'minibuffer-complete :around 'minibuffer-complete-around)
 
 (defun keyamp-minibuffer-return ()
   "Exit if file completion. It means use content of minibuffer as it is,
@@ -3382,8 +3391,7 @@ after a delay even if there more read commands follow."
     (keyamp-blink-start keyamp-read-color keyamp-screen-color))
    ((eq this-command 'save-close-buf)
     (keyamp-blink-start keyamp-modify-color keyamp-screen-color))
-   (t (keyamp-blink-start keyamp-command-color keyamp-screen-color)))
-  (blink-cursor-mode 1))
+   (t (keyamp-blink-start keyamp-command-color keyamp-screen-color))))
 
 (defun keyamp-indicate-command ()
   "Indicate command."
@@ -3392,8 +3400,7 @@ after a delay even if there more read commands follow."
   (cond
    ((memq this-command keyamp-screen-command-commands)
     (keyamp-blink-start keyamp-screen-color keyamp-command-color))
-   (t (keyamp-blink-start keyamp-accent-color keyamp-command-color)))
-  (blink-cursor-mode 0))
+   (t (keyamp-blink-start keyamp-accent-color keyamp-command-color))))
 
 (defun keyamp-indicate-io (&rest _)
   "Indicate io feedback from emacsclient evals or processes calls."
@@ -3479,8 +3486,13 @@ after a delay even if there more read commands follow."
   (remove-hook 'post-command-hook 'keyamp-blink-stop)
   (if (timerp keyamp-blink-off-timer)
       (cancel-timer keyamp-blink-off-timer))
-  (if (timerp keyamp-blink-on-timer)
-      (cancel-timer keyamp-blink-on-timer)))
+  ;; (if (timerp keyamp-blink-on-timer)
+  ;; (cancel-timer keyamp-blink-on-timer))
+  ;; FIXME: not safe :(
+  (mapc (lambda (timer)
+          (if (eq (timer--function timer) 'keyamp-blinking)
+              (cancel-timer timer)))
+        timer-list))
 
 (defun keyamp-blink-start (Color1 Color2)
   "Start blink."

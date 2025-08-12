@@ -2046,8 +2046,9 @@ command, so that next buffer shown is a user buffer."
         (setq this-command 'switch-to-buffer)
         (command-execute 'switch-to-buffer))
     (command-execute 'back-buf)
-    (if (eq last-command 'next-buf)
-        (before-last-command))))
+    ;; (if (eq last-command 'next-buf)
+        ;; (before-last-command))
+    ))
 
 (defun next-buf ()
   "Switch to the next buffer."
@@ -2057,8 +2058,9 @@ command, so that next buffer shown is a user buffer."
         (setq this-command 'switch-to-buffer)
         (command-execute 'switch-to-buffer))
     (command-execute 'forw-buf)
-    (if (eq last-command 'prev-buf)
-        (before-last-command))))
+    ;; (if (eq last-command 'prev-buf)
+        ;; (before-last-command))
+    ))
 
 (defun project-buffer-p ()
   "Return t if current buffer is a project buffer, else nil."
@@ -3097,10 +3099,12 @@ and reverse-search-history in bashrc."
   (let ((x (point)))
     (vterm-send-key Key)        ; workaround vi go after last char
     (sit-for vterm-timer-delay) ; delay to sync
-    (if (and (eq x (point)) ; point did not move
-             (eq (char-after (1+ (point))) 10) ; new line
-             (not (looking-at "\s"))           ; space
-             )
+    (if (and (eq x (point))     ; point did not move
+             (if-let ((p1 (1+ (point))) ; all blank after next char until eol
+                      (p2 (line-end-position))
+                      ((>= p2 p1)))
+                 (string-blank-p (buffer-substring-no-properties p1 p2))
+               t))
         (progn
           (vterm-send-key (kbd "C-m")) ; so activate insert
           (vterm-send-key "<right>")   ; go after last char
@@ -3206,15 +3210,18 @@ and reverse-search-history in bashrc."
 (defun toggle-ibuffer ()
   "Toggle ibuffer. Force switch to current buffer to update `other-buffer'."
   (interactive)
-  (let ((buf (buffer-name)))
-    (if (string-equal major-mode "ibuffer-mode")
-        (switch-to-buffer (other-buffer))
-      (progn
-        (switch-to-buffer buf)
-        (ibuffer)
-        (condition-case nil
-            (ibuffer-jump-to-buffer buf)
-          (error nil))))))
+  (if (string-equal major-mode "ibuffer-mode")
+      (switch-to-buffer (other-buffer))
+    (let ((buf (buffer-name))
+          (ibuf "*Ibuffer*"))
+      (switch-to-buffer buf)
+      (if (get-buffer ibuf)
+          (switch-to-buffer ibuf)
+        (let ((default-directory (expand-file-name "~/")))
+          (ibuffer)))
+      (condition-case nil
+          (ibuffer-jump-to-buffer buf)
+        (error nil)))))
 
 (defun ibuffer-select-group ()
   "Toggle filter group or visit buffer."
@@ -3558,28 +3565,6 @@ Use as around advice e.g. for mouse left click after double click."
            (< 16 (window-height)))
       (enlarge-window (round (fceiling (* 0.3 (window-height)))))))
 
-(defun del-win ()
-  "Split window if one window, otherwise delete window."
-  (interactive)
-  (if (and (not (null (frame-parameter nil 'fullscreen)))
-           (display-graphic-p))
-      (progn
-        (setq this-command 'split-window-below)
-        (split-window-below))
-    (if (active-minibuffer-window)
-        (abort-recursive-edit)
-      (if (one-window-p)
-          (progn
-            (if (or (not (display-graphic-p))
-                    (null (frame-parameter nil 'fullscreen)))
-                (progn
-                  (setq this-command 'split-window-below)
-                  (split-window-below))
-              (setq this-command 'split-window-horizontally)
-              (split-window-horizontally)))
-        (setq this-command 'delete-window)
-        (delete-window)))))
-
 (defun other-win ()
   "Other window."
   (interactive)
@@ -3773,6 +3758,27 @@ Marginalia annotation support."
            ((fboundp cmd)))
       (funcall cmd)
     (message "No command %s" Cmd)))
+
+(defun jump-buffer-or-bookmark ()
+  (interactive)
+  (let* ((buffers (mapcar #'buffer-name
+                          (cl-remove-if (lambda (b)
+                                          (with-current-buffer b
+                                            (derived-mode-p 'dired-mode)))
+                                        (buffer-list))))
+         (bookmarks (cl-remove-if (lambda (bm)
+                                    (let ((bm-file (bookmark-get-filename bm)))
+                                      (cl-some (lambda (buf)
+                                                 (string= (buffer-file-name buf) bm-file))
+                                               (buffer-list))))
+                                  (bookmark-all-names)))
+         (candidates (append buffers bookmarks))
+         (choice (minibuffer-with-setup-hook
+                     (lambda () (setq-local completion-category-default 'file))
+                   (completing-read "Buffer or bookmark: " candidates nil t))))
+    (if (member choice buffers)
+        (switch-to-buffer choice)
+      (bookmark-jump choice))))
 
 (provide 'keycom)
 
