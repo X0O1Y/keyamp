@@ -7967,6 +7967,47 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
+                "/Firefox"
+              ]
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "shell_command": "open -a 'Emacs' && /Applications/emacsclient --no-wait --eval '(frame-title-en)'",
+              "repeat": false,
+              "halt": true
+            },
+            {
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              }
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "h",
+              "modifiers": [
+                "command"
+              ],
+              "repeat": false,
+              "halt": true
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "f15",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
                 "/Emacs"
               ]
             }

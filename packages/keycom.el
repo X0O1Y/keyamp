@@ -8,6 +8,11 @@
 
 
 
+(require 'bookmark)
+(require 'cl-lib)
+
+
+
 ;; Cursor movement
 
 (defun get-bounds-of-block ()
@@ -220,14 +225,6 @@
     (command-execute 'icomplete-forward-completions)
     (if (eq last-command 'comp-back)
         (before-last-command))))
-
-(defun undo-comp-forw ()
-  "Undo then completion forward."
-  (interactive)
-  (when (minibufferp)
-    (undo)
-    (setq this-command 'comp-forw)
-    (comp-forw)))
 
 (defun hist-back ()
   "History backward for transient use."
@@ -3030,6 +3027,24 @@ and reverse-search-history in bashrc."
   (interactive)
   (vterm-tmux-prefix)
   (vterm-send-key (kbd "["))
+  (vterm-reset-cursor-point))
+
+(defun vterm-tmux-copy-hpu ()
+  "Activate copy mode in tmux and halfpage-up immediately."
+  (interactive)
+  (vterm-tmux-copy)
+  (sit-for vterm-timer-delay)
+  (vterm-send-key (kbd "SPC"))
+  (vterm-send-key (kbd "."))
+  (vterm-reset-cursor-point))
+
+(defun vterm-tmux-copy-hpd ()
+  "Activate copy mode in tmux and halfpage-down immediately."
+  (interactive)
+  (vterm-tmux-copy)
+  (sit-for vterm-timer-delay)
+  (vterm-send-key (kbd "DEL"))
+  (vterm-send-key (kbd "."))
   (vterm-reset-cursor-point))
 
 (defun vterm-tmux-split-pane ()

@@ -10,40 +10,37 @@
                 },
                 "rules": [
                     {
-                        "description": "f5",
+                        "description": "f15",
                         "manipulators": [
                             {
                                 "conditions": [
                                     {
-                                        "file_paths": ["/Preview"],
+                                        "file_paths": ["/Firefox"],
                                         "type": "frontmost_application_if"
                                     }
                                 ],
                                 "from": {
-                                    "key_code": "f5",
+                                    "key_code": "f15",
                                     "modifiers": { "optional": ["any"] }
                                 },
-                                "to": [
+                                "to_after_key_up": [
                                     {
+                                        "halt": true,
+                                        "repeat": false,
+                                        "shell_command": "open -a 'Emacs' && /Applications/emacsclient --no-wait --eval '(frame-title-en)'"
+                                    },
+                                    { "select_input_source": { "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram" } }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
                                         "key_code": "h",
-                                        "modifiers": ["command"]
+                                        "modifiers": ["command"],
+                                        "repeat": false
                                     }
                                 ],
                                 "type": "basic"
                             },
-                            {
-                                "from": {
-                                    "key_code": "f5",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [{ "shell_command": "open -a 'Preview'" }],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "f15",
-                        "manipulators": [
                             {
                                 "conditions": [
                                     {
@@ -88,6 +85,38 @@
                                         "shell_command": "open -a 'Firefox'"
                                     }
                                 ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "f5",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Preview"],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "f5",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "h",
+                                        "modifiers": ["command"]
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "from": {
+                                    "key_code": "f5",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [{ "shell_command": "open -a 'Preview'" }],
                                 "type": "basic"
                             }
                         ]
