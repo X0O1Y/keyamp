@@ -1104,7 +1104,7 @@ Cycle in this order: Init Caps, ALL CAPS, all lower. Calculates initial state."
         (downcase-region p1 p2)
         (put this-command 'state 0))))))
 
-(defun toggle-prev-letter-case ()
+(defun toggle-prev-case ()
   "Toggle the letter case of the letter to the left of cursor."
   (interactive)
   (let ((case-fold-search nil))
@@ -3236,7 +3236,8 @@ and reverse-search-history in bashrc."
           (ibuffer)))
       (condition-case nil
           (ibuffer-jump-to-buffer buf)
-        (error nil)))))
+        ;; magic number
+        (error (ibuffer-forward-filter-group 4))))))
 
 (defun ibuffer-select-group ()
   "Toggle filter group or visit buffer."

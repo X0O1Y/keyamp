@@ -261,7 +261,7 @@ executing kbd macro."
               (if (and ,Timeout
                        (not keyamp-insert-p))
                   (setq keyamp--repeat-idle-timer
-                        (run-with-idle-timer ,Timeout nil 'keyamp-escape)))
+                        (run-with-idle-timer ,Timeout nil 'keyamp-command)))
               (if ,InsertMode
                   (keyamp-insert))))))
         (cadr CmdList))))
@@ -561,7 +561,7 @@ is enabled.")
     ("x" . restart-emacs)
     ("c" . copy-to-r1)
     ("v" . paste-from-r1)
-    ("b" . toggle-prev-letter-case)
+    ("b" . toggle-prev-case)
 
     ;; left leader right half
     ("6" . quit)
@@ -1237,7 +1237,7 @@ ascii CHAR."
   (keyamp--remap keymap
     '((back-word     . select-line)   (forw-word        . select-block)
       (previous-line . beg-of-block)  (next-line        . end-of-block)
-      (bchar . isearch-wback)         (backward-bracket . dired-jump)))
+      (bchar         . isearch-wback) (backward-bracket . dired-jump)))
   (advice-add 'forw-word :after
               (lambda () "virtual leader" (keyamp-virtual-leader-init keymap))))
 
@@ -1412,7 +1412,7 @@ ascii CHAR."
     ;; I/K or DEL/SPC to list either history or completion candidates
     ;; accordingly choice made. RET to confirm and exit, ESC to quit.
     ;; To switch from history to candidates listing press ESC then double
-    ;; SPC `select-block' and DEL/SPC or I/K again to continue move
+    ;; SPC `select-word' and DEL/SPC or I/K again to continue move
     ;; backward/forward. Similarly double DEL to activate history move.
     ;; Fast history or completion candidates direction switch to quit.
     (keyamp--map-leader keymap '(paste-or-prev . select-block))
@@ -1956,6 +1956,7 @@ ascii CHAR."
       (page-dn-half        . vterm-tmux-copy-hpd)
       (cut-text-block      . tt-conn-reconnect)
       (open-line           . vterm-tmux-prev-window)
+      (repeat-command      . alt-buf)
       (insert-space-before . vterm-shell-vi-cmd) ; sync point position and activate shell vi cmd mode
       (newline             . vterm-tmux-next-window)
       (toggle-comment      . vterm-read-send-key)
@@ -1968,6 +1969,7 @@ ascii CHAR."
       (up-line             . vterm-up)
       (down-line           . vterm-down)
       (toggle-case         . prev-vterm-buf)
+      (toggle-prev-case    . terminal) ; next vterm buf
       (dired-jump          . tt-conn-tramp)
       (bookmark-set        . tt-sftp)))
 
@@ -2753,7 +2755,7 @@ ascii CHAR."
                  todo                                    t
                  toggle-comment                          t
                  toggle-case                             t
-                 toggle-prev-letter-case                 t
+                 toggle-prev-case                        t
                  undo                                    t)))
 
 (defconst keyamp-read-commands-hash
@@ -3108,7 +3110,7 @@ insert cancel the timer.")
   (keyamp-insert-init)
   (run-hooks 'keyamp-insert-hook))
 
-(defun keyamp-spc-spc (&rest _)
+(defun keyamp-SPC-SPC (&rest _)
   "Insert fast SPC SPC to activate command mode and save. Quit minibuffer."
   (if-let (((keyamp-unless-kbd-macro))
            (space ?\s)
@@ -3121,24 +3123,25 @@ insert cancel the timer.")
         (keyamp-minibuffer-quit))
        (t
         (delete-char (1- -1))
-        (save-buffer-silent-defer)
-        (keyamp-command-execute 'keyamp-escape)))
+        (unless (file-remote-p (buffer-file-name))
+          (save-buffer-silent-defer))
+        (keyamp-command-execute 'keyamp-command)))
     (if (eq last-command-event space)
         (before-last-command-event space)
       (setq before-last-command-event nil))))
 
-(add-hook 'post-self-insert-hook 'keyamp-spc-spc)
+(add-hook 'post-self-insert-hook 'keyamp-SPC-SPC)
 (advice-add-macro '(isearch-printing-char minibuffer-complete-word)
-                  :after 'keyamp-spc-spc)
+                  :after 'keyamp-SPC-SPC)
 
-(defun keyamp-spc-del (&rest _)
+(defun keyamp-SPC-DEL (&rest _)
   "Insert fast SPC DEL to move char forward while in insert mode."
   (if-let (((keyamp-unless-kbd-macro))
            (space ?\s)
            ((eq before-last-command-event space)))
       (keyamp-command-execute 'fchar)))
 
-(advice-add 'delete-backward-char :after #'keyamp-spc-del)
+(advice-add 'delete-backward-char :after #'keyamp-SPC-DEL)
 
 (defun keyamp-command-if-insert (&rest _)
   "Activate command mode if insert mode."
@@ -3493,13 +3496,8 @@ after a delay even if there more read commands follow."
   (remove-hook 'post-command-hook 'keyamp-blink-stop)
   (if (timerp keyamp-blink-off-timer)
       (cancel-timer keyamp-blink-off-timer))
-  ;; (if (timerp keyamp-blink-on-timer)
-  ;; (cancel-timer keyamp-blink-on-timer))
-  ;; FIXME: not safe :(
-  (mapc (lambda (timer)
-          (if (eq (timer--function timer) 'keyamp-blinking)
-              (cancel-timer timer)))
-        timer-list))
+  (if (timerp keyamp-blink-on-timer)
+      (cancel-timer keyamp-blink-on-timer)))
 
 (defun keyamp-blink-start (Color1 Color2)
   "Start blink."
@@ -3587,10 +3585,8 @@ after a delay even if there more read commands follow."
     [backspace ,(string-to-char (keyamp--convert-kbd-str "j"))]
     [backspace ,(string-to-char (keyamp--convert-kbd-str "k"))]
     [?\C-h]
-    [,(string-to-char (keyamp--convert-kbd-str "'"))]
-    [,(string-to-char (if-let ((quotemap (car (rassoc "'" keyamp-input-method-to-ascii))))
-                          quotemap
-                        ""))])
+    [?\C-_ ,(string-to-char (keyamp--convert-kbd-str "n"))]
+    [?\C-И ,(string-to-char "т")])
   "Indicate prefixes with io.")
 
 (defconst keyamp-prefix-modify
@@ -3668,11 +3664,14 @@ Cleanup echo area. Quit minibuffer. Quit wait key sequence."
   "Return to clear selection, command mode or quit minibuffer."
   (interactive)
   (cond
-   ((region-active-p)                    (deactivate-region))
-   ((or keyamp-repeat-p keyamp-insert-p) (keyamp-command))
-   ((minibufferp)                        (keyamp-minibuffer-quit))
-   ((cl-plusp (recursion-depth))         (exit-recursive-edit))
-   (t                                    (keyamp-command))))
+   ((region-active-p)
+    (deactivate-region))
+   ((or keyamp-repeat-p keyamp-insert-p)
+    (keyamp-command))
+   ((minibufferp)
+    (keyamp-minibuffer-quit))
+   (t
+    (keyamp-command))))
 
 (define-minor-mode keyamp
   "Keyboard Amplifier."
@@ -3690,7 +3689,6 @@ Cleanup echo area. Quit minibuffer. Quit wait key sequence."
     (add-hook 'minibuffer-exit-hook  'keyamp-deactivate-region)
     (add-hook 'isearch-mode-hook     'keyamp-repeat-deactivate)
     (add-hook 'isearch-mode-end-hook 'keyamp-command)
-    (add-hook 'debugger-mode-hook    'keyamp-command)
     (add-function :after after-focus-change-function #'keyamp-command-if-insert)))
 
 (provide 'keyamp)
