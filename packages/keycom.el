@@ -772,6 +772,32 @@ and `right-brackets'."
         (before-last-command)))
   (beginning-of-visual-line-once))
 
+(defun page-up-half-rev ()
+  "Page up half. For reverse transient."
+  (interactive)
+  (if (equal before-last-command this-command)
+      (progn
+        (command-execute 'View-scroll-half-page-backward)
+        (setq this-command 'ignore)
+        (command-execute 'ignore))
+    (command-execute 'View-scroll-half-page-backward)
+    (if (eq last-command 'page-dn-half-rev)
+        (before-last-command)))
+  (beginning-of-visual-line-once))
+
+(defun page-dn-half-rev ()
+  "Page dn half. For reverse transient."
+  (interactive)
+  (if (equal before-last-command this-command)
+      (progn
+        (command-execute 'View-scroll-half-page-forward)
+        (setq this-command 'ignore)
+        (command-execute 'ignore))
+    (command-execute 'View-scroll-half-page-forward)
+    (if (eq last-command 'page-up-half-rev)
+        (before-last-command)))
+  (beginning-of-visual-line-once))
+
 (advice-add 'mark-defun :after #'exchange-point-and-mark)
 
 
@@ -3790,7 +3816,9 @@ Marginalia annotation support."
                                   (bookmark-all-names)))
          (candidates (append buffers bookmarks))
          (choice (minibuffer-with-setup-hook
-                     (lambda () (setq-local completion-category-default 'file))
+                     (lambda ()
+                       (setq-local completion-ignore-case t)
+                       (setq-local completion-category-default 'file))
                    (completing-read "Buffer or bookmark: " candidates nil t))))
     (if (member choice buffers)
         (switch-to-buffer choice)

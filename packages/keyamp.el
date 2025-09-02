@@ -469,7 +469,7 @@ is enabled.")
 (keyamp--map-return keyamp-command-map keyamp-insert)
 (keyamp--map keyamp-command-map
   '(;; left half
-    ("`" . make-frame-command)   ("~" . keyamp-insert-and-self-insert)
+    ("`" . alternate-frame)      ("~" . keyamp-insert-and-self-insert)
     ("1" . kmacro-record)        ("!" . keyamp-insert-and-self-insert)
     ("2" . kmacro-play)          ("@" . keyamp-insert-and-self-insert)
     ("3" . kmacro-helper)        ("#" . keyamp-insert-and-self-insert)
@@ -509,7 +509,7 @@ is enabled.")
     ("o"  . forw-word)           ("O" . keyamp-insert-and-self-insert)
     ("p"  . jump-mark)           ("P" . keyamp-insert-and-self-insert)
     ("["  . scratch)             ("{" . keyamp-insert-and-self-insert)
-    ("]"  . list-timers)         ("}" . keyamp-insert-and-self-insert)
+    ("]"  . ignore)              ("}" . keyamp-insert-and-self-insert)
     ("\\" . bookmark-set)        ("|" . keyamp-insert-and-self-insert)
 
     ("h" . beg-of-line)          ("H"  . keyamp-insert-and-self-insert)
@@ -608,7 +608,7 @@ is enabled.")
 
     ("l" . screen-idle)
     (";" . recentf-open-files)
-    ("'" . alternate-frame)
+    ("'" . list-timers)
     ("n" . list-processes)
     ("m" . tt-conn)
     ("," . ai)
@@ -692,7 +692,7 @@ is enabled.")
     ("p"  . mark-defun)
     ("["  . backward-sexp)
     ("]"  . forward-sexp)
-    ("\\" . dslide-deck-start)
+    ("\\" . make-frame-command)
 
     ("h" . page-up-half)
     ("j" . isearch-wback)
@@ -1052,16 +1052,8 @@ is enabled.")
   (keyamp--set keymap '(enlarge-window-horizontally shrink-window-horizontally)
     nil nil nil keyamp-delay-2))
 
-(with-sparse-keymap
-  (keyamp--remap keymap '((make-frame-command . delete-frame)))
-  (keyamp--set keymap '(scratch)))
-
 
 ;; Repeat mode - read commands
-
-(with-sparse-keymap ; hold down RET to ESC, fast second RET press for double ESC
-  (keyamp--map-return keymap keyamp-escape)
-  (keyamp--set keymap '(keyamp-escape) nil nil nil keyamp-blink-idle-duration))
 
 (with-sparse-keymap
   ;; Initiate by triple DEL/SPC (hold down).
@@ -1259,7 +1251,7 @@ ascii CHAR."
   (keyamp--map-return keymap toggle-ibuffer)
   (keyamp--remap keymap
     '((undo               . todo)
-      (shrink-whitespaces . player)
+      (scratch            . player)
       (open-line          . alt-buf)
       (del-back           . del-forw)
       (newline            . toggle-pin-window)
@@ -1291,16 +1283,22 @@ ascii CHAR."
 
 (with-sparse-keymap
   ;; Repeat half page up/down with I/K or DEL/SPC.
-  (keyamp--map-leader keymap '(next-line . previous-line))
+  (keyamp--map-leader keymap '(page-dn-half . page-up-half))
   (keyamp--map-return keymap keyamp-ret)
   (keyamp--map-tab keymap scroll-up-command)
   (keyamp--map-backtab keymap scroll-down-command)
   (keyamp--remap keymap
-    '((previous-line . page-up-half) (next-line . page-dn-half)
-      (down-line     . page-dn-half) (up-line   . page-up-half)))
+    '((previous-line . page-up-half-rev) (next-line . page-dn-half)
+      (down-line     . page-dn-half)     (up-line   . page-up-half)))
   (unless (display-graphic-p) ; touch reader
     (keyamp--remap keymap '((down-line . page-up-half) (up-line . page-dn-half))))
   (keyamp--set keymap '(page-up-half page-dn-half)))
+
+(with-sparse-keymap ; swap leaders up/down
+  (keyamp--map-leader keymap '(page-up-half-rev . page-dn-half-rev))
+  (keyamp--map-return keymap keyamp-ret)
+  (keyamp--remap keymap '((previous-line . page-up-half) (next-line . page-dn-half)))
+  (keyamp--set keymap '(page-up-half-rev page-dn-half-rev)))
 
 (with-sparse-keymap
   ;; Initially TAB makes half page forward, following presses do full page.
@@ -3671,7 +3669,7 @@ Cleanup echo area. Quit minibuffer. Quit wait key sequence."
    ((minibufferp)
     (keyamp-minibuffer-quit))
    (t
-    (keyamp-command))))
+    (keyboard-quit))))
 
 (define-minor-mode keyamp
   "Keyboard Amplifier."
