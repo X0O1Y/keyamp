@@ -669,7 +669,7 @@ is enabled.")
     ("f DEL" . insert-ascii-double-quote)  ("f SPC" . insert-backtick-quote)
     ("f <escape>" . ignore)                ("f RET" . emoji-insert)
 
-    ("g" . tools)
+    ("g" . player)
     ("z" . goto-char)
     ("x" . next-eww-buf)
     ("c" . copy-all)
@@ -1088,10 +1088,7 @@ is enabled.")
   (keyamp--remap keymap '((previous-line . up-line) (next-line . down-line)))
   (keyamp--set keymap '(up-line-rev down-line-rev)))
 
-(with-sparse-keymap
-  (keyamp--map-leader keymap '(down-line . up-line))
-  (keyamp--map-return keymap keyamp-ret)
-  (keyamp--remap keymap '((previous-line . beg-of-block) (next-line . end-of-block)))
+(with-sparse-keymap ; dummy
   (keyamp--set keymap '(beg-of-buf end-of-buf)))
 
 (with-sparse-keymap
@@ -1246,20 +1243,17 @@ ascii CHAR."
 
 ;; G acts as leader key.
 (with-sparse-keymap
-  (keyamp--map-leader keymap '(newline . tools))
+  (keyamp--map-leader keymap '(toggle-ibuffer . toggle-ibuffer))
   (keyamp--map-escape keymap deactivate-region)
-  (keyamp--map-return keymap toggle-ibuffer)
+  (keyamp--map-return keymap tools)
   (keyamp--remap keymap
-    '((undo               . todo)
-      (scratch            . player)
-      (open-line          . alt-buf)
-      (del-back           . del-forw)
-      (newline            . toggle-pin-window)
-      (activate-region    . rectangle)
-      (toggle-case        . downloads)
-      (alt-buf            . jump-6)
-      (other-win          . jump-7)
-      (isearch-forward    . jump-8)))
+    '((undo            . todo)
+      (del-back        . del-forw)
+      (newline         . toggle-pin-window)
+      (activate-region . rectangle)
+      (toggle-case     . downloads)
+      (other-win       . jump-7)
+      (isearch-forward . jump-8)))
 
   (advice-add 'activate-region :after
               (lambda () "virtual leader G transient"
@@ -1274,11 +1268,10 @@ ascii CHAR."
 
 (advice-add-macro
  '(del-forw              tools
-   jump-6
+                         jump-6
    jump-7                jump-8
    screen-idle           downloads
-   toggle-pin-window     toggle-ibuffer
-   player                alt-buf)
+   toggle-pin-window     toggle-ibuffer)
  :before 'keyamp-deactivate-region)
 
 (with-sparse-keymap
@@ -1318,11 +1311,6 @@ ascii CHAR."
   (keyamp--map-leader keymap '(fchar . bchar))
   (keyamp--remap keymap '((bchar . hscroll-right) (fchar . hscroll-left)))
   (keyamp--set keymap '(hscroll-left hscroll-right)))
-
-(with-sparse-keymap
-  (keyamp--map-leader keymap '(next-line . next-line))
-  (keyamp--remap keymap '((next-line . jump-mark)))
-  (keyamp--set keymap '(jump-mark)))
 
 (with-sparse-keymap
   (keyamp--map-leader keymap '(text-scale-decrease . text-scale-increase))
@@ -1399,6 +1387,10 @@ ascii CHAR."
 (with-sparse-keymap
   (keyamp--remap keymap '((del-back . cycle-hyphen-lowline-space)))
   (keyamp--set keymap '(cycle-hyphen-lowline-space) nil nil nil keyamp-delay-1))
+
+(with-sparse-keymap
+  (keyamp--remap keymap '((split-window-below . split-window-r)))
+  (keyamp--set keymap '(split-window-below)))
 
 
 ;; Modes Remaps
@@ -1952,7 +1944,8 @@ ascii CHAR."
       (kill-line           . vterm-tmux-copy) ; activate tmux copy mode
       (page-up-half        . vterm-tmux-copy-hpu)
       (page-dn-half        . vterm-tmux-copy-hpd)
-      (cut-text-block      . tt-conn-reconnect)
+      (copy-text-block     . tt-conn-reconnect)
+      (cut-text-block      . tt-conn-localhost)
       (open-line           . vterm-tmux-prev-window)
       (repeat-command      . alt-buf)
       (insert-space-before . vterm-shell-vi-cmd) ; sync point position and activate shell vi cmd mode
@@ -2342,9 +2335,9 @@ ascii CHAR."
 (with-eval-after-load 'tetris
   (keyamp--remap tetris-mode-map
     '((keyamp-escape . tetris-pause-game)
-      (del-back      . tetris-rotate-prev) (alt-buf       . tetris-rotate-prev)
-      (newline       . tetris-rotate-next) (next-buf      . tetris-rotate-next)
-      (next-line     . tetris-move-bottom) (bchar . tetris-move-down)))
+      (del-back      . tetris-rotate-prev)
+      (newline       . tetris-rotate-next) (next-buf . tetris-rotate-next)
+      (next-line     . tetris-move-bottom) (bchar    . tetris-move-down)))
 
   (with-sparse-keymap
     (keyamp--map-leader keymap '(tetris-move-left . tetris-move-right))
@@ -2763,7 +2756,6 @@ ascii CHAR."
                  back-char                               t
                  beg-of-block                            t
                  beg-of-block-rev                        t
-                 beg-of-buf                              t
                  calc-redo                               t
                  calc-undo                               t
                  calendar-goto-today                     t
@@ -2800,7 +2792,6 @@ ascii CHAR."
                  emms-seek-forward-or-next               t
                  end-of-block                            t
                  end-of-block-rev                        t
-                 end-of-buf                              t
                  enlarge-window                          t
                  enlarge-window-horizontally             t
                  eshell-next-input                       t
@@ -2853,7 +2844,6 @@ ascii CHAR."
                  isearch-ring-advance                    t
                  isearch-ring-retreat                    t
                  isearch-yank-kill                       t
-                 jump-mark                               t
                  keyamp--hook-indicate                   t
                  minibuffer-previous-completion          t
                  minibuffer-next-completion              t
@@ -3669,7 +3659,7 @@ Cleanup echo area. Quit minibuffer. Quit wait key sequence."
    ((minibufferp)
     (keyamp-minibuffer-quit))
    (t
-    (keyboard-quit))))
+    (keyamp-command))))
 
 (define-minor-mode keyamp
   "Keyboard Amplifier."

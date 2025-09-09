@@ -932,9 +932,19 @@ including the inner text.
 This command assumes the left of cursor is a right bracket, and there
 is a matching one before it.
 What char is considered bracket or quote is determined by current syntax table."
-  (forward-sexp -1)
-  (mark-sexp)
-  (kill-region (region-beginning) (region-end)))
+  (if (and (eq major-mode 'python-ts-mode)
+           (looking-back "\\s\"" 1))
+      (progn ; crazy shit with quotes - go to prev quote and then del cause sexp moves wrong
+        (backward-char 1)
+        (let ((skipChars (concat "^\"`'" (mapconcat #'identity brackets ""))))
+          (skip-chars-backward skipChars)
+          (setq skipChar (buffer-substring-no-properties (- (point) 1) (point)))
+          (if (member skipChar left-brackets)
+              (setq skipChar (cdr (assoc skipChar pair-brackets)))))
+        (del-back))
+    (forward-sexp -1)
+    (mark-sexp)
+    (kill-region (region-beginning) (region-end))))
 
 (defun cut-bracket-pair ()
   "Delete the matching brackets/quotes to the left of cursor.
@@ -1018,17 +1028,27 @@ If `universal-argument' is called first, do not delete inner text."
      (t (kill-region (point) (progn (backward-char 1) (point)))))))
 
 (defun del-back ()
-  "Try cut bracket. If error, then delete char."
+  "If delete chars in progress, then do delete char back.
+Else try cut bracket. If error e.g. no match, then delete char."
   (interactive)
-  (if buffer-read-only
-      (setq this-command 'ignore)
-    (condition-case nil
-        (progn
-          (cut-bracket)
-          (push-mark (point) t))
-      (error (if (looking-back "\\s)" 1)
-                 (kill-region (point) (progn (backward-char 1) (point)))
-               (kill-region (point) (progn (forward-char 1) (point))))))))
+  (if (eq last-command this-command)
+      (delete-char -1)
+    (if buffer-read-only
+        (setq this-command 'ignore)
+      (condition-case nil
+          (progn
+            (cut-bracket)
+            (push-mark (point) t))
+        (error (if (looking-back "\\s)" 1)
+                   (kill-region (point)
+                                (progn
+                                  (backward-char 1)
+                                  (point)))
+                 (kill-region (point)
+                              (progn
+                                (forward-char 1)
+                                (point))))))))
+  (setq this-command 'del-back))
 
 (defun del-forw ()
   "Delete char forward."
@@ -2344,6 +2364,8 @@ Switch to the same buffer type after close, e.g. user or project."
     (cond
      ((eq major-mode 'dired-mode) nil)
      ((eq major-mode 'ibuffer-mode) nil)
+     ((eq major-mode 'vterm-mode)
+      (prev-vterm-buf))
      ((string-equal type "proj")
       (unless (project-buffer-p)
         (prev-proj-buf)))
@@ -3823,6 +3845,12 @@ Marginalia annotation support."
     (if (member choice buffers)
         (switch-to-buffer choice)
       (bookmark-jump choice))))
+
+(defun split-window-r ()
+  "Delete other windows then split window right"
+  (interactive)
+  (delete-other-windows)
+  (split-window-right))
 
 (provide 'keycom)
 
