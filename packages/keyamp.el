@@ -34,8 +34,40 @@
 (defgroup keyamp nil "Customization options for keyamp."
   :group 'help :prefix "keyamp-")
 
+(defvar keyamp-current-layout "qwerty" "Current layout.")
+
 
 ;; Quail
+
+(when (string-equal keyamp-current-layout "engineer-engram")
+  (quail-define-package
+   "russian-computer" "Russian" "RU" nil
+   "ЙЦУКЕН Russian computer layout for engineer engram compatibility.
+   Stop convert .,-_=+\/
+   Actually double convert:
+   / -> h
+   ? -> g
+   - -> b
+   _ -> B
+   = -> *
+   + -> (
+   \ -> )
+   | -> #"
+   nil t t t t nil nil nil nil nil t)
+
+  (quail-define-rules
+   ("1" ?1)  ("2" ?2)  ("3" ?3) ("4" ?4)  ("5" ?5) ("6" ?6)   ("7" ?7) ("8" ?8)
+   ("9" ?9)  ("0" ?0)  ("-" ?b) ("=" ?*)  ("|" ?#) ("`" ?ё)   ("q" ?й) ("w" ?ц)
+   ("e" ?у)  ("r" ?к)  ("t" ?е) ("y" ?н)  ("u" ?г) ("i" ?ш)   ("o" ?щ) ("p" ?з)
+   ("[" ?х)  ("]" ?ъ)  ("a" ?ф) ("s" ?ы)  ("d" ?в) ("f" ?а)   ("g" ?п) ("h" ?р)
+   ("j" ?о)  ("k" ?л)  ("l" ?д) (";" ?ж)  ("'" ?э) ("\\" ?\)) ("z" ?я) ("x" ?ч)
+   ("c" ?с)  ("v" ?м)  ("b" ?и) ("n" ?т)  ("m" ?ь) ("," ?б)   ("." ?ю) ("/" ?h)
+   ("!" ?!)  ("@" ?\") ("#" ?№) ("$" ?\;) ("%" ?%) ("^" ?:)   ("&" ??) ("*" ?*)
+   ("(" ?\() (")" ?\)) ("_" ?B) ("+" ?\() ("~" ?Ё) ("Q" ?Й)   ("W" ?Ц) ("E" ?У)
+   ("R" ?К)  ("T" ?Е)  ("Y" ?Н) ("U" ?Г)  ("I" ?Ш) ("O" ?Щ)   ("P" ?З) ("{" ?Х)
+   ("}" ?Ъ)  ("A" ?Ф)  ("S" ?Ы) ("D" ?В)  ("F" ?А) ("G" ?П)   ("H" ?Р) ("J" ?О)
+   ("K" ?Л)  ("L" ?Д)  (":" ?Ж) ("\"" ?Э) ("|" ?|) ("Z" ?Я)   ("X" ?Ч) ("C" ?С)
+   ("V" ?М)  ("B" ?И)  ("N" ?Т) ("M" ?Ь)  ("<" ?Б) (">" ?Ю)   ("?" ?g)))
 
 (defconst keyamp-input-methods '(russian-computer hebrew)
   "Input methods, activate when not available otherwise. See
@@ -64,7 +96,7 @@ throughout the code of the package.")
           (push (cons to from) (symbol-value var-name))))
       (cdr (quail-map))))
    (activate-input-method nil))
- keyamp-input-methods)
+ (reverse keyamp-input-methods))
 
 (push '("engineer-engram" . "\
                               \
@@ -84,19 +116,19 @@ Single non-ASCII chars mapped in `keyamp--map' macro."
      (activate-input-method method)
      (mapc
       (lambda (map)
-        (if-let ((to (keyamp--convert-kbd-str (char-to-string (car map))))
-                 (from (quail-get-translation (cadr map) to 1))
-                 (to (string-to-char to))
-                 ((characterp from))
-                 ((> from 127)))
-            (mapc
-             (lambda (modifier)
-               (define-key local-function-key-map
-                           (vector (append modifier (list from)))
-                           (vector (append modifier (list to)))))
-             '(nil (control)))))
+        (when-let ((to (keyamp--convert-kbd-str (char-to-string (car map))))
+                   (from (quail-get-translation (cadr map) to 1))
+                   (to (string-to-char to))
+                   ((characterp from))
+                   ((> from 127)))
+          (mapc
+           (lambda (modifier)
+             (define-key local-function-key-map
+                         (vector (append modifier (list from)))
+                         (vector (append modifier (list to)))))
+           '(nil (control)))))
       (cdr (quail-map))))
-     keyamp-input-methods)
+   keyamp-input-methods)
   (activate-input-method nil))
 
 (defun toggle-input-method ()
@@ -104,7 +136,21 @@ Single non-ASCII chars mapped in `keyamp--map' macro."
   (interactive)
   (let ((method (car keyamp-input-methods)))
     (activate-input-method (if current-input-method nil method))
-    (message "%s %s" method (if current-input-method "activated" "deactivated"))))
+    (message "%s %s" (if current-input-method "Activated" "Deactivated") method)))
+
+(defun map-toggle-input-method ()
+  "Map `toggle-input-method' with `keyamp-insert-hook'."
+  (keymap-set keyamp-map "`" 'toggle-input-method)
+  (keymap-set keyamp-map (car (rassoc "`" keyamp-input-method-to-ascii))
+              'toggle-input-method))
+
+(defun unmap-toggle-input-method ()
+  "Unmap `toggle-input-method' with `keyamp-command-hook'."
+  (keymap-set keyamp-map "`" nil)
+  (keymap-set keyamp-map (car (rassoc "`" keyamp-input-method-to-ascii)) nil))
+
+(defvar toggle-standard-to-current-layout-silent nil
+  "Set this t if need silent `toggle-standard-to-current-layout'.")
 
 (defun toggle-standard-to-current-layout ()
   "Toggle translation standard keyboard to `keyamp-current-layout' command.
@@ -115,12 +161,18 @@ present in `quail-keyboard-layout-alist'."
       (progn
         (quail-set-keyboard-layout "standard")
         (put 'toggle-standard-to-current-layout 'state nil)
-        (message "Deactivated standard keyboard to %s" keyamp-current-layout))
+        (remove-hook 'keyamp-insert-hook 'map-toggle-input-method)
+        (remove-hook 'keyamp-command-hook 'unmap-toggle-input-method)
+        (unless toggle-standard-to-current-layout-silent
+          (message "Deactivated standard keyboard")))
     (if (assoc keyamp-current-layout quail-keyboard-layout-alist)
         (quail-set-keyboard-layout keyamp-current-layout)
       (user-error "Unable to activate standard keyboard to %s" keyamp-current-layout))
     (put 'toggle-standard-to-current-layout 'state t)
-    (message "Activated standard keyboard to %s" keyamp-current-layout))
+    (add-hook 'keyamp-insert-hook 'map-toggle-input-method)
+    (add-hook 'keyamp-command-hook 'unmap-toggle-input-method)
+    (unless toggle-standard-to-current-layout-silent
+      (message "Activated standard keyboard")))
   (let ((define (get 'toggle-standard-to-current-layout 'state)))
     (mapc
      (lambda (pair)
@@ -135,8 +187,6 @@ present in `quail-keyboard-layout-alist'."
 Value is an alist, each element is of the form (\"e\" . \"d\").
 First char is QWERTY, second is corresponding char of the destination layout.
 When a char is not in this alist, they are assumed to be the same.")
-
-(defvar keyamp-current-layout "qwerty" "Current layout.")
 
 (defconst keyamp-ascii-chars (number-sequence 33 126)
   "List of ASCII printable characters except space.")
@@ -417,9 +467,11 @@ Activate command, insert or repeat mode optionally."
 Prefix sequence may contain last key ESC."
   (if-let ((tty-seq (this-single-command-keys))
            ((= ?\e (aref tty-seq (1- (length tty-seq)))))
-           ((or (or defining-kbd-macro executing-kbd-macro)
+           ((or (or defining-kbd-macro
+                    executing-kbd-macro)
                 (sit-for keyamp-tty-seq-timeout))))
-      [escape] map))
+      [escape]
+    map))
 
 (defun keyamp-lookup-key (map key)
   (catch 'found
@@ -1457,7 +1509,9 @@ ascii CHAR."
                     :after 'keyamp-insert-init)
 
   (keyamp--map minibuffer-inactive-mode-map
-    '(("<mouse-1>" . toggle-ibuffer) ("<double-mouse-1>" . ignore)))
+    '(("<mouse-1>" . toggle-ibuffer) ("<double-mouse-1>" . ignore)
+      ("<left-fringe> <mouse-1>"  . execute-extended-command)
+      ("<right-fringe> <mouse-1>" . view-messages)))
   (keyamp--remap minibuffer-inactive-mode-map '((mouse-3 . radio-next))))
 
 (with-eval-after-load 'icomplete
@@ -3111,7 +3165,8 @@ insert cancel the timer.")
         (keyamp-minibuffer-quit))
        (t
         (delete-char (1- -1))
-        (unless (file-remote-p (buffer-file-name))
+        (when-let ((file (buffer-file-name))
+                   ((not (file-remote-p file))))
           (save-buffer-silent-defer))
         (keyamp-command-execute 'keyamp-command)))
     (if (eq last-command-event space)
@@ -3124,10 +3179,10 @@ insert cancel the timer.")
 
 (defun keyamp-SPC-DEL (&rest _)
   "Insert fast SPC DEL to move char forward while in insert mode."
-  (if-let (((keyamp-unless-kbd-macro))
-           (space ?\s)
-           ((eq before-last-command-event space)))
-      (keyamp-command-execute 'fchar)))
+  (when-let (((keyamp-unless-kbd-macro))
+             (space ?\s)
+             ((eq before-last-command-event space)))
+    (keyamp-command-execute 'fchar)))
 
 (advice-add 'delete-backward-char :after #'keyamp-SPC-DEL)
 
@@ -3179,13 +3234,13 @@ Simply hit TAB to minibuffer-complete file name if the name exists."
 
 (defun keyamp-minibuffer-y-or-n-literal ()
   "Return t if asked literal y or n question."
-  (if-let ((str (minibuffer-prompt)))
-      (string-match "y, n, !\\|yn!q" str)))
+  (when-let ((str (minibuffer-prompt)))
+    (string-match "y, n, !\\|yn!q" str)))
 
 (defun keyamp-minibuffer-y-or-n ()
   "Return t if asked non-literal y or n question."
-  (if-let ((str (minibuffer-prompt)))
-      (string-match "y or n" str)))
+  (when-let ((str (minibuffer-prompt)))
+    (string-match "y or n" str)))
 
 (defun keyamp-insert-minibuffer ()
   "Answer to y or n question if asked or answer literal y or n question if asked.
@@ -3194,9 +3249,9 @@ Else activate insert mode and self insert."
   (let ((key (this-command-keys)))
     (if (vectorp key)
         (setq key (char-to-string (aref key 0))))
-    (if-let ((key-ascii (cdr (assoc key keyamp-input-method-to-ascii)))
-             ((> (string-to-char key) 127)))
-        (setq key (keyamp--convert-kbd-str key-ascii)))
+    (when-let ((key-ascii (cdr (assoc key keyamp-input-method-to-ascii)))
+               ((> (string-to-char key) 127)))
+      (setq key (keyamp--convert-kbd-str key-ascii)))
     (cond
      ((keyamp-minibuffer-y-or-n)
       (if (string-equal key (keyamp--convert-kbd-str "k")) ; QWERTY K
@@ -3242,9 +3297,9 @@ of quit minibuffer. Answer q to literal y or n question."
 
 (defun keyamp-copy-minibuffer ()
   "Kill minibuffer content to ring for reuse."
-  (if-let ((str (buffer-substring (1+ (length (minibuffer-prompt))) (point-max)))
-           ((cl-plusp (length str))))
-      (kill-new str)))
+  (when-let ((str (buffer-substring (1+ (length (minibuffer-prompt))) (point-max)))
+             ((cl-plusp (length str))))
+    (kill-new str)))
 
 (defun keyamp-minibuffer-shift ()
   "Quit minibuffer and call some minibuffer command. Single motion switch."
@@ -3620,9 +3675,9 @@ Cleanup echo area. Quit minibuffer. Quit wait key sequence."
     (if (region-active-p)
         (deactivate-mark))
     (keyamp-command)
-    (if-let ((buf (get-buffer " *Echo Area 0*"))
-             ((cl-plusp (buffer-size buf))))
-        (run-at-time nil nil 'message nil))
+    (when-let ((buf (get-buffer " *Echo Area 0*"))
+               ((cl-plusp (buffer-size buf))))
+      (run-at-time nil nil 'message nil))
     (if (minibufferp)
         (keyamp-minibuffer-quit))
     (keyboard-quit)))

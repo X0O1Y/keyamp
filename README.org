@@ -24,27 +24,19 @@ Input model based on [[file:packages/keyamp.el][Keyamp]] for Emacs.
 * Virtual keyboard
 
 Emacs in pocket with unicode support. [[https://apps.apple.com/us/app/termius-terminal-ssh-client/id549039908][Termius]] client. Custom keyboard.
+- Tmux over mosh - permanent instant remote access
+#+begin_src bash
+  mosh-server new -p 65566:65569 -s -c 256 -l LANG=en_US.UTF-8 -- bash -c "kill $(ps --no-headers --sort=start_time -C mosh-server -o pid | tail -n 1) && tmux -u new -As emacs 'emacs'"
+#+end_src
 
 *** Custom
 - Engineer Engram and Russian layouts
   - [[https://apps.apple.com/us/app/xkeyboard-custom-keyboard/id1440245962][xKeyboard - Custom Keyboard]]
   - Layout file: [[file:layouts/ios/xkeyboard/Engineer-Engram.xkeyboard][Engineer-Engram.xkeyboard]]
 
-*** Preferences
-- Set terminal and keyboard coding system to utf-8:
-#+begin_src elisp
-(set-terminal-coding-system 'utf-8)
-(set-keyboard-coding-system 'utf-8)
-#+end_src
-
 [[screenshots/virtual-keyboard.png]]
 
 [[screenshots/virtual-keyboard2.png]]
-
-- Emacs in tmux over mosh - instant remote access
-#+begin_src bash
-  mosh-server new -s -c 256 -l LANG=en_US.UTF-8 -- tmux -u new -As emacs 'emacs'
-#+end_src
 
 * Split keyboard
 
