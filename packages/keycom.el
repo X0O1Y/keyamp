@@ -35,8 +35,8 @@
 
 (defun up-line-wrap ()
   "On the first line go to the last line of buffer."
-  (if (= (line-number-at-pos) 1)
-      (forward-line (count-lines (point-min) (point-max)))))
+  (when (= (line-number-at-pos) 1)
+    (forward-line (count-lines (point-min) (point-max)))))
 
 (defun down-line-wrap (fun &rest r)
   "On the last line go to the first line of buffer."
@@ -102,8 +102,8 @@
           (setq this-command 'beg-of-block)
           (beg-of-block)))))
    (t (command-execute 'previous-line)
-      (if (eq last-command 'down-line)
-          (before-last-command))))
+      (when (eq last-command 'down-line)
+        (before-last-command))))
   (setq last-command-keys (this-command-keys)))
 
 (defun down-line ()
@@ -138,8 +138,8 @@
       (if (and (eq major-mode 'gnus-summary-mode)
                (> (line-number-at-pos) 2))
           (command-execute 'next-line)) ; double next line
-      (if (eq last-command 'up-line)
-          (before-last-command))))
+      (when (eq last-command 'up-line)
+        (before-last-command))))
   (setq last-command-keys (this-command-keys)))
 
 (defun up-line-rev ()
@@ -156,29 +156,40 @@
        (t (setq this-command 'up-line)
           (up-line)))
     (command-execute 'previous-line)
-    (if (eq last-command 'down-line-rev)
-        (before-last-command)))
+    (when (eq last-command 'down-line-rev)
+      (before-last-command)))
   (setq last-command-keys (this-command-keys)))
 
 (defun down-line-rev ()
-  "Down line for transient use. Reverse."
+  "Down line for transient use. Reverse. Generally both leaders do
+down line if held down (triple press), but each leader might change direction,
+and so does the other one."
   (interactive)
-  (if (equal before-last-command this-command)
-      (cond
-       ((eq major-mode 'ibuffer-mode)
-        (setq this-command 'ibuffer-forward-filter-group)
-        (ibuffer-forward-filter-group))
-       ((eq major-mode 'gnus-group-mode)
-        (setq this-command 'gnus-topic-next)
-        (gnus-topic-next))
-       (t (setq this-command 'down-line)
-          (down-line)))
-    (command-execute 'next-line)
-    (if (and (eq major-mode 'gnus-summary-mode)
-             (> (line-number-at-pos) 2))
+  (when (region-active-p) ; triple press
+    (deactivate-mark)
+    (double-jump-back)
+    (command-execute 'next-line))
+  (if (or (equal before-last-command 'previous-line)
+          (equal before-last-command 'up-line))
+      (progn
+        (setq this-command 'up-line)
+        (up-line))
+    (if (equal before-last-command this-command)
+        (cond
+         ((eq major-mode 'ibuffer-mode)
+          (setq this-command 'ibuffer-forward-filter-group)
+          (ibuffer-forward-filter-group))
+         ((eq major-mode 'gnus-group-mode)
+          (setq this-command 'gnus-topic-next)
+          (gnus-topic-next))
+         (t (setq this-command 'down-line)
+            (down-line)))
+      (command-execute 'next-line)
+      (when (and (eq major-mode 'gnus-summary-mode)
+                 (> (line-number-at-pos) 2))
         (command-execute 'next-line))
-    (if (eq last-command 'up-line-rev)
-        (before-last-command)))
+      (when (eq last-command 'up-line-rev)
+        (before-last-command))))
   (setq last-command-keys (this-command-keys)))
 
 (defun beginning-of-visual-line-once (&rest _)
@@ -212,8 +223,8 @@
         (setq this-command 'abort-recursive-edit)
         (abort-recursive-edit))
     (command-execute 'icomplete-backward-completions)
-    (if (eq last-command 'comp-forw)
-        (before-last-command))))
+    (when (eq last-command 'comp-forw)
+      (before-last-command))))
 
 (defun comp-forw ()
   "Completion forward for transient use."
@@ -223,8 +234,8 @@
         (setq this-command 'abort-recursive-edit)
         (abort-recursive-edit))
     (command-execute 'icomplete-forward-completions)
-    (if (eq last-command 'comp-back)
-        (before-last-command))))
+    (when (eq last-command 'comp-back)
+      (before-last-command))))
 
 (defun hist-back ()
   "History backward for transient use."
@@ -232,8 +243,8 @@
   (if (equal before-last-command this-command)
       (isearch-cancel-clean-are)
     (command-execute 'previous-line-or-history-element)
-    (if (eq last-command 'hist-forw)
-        (before-last-command))))
+    (when (eq last-command 'hist-forw)
+      (before-last-command))))
 
 (defun hist-forw ()
   "History forward for transient use."
@@ -241,8 +252,8 @@
   (if (equal before-last-command this-command)
       (isearch-cancel-clean-are)
     (command-execute 'next-line-or-history-element)
-    (if (eq last-command 'hist-back)
-        (before-last-command))))
+    (when (eq last-command 'hist-back)
+      (before-last-command))))
 
 (defun company-select-back ()
   "Company complete backward for transient use."
@@ -252,8 +263,8 @@
         (setq this-command 'company-abort)
         (company-abort))
     (command-execute 'company-select-previous)
-    (if (eq last-command 'company-select-forw)
-        (before-last-command))))
+    (when (eq last-command 'company-select-forw)
+      (before-last-command))))
 
 (defun company-select-forw ()
   "Company complete forward for transient use."
@@ -263,8 +274,8 @@
         (setq this-command 'company-abort)
         (company-abort))
     (command-execute 'company-select-next)
-    (if (eq last-command 'company-select-back)
-        (before-last-command))))
+    (when (eq last-command 'company-select-back)
+      (before-last-command))))
 
 (defun button-back ()
   "Button backward for transient use."
@@ -274,8 +285,8 @@
         (setq this-command 'backward-button)
         (backward-button 1 nil nil t))
     (backward-button 1 nil nil t)
-    (if (eq last-command 'button-forw)
-        (before-last-command))))
+    (when (eq last-command 'button-forw)
+      (before-last-command))))
 
 (defun button-forw ()
   "Button forward for transient use."
@@ -285,8 +296,8 @@
         (setq this-command 'forward-button)
         (forward-button 1 nil nil t))
     (forward-button 1 nil nil t)
-    (if (eq last-command 'button-back)
-        (before-last-command))))
+    (when (eq last-command 'button-back)
+      (before-last-command))))
 
 (defun isearch-update-ring-force ()
   "Force push string to isearch ring."
@@ -344,9 +355,9 @@
         (setq this-command 'isearch-cancel)
         (isearch-cancel-clean))
     (command-execute 'isearch-repeat-backward)
-    (if (or (eq last-command 'isearch-forw)
-            (eq last-command 'isearch-wforw))
-        (before-last-command))))
+    (when (or (eq last-command 'isearch-forw)
+              (eq last-command 'isearch-wforw))
+      (before-last-command))))
 
 (defun isearch-forw ()
   "Isearch forward for transient use."
@@ -357,9 +368,9 @@
         (setq this-command 'isearch-cancel)
         (isearch-cancel-clean))
     (command-execute 'isearch-repeat-forward)
-    (if (or (eq last-command 'isearch-back)
-            (eq last-command 'isearch-wback))
-        (before-last-command))))
+    (when (or (eq last-command 'isearch-back)
+              (eq last-command 'isearch-wback))
+      (before-last-command))))
 
 (defun jump-mark ()
   "Move cursor to last mark position of current buffer, but not point.
@@ -372,23 +383,26 @@ Save point to register 6 before repeated call."
       (point-to-register ?6))
     (let ((p (point)))
       (set-mark-command t)
-      (if (eql p (point))
-          (set-mark-command t)))))
+      (when (eql p (point))
+        (set-mark-command t)))))
 
 (defun jump-6 ()
   "Jump to register 6."
   (interactive)
-  (if (get-register ?6) (jump-to-register ?6)))
+  (when (get-register ?6)
+    (jump-to-register ?6)))
 
 (defun jump-7 ()
   "Jump to register 7."
   (interactive)
-  (if (get-register ?7) (jump-to-register ?7)))
+  (when (get-register ?7)
+    (jump-to-register ?7)))
 
 (defun jump-8 ()
   "Jump to register 8."
   (interactive)
-  (if (get-register ?8) (jump-to-register ?8)))
+  (when (get-register ?8)
+    (jump-to-register ?8)))
 
 (defun beg-of-line-raw ()
   "Move cursor to beginning of line."
@@ -402,8 +416,8 @@ Save point to register 6 before repeated call."
                 (forward-char 4))
             (beginning-of-line))
         (back-to-indentation)
-        (if (eq p (point))
-            (beginning-of-line))))))
+        (when (eq p (point))
+          (beginning-of-line))))))
 
 (defun beg-of-line ()
   "Move cursor to beginning of line. Move to end of line if in beginning of line."
@@ -428,19 +442,19 @@ Save point to register 6 before repeated call."
   (when (re-search-backward "\n[\t\n ]*\n+" nil 1)
     (skip-chars-backward "\n\t ")
     (forward-char))
-  (if (eq last-command 'end-of-block)
-      (when (re-search-backward "\n[\t\n ]*\n+" nil 1)
-        (skip-chars-backward "\n\t ")
-        (forward-char)))
-  (if (eq major-mode 'dired-mode)
-      (dired-previous-line 1)))
+  (when (eq last-command 'end-of-block)
+    (when (re-search-backward "\n[\t\n ]*\n+" nil 1)
+      (skip-chars-backward "\n\t ")
+      (forward-char)))
+  (when (eq major-mode 'dired-mode)
+    (dired-previous-line 1)))
 
 (defun forw-block ()
   "Move cursor to the beginning of next block."
   (interactive)
   (re-search-forward "\n[\t\n ]*\n+" nil 1)
-  (if (eq major-mode 'dired-mode)
-      (dired-next-line 1)))
+  (when (eq major-mode 'dired-mode)
+    (dired-next-line 1)))
 
 (defun beg-of-block ()
   "Back block. Fast double direction switch via SPC to stop,
@@ -455,8 +469,8 @@ switch via K to half page move."
         (setq this-command 'ignore)
         (command-execute 'ignore))
     (command-execute 'back-block)
-    (if (eq last-command 'end-of-block)
-        (before-last-command)))
+    (when (eq last-command 'end-of-block)
+      (before-last-command)))
   (setq last-command-keys (this-command-keys)))
 
 (defun beg-of-block-rev ()
@@ -471,8 +485,8 @@ switch via K to half page move."
         (setq this-command 'ignore)
         (command-execute 'ignore))
     (command-execute 'back-block)
-    (if (eq last-command 'end-of-block-rev)
-        (before-last-command)))
+    (when (eq last-command 'end-of-block-rev)
+      (before-last-command)))
   (setq last-command-keys (this-command-keys)))
 
 (defun end-of-block ()
@@ -488,8 +502,8 @@ switch via I to half page move."
         (setq this-command 'ignore)
         (command-execute 'ignore))
     (command-execute 'forw-block)
-    (if (eq last-command 'beg-of-block)
-        (before-last-command)))
+    (when (eq last-command 'beg-of-block)
+      (before-last-command)))
   (setq last-command-keys (this-command-keys)))
 
 (defun end-of-block-rev ()
@@ -504,8 +518,8 @@ switch via I to half page move."
         (setq this-command 'ignore)
         (command-execute 'ignore))
     (command-execute 'forw-block)
-    (if (eq last-command 'beg-of-block-rev)
-        (before-last-command)))
+    (when (eq last-command 'beg-of-block-rev)
+      (before-last-command)))
   (setq last-command-keys (this-command-keys)))
 
 (defun beg-of-buf ()
@@ -516,8 +530,8 @@ switch via I to half page move."
         (goto-char (point-max))
         (forward-line -1))
     (goto-char (point-min)))
-  (if (eq major-mode 'dired-mode)
-      (dired-next-line 1)))
+  (when (eq major-mode 'dired-mode)
+    (dired-next-line 1)))
 
 (defun end-of-buf ()
   "Go to the end of buffer, next call to the beginning of buffer."
@@ -624,19 +638,19 @@ and `right-brackets'."
 (defun back-word ()
   "Backward word. Fast double direction switch breaks beat to char move."
   (interactive)
-  (if (and (member (this-command-keys) (list "l" [?г]))
-           (not (or (eq last-command 'select-word)
-                    (eq last-command 'back-word)
-                    (eq last-command 'jump-mark))))
-      (push-mark (point) t)) ; virtual leader
+  (when (and (member (this-command-keys) (list "l" [?г]))
+             (not (or (eq last-command 'select-word)
+                      (eq last-command 'back-word)
+                      (eq last-command 'jump-mark))))
+    (push-mark (point) t)) ; virtual leader
   (if (equal before-last-command this-command)
       (progn
         (backward-word)
         (setq this-command 'ignore)
         (command-execute 'ignore))
     (command-execute 'backward-word)
-    (if (eq last-command 'forw-word)
-        (before-last-command))))
+    (when (eq last-command 'forw-word)
+      (before-last-command))))
 
 (defun back-word-repeat ()
   "Backward word for leader repeat."
@@ -647,24 +661,24 @@ and `right-brackets'."
         (setq this-command 'ignore)
         (command-execute 'ignore))
     (command-execute 'backward-word)
-    (if (eq last-command 'forw-word-repeat)
-        (before-last-command))))
+    (when (eq last-command 'forw-word-repeat)
+      (before-last-command))))
 
 (defun forw-word ()
   "Forward word."
   (interactive)
-  (if (and (member (this-command-keys) (list "w" [?щ]))
-           (not (or (eq last-command 'select-word)
-                    (eq last-command 'forw-word))))
-      (push-mark (point) t)) ; virtual leader
+  (when (and (member (this-command-keys) (list "w" [?щ]))
+             (not (or (eq last-command 'select-word)
+                      (eq last-command 'forw-word))))
+    (push-mark (point) t)) ; virtual leader
   (if (equal before-last-command this-command)
       (progn
         (forward-word)
         (setq this-command 'ignore)
         (command-execute 'ignore))
     (command-execute 'forward-word)
-    (if (eq last-command 'back-word)
-        (before-last-command))))
+    (when (eq last-command 'back-word)
+      (before-last-command))))
 
 (defun forw-word-repeat ()
   "Forward word for leader repeat."
@@ -675,8 +689,8 @@ and `right-brackets'."
         (setq this-command 'ignore)
         (command-execute 'ignore))
     (command-execute 'forward-word)
-    (if (eq last-command 'back-word-repeat)
-        (before-last-command))))
+    (when (eq last-command 'back-word-repeat)
+      (before-last-command))))
 
 (defun back-char ()
   "Backward char."
@@ -687,8 +701,8 @@ and `right-brackets'."
         (setq this-command 'ignore)
         (command-execute 'ignore))
     (command-execute 'left-char)
-    (if (eq last-command 'forw-char)
-        (before-last-command))))
+    (when (eq last-command 'forw-char)
+      (before-last-command))))
 
 (defun forw-char ()
   "Forward char."
@@ -699,8 +713,8 @@ and `right-brackets'."
         (setq this-command 'ignore)
         (command-execute 'ignore))
     (command-execute 'right-char)
-    (if (eq last-command 'back-char)
-        (before-last-command))))
+    (when (eq last-command 'back-char)
+      (before-last-command))))
 
 (defun bchar ()
   "Backward char."
@@ -713,8 +727,8 @@ and `right-brackets'."
               (setq this-command 'deactivate-region)
               (command-execute 'deactivate-region))))
     (command-execute 'backward-char)
-    (if (eq last-command 'fchar)
-        (before-last-command))))
+    (when (eq last-command 'fchar)
+      (before-last-command))))
 
 (defun fchar ()
   "Forward char."
@@ -722,13 +736,12 @@ and `right-brackets'."
   (if (equal before-last-command this-command)
       (progn
         (command-execute 'forward-char)
-        (if (region-active-p)
-            (progn
-              (setq this-command 'deactivate-region)
-              (command-execute 'deactivate-region))))
+        (when (region-active-p)
+          (setq this-command 'deactivate-region)
+          (command-execute 'deactivate-region)))
     (command-execute 'forward-char)
-    (if (eq last-command 'bchar)
-        (before-last-command))))
+    (when (eq last-command 'bchar)
+      (before-last-command))))
 
 (defun activate-region ()
   "Select region. If region active, then exchange point and mark."
@@ -742,7 +755,7 @@ and `right-brackets'."
     (set-mark-command nil)))
 
 (defun deactivate-region ()
-  "Command `deactivate-mark'."
+  "Command to `deactivate-mark'."
   (interactive)
   (deactivate-mark))
 
@@ -755,8 +768,8 @@ and `right-brackets'."
         (setq this-command 'ignore)
         (command-execute 'ignore))
     (command-execute 'View-scroll-half-page-backward)
-    (if (eq last-command 'page-dn-half)
-        (before-last-command)))
+    (when (eq last-command 'page-dn-half)
+      (before-last-command)))
   (beginning-of-visual-line-once))
 
 (defun page-dn-half ()
@@ -768,8 +781,8 @@ and `right-brackets'."
         (setq this-command 'ignore)
         (command-execute 'ignore))
     (command-execute 'View-scroll-half-page-forward)
-    (if (eq last-command 'page-up-half)
-        (before-last-command)))
+    (when (eq last-command 'page-up-half)
+      (before-last-command)))
   (beginning-of-visual-line-once))
 
 (defun page-up-half-rev ()
@@ -781,8 +794,8 @@ and `right-brackets'."
         (setq this-command 'ignore)
         (command-execute 'ignore))
     (command-execute 'View-scroll-half-page-backward)
-    (if (eq last-command 'page-dn-half-rev)
-        (before-last-command)))
+    (when (eq last-command 'page-dn-half-rev)
+      (before-last-command)))
   (beginning-of-visual-line-once))
 
 (defun page-dn-half-rev ()
@@ -794,8 +807,8 @@ and `right-brackets'."
         (setq this-command 'ignore)
         (command-execute 'ignore))
     (command-execute 'View-scroll-half-page-forward)
-    (if (eq last-command 'page-up-half-rev)
-        (before-last-command)))
+    (when (eq last-command 'page-up-half-rev)
+      (before-last-command)))
   (beginning-of-visual-line-once))
 
 (advice-add 'mark-defun :after #'exchange-point-and-mark)
@@ -820,19 +833,19 @@ and `right-brackets'."
 (defun copy-text-block ()
   "Copy text block to register 1."
   (interactive)
-  (if (fboundp 'uncentered-cursor)
-      (uncentered-cursor))
+  (when (fboundp 'uncentered-cursor)
+    (uncentered-cursor))
   (select-block)
   (sit-for 0.1)
   (copy-line)
   (double-jump-back)
-  (if (fboundp 'centered-cursor)
-      (centered-cursor)))
+  (when (fboundp 'centered-cursor)
+    (centered-cursor)))
 
 (defun copy-selection (&rest _)
   "Copy selection."
-  (if (region-active-p)
-      (copy-region-as-kill (region-beginning) (region-end))))
+  (when (region-active-p)
+    (copy-region-as-kill (region-beginning) (region-end))))
 
 (defun copy-line ()
   "Copy current line or selection.
@@ -899,17 +912,16 @@ paste that many times."
   (interactive)
   (if buffer-read-only
       (setq this-command 'ignore)
-    (progn
-      (if (and delete-selection-mode
+    (when (and delete-selection-mode
                (region-active-p))
-          (delete-region (region-beginning) (region-end)))
-      (if current-prefix-arg
-          (dotimes (_ (prefix-numeric-value current-prefix-arg))
-            (yank))
-        (if (eq real-last-command this-command)
-            (yank-pop 1)
-          (push-mark (point) t)
-          (yank))))))
+      (delete-region (region-beginning) (region-end)))
+    (if current-prefix-arg
+        (dotimes (_ (prefix-numeric-value current-prefix-arg))
+          (yank))
+      (if (eq real-last-command this-command)
+          (yank-pop 1)
+        (push-mark (point) t)
+        (yank)))))
 
 (defconst show-kill-ring-separator (concat "\n\n" (make-string 77 95) "\n\n")
   "A line divider for `show-kill-ring'.")
@@ -919,11 +931,10 @@ paste that many times."
   (interactive)
   (let ((buf (generate-new-buffer "*copy stack*"))
         (inhibit-read-only t))
-    (progn
-      (switch-to-buffer buf)
-      (mapc (lambda (x)
-              (insert x show-kill-ring-separator))
-            kill-ring))
+    (switch-to-buffer buf)
+    (mapc (lambda (x)
+            (insert x show-kill-ring-separator))
+          kill-ring)
     (goto-char (point-min))))
 
 (defun cut-bracket-text ()
@@ -939,8 +950,8 @@ What char is considered bracket or quote is determined by current syntax table."
         (let ((skipChars (concat "^\"`'" (mapconcat #'identity brackets ""))))
           (skip-chars-backward skipChars)
           (setq skipChar (buffer-substring-no-properties (- (point) 1) (point)))
-          (if (member skipChar left-brackets)
-              (setq skipChar (cdr (assoc skipChar pair-brackets)))))
+          (when (member skipChar left-brackets)
+            (setq skipChar (cdr (assoc skipChar pair-brackets)))))
         (del-back))
     (forward-sexp -1)
     (mark-sexp)
@@ -1289,19 +1300,19 @@ one space or newline at each step, till no more white space."
        ((eq eol-count 1)
         (if space-neighbor-p
             (delete-spaces)
-          (progn
-            (delete-blank-lines)
-            (insert " "))))
+          (delete-blank-lines)
+          (insert " ")))
        ((eq eol-count 2)
-        (if space-neighbor-p (delete-spaces) (delete-blank-lines)))
+        (if space-neighbor-p
+            (delete-spaces)
+          (delete-blank-lines)))
        ((> eol-count 2)
         (if space-neighbor-p
             (delete-spaces)
-          (progn
-            (goto-char p2)
-            (search-backward "\n")
-            (delete-region p1 (point))
-            (insert "\n"))))
+          (goto-char p2)
+          (search-backward "\n")
+          (delete-region p1 (point))
+          (insert "\n")))
        (t (message "Nothing done. Logic error 40873. Should not reach here"))))))
 
 (defun fill-or-unfill ()
@@ -1427,7 +1438,9 @@ Move cursor to the beginning of next text block."
 (defun space-to-newline ()
   "Replace space sequence to a newline char in current block or selection."
   (interactive)
-  (let* ((bds (get-bounds-of-block-or-region)) (p1 (car bds)) (p2 (cdr bds)))
+  (let* ((bds (get-bounds-of-block-or-region))
+         (p1 (car bds))
+         (p2 (cdr bds)))
     (save-restriction
       (narrow-to-region p1 p2)
       (goto-char (point-min))
@@ -1570,7 +1583,9 @@ In lisp code, QuoteL QuoteR Sep are strings."
             (insert quoteL)
             (end-of-line)
             (insert quoteR sep)
-            (if (eq (point) (point-max)) (throw 'EndReached t) (forward-char))))))))
+            (if (eq (point) (point-max))
+                (throw 'EndReached t)
+              (forward-char))))))))
 
 (defun escape-quotes (Begin End)
   "Add slash before double quote in current line or selection.
@@ -2057,8 +2072,8 @@ command, so that next buffer shown is a user buffer."
                 (message "%s" err)
                 (switch-to-buffer buf)))
           (setq i (1+ buf-count-limit))))
-      (if (eq buf (current-buffer))
-          (user-error "%s" err)))))
+      (when (eq buf (current-buffer))
+        (user-error "%s" err)))))
 
 (defun forw-buf ()
   "Switch to the next buffer."
@@ -2078,8 +2093,8 @@ command, so that next buffer shown is a user buffer."
                 (message "%s" err)
                 (switch-to-buffer buf)))
           (setq i (1+ buf-count-limit))))
-      (if (eq buf (current-buffer))
-          (user-error "%s" err)))))
+      (when (eq buf (current-buffer))
+        (user-error "%s" err)))))
 
 (defun prev-buf ()
   "Switch to the previous buffer."
@@ -2088,10 +2103,7 @@ command, so that next buffer shown is a user buffer."
       (progn
         (setq this-command 'switch-to-buffer)
         (command-execute 'switch-to-buffer))
-    (command-execute 'back-buf)
-    ;; (if (eq last-command 'next-buf)
-        ;; (before-last-command))
-    ))
+    (command-execute 'back-buf)))
 
 (defun next-buf ()
   "Switch to the next buffer."
@@ -2100,10 +2112,7 @@ command, so that next buffer shown is a user buffer."
       (progn
         (setq this-command 'switch-to-buffer)
         (command-execute 'switch-to-buffer))
-    (command-execute 'forw-buf)
-    ;; (if (eq last-command 'prev-buf)
-        ;; (before-last-command))
-    ))
+    (command-execute 'forw-buf)))
 
 (defun project-buffer-p ()
   "Return t if current buffer is a project buffer, else nil."
@@ -2349,8 +2358,8 @@ to `user-emacs-directory' temp and named file_‹datetime›_‹randomhex›.txt
 Switch to the same buffer type after close, e.g. user or project."
   (interactive)
   (if (buffer-file-name)
-      (if (buffer-modified-p)
-          (save-buffer))
+      (when (buffer-modified-p)
+        (save-buffer))
     (when (user-buffer-p)
       (widen)
       (when (not (equal (point-max) 1))
@@ -2559,7 +2568,7 @@ File suffix is used to determine which program to run, set in the variable
                               bash-ts-mode
                               sh-mode
                               go-ts-mode))
-            (y-or-n-p (concat "Run? " (buffer-file-name))))
+           (y-or-n-p (concat "Run? " (buffer-file-name))))
       (progn
         (when (not buffer-file-name) (save-buffer))
         (let* ((outBuffer "*run output*")
@@ -2570,9 +2579,10 @@ File suffix is used to determine which program to run, set in the variable
                (appCmdStr (cdr (assoc fExt extAppMap)))
                cmdStr)
           (setq cmdStr
-                (if appCmdStr
-                    (format "%s %s &" appCmdStr (shell-quote-argument fname))))
-          (if (buffer-modified-p) (save-buffer))
+                (when appCmdStr
+                  (format "%s %s &" appCmdStr (shell-quote-argument fname))))
+          (when (buffer-modified-p)
+            (save-buffer))
           (cond
            ((string-equal fExt "el")
             (load fname))
@@ -2636,9 +2646,9 @@ If the current buffer is not associated with a file, nothing's done."
 For detail, see `make-backup'.
 If the current buffer is not associated with a file nor dired, nothing's done."
   (interactive)
-  (if (and (buffer-file-name)
-           (buffer-modified-p))
-      (save-buffer))
+  (when (and (buffer-file-name)
+             (buffer-modified-p))
+    (save-buffer))
   (make-backup))
 
 (defun backup-and-copy ()
@@ -2649,10 +2659,10 @@ If the current buffer is not associated with a file nor dired, nothing's done."
 
 (defun save-buffer-silent ()
   "Save buffer without message."
-  (let ((inhibit-message t))
-    (unless (minibufferp)
-      (if (buffer-file-name)
-          (save-buffer)))))
+  (when-let ((inhibit-message t)
+             ((not (minibufferp)))
+             ((buffer-file-name)))
+    (save-buffer)))
 
 (defun save-buffer-silent-defer ()
   "Defer `save-buffer-silent'."
@@ -2714,9 +2724,9 @@ If the current buffer is not associated with a file nor dired, nothing's done."
 (defun search-string ()
   "Search string in all files of current directory."
   (interactive)
-  (let ((xdefault (cur-word)))
+  (let ((default (cur-word)))
     (find-text
-     (read-string (format "Search (%s): " xdefault) nil 'query-replace-history xdefault)
+     (read-string (format "Search (%s): " default) nil 'query-replace-history default)
      (expand-file-name "") ".[A-Za-z0-9]+$" t t)))
 
 (defun show-in-desktop ()
@@ -2864,13 +2874,13 @@ before actually send the cd command."
      ((eq major-mode 'eshell-mode)
       (insert "pushd . && ")
       (yank)
-      (if (change-wd-p)
-          (eshell-send-input)))
+      (when (change-wd-p)
+        (eshell-send-input)))
      ((eq major-mode 'vterm-mode)
       (vterm-insert "pushd . && ")
       (vterm-yank)
-      (if (change-wd-p)
-          (vterm-send-return))))))
+      (when (change-wd-p)
+        (vterm-send-return))))))
 
 (defun change-wd ()
   "Change working directory."
@@ -2935,16 +2945,16 @@ before actually send the cd command."
     (if kmacro-playp
         (progn
           (message "%s" "Macro playback on")
-          (if (timerp kmacro-play-timer)
-              (cancel-timer kmacro-play-timer))
+          (when (timerp kmacro-play-timer)
+            (cancel-timer kmacro-play-timer))
           (setq kmacro-play-timer
                 (run-with-idle-timer kmacro-play-timeout nil
                                      (lambda ()
                                        (setq kmacro-playp nil)
                                        (setq kmacro-play-timer nil)))))
       (message "%s" "Macro playback off")
-      (if (timerp kmacro-play-timer)
-          (cancel-timer kmacro-play-timer)))))
+      (when (timerp kmacro-play-timer)
+        (cancel-timer kmacro-play-timer)))))
 
 (defun kmacro-play ()
   "Play keyboard macro."
@@ -3241,16 +3251,16 @@ and reverse-search-history in bashrc."
 
 (defun vterm-reset-cursor-shape ()
   "Kill local cursor type variable in order to restore cursor change shape."
-  (if (eq major-mode 'vterm-mode) ; sometimes binds and hinders indicate
-      (kill-local-variable 'cursor-type)))
+  (when (eq major-mode 'vterm-mode) ; sometimes binds and hinders indicate
+    (kill-local-variable 'cursor-type)))
 
 (advice-add 'vterm-reset-cursor-point :after #'vterm-reset-cursor-shape)
 
 (defun screenshot ()
   "Take screenshot on macOS."
   (interactive)
-  (if (string-equal system-type "darwin")
-      (call-process "screencapture" nil 0 nil "-W" "-U" "dummy")))
+  (when (string-equal system-type "darwin")
+    (call-process "screencapture" nil 0 nil "-W" "-U" "dummy")))
 
 (defun clock ()
   "World clock."
@@ -3562,8 +3572,8 @@ before selection. This fun to be run as before advice for move fun."
 
 (defun delete-before (&rest _)
   "Delete selection right before insertion."
-  (if (memq last-command '(select-word select-quote))
-      (del-back)))
+  (when (memq last-command '(select-word select-quote))
+    (del-back)))
 
 (defun lookup-around (fun &rest r)
   "Lookup selection if buffer is read only and last command `select-word'.
@@ -3625,9 +3635,9 @@ Use as around advice e.g. for mouse left click after double click."
 
 (defun enlarge-window-split ()
   "Enlarge window if frame splitted equally."
-  (if (and (window-half-height-p)
-           (< 16 (window-height)))
-      (enlarge-window (round (fceiling (* 0.3 (window-height)))))))
+  (when (and (window-half-height-p)
+             (< 16 (window-height)))
+    (enlarge-window (round (fceiling (* 0.3 (window-height)))))))
 
 (defun other-win ()
   "Other window."
@@ -3707,9 +3717,9 @@ Use as around advice e.g. for mouse left click after double click."
 (defun empty-bin ()
   "Empty bin on macOS."
   (interactive)
-  (if (and (y-or-n-p-with-timeout "Empty bin?" 3 nil)
-           (string-equal system-type "darwin"))
-      (call-process "osascript" nil 0 nil "-e" "tell app \"Finder\" to empty")))
+  (when (and (y-or-n-p-with-timeout "Empty bin?" 3 nil)
+             (string-equal system-type "darwin"))
+    (call-process "osascript" nil 0 nil "-e" "tell app \"Finder\" to empty")))
 
 (defun yt-dlp-video ()
   "Ask URL and download video."
@@ -3780,16 +3790,16 @@ Use as around advice e.g. for mouse left click after double click."
 (defun eval-defun-visual ()
   "Same as `eval-defun' but highlight defun."
   (interactive)
-  (if (fboundp 'uncentered-cursor)
-      (uncentered-cursor))
+  (when (fboundp 'uncentered-cursor)
+    (uncentered-cursor))
   (command-execute 'eval-defun)
   (push-mark (point) t nil)
   (mark-defun)
   (sit-for 0.1)
   (set-mark-command t)
   (set-mark-command t)
-  (if (fboundp 'centered-cursor)
-      (centered-cursor)))
+  (when (fboundp 'centered-cursor)
+    (centered-cursor)))
 
 (defun copy-char ()
   "Prompt for a character and copy it to the kill-ring."

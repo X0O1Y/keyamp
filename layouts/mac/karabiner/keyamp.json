@@ -6439,6 +6439,33 @@
               "halt": true
             }
           ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "tab",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/KeyPad"
+              ]
+            }
+          ],
+          "to": [
+            {
+              "key_code": "tab",
+              "modifiers": [
+                "command"
+              ]
+            }
+          ]
         }
       ]
     },
@@ -7156,12 +7183,22 @@
               ]
             }
           ],
-          "to": [
+          "to_after_key_up": [
             {
               "key_code": "h",
               "modifiers": [
                 "command"
               ]
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "comma",
+              "modifiers": [
+                "left_option"
+              ],
+              "repeat": false,
+              "halt": true
             }
           ]
         },
@@ -7214,7 +7251,7 @@
               ]
             }
           ],
-          "to": [
+          "to_after_key_up": [
             {
               "key_code": "tab",
               "modifiers": [
@@ -7222,6 +7259,13 @@
               ],
               "halt": true,
               "repeat": false
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "shell_command": "open -a SwitchBetweenAudioDevices.app",
+              "repeat": false,
+              "halt": true
             }
           ]
         },
@@ -7613,7 +7657,8 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Windows"
+                "/Windows",
+                "/KeyPad"
               ]
             }
           ],

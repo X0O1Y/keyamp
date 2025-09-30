@@ -34,6 +34,9 @@ Emacs in pocket with unicode support. [[https://apps.apple.com/us/app/termius-te
   - [[https://apps.apple.com/us/app/xkeyboard-custom-keyboard/id1440245962][xKeyboard - Custom Keyboard]]
   - Layout file: [[file:layouts/ios/xkeyboard/Engineer-Engram.xkeyboard][Engineer-Engram.xkeyboard]]
 
+*** Bluetooth keyboard
+- [[https://bluetooth-keyboard.com/keypad/][KeyPad]] use your Mac keyboard as a bluetooth keyboard
+
 [[screenshots/virtual-keyboard.png]]
 
 [[screenshots/virtual-keyboard2.png]]

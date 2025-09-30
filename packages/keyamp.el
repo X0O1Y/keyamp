@@ -1,7 +1,7 @@
 ;;; keyamp.el --- Keyboard Amplifier -*- coding: utf-8; lexical-binding: t; -*-
 
 ;; Author: Egor Maltsev <x0o1@ya.ru>
-;; Version: 1.2 2025-01-07 Spectrum
+;; Version: 1.3 2025-09-22 Standard
 ;;          __   _____   __
 ;;         |__| |_____| |__|
 ;;
@@ -34,40 +34,31 @@
 (defgroup keyamp nil "Customization options for keyamp."
   :group 'help :prefix "keyamp-")
 
-(defvar keyamp-current-layout "qwerty" "Current layout.")
+(defvar keyamp-cur-layout "qwerty"
+  "Keyamp current layout. Set non-standard layout before keyamp load.")
 
 
 ;; Quail
 
-(when (string-equal keyamp-current-layout "engineer-engram")
+(when (string-equal keyamp-cur-layout "engineer-engram")
   (quail-define-package
    "russian-computer" "Russian" "RU" nil
-   "ЙЦУКЕН Russian computer layout for engineer engram compatibility.
-   Stop convert .,-_=+\/
-   Actually double convert:
-   / -> h
-   ? -> g
-   - -> b
-   _ -> B
-   = -> *
-   + -> (
-   \ -> )
-   | -> #"
+   "ЙЦУКЕН Russian computer layout for Engineer Engram compatibility."
    nil t t t t nil nil nil nil nil t)
 
   (quail-define-rules
-   ("1" ?1)  ("2" ?2)  ("3" ?3) ("4" ?4)  ("5" ?5) ("6" ?6)   ("7" ?7) ("8" ?8)
-   ("9" ?9)  ("0" ?0)  ("-" ?b) ("=" ?*)  ("|" ?#) ("`" ?ё)   ("q" ?й) ("w" ?ц)
-   ("e" ?у)  ("r" ?к)  ("t" ?е) ("y" ?н)  ("u" ?г) ("i" ?ш)   ("o" ?щ) ("p" ?з)
-   ("[" ?х)  ("]" ?ъ)  ("a" ?ф) ("s" ?ы)  ("d" ?в) ("f" ?а)   ("g" ?п) ("h" ?р)
-   ("j" ?о)  ("k" ?л)  ("l" ?д) (";" ?ж)  ("'" ?э) ("\\" ?\)) ("z" ?я) ("x" ?ч)
-   ("c" ?с)  ("v" ?м)  ("b" ?и) ("n" ?т)  ("m" ?ь) ("," ?б)   ("." ?ю) ("/" ?h)
-   ("!" ?!)  ("@" ?\") ("#" ?№) ("$" ?\;) ("%" ?%) ("^" ?:)   ("&" ??) ("*" ?*)
-   ("(" ?\() (")" ?\)) ("_" ?B) ("+" ?\() ("~" ?Ё) ("Q" ?Й)   ("W" ?Ц) ("E" ?У)
-   ("R" ?К)  ("T" ?Е)  ("Y" ?Н) ("U" ?Г)  ("I" ?Ш) ("O" ?Щ)   ("P" ?З) ("{" ?Х)
-   ("}" ?Ъ)  ("A" ?Ф)  ("S" ?Ы) ("D" ?В)  ("F" ?А) ("G" ?П)   ("H" ?Р) ("J" ?О)
-   ("K" ?Л)  ("L" ?Д)  (":" ?Ж) ("\"" ?Э) ("|" ?|) ("Z" ?Я)   ("X" ?Ч) ("C" ?С)
-   ("V" ?М)  ("B" ?И)  ("N" ?Т) ("M" ?Ь)  ("<" ?Б) (">" ?Ю)   ("?" ?g)))
+   ("1" ?1) ("2" ?2) ("3" ?3) ("4" ?4)  ("5" ?5) ("6" ?6)   ("7" ?7) ("8" ?8)
+   ("9" ?9) ("0" ?0) ("-" ?b) ("=" ?*)  ("|" ?#) ("`" ?ё)   ("q" ?й) ("w" ?ц)
+   ("e" ?у) ("r" ?к) ("t" ?е) ("y" ?н)  ("u" ?г) ("i" ?ш)   ("o" ?щ) ("p" ?з)
+   ("[" ?х) ("]" ?ъ) ("a" ?ф) ("s" ?ы)  ("d" ?в) ("f" ?а)   ("g" ?п) ("h" ?р)
+   ("j" ?о) ("k" ?л) ("l" ?д) (";" ?ж)  ("'" ?э) ("\\" ?\)) ("z" ?я) ("x" ?ч)
+   ("c" ?с) ("v" ?м) ("b" ?и) ("n" ?т)  ("m" ?ь) ("," ?б)   ("." ?ю) ("/" ?h)
+   ("!" ?N) ("@" ?y) ("#" ?№) ("$" ?G)  ("%" ?=) ("^" ?H)   ("&" ?n) ("*" ?&)
+   ("(" ?T) (")" ?Y) ("_" ?B) ("+" ?\() ("~" ?Ё) ("Q" ?Й)   ("W" ?Ц) ("E" ?У)
+   ("R" ?К) ("T" ?Е) ("Y" ?Н) ("U" ?Г)  ("I" ?Ш) ("O" ?Щ)   ("P" ?З) ("{" ?Х)
+   ("}" ?Ъ) ("A" ?Ф) ("S" ?Ы) ("D" ?В)  ("F" ?А) ("G" ?П)   ("H" ?Р) ("J" ?О)
+   ("K" ?Л) ("L" ?Д) (":" ?Ж) ("\"" ?Э) ("|" ?|) ("Z" ?Я)   ("X" ?Ч) ("C" ?С)
+   ("V" ?М) ("B" ?И) ("N" ?Т) ("M" ?Ь)  ("<" ?Б) (">" ?Ю)   ("?" ?g)))
 
 (defconst keyamp-input-methods '(russian-computer hebrew)
   "Input methods, activate when not available otherwise. See
@@ -78,23 +69,21 @@ translation of corresponding non-ASCII command key sequences and
 mapping to non-QWERTY layouts. Mappings defined in QWERTY notation
 throughout the code of the package.")
 
-(defvar keyamp-input-method-to-ascii nil "Input method to ASCII char.")
+(defvar keyamp-input-methods-to-std nil
+  "Input methods to standard keyboard (QWERTY layout) ASCII char.
+Primary methods pairs come first.")
 
 (mapc
  (lambda (method)
    (activate-input-method method)
-   (let ((var-name (intern (concat "keyamp-standard-to-" (symbol-name method)))))
-     (eval `(defvar ,var-name nil ,(concat "Standard layout to input method "
-                                           (symbol-name method) ".")))
-     (mapc
-      (lambda (map)
-        (when-let ((to (char-to-string (car map)))
-                   (from (quail-get-translation (cadr map) to 1))
-                   ((characterp from))
-                   (from (char-to-string from)))
-          (push (cons from to) keyamp-input-method-to-ascii)
-          (push (cons to from) (symbol-value var-name))))
-      (cdr (quail-map))))
+   (mapc
+    (lambda (map)
+      (when-let ((to (char-to-string (car map)))
+                 (from (quail-get-translation (cadr map) to 1))
+                 ((characterp from))
+                 (from (char-to-string from)))
+        (push (cons from to) keyamp-input-methods-to-std)))
+    (cdr (quail-map)))
    (activate-input-method nil))
  (reverse keyamp-input-methods))
 
@@ -120,11 +109,11 @@ Single non-ASCII chars mapped in `keyamp--map' macro."
                    (from (quail-get-translation (cadr map) to 1))
                    (to (string-to-char to))
                    ((characterp from))
-                   ((> from 127)))
+                   ((> from (1- (expt 2 7)))))
           (mapc
            (lambda (modifier)
-             (define-key local-function-key-map
-                         (vector (append modifier (list from)))
+             (keymap-set local-function-key-map
+                         (key-description (vector (append modifier (list from))))
                          (vector (append modifier (list to)))))
            '(nil (control)))))
       (cdr (quail-map))))
@@ -132,48 +121,53 @@ Single non-ASCII chars mapped in `keyamp--map' macro."
   (activate-input-method nil))
 
 (defun toggle-input-method ()
-  "Toggle input method command. Activate when input method not available in OS."
+  "Toggle primary input method command.
+Activate when input method not available in OS."
   (interactive)
-  (let ((method (car keyamp-input-methods)))
+  (when-let ((method (car keyamp-input-methods)))
     (activate-input-method (if current-input-method nil method))
-    (message "%s %s" (if current-input-method "Activated" "Deactivated") method)))
+    (message (capitalize
+              (replace-regexp-in-string
+               "-" " "
+               (format "%s" (if current-input-method method keyamp-cur-layout)))))))
+
+(defvar toggle-input-method-key "`"
+  "The key toggles primary input method in insert mode with standard
+keyboard. E.g. use standard keyboard via bluetooth for terminal Emacs with
+non-QWERTY ASCII layout and toggle non-ASCII input method with the key.")
 
 (defun map-toggle-input-method ()
-  "Map `toggle-input-method' with `keyamp-insert-hook'."
-  (keymap-set keyamp-map "`" 'toggle-input-method)
-  (keymap-set keyamp-map (car (rassoc "`" keyamp-input-method-to-ascii))
-              'toggle-input-method))
+  "Toggle map `toggle-input-method' to `toggle-input-method-key' and
+corresponding non-ASCII key for primary input method in insert mode."
+  (let ((cmd (if keyamp-insert-p 'toggle-input-method))
+        (input-method-key
+         (car (rassoc toggle-input-method-key keyamp-input-methods-to-std))))
+    (keymap-set keyamp-map toggle-input-method-key cmd)
+    (keymap-set keyamp-map input-method-key cmd)))
 
-(defun unmap-toggle-input-method ()
-  "Unmap `toggle-input-method' with `keyamp-command-hook'."
-  (keymap-set keyamp-map "`" nil)
-  (keymap-set keyamp-map (car (rassoc "`" keyamp-input-method-to-ascii)) nil))
-
-(defvar toggle-standard-to-current-layout-silent nil
-  "Set this t if need silent `toggle-standard-to-current-layout'.")
-
-(defun toggle-standard-to-current-layout ()
-  "Toggle translation standard keyboard to `keyamp-current-layout' command.
-Activate when `keyamp-current-layout' not available in OS. The layout must
+(defun toggle-std-to-cur-layout ()
+  "Toggle translation standard keyboard to `keyamp-cur-layout' command.
+Activate when `keyamp-cur-layout' not available in OS. The layout must
 present in `quail-keyboard-layout-alist'."
   (interactive)
-  (if (get 'toggle-standard-to-current-layout 'state)
+  (if (get 'toggle-std-to-cur-layout 'state)
       (progn
         (quail-set-keyboard-layout "standard")
-        (put 'toggle-standard-to-current-layout 'state nil)
+        (put 'toggle-std-to-cur-layout 'state nil)
         (remove-hook 'keyamp-insert-hook 'map-toggle-input-method)
-        (remove-hook 'keyamp-command-hook 'unmap-toggle-input-method)
-        (unless toggle-standard-to-current-layout-silent
+        (remove-hook 'keyamp-command-hook 'map-toggle-input-method)
+        (activate-input-method nil)
+        (when (eq this-command 'toggle-std-to-cur-layout)
           (message "Deactivated standard keyboard")))
-    (if (assoc keyamp-current-layout quail-keyboard-layout-alist)
-        (quail-set-keyboard-layout keyamp-current-layout)
-      (user-error "Unable to activate standard keyboard to %s" keyamp-current-layout))
-    (put 'toggle-standard-to-current-layout 'state t)
+    (if (assoc keyamp-cur-layout quail-keyboard-layout-alist)
+        (quail-set-keyboard-layout keyamp-cur-layout)
+      (user-error "Unable to activate standard keyboard to %s" keyamp-cur-layout))
+    (put 'toggle-std-to-cur-layout 'state t)
     (add-hook 'keyamp-insert-hook 'map-toggle-input-method)
-    (add-hook 'keyamp-command-hook 'unmap-toggle-input-method)
-    (unless toggle-standard-to-current-layout-silent
+    (add-hook 'keyamp-command-hook 'map-toggle-input-method)
+    (when (eq this-command 'toggle-std-to-cur-layout)
       (message "Activated standard keyboard")))
-  (let ((define (get 'toggle-standard-to-current-layout 'state)))
+  (let ((define (get 'toggle-std-to-cur-layout 'state)))
     (mapc
      (lambda (pair)
        (keymap-set key-translation-map (car pair) (if define (cdr pair))))
@@ -210,10 +204,10 @@ in `quail-keyboard-layout-alist'."
 
 (keyamp-layouts-quail-push "engineer-engram")
 
-(defvar keyamp--convert-table (cdr (assoc keyamp-current-layout keyamp-layouts))
+(defvar keyamp--convert-table (cdr (assoc keyamp-cur-layout keyamp-layouts))
   "A alist that's the conversion table from QWERTY to current layout.
 Value structure is one of the key's value of `keyamp-layouts'.
-Value is programmatically set from value of `keyamp-current-layout'.
+Value is programmatically set from value of `keyamp-cur-layout'.
 Do not manually set this variable.")
 
 (defun keyamp--convert-kbd-str (CharStr)
@@ -249,11 +243,11 @@ converted according to `keyamp--convert-table'."
                    (seq-filter
                     (lambda (x)
                       (string-equal (cdr x) (car pair)))
-                    keyamp-input-method-to-ascii))))
+                    keyamp-input-methods-to-std))))
         (cadr KeyCmdAlist))))
 
-(defun keyamp--map-ascii (KeymapName Cmd)
-  "Map `keymap-set' over each ASCII char to CMD.
+(defun keyamp--map-standard (KeymapName Cmd)
+  "Map `keymap-set' over each standard keyboard ASCII char to CMD.
 Map `keymap-set' over each corresponding non-ASCII input method char to CMD."
   (mapcar
    (lambda (char)
@@ -267,7 +261,7 @@ Map `keymap-set' over each corresponding non-ASCII input method char to CMD."
                 (seq-filter
                  (lambda (x)
                    (string-equal (cdr x) charStr))
-                 keyamp-input-method-to-ascii)))))
+                 keyamp-input-methods-to-std)))))
    keyamp-ascii-chars))
 
 (defmacro keyamp--remap (KeymapName CmdCmdAlist)
@@ -298,22 +292,22 @@ executing kbd macro."
         (lambda (cmd)
           `(advice-add ,(list 'quote cmd) (if ,How ,How :after)
                        (lambda (&rest _) "auto repeat"
-            (when (and (keyamp-unless-kbd-macro)
-                       (or (eq real-this-command 'repeat)
-                           (eq this-command 'kill-region) ; exception
-                           (eq this-command 'undo)        ; exception
-                           (eq this-command ,(list 'quote cmd))))
-              (if (and ,CommandMode
-                       keyamp-insert-p)
-                  (keyamp-command))
-              (keyamp-repeat-init ,KeymapName)
-              (keyamp-cancel-repeat-idle-timer)
-              (if (and ,Timeout
-                       (not keyamp-insert-p))
-                  (setq keyamp--repeat-idle-timer
-                        (run-with-idle-timer ,Timeout nil 'keyamp-command)))
-              (if ,InsertMode
-                  (keyamp-insert))))))
+                         (when (and (keyamp-unless-kbd-macro)
+                                    (or (eq real-this-command 'repeat)
+                                        (eq this-command 'kill-region) ; exception
+                                        (eq this-command 'undo) ; exception
+                                        (eq this-command ,(list 'quote cmd))))
+                           (when (and ,CommandMode
+                                      keyamp-insert-p)
+                             (keyamp-command))
+                           (keyamp-repeat-init ,KeymapName)
+                           (keyamp-cancel-repeat-idle-timer)
+                           (when (and ,Timeout
+                                      (not keyamp-insert-p))
+                             (setq keyamp--repeat-idle-timer
+                                   (run-with-idle-timer ,Timeout nil 'keyamp-command)))
+                           (when ,InsertMode
+                             (keyamp-insert))))))
         (cadr CmdList))))
 
 (defmacro keyamp--hook (KeymapName HookList &optional CommandMode InsertMode RepeatMode)
@@ -326,15 +320,15 @@ Activate command, insert or repeat mode optionally."
           `(add-hook ,(list 'quote hook)
                      (lambda () "auto repeat"
                        (when this-command
-                         (if (and ,CommandMode
-                                  keyamp-insert-p)
-                             (keyamp-command))
-                         (if (and ,InsertMode
-                                  (not keyamp-insert-p))
-                             (keyamp-insert))
+                         (when (and ,CommandMode
+                                    keyamp-insert-p)
+                           (keyamp-command))
+                         (when (and ,InsertMode
+                                    (not keyamp-insert-p))
+                           (keyamp-insert))
                          (keyamp-repeat-init ,KeymapName)
-                         (if ,RepeatMode
-                             (keyamp-command-execute 'keyamp--hook-indicate))))))
+                         (when ,RepeatMode
+                           (keyamp-command-execute 'keyamp--hook-indicate))))))
         (cadr HookList))))
 
 (defun keyamp--hook-indicate ()
@@ -346,9 +340,9 @@ Activate command, insert or repeat mode optionally."
   "Change this command to CMD and execute it. Indicate when not idle."
   (setq this-command Cmd)
   (command-execute Cmd)
-  (if (or (null (current-idle-time))
-          (< (time-convert (current-idle-time) 'integer) keyamp-idle-timeout))
-      (keyamp-transient)))
+  (when (or (null (current-idle-time))
+            (< (time-convert (current-idle-time) 'integer) keyamp-idle-timeout))
+    (keyamp-transient)))
 
 (defmacro keyamp--map-leader (KeymapName CmdCons)
   "Map leader keys using `keyamp--map'."
@@ -371,8 +365,8 @@ Activate command, insert or repeat mode optionally."
 (defmacro keyamp--map-backtab (KeymapName Cmd)
   "Map S-<tab> and <backtab> keys to CMD using `keyamp--map'."
   (declare (indent defun))
-  `(if (display-graphic-p)
-       (keyamp--map ,KeymapName '(("S-<tab>" . ,Cmd))))
+  `(when (display-graphic-p)
+     (keyamp--map ,KeymapName '(("S-<tab>" . ,Cmd))))
   `(keyamp--map ,KeymapName '(("<backtab>" . ,Cmd))))
 
 (defmacro keyamp--map-return (KeymapName Cmd)
@@ -409,10 +403,10 @@ Activate command, insert or repeat mode optionally."
 
 (defun keyamp-double-press (Cmd)
   "Execute COMMAND after second command call during `keyamp-double-press-timeout'."
-  (if (and (timerp keyamp-double-press-timer)
-           (eq this-command last-command)
-           (keyamp-unless-kbd-macro))
-      (keyamp-command-execute Cmd))
+  (when (and (timerp keyamp-double-press-timer)
+             (eq this-command last-command)
+             (keyamp-unless-kbd-macro))
+    (keyamp-command-execute Cmd))
   (setq keyamp-double-press-timer
         (run-with-timer keyamp-double-press-timeout nil
                         (lambda () (setq keyamp-double-press-timer nil)))))
@@ -437,9 +431,9 @@ Activate command, insert or repeat mode optionally."
 
 (defun keyamp-defer-command (Defer Cmd)
   "Delay execution of CMD for DEFER seconds."
-  (if (keyamp-unless-kbd-macro)
-      (setq keyamp-defer-command-timer
-            (run-with-timer Defer nil 'keyamp-command-execute Cmd))))
+  (when (keyamp-unless-kbd-macro)
+    (setq keyamp-defer-command-timer
+          (run-with-timer Defer nil 'keyamp-command-execute Cmd))))
 
 (defun keyamp-cancel-defer-command-timer ()
   "Cancel `keyamp-defer-command-timer'."
@@ -452,8 +446,8 @@ Activate command, insert or repeat mode optionally."
   "Run `keyamp-defer-command' as around advice."
   (if (or defining-kbd-macro executing-kbd-macro)
       (keyamp-command-execute fun)
-    (if (memq last-command triple-press-direction-commands-list)
-        (before-last-command))
+    (when (memq last-command triple-press-direction-commands-list)
+      (before-last-command))
     (keyamp-defer-command keyamp-key-repeat-delay fun)))
 
 
@@ -481,9 +475,10 @@ Prefix sequence may contain last key ESC."
   "Setup key mappings of current terminal to turn a tty's ESC into <escape>."
   (when-let (((memq (terminal-live-p (frame-terminal)) '(t pc)))
              (esc-binding (keyamp-lookup-key input-decode-map ?\e))
+             (ESC-key "ESC")
              (esc `(menu-item "" ,esc-binding :filter keyamp-tty-ESC-filter)))
-    (keymap-set input-decode-map "ESC" esc)
-    (keymap-set key-translation-map "ESC" "<escape>")))
+    (keymap-set input-decode-map ESC-key esc)
+    (keymap-set key-translation-map ESC-key "<escape>")))
 
 
 ;; Keymaps
@@ -513,14 +508,14 @@ is enabled.")
 
 (keyamp--map-escape keyamp-map keyamp-escape)
 (keyamp--map keyamp-map
-  '(;; Control sequences for leaders used as key hold down prefixes in Karabiner.
+  '(;; Control sequences as leader prefixes for automation
     ("C-^" . keyamp-lleader-map) ("C-_" . keyamp-rleader-map)
     ("C-+" . keyamp-lleader-map) ("C-И" . keyamp-rleader-map)))
 
 (keyamp--map-leader keyamp-command-map '(keyamp-lleader-map . keyamp-rleader-map))
 (keyamp--map-return keyamp-command-map keyamp-insert)
 (keyamp--map keyamp-command-map
-  '(;; left half
+  '(;; Left half
     ("`" . alternate-frame)      ("~" . keyamp-insert-and-self-insert)
     ("1" . kmacro-record)        ("!" . keyamp-insert-and-self-insert)
     ("2" . kmacro-play)          ("@" . keyamp-insert-and-self-insert)
@@ -546,7 +541,7 @@ is enabled.")
     ("v" . paste-or-prev)        ("V" . keyamp-insert-and-self-insert)
     ("b" . toggle-case)          ("B" . keyamp-insert-and-self-insert)
 
-    ;; right half
+    ;; Right half
     ("6" . pass)                 ("^" . keyamp-insert-and-self-insert)
     ("7" . jump-to-register)     ("&" . keyamp-insert-and-self-insert)
     ("8" . point-to-register)    ("*" . goto-match-br) ; QWERTY * -> = Engram, QWERTY / -> = RU PC Karabiner
@@ -589,7 +584,7 @@ is enabled.")
 (keyamp--map-tab keyamp-lleader-map read-only-mode)
 (keyamp--map-backtab keyamp-lleader-map volume-decrease)
 (keyamp--map keyamp-lleader-map
-  '(;; left leader left half
+  '(;; Left leader left half
     ("`" . revert-buffer)
     ("1" . periodic-chart)
     ("2" . kmacro-play-toggle)
@@ -615,7 +610,7 @@ is enabled.")
     ("v" . paste-from-r1)
     ("b" . toggle-prev-case)
 
-    ;; left leader right half
+    ;; Left leader right half
     ("6" . quit)
     ("7" . number-to-register)
     ("8" . sql)
@@ -687,8 +682,8 @@ is enabled.")
 (keyamp--map-backtab keyamp-rleader-map speedbar)
 (keyamp--map-tab keyamp-rleader-map next-proj-buf)
 (keyamp--map keyamp-rleader-map
-  '(;; right leader left half
-    ("`" . toggle-input-method)            ("~" . toggle-standard-to-current-layout)
+  '(;; Right leader left half
+    ("`" . toggle-input-method)            ("~" . toggle-std-to-cur-layout)
     ("1" . view-lossage)
     ("2" . insert-kbd-macro)
     ("3" . config)
@@ -728,7 +723,7 @@ is enabled.")
     ("v" . tasks)
     ("b" . title-case-region-or-line)
 
-    ;; right leader right half
+    ;; Right leader right half
     ("6" . pass-generate)
     ("7" . copy-to-register)
     ("8" . insert-register)
@@ -915,13 +910,13 @@ is enabled.")
   (keyamp--map-tab keymap exit-minibuffer)
   (keyamp--map-backtab keymap exit-minibuffer)
 
- (defun isearch-mode-setup-minibuffer ()
-   "Setup isearch transient in minibuffer before choice from the ring."
-   (if (isearch-minibuffer-prompt)
-       (keyamp-repeat-deactivate-init keymap)))
+  (defun isearch-mode-setup-minibuffer ()
+    "Setup isearch transient in minibuffer before choice from the ring."
+    (when (isearch-minibuffer-prompt)
+      (keyamp-repeat-deactivate-init keymap)))
 
- (add-hook 'minibuffer-setup-hook 'isearch-mode-setup-minibuffer 96)
- (advice-add-macro '(hist-back hist-forw) :after 'isearch-mode-setup-minibuffer))
+  (add-hook 'minibuffer-setup-hook 'isearch-mode-setup-minibuffer 96)
+  (advice-add-macro '(hist-back hist-forw) :after 'isearch-mode-setup-minibuffer))
 
 
 
@@ -1137,7 +1132,7 @@ is enabled.")
 (with-sparse-keymap ; swap leaders up/down
   (keyamp--map-leader keymap '(up-line-rev . down-line-rev))
   (keyamp--map-return keymap keyamp-ret)
-  (keyamp--remap keymap '((previous-line . up-line) (next-line . down-line)))
+  (keyamp--remap keymap '((previous-line . up-line) (next-line . down-line-rev)))
   (keyamp--set keymap '(up-line-rev down-line-rev)))
 
 (with-sparse-keymap ; dummy
@@ -1167,7 +1162,7 @@ is enabled.")
   (keyamp--set keymap '(select-word)))
 
 (with-sparse-keymap
-  (keyamp--map-leader keymap '(keyamp-escape . up-line))
+  (keyamp--map-leader keymap '(keyamp-escape . down-line-rev))
   (keyamp--remap keymap
     '((previous-line . beg-of-block)  (next-line     . select-word)
       (keyamp-escape . return-before) (hippie-expand . exec-query)))
@@ -1232,13 +1227,13 @@ is enabled.")
 
 (defun keyamp--leader-deactivate ()
   "Deactivate virtual leader."
-  (if keyamp--deactivate-leader-fun
-      (funcall keyamp--deactivate-leader-fun))
+  (when keyamp--deactivate-leader-fun
+    (funcall keyamp--deactivate-leader-fun))
   (setq keyamp-virtual-leader-timer nil))
 
-(defun keyamp-ascii-to-input-method-vector (char)
-  "Calculate list of vectors of corresponding input methods chars from qwerty
-ascii CHAR."
+(defun keyamp-standard-to-input-method-vector (char)
+  "Calculate list of vectors of corresponding input methods chars from standard
+keyboard ASCII CHAR."
   (mapcar
    (lambda (map)
      (vector (string-to-char map)))
@@ -1246,19 +1241,19 @@ ascii CHAR."
            (seq-filter
             (lambda (x)
               (string-equal (cdr x) char))
-            keyamp-input-method-to-ascii))))
+            keyamp-input-methods-to-std))))
 
 (defun keyamp-virtual-leader-init (Keymap)
   "Set virtual leader transient KEYMAP."
   (when-let (((keyamp-unless-kbd-macro))
              ((member (this-command-keys)
                       `(,(keyamp--convert-kbd-str "u")
-                        ,@(keyamp-ascii-to-input-method-vector "u")
+                        ,@(keyamp-standard-to-input-method-vector "u")
                         ,(keyamp--convert-kbd-str "o")
-                        ,@(keyamp-ascii-to-input-method-vector "o")))))
+                        ,@(keyamp-standard-to-input-method-vector "o")))))
     (setq keyamp--deactivate-leader-fun (set-transient-map Keymap))
-    (if (timerp keyamp-virtual-leader-timer)
-        (cancel-timer keyamp-virtual-leader-timer))
+    (when (timerp keyamp-virtual-leader-timer)
+      (cancel-timer keyamp-virtual-leader-timer))
     (setq keyamp-virtual-leader-timer
           (run-with-timer keyamp-double-press-timeout
                           nil 'keyamp--leader-deactivate))))
@@ -1284,8 +1279,8 @@ ascii CHAR."
 
 (defun keyamp-virtual-leader-return-before (&rest _)
   "Return before, that is, compensate word move."
-  (if (timerp keyamp-virtual-leader-timer)
-      (set-mark-command t)))
+  (when (timerp keyamp-virtual-leader-timer)
+    (set-mark-command t)))
 
 (advice-add-macro '(select-word      select-quote
                     select-line      select-block
@@ -1309,14 +1304,14 @@ ascii CHAR."
 
   (advice-add 'activate-region :after
               (lambda () "virtual leader G transient"
-                (if (and (keyamp-unless-kbd-macro)
-                         (eq (mark) (point)))
-                    (set-transient-map keymap)))))
+                (when (and (keyamp-unless-kbd-macro)
+                           (eq (mark) (point)))
+                  (set-transient-map keymap)))))
 
 (defun keyamp-deactivate-region (&rest _)
   "Deactivate region if mark equal point."
-  (if (eq (mark) (point))
-      (deactivate-region)))
+  (when (eq (mark) (point))
+    (deactivate-region)))
 
 (advice-add-macro
  '(del-forw              tools
@@ -1463,7 +1458,7 @@ ascii CHAR."
     (keyamp--map keymap '(("C-t" . keyamp-minibuffer-shift))) ; S-<return>
     (keyamp--map-tab keymap comp-forw)
     (keyamp--map-backtab keymap isearch-backward)
-    (keyamp--map-ascii keymap 'keyamp-insert-minibuffer)
+    (keyamp--map-standard keymap 'keyamp-insert-minibuffer)
     (keyamp--map keymap
       '(("<left>" . isearch-backward) ("<right>" . keyamp-minibuffer-shift)
         ("<up>"   . select-word)      ("<down>"  . comp-forw)))
@@ -1694,8 +1689,8 @@ ascii CHAR."
 
     (defun keyamp-command-company ()
       "Set transient keymap if company candidates."
-      (if company-candidates
-          (keyamp-repeat-deactivate-init keymap)))
+      (when company-candidates
+        (keyamp-repeat-deactivate-init keymap)))
 
     (add-hook 'keyamp-command-hook 'keyamp-command-company))
 
@@ -1805,8 +1800,8 @@ ascii CHAR."
 
 (advice-add 'delete-other-windows :after
             (lambda (&rest _) "screen-idle-keymap"
-              (if (eq major-mode 'org-agenda-mode)
-                  (set-transient-map screen-idle-keymap))))
+              (when (eq major-mode 'org-agenda-mode)
+                (set-transient-map screen-idle-keymap))))
 
 (defvar screen-idle-escape-keymap (make-sparse-keymap))
 (keyamp--map-tab screen-idle-escape-keymap keyamp-tab)
@@ -1976,8 +1971,8 @@ ascii CHAR."
 
     (defun keyamp-input-timer-payload-eshell ()
       "Set transient keymap for eshell after input timer timeout."
-      (if (eq major-mode 'eshell-mode)
-          (keyamp-repeat-deactivate-init keymap)))
+      (when (eq major-mode 'eshell-mode)
+        (keyamp-repeat-deactivate-init keymap)))
 
     (advice-add 'keyamp-input-timer-payload :after #'keyamp-input-timer-payload-eshell))
 
@@ -2193,7 +2188,7 @@ ascii CHAR."
     (keyamp--map-return keymap vterm-vi-self-insert)
     (keyamp--map-tab keymap vterm-vi-self-insert)
     (keyamp--map-backtab keymap vterm-vi-self-insert)
-    (keyamp--map-ascii keymap 'vterm-vi-self-insert)
+    (keyamp--map-standard keymap 'vterm-vi-self-insert)
     (keyamp--map keymap
       '(("<left>" . vterm-vi-self-insert) ("<right>" . vterm-vi-self-insert)
         ("<up>"   . vterm-vi-self-insert) ("<down>"  . vterm-vi-self-insert)
@@ -2217,7 +2212,7 @@ ascii CHAR."
 (keyamp--map-return keyamp-ignore-map ignore)
 (keyamp--map-tab keyamp-ignore-map ignore)
 (keyamp--map-backtab keyamp-ignore-map ignore)
-(keyamp--map-ascii keyamp-ignore-map 'ignore)
+(keyamp--map-standard keyamp-ignore-map 'ignore)
 (keyamp--map keyamp-ignore-map
   '(("<down-mouse-1>" . ignore) ("<mouse-1>" . ignore) ("<drag-mouse-1>" . ignore)
     ("<left>" . ignore) ("<right>" . ignore)
@@ -3062,8 +3057,8 @@ insert cancel the timer.")
   "Cancel `keyamp-input-timer'."
   (remove-hook 'post-command-hook 'keyamp-cancel-input-timer)
   (remove-hook 'post-self-insert-hook 'keyamp-cancel-input-timer)
-  (if (timerp keyamp-input-timer)
-      (cancel-timer keyamp-input-timer)))
+  (when (timerp keyamp-input-timer)
+    (cancel-timer keyamp-input-timer)))
 
 (defun keyamp-input-timer-payload ()
   "Payload for `keyamp-input-timer'."
@@ -3128,8 +3123,8 @@ insert cancel the timer.")
     (when (buffer-file-name)
       (point-to-register ?7)
       (push-mark (point) t)))
-  (if keyamp--deactivate-command-fun
-      (funcall keyamp--deactivate-command-fun))
+  (when keyamp--deactivate-command-fun
+    (funcall keyamp--deactivate-command-fun))
   (setq keyamp--deactivate-command-fun
         (set-transient-map keyamp-command-map (lambda () t)))
   (keyamp-indicate-command))
@@ -3247,11 +3242,11 @@ Simply hit TAB to minibuffer-complete file name if the name exists."
 Else activate insert mode and self insert."
   (interactive)
   (let ((key (this-command-keys)))
-    (if (vectorp key)
-        (setq key (char-to-string (aref key 0))))
-    (when-let ((key-ascii (cdr (assoc key keyamp-input-method-to-ascii)))
+    (when (vectorp key)
+      (setq key (char-to-string (aref key 0))))
+    (when-let ((key-standard (cdr (assoc key keyamp-input-methods-to-std)))
                ((> (string-to-char key) 127)))
-      (setq key (keyamp--convert-kbd-str key-ascii)))
+      (setq key (keyamp--convert-kbd-str key-standard)))
     (cond
      ((keyamp-minibuffer-y-or-n)
       (if (string-equal key (keyamp--convert-kbd-str "k")) ; QWERTY K
@@ -3259,8 +3254,8 @@ Else activate insert mode and self insert."
         (y-or-n-p-insert-n)))
      ((keyamp-minibuffer-y-or-n-literal)
       (keyamp-insert-init) ; no hook run for single char insert
-      (if (get 'toggle-standard-to-current-layout 'state) ; convert back to current layout
-          (setq key (car (rassoc key keyamp--convert-table))))
+      (when (get 'toggle-std-to-cur-layout 'state) ; convert back to current layout
+        (setq key (car (rassoc key keyamp--convert-table))))
       (execute-kbd-macro (kbd key))) ; key press required
      (t
       (keyamp-insert-and-self-insert)))))
@@ -3273,7 +3268,7 @@ of quit minibuffer. Answer q to literal y or n question."
       (progn
         (keyamp-insert-init)
         (let ((key "q"))
-          (if (get 'toggle-standard-to-current-layout 'state)
+          (if (get 'toggle-std-to-cur-layout 'state)
               (setq key (car (rassoc key keyamp--convert-table))))
           (execute-kbd-macro (kbd key))))
     (if (keyamp-minibuffer-empty)
@@ -3307,14 +3302,6 @@ of quit minibuffer. Answer q to literal y or n question."
   (when (keyamp-unless-kbd-macro)
     (keyamp-copy-minibuffer)
     (cond
-     ((keyamp-minibuffer-match "Describe function")
-      (keyamp-defer-command 0 'describe-variable))
-     ((keyamp-minibuffer-match "Describe variable")
-      (keyamp-defer-command 0 'describe-function))
-     ((keyamp-minibuffer-match "Jump to bookmark")
-      (keyamp-defer-command 0 'switch-to-buffer))
-     ((keyamp-minibuffer-match "M-x")
-      (keyamp-defer-command 0 'describe-variable))
      ((keyamp-minibuffer-match "Query replace")
       (keyamp-defer-command 0 'query-replace-regexp))
      ((keyamp-minibuffer-match "Search")
@@ -3327,18 +3314,10 @@ of quit minibuffer. Answer q to literal y or n question."
       (keyamp-defer-command 0 'write-file))
      ((keyamp-minibuffer-match "Write file")
       (keyamp-defer-command 0 'rename-visited-file))
-     ((keyamp-minibuffer-match "Copy")
-      (keyamp-defer-command 0 'dired-do-rename))
-     ((keyamp-minibuffer-match "Rename")
-      (keyamp-defer-command 0 'dired-do-copy))
-     ((keyamp-minibuffer-match "Switch to buffer")
-      (keyamp-defer-command-bookmark 'bookmark-jump))
      ((keyamp-minibuffer-match "Set bookmark named")
       (keyamp-defer-command-bookmark 'bookmark-rename))
      ((keyamp-minibuffer-match "Old bookmark name")
-      (keyamp-defer-command-bookmark 'bookmark-delete))
-     ((keyamp-minibuffer-match "Delete bookmark")
-      (keyamp-defer-command-bookmark 'bookmark-set)))
+      (keyamp-defer-command-bookmark 'bookmark-delete)))
     (abort-recursive-edit)))
 
 (setq-default cursor-in-non-selected-windows nil)
@@ -3374,10 +3353,10 @@ of quit minibuffer. Answer q to literal y or n question."
   "Indicate read."
   (unless keyamp-insert-p
     (keyamp-indicate keyamp-read-indicator keyamp-read-cursor keyamp-read-color))
-  (if (and (eq last-command 'keyamp--hook-indicate)
-           (minibufferp)
-           (not (isearch-minibuffer-prompt)))
-      (keyamp-blink-start keyamp-insert-color keyamp-read-color)))
+  (when (and (eq last-command 'keyamp--hook-indicate)
+             (minibufferp)
+             (not (isearch-minibuffer-prompt)))
+    (keyamp-blink-start keyamp-insert-color keyamp-read-color)))
 
 (defvar keyamp-indicate-read-timer nil "Indicate read timer.")
 
@@ -3411,15 +3390,15 @@ after a delay even if there more read commands follow."
 
 (defun keyamp-cancel-repeat-idle-timer ()
   "Cancel `keyamp--repeat-idle-timer'."
-  (if (timerp keyamp--repeat-idle-timer)
-      (cancel-timer keyamp--repeat-idle-timer)))
+  (when (timerp keyamp--repeat-idle-timer)
+    (cancel-timer keyamp--repeat-idle-timer)))
 
 (defun keyamp-repeat-deactivate ()
   "Deactivate repeat."
-  (if keyamp-repeat-p
-      (setq keyamp-repeat-p nil))
-  (if keyamp--deactivate-repeat-fun
-      (funcall keyamp--deactivate-repeat-fun))
+  (when keyamp-repeat-p
+    (setq keyamp-repeat-p nil))
+  (when keyamp--deactivate-repeat-fun
+    (funcall keyamp--deactivate-repeat-fun))
   (keyamp-cancel-repeat-idle-timer))
 
 (defun keyamp-repeat-deactivate-init (Keymap)
@@ -3506,19 +3485,19 @@ after a delay even if there more read commands follow."
          ((gethash this-command keyamp-modify-commands-hash)
           (keyamp-indicate-modify))
          (t (keyamp-indicate-command))))
-      (if (or defining-kbd-macro
-              (memq this-command keyamp-blink-modify-commands)
-              (eq major-mode 'wdired-mode))
-          (keyamp-blink keyamp-blinker-modify))
-      (if (eq this-command 'ignore)
-          (keyamp-blink keyamp-blinker-idle))
+      (when (or defining-kbd-macro
+                (memq this-command keyamp-blink-modify-commands)
+                (eq major-mode 'wdired-mode))
+        (keyamp-blink keyamp-blinker-modify))
+      (when (eq this-command 'ignore)
+        (keyamp-blink keyamp-blinker-idle))
       (when (eq this-command 'keyamp-escape)
         (keyamp-blink keyamp-blinker-idle)
         (modify-all-frames-parameters '((cursor-type . hollow))))
-      (if (memq this-command keyamp-blink-io-commands)
-          (keyamp-blink keyamp-blinker-io))
-      (if (memq this-command keyamp-blink-command-commands)
-          (keyamp-blink keyamp-blinker-command)))))
+      (when (memq this-command keyamp-blink-io-commands)
+        (keyamp-blink keyamp-blinker-io))
+      (when (memq this-command keyamp-blink-command-commands)
+        (keyamp-blink keyamp-blinker-command)))))
 
 (defvar keyamp-blink-on-timer nil "Blink indicator on timer.")
 (defvar keyamp-blink-off-timer nil "Blink indicator off timer.")
@@ -3529,18 +3508,18 @@ after a delay even if there more read commands follow."
 (defun keyamp-blinking (Color1 Color2)
   "Blinking."
   (keyamp-indicator-color Color1)
-  (if (timerp keyamp-blink-off-timer)
-      (cancel-timer keyamp-blink-off-timer))
+  (when (timerp keyamp-blink-off-timer)
+    (cancel-timer keyamp-blink-off-timer))
   (setq keyamp-blink-off-timer
         (run-with-timer keyamp-blink-duration nil 'keyamp-indicator-color Color2)))
 
 (defun keyamp-blink-stop ()
   "Stop blink."
   (remove-hook 'post-command-hook 'keyamp-blink-stop)
-  (if (timerp keyamp-blink-off-timer)
-      (cancel-timer keyamp-blink-off-timer))
-  (if (timerp keyamp-blink-on-timer)
-      (cancel-timer keyamp-blink-on-timer)))
+  (when (timerp keyamp-blink-off-timer)
+    (cancel-timer keyamp-blink-off-timer))
+  (when (timerp keyamp-blink-on-timer)
+    (cancel-timer keyamp-blink-on-timer)))
 
 (defun keyamp-blink-start (Color1 Color2)
   "Start blink."
@@ -3585,16 +3564,16 @@ after a delay even if there more read commands follow."
   (oset obj curCursor (frame-parameter nil 'cursor-type))
   (unless (eq (oref obj curColor) (oref obj color))
     (keyamp-indicate (oref obj indicator) (oref obj curCursor) (eval (oref obj color)))
-    (if (timerp (oref obj timer))
-        (cancel-timer (oref obj timer)))
+    (when (timerp (oref obj timer))
+      (cancel-timer (oref obj timer)))
     (oset obj timer (run-with-timer (oref obj duration) nil 'keyamp-blink-end obj))))
 
 (cl-defgeneric keyamp-blink-end (obj) "End blink.")
 
 (cl-defmethod keyamp-blink-end ((obj keyamp-blinker))
   "End blink with blinker."
-  (if (eq (oref obj indicator) mode-line-front-space)
-      (keyamp-indicate (oref obj curIndicator) (oref obj curCursor) (oref obj curColor))))
+  (when (eq (oref obj indicator) mode-line-front-space)
+    (keyamp-indicate (oref obj curIndicator) (oref obj curCursor) (oref obj curColor))))
 
 (defconst keyamp-blink-idle-duration (/ keyamp-blink-duration 2) "Blink idle duration.")
 
@@ -3629,7 +3608,7 @@ after a delay even if there more read commands follow."
     [backspace ,(string-to-char (keyamp--convert-kbd-str "k"))]
     [?\C-h]
     [?\C-_ ,(string-to-char (keyamp--convert-kbd-str "n"))]
-    [?\C-И ,(string-to-char "т")])
+    [?\C-И ,(string-to-char (car (rassoc "n" keyamp-input-methods-to-std)))])
   "Indicate prefixes with io.")
 
 (defconst keyamp-prefix-modify
@@ -3670,22 +3649,22 @@ after a delay even if there more read commands follow."
 Cancel isearch. Deactivate region. Deactivate transient keymaps.
 Cleanup echo area. Quit minibuffer. Quit wait key sequence."
   (let ((default-directory user-emacs-directory))
-    (if isearch-mode
-        (isearch-cancel-clean))
-    (if (region-active-p)
-        (deactivate-mark))
+    (when isearch-mode
+      (isearch-cancel-clean))
+    (when (region-active-p)
+      (deactivate-mark))
     (keyamp-command)
     (when-let ((buf (get-buffer " *Echo Area 0*"))
                ((cl-plusp (buffer-size buf))))
       (run-at-time nil nil 'message nil))
-    (if (minibufferp)
-        (keyamp-minibuffer-quit))
+    (when (minibufferp)
+      (keyamp-minibuffer-quit))
     (keyboard-quit)))
 
 (defun keyamp-idle-detect ()
   "Idle detect."
-  (if (timerp keyamp-idle-timer)
-      (cancel-timer keyamp-idle-timer))
+  (when (timerp keyamp-idle-timer)
+    (cancel-timer keyamp-idle-timer))
   (setq keyamp-idle-timer
         (run-with-idle-timer keyamp-idle-timeout t 'keyamp-idle-init)))
 
