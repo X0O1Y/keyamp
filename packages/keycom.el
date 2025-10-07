@@ -135,9 +135,9 @@
           (setq this-command 'end-of-block)
           (end-of-block)))))
    (t (command-execute 'next-line)
-      (if (and (eq major-mode 'gnus-summary-mode)
-               (> (line-number-at-pos) 2))
-          (command-execute 'next-line)) ; double next line
+      (when (and (eq major-mode 'gnus-summary-mode)
+                 (> (line-number-at-pos) 2))
+        (command-execute 'next-line)) ; double next line
       (when (eq last-command 'up-line)
         (before-last-command))))
   (setq last-command-keys (this-command-keys)))
@@ -237,6 +237,30 @@ and so does the other one."
     (when (eq last-command 'comp-back)
       (before-last-command))))
 
+(defun comp-back-rev ()
+  "Completion backward for transient use. Reverse."
+  (interactive)
+  (if (equal before-last-command this-command)
+      (progn
+        (setq this-command 'abort-recursive-edit)
+        (abort-recursive-edit))
+    (command-execute 'icomplete-backward-completions)
+    (when (eq last-command 'comp-forw-rev)
+      (before-last-command))))
+
+(defun comp-forw-rev ()
+  "Completion forward for transient use. Reverse."
+  (interactive)
+  (if (eq (icomplete--category) 'file)
+      (isearch-backward)
+    (if (equal before-last-command this-command)
+        (progn
+          (setq this-command 'abort-recursive-edit)
+          (abort-recursive-edit))
+      (command-execute 'icomplete-forward-completions)
+      (when (eq last-command 'comp-back-rev)
+        (before-last-command)))))
+
 (defun hist-back ()
   "History backward for transient use."
   (interactive)
@@ -254,6 +278,24 @@ and so does the other one."
     (command-execute 'next-line-or-history-element)
     (when (eq last-command 'hist-back)
       (before-last-command))))
+
+(defun ido-next-match-rev ()
+  "Custom for transient use, reverse."
+  (interactive)
+  (if ido-matches
+      (let ((next (cadr ido-matches)))
+	(setq ido-cur-list (ido-chop ido-cur-list next))
+	(setq ido-matches (ido-chop ido-matches next))
+	(setq ido-rescan nil))))
+
+(defun ido-prev-match-rev ()
+  "Custom for transient use, reverse."
+  (interactive)
+  (if ido-matches
+      (let ((prev (car (last ido-matches))))
+	(setq ido-cur-list (ido-chop ido-cur-list prev))
+	(setq ido-matches (ido-chop ido-matches prev))
+	(setq ido-rescan nil))))
 
 (defun company-select-back ()
   "Company complete backward for transient use."
@@ -1144,12 +1186,12 @@ Cycle in this order: Init Caps, ALL CAPS, all lower. Calculates initial state."
         (save-excursion
           (skip-chars-backward "[:alpha:]")
           (setq p1 (point))
-          (if (string-is-capitalized (buffer-substring p1 (1+ p1)))
-              (put this-command 'state 1))
+          (when (string-is-capitalized (buffer-substring p1 (1+ p1)))
+            (put this-command 'state 1))
           (skip-chars-forward "[:alpha:]")
           (setq p2 (point))
-          (if (string-is-capitalized (buffer-substring p1 p2))
-              (put this-command 'state 2))))
+          (when (string-is-capitalized (buffer-substring p1 p2))
+            (put this-command 'state 2))))
       (cond
        ((equal 0 (get this-command 'state))
         (upcase-initials-region p1 p2)
@@ -1212,12 +1254,14 @@ When called in a Elisp program, Begin End are region boundaries."
   (interactive)
   (let* ((skipChars "^\"<>(){}[]")
          (p0 (point))
-         (p1 (if Begin Begin
+         (p1 (if Begin
+                 Begin
                (if (region-active-p)
                    (region-beginning)
                  (skip-chars-backward skipChars (line-beginning-position))
                  (point))))
-         (p2 (if End End
+         (p2 (if End
+                 End
                (if (region-active-p)
                    (region-end)
                  (goto-char p0)
@@ -2445,6 +2489,8 @@ Similar to `kill-buffer', with the following addition:
      (setq this-command 'ignore)
      (command-execute 'ignore))))
 
+(defvar browse-url-ff-patterns nil "List of patterns to browse in Firefox.")
+
 (defun open-file ()
   "Open the file path under cursor. Or do something depending on context.
 If there is selection, use it for path.
@@ -2478,7 +2524,16 @@ for elisp files."
       (if (string-match-p "\\`https?://" path)
           (if (string-match-p "\\`https?://www.youtube.com" path)
               (movie path)
-            (browse-url path))
+            (if (catch 'matched
+                  (dolist (pattern browse-url-ff-patterns)
+                    (when (string-match-p pattern path)
+                      (throw 'matched t)))
+                  nil)
+                (let ((browse-url-browser-function
+                       (lambda (url &optional _new-window)
+                         (start-process "" nil "open" "-a" "Firefox" url))))
+                  (browse-url path))
+              (browse-url path)))
         (progn
           (if (string-match "#" path)
               (let ((fpath (substring path 0 (match-beginning 0)))
@@ -2737,7 +2792,9 @@ This command can be called when in a file buffer or in `dired'."
                   (if (eq nil (dired-get-marked-files))
                       default-directory
                     (car (dired-get-marked-files)))
-                (if (buffer-file-name) (buffer-file-name) default-directory))))
+                (if (buffer-file-name)
+                    (buffer-file-name)
+                  default-directory))))
     (cond
      ((eq system-type 'windows-nt)
       (let ((cmd (format "Explorer /select,%s"
@@ -3081,14 +3138,14 @@ and reverse-search-history in bashrc."
   (vterm-send-key (kbd "C-b")))
 
 (defun vterm-tmux-copy ()
-  "Activate copy mode in tmux."
+  "Activate copy mode in tmux. Prefix + ] to paste."
   (interactive)
   (vterm-tmux-prefix)
   (vterm-send-key (kbd "["))
   (vterm-reset-cursor-point))
 
 (defun vterm-tmux-copy-hpu ()
-  "Activate copy mode in tmux and halfpage-up immediately."
+  "Activate copy mode in tmux and half page up immediately."
   (interactive)
   (vterm-tmux-copy)
   (sit-for vterm-timer-delay)
@@ -3097,7 +3154,7 @@ and reverse-search-history in bashrc."
   (vterm-reset-cursor-point))
 
 (defun vterm-tmux-copy-hpd ()
-  "Activate copy mode in tmux and halfpage-down immediately."
+  "Activate copy mode in tmux and half page down immediately."
   (interactive)
   (vterm-tmux-copy)
   (sit-for vterm-timer-delay)
@@ -3145,9 +3202,9 @@ and reverse-search-history in bashrc."
 (defun vterm-shell-vi-cmd ()
   "Activate vi cmd mode in shell prompt. Deactivate tmux copy mode."
   (interactive)
-  (if (and (eq major-mode 'vterm-mode)
-           (vterm-reset-cursor-point))
-      (vterm-send-key (kbd "^["))))
+  (when (and (eq major-mode 'vterm-mode)
+             (vterm-reset-cursor-point))
+    (vterm-send-key (kbd "^["))))
 
 (defun vterm-shell-vi-insert ()
   "Activate vi insert mode in shell prompt."
@@ -3172,17 +3229,16 @@ and reverse-search-history in bashrc."
   (let ((x (point)))
     (vterm-send-key Key)        ; workaround vi go after last char
     (sit-for vterm-timer-delay) ; delay to sync
-    (if (and (eq x (point))     ; point did not move
-             (if-let ((p1 (1+ (point))) ; all blank after next char until eol
-                      (p2 (line-end-position))
-                      ((>= p2 p1)))
-                 (string-blank-p (buffer-substring-no-properties p1 p2))
-               t))
-        (progn
-          (vterm-send-key (kbd "C-m")) ; so activate insert
-          (vterm-send-key "<right>")   ; go after last char
-          (vterm-send-key (kbd "SPC")) ; add space and back to cmd mode
-          (vterm-send-key (kbd "^["))))))
+    (when (and (eq x (point))   ; point did not move
+               (if-let ((p1 (1+ (point))) ; all blank after next char until eol
+                        (p2 (line-end-position))
+                        ((>= p2 p1)))
+                   (string-blank-p (buffer-substring-no-properties p1 p2))
+                 t))
+      (vterm-send-key (kbd "C-m"))   ; so activate insert
+      (vterm-send-key "<right>")     ; go after last char
+      (vterm-send-key (kbd "SPC"))   ; add space and back to cmd mode
+      (vterm-send-key (kbd "^[")))))
 
 (defun vterm-shell-vi-s ()
   "Send key to shell prompt vi cmd mode."
@@ -3376,12 +3432,24 @@ and reverse-search-history in bashrc."
             (gnus-nnews-inbox))))
     (message "%s" "Offline")))
 
+(defun password-store ()
+  "Go to password store."
+  (interactive)
+  (if-let ((store "~/.password-store")
+           ((file-exists-p store)))
+      (find-file store)
+    (message "%s %s" store "not found")))
+
 (defun sql ()
   "Open SQL client or toggle sql type."
   (interactive)
-  (if (string-match "^\.sql" (buffer-name))
-      (toggle-sql-type)
-    (find-file "~/.sql")))
+  (let ((file ".sql"))
+    (if (string-match (concat "^\\" file) (buffer-name))
+        (toggle-sql-type)
+      (if-let ((sql (concat "~/" file))
+               ((file-exists-p sql)))
+          (find-file sql)
+        (message "%s %s" sql "not found")))))
 
 (defvar sql-type "async" "SQL type for client.")
 
@@ -3604,8 +3672,8 @@ Use as around advice e.g. for mouse left click after double click."
   (mouse-set-point e)
   (if (eq major-mode 'eww-mode)
       (translate)
-    (if (use-region-p)
-        (deactivate-mark))
+    (when (use-region-p)
+      (deactivate-mark))
     (select-word)))
 
 (defun calendar-split ()
@@ -3675,11 +3743,10 @@ Use as around advice e.g. for mouse left click after double click."
 (defun delete-completion-win ()
   "Delete completion window."
   (interactive)
-  (if-let ((win (get-buffer-window "*Completions*")))
-      (progn
-        (select-window win)
-        (delete-window)
-        (select-window (get-buffer-window completion-reference-buffer)))))
+  (when-let ((win (get-buffer-window "*Completions*")))
+    (select-window win)
+    (delete-window)
+    (select-window (get-buffer-window completion-reference-buffer))))
 
 (defun toggle-pin-window ()
   "Toggle current window dedicated and not deletable."
@@ -3690,8 +3757,8 @@ Use as around advice e.g. for mouse left click after double click."
 
 (defun scroll-one-pixel (&rest _)
   "Scroll one pixel up. Disables recentering cursor temporary."
-  (if pixel-scroll-mode
-      (pixel-scroll-pixel-up 1)))
+  (when pixel-scroll-mode
+    (pixel-scroll-pixel-up 1)))
 
 (defalias 'view-messages 'view-echo-area-messages)
 
@@ -3724,7 +3791,7 @@ Use as around advice e.g. for mouse left click after double click."
 (defun yt-dlp-video ()
   "Ask URL and download video."
   (interactive)
-  (let* ((url (read-string "Download video: "))
+  (let* ((url (read-string "Download video URL: "))
          (cmd (concat "yt-dlp \"" url "\""))
          (proxy (concat "socks5://127.0.0.1:" socks-port)))
     (with-environment-variables (("https_proxy" proxy))
@@ -3733,7 +3800,7 @@ Use as around advice e.g. for mouse left click after double click."
 (defun yt-dlp-audio ()
   "Ask URL and download audio."
   (interactive)
-  (let* ((url (read-string "Download audio: "))
+  (let* ((url (read-string "Download audio URL: "))
          (cmd (concat "yt-dlp --extract-audio --audio-format mp3 \"" url "\""))
          (proxy (concat "socks5://127.0.0.1:" socks-port)))
     (with-environment-variables (("https_proxy" proxy))
