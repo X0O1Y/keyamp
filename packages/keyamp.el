@@ -1,6 +1,6 @@
 ;;; keyamp.el --- Keyboard Amplifier -*- coding: utf-8; lexical-binding: t; -*-
 
-;; Author: Egor Maltsev <x0O1@ya.ru>
+;; Author: Egor Maltsev <X0O1@YA.RU>
 ;; Version: 1.3 2025-09-22 Standard
 ;;          __   _____   __
 ;;         |__| |_____| |__|
@@ -515,7 +515,8 @@ is enabled.")
 (keyamp--map keyamp-map
   '(;; Control sequences as leader prefixes for scripting
     ("C-^" . keyamp-lleader-map) ("C-_" . keyamp-rleader-map)
-    ("C-+" . keyamp-lleader-map) ("C-И" . keyamp-rleader-map)
+    ("C-+" . keyamp-lleader-map) ("C-И" . keyamp-rleader-map) ; russian-computer
+                                 ("C-b" . keyamp-rleader-map) ; hebrew
 
     ("<home>"  . beg-of-buf)
     ("<end>"   . end-of-buf)
@@ -590,7 +591,7 @@ is enabled.")
     ("<down>"  . down-line)
 
     ("<prior>" . pass)
-    ("<next>"  . terminal)
+    ("<next>"  . next-vterm-buf)
     ("<home>"  . password-store)
     ("<end>"   . prev-vterm-buf)))
 
@@ -703,7 +704,7 @@ is enabled.")
     ("`" . toggle-input-method)            ("~" . toggle-std-to-cur-layout)
     ("1" . view-lossage)
     ("2" . insert-kbd-macro)
-    ("3" . config)
+    ("3" . jump-buffer-or-bookmark)
     ("4" . change-bracket-pairs)
     ("5" . json-pretty)
 
@@ -802,7 +803,9 @@ is enabled.")
   (keymap-set key-translation-map "S-SPC"         "<tab>")
   (keymap-set key-translation-map "S-<backspace>" "<backtab>")
   (keymap-set key-translation-map "S-<return>"    keyamp-sret)
-  (keymap-set key-translation-map "S-<escape>"    keyamp-sesc))
+  (keymap-set key-translation-map "S-<escape>"    keyamp-sesc)
+  (keymap-set key-translation-map "S-<next>"      "C-u")
+  (keymap-set key-translation-map "S-<prior>"     "C-g"))
 
 (setq help-map (make-sparse-keymap))
 (fset 'help-command help-map)
@@ -1587,10 +1590,12 @@ keyboard ASCII CHAR."
   (keyamp--remap dired-mode-map
     '((keyamp-insert       . dired-find-file)
       (backward-bracket    . dired-jump)
-      (insert-space-before . ignore)
+      (insert-space-before . dired-extract)
+      (reformat-lines      . dired-decrypt)
       (del-word            . dired-unmark-all-marks)
       (backward-del-word   . dired-do-chmod)
       (shrink-whitespaces  . dired-hide-details-mode)
+      (kill-line           . dired-encrypt)
       (open-line           . prev-dired-buf)
       (del-back            . dired-toggle-mark)
       (newline             . next-dired-buf)
@@ -3500,24 +3505,23 @@ after a delay even if there more read commands follow."
     (if (and (eq this-command 'mac-mwheel-scroll)
              (eq mode-line-front-space keyamp-command-indicator))
         (progn) ; Ease scroll
-      (unless (eq this-command last-command)
-        (cond
-         ((or keyamp-insert-p
-              (and isearch-mode
-                   (not (memq this-command keyamp-isearch-not-insert))))
-          (keyamp-indicate-insert))
-         ((eq this-command 'activate-region)
-          (keyamp-indicate keyamp-command-indicator
-                           keyamp-modify-cursor keyamp-command-color))
-         ((gethash this-command keyamp-screen-commands-hash)
-          (keyamp-indicate-screen))
-         ((gethash this-command keyamp-read-commands-hash)
-          (keyamp-indicate-read-defer))
-         ((eq real-this-command 'repeat)
-          (keyamp-blink-start keyamp-read-color keyamp-modify-color))
-         ((gethash this-command keyamp-modify-commands-hash)
-          (keyamp-indicate-modify))
-         (t (keyamp-indicate-command))))
+      (cond
+       ((or keyamp-insert-p
+            (and isearch-mode
+                 (not (memq this-command keyamp-isearch-not-insert))))
+        (keyamp-indicate-insert))
+       ((eq this-command 'activate-region)
+        (keyamp-indicate keyamp-command-indicator
+                         keyamp-modify-cursor keyamp-command-color))
+       ((gethash this-command keyamp-screen-commands-hash)
+        (keyamp-indicate-screen))
+       ((gethash this-command keyamp-read-commands-hash)
+        (keyamp-indicate-read-defer))
+       ((eq real-this-command 'repeat)
+        (keyamp-blink-start keyamp-read-color keyamp-modify-color))
+       ((gethash this-command keyamp-modify-commands-hash)
+        (keyamp-indicate-modify))
+       (t (keyamp-indicate-command)))
       (when (or defining-kbd-macro
                 (memq this-command keyamp-blink-modify-commands)
                 (eq major-mode 'wdired-mode))
@@ -3650,7 +3654,7 @@ after a delay even if there more read commands follow."
     [?\s ,(string-to-char (keyamp--convert-kbd-str "f"))])
   "Indicate prefixes with modify.")
 
-(defconst keyamp-blink-flash 0.15 "Blink flash duration.")
+(defconst keyamp-blink-flash 0.3 "Blink flash duration.")
 
 (defsubst keyamp-blink-flash (Color)
   (let ((keyamp-blink-duration keyamp-blink-flash)

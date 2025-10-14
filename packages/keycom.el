@@ -3788,24 +3788,6 @@ Use as around advice e.g. for mouse left click after double click."
              (string-equal system-type "darwin"))
     (call-process "osascript" nil 0 nil "-e" "tell app \"Finder\" to empty")))
 
-(defun yt-dlp-video ()
-  "Ask URL and download video."
-  (interactive)
-  (let* ((url (read-string "Download video URL: "))
-         (cmd (concat "yt-dlp \"" url "\""))
-         (proxy (concat "socks5://127.0.0.1:" socks-port)))
-    (with-environment-variables (("https_proxy" proxy))
-      (async-shell-command cmd))))
-
-(defun yt-dlp-audio ()
-  "Ask URL and download audio."
-  (interactive)
-  (let* ((url (read-string "Download audio URL: "))
-         (cmd (concat "yt-dlp --extract-audio --audio-format mp3 \"" url "\""))
-         (proxy (concat "socks5://127.0.0.1:" socks-port)))
-    (with-environment-variables (("https_proxy" proxy))
-      (async-shell-command cmd))))
-
 (defun rectangle ()
   "Rectangle mark mode."
   (interactive)
@@ -3914,14 +3896,17 @@ Marginalia annotation support."
                                                (buffer-list))))
                                   (bookmark-all-names)))
          (candidates (append buffers bookmarks))
-         (choice (minibuffer-with-setup-hook
-                     (lambda ()
-                       (setq-local completion-ignore-case t)
-                       (setq-local completion-category-default 'file))
-                   (completing-read "Buffer or bookmark: " candidates nil t))))
-    (if (member choice buffers)
-        (switch-to-buffer choice)
-      (bookmark-jump choice))))
+         (collection (lambda (string pred action)
+                       (if (eq action 'metadata)
+                           `(metadata (category . bookmark))
+                         (complete-with-action action candidates string pred)))))
+    (let ((choice (minibuffer-with-setup-hook
+                      (lambda ()
+                        (setq-local completion-ignore-case t))
+                    (completing-read "M-x buffer: " collection nil t))))
+      (if (member choice buffers)
+          (switch-to-buffer choice)
+        (bookmark-jump choice)))))
 
 (defun split-window-r ()
   "Delete other windows then split window right"
