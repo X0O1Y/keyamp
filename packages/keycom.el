@@ -1106,9 +1106,13 @@ Else try cut bracket. If error e.g. no match, then delete char."
 (defun del-forw ()
   "Delete char forward."
   (interactive)
-  (if buffer-read-only
-      (setq this-command 'ignore)
-    (delete-char 1)))
+  (if (eq major-mode 'vterm-mode)
+      (progn
+        (setq this-command 'vterm-shell-vi-fdel)
+        (command-execute 'vterm-shell-vi-fdel))
+    (if buffer-read-only
+        (setq this-command 'ignore)
+      (delete-char 1))))
 
 (defun change-bracket-pairs (FromChars ToChars)
   "Change bracket pairs to another type or none.
@@ -2471,7 +2475,7 @@ Similar to `kill-buffer', with the following addition:
   "Open the last closed file."
   (interactive)
   (if (zerop (length recently-closed-buffers))
-      (message "No recently closed buffers in this session")
+      (message "No recently closed buffers")
     (find-file (cdr (pop recently-closed-buffers)))))
 
 (defun describe-foo-at-point-error ()
@@ -3234,33 +3238,36 @@ and reverse-search-history in bashrc."
                         (p2 (line-end-position))
                         ((>= p2 p1)))
                    (string-blank-p (buffer-substring-no-properties p1 p2))
-                 t))
-      (vterm-send-key (kbd "C-m"))   ; so activate insert
-      (vterm-send-key "<right>")     ; go after last char
-      (vterm-send-key (kbd "SPC"))   ; add space and back to cmd mode
+                 t)
+               (let ((p1 (1- (point))) ; not blank before prev char
+                     (p2 (line-end-position)))
+                 (not (string-blank-p (buffer-substring-no-properties p2 p1)))))
+      (vterm-send-key (kbd "C-m")) ; so activate insert
+      (vterm-send-key "<right>")   ; go after last char
+      (vterm-send-key (kbd "SPC")) ; add space and back to cmd mode
       (vterm-send-key (kbd "^[")))))
-
-(defun vterm-shell-vi-s ()
-  "Send key to shell prompt vi cmd mode."
-  (interactive)
-  (vterm-shell-vi-push-right "s"))
 
 (defun vterm-shell-vi-l ()
   "Send key to shell prompt vi cmd mode."
   (interactive)
+  (vterm-shell-vi-push-right "s"))
+
+(defun vterm-shell-vi-u ()
+  "Send key to shell prompt vi cmd mode."
+  (interactive)
   (vterm-send-key "l"))
 
-(defun vterm-shell-vi-w ()
+(defun vterm-shell-vi-o ()
   "Send key to shell prompt vi cmd mode."
   (interactive)
   (vterm-shell-vi-push-right "w"))
 
-(defun vterm-shell-vi-e ()
+(defun vterm-shell-vi-d ()
   "Send key to shell prompt vi cmd mode."
   (interactive)
   (vterm-send-key "e"))
 
-(defun vterm-shell-vi-a ()
+(defun vterm-shell-vi-fdel ()
   "Send key to shell prompt vi cmd mode."
   (interactive)
   (vterm-send-key "a"))
@@ -3859,17 +3866,17 @@ Use as around advice e.g. for mouse left click after double click."
     (message "Copied: %c (%s)" char charName)))
 
 (defconst prog-commands
-  '(("python-new" . "New Python file.")
-    ("go-new" . "New Go file.")
-    ("bash-new" . "New Bash file."))
-  "Alist of commands and their descriptions.")
+  '(("python" . "Python")
+    ("go" . "Go")
+    ("bash" . "Bash"))
+  "Alist of commands prefixes and their descriptions.")
 
 (defun prog-new (Cmd)
   "New prog file, commands defined in `prog-commands'.
 Marginalia annotation support."
   (interactive
    (list (completing-read
-          "New prog file: "
+          "New program: "
           (lambda (str pred action)
             (if (eq action 'metadata)
                 `(metadata
@@ -3877,12 +3884,12 @@ Marginalia annotation support."
                    . ,(lambda (key)
                         (format " %s" (cdr (assoc key prog-commands))))))
               (complete-with-action action (mapcar #'car prog-commands) str pred))))))
-  (if-let ((cmd (intern Cmd))
+  (if-let ((cmd (intern (concat Cmd "-new")))
            ((fboundp cmd)))
       (funcall cmd)
     (message "No command %s" Cmd)))
 
-(defun jump-buffer-or-bookmark ()
+(defun buf-or-bookmark ()
   (interactive)
   (let* ((buffers (mapcar #'buffer-name
                           (cl-remove-if (lambda (b)
@@ -3913,6 +3920,17 @@ Marginalia annotation support."
   (interactive)
   (delete-other-windows)
   (split-window-right))
+
+(defun kill-random-uuid ()
+  "Generate and copy UUID to kill ring."
+  (interactive)
+  (kill-new
+   (string-trim
+    (shell-command-to-string
+     (cond
+      ((eq system-type 'windows-nt) "pwsh.exe -Command [guid]::NewGuid().toString()")
+      ((eq system-type 'darwin) "uuidgen | tr '[:upper:]' '[:lower:]'")
+      ((eq system-type 'gnu/linux) "uuidgen"))))))
 
 (provide 'keycom)
 

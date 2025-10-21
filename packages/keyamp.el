@@ -566,24 +566,22 @@ is enabled.")
     ("i"  . previous-line)       ("I"  . keyamp-insert-and-self-insert)
     ("o"  . forw-word)           ("O"  . keyamp-insert-and-self-insert)
     ("p"  . jump-mark)           ("P"  . keyamp-insert-and-self-insert)
-    ("["  . scratch)             ("{"  . keyamp-insert-and-self-insert)
+    ("["  . alt-buf)             ("{"  . keyamp-insert-and-self-insert)
     ("]"  . empty-bin)           ("}"  . keyamp-insert-and-self-insert)
-    ("\\" . bookmark-set)        ("|"  . keyamp-insert-and-self-insert)
+    ("\\" . lock-screen)         ("|"  . keyamp-insert-and-self-insert)
 
     ("h" . beg-of-line)          ("H"  . keyamp-insert-and-self-insert)
     ("j" . bchar)                ("J"  . keyamp-insert-and-self-insert)
     ("k" . next-line)            ("K"  . keyamp-insert-and-self-insert)
     ("l" . fchar)                ("L"  . keyamp-insert-and-self-insert)
     (";" . end-of-lyne)          (":"  . keyamp-insert-and-self-insert)
-    ("'" . alt-buf)              ("\"" . keyamp-insert-and-self-insert)
+    ("'" . tools)                ("\"" . keyamp-insert-and-self-insert)
 
     ("n" . isearch-forward)      ("N"  . keyamp-insert-and-self-insert)
     ("m" . backward-bracket)     ("M"  . keyamp-insert-and-self-insert)
     ("," . other-win)            ("<"  . keyamp-insert-and-self-insert)
     ("." . forward-bracket)      (">"  . keyamp-insert-and-self-insert)
     ("/" . goto-match-br)        ("?"  . keyamp-insert-and-self-insert)
-
-    ;;;;;;;;;;;;;;;;;;;;;;;
 
     ("<left>"  . back-char)
     ("<right>" . forw-char)
@@ -647,7 +645,7 @@ is enabled.")
     ("o"  . flymake-goto-next-error)
     ("p"  . show-kill-ring)
     ("["  . toggle-frame-maximized)
-    ("]"  . gptel-menu)
+    ("]"  . make-frame-command)
     ("\\" . yt-dlp)
 
     ("h"  . prog-new)
@@ -678,7 +676,12 @@ is enabled.")
     ("m" . tt-conn)
     ("," . ai)
     ("." . open-last-closed)
-    ("/" . goto-line)))
+    ("/" . goto-line)
+
+    ("<prior>" . pass-otp)
+    ("<next>"  . tt-sftp)
+    ("<home>"  . pass-generate)
+    ("<end>"   . ignore)))
 
 (if (display-graphic-p)
     (keyamp--map keyamp-lleader-map
@@ -704,7 +707,7 @@ is enabled.")
     ("`" . toggle-input-method)            ("~" . toggle-std-to-cur-layout)
     ("1" . view-lossage)
     ("2" . insert-kbd-macro)
-    ("3" . jump-buffer-or-bookmark)
+    ("3" . ignore)
     ("4" . change-bracket-pairs)
     ("5" . json-pretty)
 
@@ -742,7 +745,7 @@ is enabled.")
     ("b" . title-case-region-or-line)
 
     ;; Right leader right half
-    ("6" . pass-generate)
+    ("6" . password-store)
     ("7" . copy-to-register)
     ("8" . insert-register)
     ("9" . org-insert-source-code)
@@ -757,21 +760,26 @@ is enabled.")
     ("p"  . mark-defun)
     ("["  . backward-sexp)
     ("]"  . forward-sexp)
-    ("\\" . make-frame-command)
+    ("\\" . gptel-menu)
 
     ("h" . page-up-half)
     ("j" . isearch-wback)
     ("k" . end-of-block)
     ("l" . isearch-wforw)
     (";" . page-dn-half)
-    ("'" . describe-mode)
+    ("'" . scratch)
 
     ("n" . help-command)
     ("m" . dired-jump)
     ("," . delete-other-windows)
     ("." . save-close-buf)
     ("/" . view-messages)
-    ("*" . view-messages)))
+    ("*" . view-messages)
+
+    ("<prior>" . ignore)
+    ("<next>"  . tt-conn-localhost)
+    ("<home>"  . ignore)
+    ("<end>"   . ignore)))
 
 (if (display-graphic-p)
     (keyamp--map keyamp-rleader-map
@@ -786,7 +794,7 @@ is enabled.")
         ("<mouse-3>" . ignore))))
 
 (keyamp--map-double
-  '((keyamp-escape  . alternate-frame) (other-win     . jump-buffer-or-bookmark)
+  '((keyamp-escape  . alternate-frame) (other-win     . buf-or-bookmark)
     (beg-of-line    . beg-of-buf)      (end-of-lyne   . end-of-buf)
     (proced-defer   . save-close-buf)  (sh-defer      . delete-other-windows)
     (occur-cur-word . search-string)   (kmacro-record . keyamp-delete)))
@@ -835,10 +843,6 @@ is enabled.")
 
 ;; Pass single key through the network
 (keyamp--map global-map '(("<f10>" . exec-query) ("<f12>" . keyamp-escape)))
-
-;; For in Termius add-on maybe
-(keymap-set key-translation-map "<deletechar>" "DEL")
-(keymap-set key-translation-map "<insertchar>" "SPC")
 
 (when (display-graphic-p) ; Mouse
   (keyamp--map global-map '(("<double-mouse-1>" . select-word) ("<mouse-3>" . mouse-3)))
@@ -1154,7 +1158,7 @@ is enabled.")
   (keyamp--set keymap '(beg-of-buf end-of-buf)))
 
 (with-sparse-keymap
-  (keyamp--map-leader keymap '(end-of-block . beg-of-block))
+  (keyamp--map-leader keymap '(end-of-block . end-of-block-rev))
   (keyamp--map-return keymap keyamp-ret)
   (keyamp--remap keymap '((previous-line . beg-of-block-rev) (next-line . end-of-block)))
   (keyamp--set keymap '(beg-of-block end-of-block)))
@@ -1221,6 +1225,7 @@ is enabled.")
 
 (with-sparse-keymap
   (keyamp--remap keymap '((bchar . back-word) (fchar . forw-word)))
+  (keyamp--remap keymap '((next-line . keyamp-escape)))
   (keyamp--set keymap '(back-word forw-word)))
 
 (with-sparse-keymap
@@ -1305,7 +1310,7 @@ keyboard ASCII CHAR."
 
 ;; G acts as leader key.
 (with-sparse-keymap
-  (keyamp--map-leader keymap '(toggle-ibuffer . toggle-ibuffer))
+  (keyamp--map-leader keymap '(buf-or-bookmark . toggle-ibuffer))
   (keyamp--map-escape keymap deactivate-region)
   (keyamp--map-return keymap tools)
   (keyamp--remap keymap
@@ -1329,11 +1334,11 @@ keyboard ASCII CHAR."
     (deactivate-region)))
 
 (advice-add-macro
- '(del-forw              tools
-                         jump-6
-   jump-7                jump-8
-   screen-idle           downloads
-   toggle-pin-window     toggle-ibuffer)
+ '(del-forw          tools
+   buf-or-bookmark   jump-6
+   jump-7            jump-8
+   downloads
+   toggle-pin-window toggle-ibuffer)
  :before 'keyamp-deactivate-region)
 
 (with-sparse-keymap
@@ -1364,7 +1369,7 @@ keyboard ASCII CHAR."
   (keyamp--map-backtab keymap previous-line)
   (keyamp--remap keymap
     '((previous-line . scroll-down-command) (next-line . scroll-up-command)
-      (down-line     . page-dn-half) (up-line   . page-up-half)))
+      (down-line     . page-dn-half)        (up-line   . page-up-half)))
   (unless (display-graphic-p) ; Touch reader
     (keyamp--remap keymap '((down-line . page-up-half) (up-line . page-dn-half))))
   (keyamp--set keymap '(scroll-down-command scroll-up-command)))
@@ -1793,7 +1798,7 @@ keyboard ASCII CHAR."
 
 (with-eval-after-load 'org
   (keyamp--map-tab org-mode-map org-cycle)
-  (keyamp--map-backtab org-mode-map undo)
+  (keyamp--map-backtab org-mode-map org-cycle)
   (keyamp--remap org-mode-map
     '((eval-region-or-sexp . insert-date) (insert-date . org-time-stamp))))
 
@@ -1980,7 +1985,7 @@ keyboard ASCII CHAR."
 
 (with-eval-after-load 'esh-mode
   (keyamp--map-tab eshell-mode-map completion-at-point)
-  (keyamp--map-backtab eshell-mode-map undo)
+  (keyamp--map-backtab eshell-mode-map completion-at-point)
   (keyamp--remap eshell-mode-map
     '((cut-line       . eshell-clear)
       (select-block   . eshell-previous-input)
@@ -2022,31 +2027,37 @@ keyboard ASCII CHAR."
   (keyamp--map-backtab vterm-mode-map vterm-send-backtab)
 
   (keyamp--remap vterm-mode-map
-    '((select-block        . vterm-up-vi-cmd)
-      (paste-or-prev       . vterm-yank)
-      (kill-line           . vterm-tmux-copy) ; Activate tmux copy mode
-      (page-up-half        . vterm-tmux-copy-hpu)
-      (page-dn-half        . vterm-tmux-copy-hpd)
-      (copy-text-block     . tt-conn-reconnect)
-      (cut-text-block      . tt-conn-localhost)
-      (open-line           . vterm-tmux-prev-window)
-      (repeat-command      . alt-buf)
-      (insert-space-before . vterm-shell-vi-cmd) ; Sync point position and activate shell vi cmd mode
-      (newline             . vterm-tmux-next-window)
-      (toggle-comment      . vterm-read-send-key)
-      (cut-line            . vterm-clear)
-      (new-empty-buffer    . vterm-tmux-new-window)
-      (query-replace       . vterm-vi) ; Activate vi mode
-      (reformat-lines      . vterm-tmux-close-window)
+    '(;; Left half
+      (insert-space-before . vterm-shell-vi-cmd)      ; Q Sync point and activate shell vi cmd mode transient
+      (reformat-lines      . vterm-tmux-close-window) ; SPC Q
+      (backward-del-word   . vterm-shell-vi-cmd)      ; W Sync point or do modify if in transient
+      (undo                . vterm-undo)              ; E
+      (del-word            . vterm-shell-vi-cmd)      ; R Sync point or do modify if in transient
+      (query-replace       . vterm-vi)                ; SPC R Activate vi mode (TUI)
+      (cut-text-block      . tt-conn-reconnect)       ; T
+      (copy-text-block     . tt-sftp)                 ; SPC T
+      (shrink-whitespaces  . tt-conn-localhost)       ; A
+      (kill-line           . ignore)                  ; SPC A
+      (open-line           . vterm-tmux-prev-window)  ; S
+      (del-back            . vterm-shell-vi-cmd)      ; D Sync point or do modify if in transient
+      (newline             . vterm-tmux-next-window)  ; F
+      (new-empty-buffer    . vterm-tmux-new-window)   ; SPC G
+      (toggle-comment      . vterm-read-send-key)     ; Z
+      (cut-line            . vterm-clear)             ; X
+      (paste-or-prev       . vterm-yank)              ; V
+      (paste-from-r1       . vterm-tmux-copy)         ; SPC V Activate tmux copy mode
+      (toggle-case         . prev-vterm-buf)          ; B
+      (toggle-prev-case    . next-vterm-buf)          ; SPC B
+
+      ;; Right half
+      (page-up-half        . vterm-tmux-copy-hpu)  ; DEL H
+      (page-dn-half        . vterm-tmux-copy-hpd)  ; DEL ;
+      (dired-jump          . tt-conn-tramp)        ; DEL M
+      (select-block        . vterm-up-vi-cmd)      ; DEL DEL
       (back-char           . vterm-left)
       (forw-char           . vterm-right)
       (up-line             . vterm-up)
-      (down-line           . vterm-down)
-      (toggle-case         . prev-vterm-buf)
-      (toggle-prev-case    . terminal) ; Next vterm buf
-      (dired-jump          . tt-conn-tramp)
-      (bookmark-set        . tt-sftp)
-      (empty-bin           . tt-conn-tramp-docker)))
+      (down-line           . vterm-down)))
 
   ;; Sync point on insert
   (add-hook 'keyamp-insert-hook 'vterm-reset-cursor-point)
@@ -2082,18 +2093,17 @@ keyboard ASCII CHAR."
   (with-sparse-keymap
     (keyamp--remap keymap
       '((bchar         . vterm-left) (fchar     . vterm-right)
-        (previous-line . vterm-up) (next-line . vterm-down)))
+        (previous-line . vterm-up)   (next-line . vterm-down)))
     (keyamp--set keymap '(vterm-left vterm-right vterm-up vterm-down)))
 
   ;;;;;; Shell prompt vi cmd mode
   (with-sparse-keymap
     (keyamp--remap keymap
       '((bchar              . vterm-shell-vi-self-insert)
-        (fchar              . vterm-shell-vi-s) ; Engram notation
-        (back-word          . vterm-shell-vi-l)
-        (forw-word          . vterm-shell-vi-w)
-        (del-back           . vterm-shell-vi-e)
-        (shrink-whitespaces . vterm-shell-vi-a) ; Delete char forward
+        (fchar              . vterm-shell-vi-l)
+        (back-word          . vterm-shell-vi-u)
+        (forw-word          . vterm-shell-vi-o)
+        (del-back           . vterm-shell-vi-d)
         (undo               . vterm-shell-vi-self-insert)
         (beg-of-line        . vterm-shell-vi-self-insert)
         (end-of-lyne        . vterm-shell-vi-self-insert)
@@ -2103,21 +2113,26 @@ keyboard ASCII CHAR."
       '(vterm-up-vi-cmd ; Vi cmd mode auto enable
         vterm-down
         vterm-shell-vi-cmd    vterm-shell-vi-self-insert
-        vterm-shell-vi-s      vterm-shell-vi-l
-        vterm-shell-vi-w      vterm-shell-vi-e
-        vterm-shell-vi-a))
+        vterm-shell-vi-l      vterm-shell-vi-u
+        vterm-shell-vi-o      vterm-shell-vi-d
+        vterm-shell-vi-fdel))
     ;; Vi insert sync with keyamp
     (add-hook 'keyamp-insert-hook 'vterm-shell-vi-insert))
 
   (with-sparse-keymap ; Move word repeat
-    (keyamp--remap keymap '((bchar . vterm-shell-vi-l) (fchar . vterm-shell-vi-w)))
-    (keyamp--set keymap '(vterm-shell-vi-l vterm-shell-vi-w)))
+    (keyamp--remap keymap '((bchar . vterm-shell-vi-u) (fchar . vterm-shell-vi-o)))
+    (keyamp--set keymap '(vterm-shell-vi-u vterm-shell-vi-o)))
 
-  (with-sparse-keymap ; Delete char repeat
-    (keyamp--map-leader keymap '(vterm-shell-vi-a . vterm-shell-vi-e))
-    (keyamp--set keymap '(vterm-shell-vi-e vterm-shell-vi-a)))
+  (with-sparse-keymap ; Delete repeat
+    (keyamp--map-leader keymap '(nil . vterm-shell-vi-d))
+    (keyamp--set keymap '(vterm-shell-vi-d)))
 
-  ;; Config examples:
+  (with-sparse-keymap ; Forward delete repeat
+    (keyamp--map-leader keymap '(nil . vterm-shell-vi-fdel))
+    (keyamp--remap keymap '((del-back . vterm-shell-vi-fdel)))
+    (keyamp--set keymap '(vterm-shell-vi-fdel)))
+
+  ;; Config reference:
 
   ;;;;;; .inputrc
   ;; $if mode=vi
@@ -2144,6 +2159,9 @@ keyboard ASCII CHAR."
   ;;;;;; .zshrc
   ;; set -o vi
   ;; bindkey "^[" vi-cmd-mode
+  ;; bindkey "^O" history-incremental-search-backward
+  ;; # Force bind backward delete after vi cmd mode
+  ;; bindkey "^?" backward-delete-char
 
   ;; bindkey -M vicmd "\C-m" vi-insert
   ;; bindkey -M vicmd "\C-j" vi-insert
@@ -2182,7 +2200,7 @@ keyboard ASCII CHAR."
         (isearch-forward . vterm-tmux-copy-self-insert)))
     (keyamp--set keymap
       '(vterm-tmux-copy     vterm-tmux-copy-self-insert
-                            vterm-tmux-copy-hpu vterm-tmux-copy-hpd) :command))
+        vterm-tmux-copy-hpu vterm-tmux-copy-hpd) :command))
 
   (with-sparse-keymap
     (keyamp--map-return keymap keyamp-ret)
@@ -2216,7 +2234,7 @@ keyboard ASCII CHAR."
   ;; bind -T copy-mode-vi Tab send-keys -X search-reverse
   ;; bind -T copy-mode-vi BTab send-keys -X search-again
 
-  ;;;;;; Vi mode - run TUI inside Emacs
+  ;;;;;; Vi mode - keymap for TUI
   (with-sparse-keymap
     (keyamp--map-leader keymap '(vterm-vi-self-insert . vterm-vi-self-insert))
     (keyamp--map-escape keymap vterm-vi-escape)
@@ -2227,7 +2245,7 @@ keyboard ASCII CHAR."
     (keyamp--map keymap
       '(("<left>" . vterm-vi-self-insert) ("<right>" . vterm-vi-self-insert)
         ("<up>"   . vterm-vi-self-insert) ("<down>"  . vterm-vi-self-insert)
-        (keyamp-sesc    . keyamp-command)))
+        (keyamp-sesc . keyamp-command)))
     (keyamp--set keymap '(vterm-vi vterm-vi-self-insert vterm-vi-escape) :command))
 
   (defun vterm-vi-auto (&rest _)
@@ -2539,12 +2557,12 @@ keyboard ASCII CHAR."
 
 (with-eval-after-load 'emacs-lisp-mode
   (keyamp--map-tab emacs-lisp-mode-map emacs-lisp-indent)
-  (keyamp--map-backtab emacs-lisp-mode-map undo)
+  (keyamp--map-backtab emacs-lisp-mode-map emacs-lisp-indent)
   (keyamp--remap emacs-lisp-mode-map
     '((reformat-lines . emacs-lisp-remove-paren-pair))))
 
 (with-eval-after-load 'perl-mode
-  (keyamp--map-backtab perl-mode-map undo))
+  (keyamp--map-backtab perl-mode-map nil))
 
 (with-sparse-keymap
   (keyamp--map-leader keymap '(fchar . bchar))
@@ -3024,11 +3042,11 @@ keyboard ASCII CHAR."
   "List of commands to blink modify after.")
 
 (defconst keyamp-blink-io-commands
-  '(vterm-shell-vi-cmd    vterm-shell-vi-self-insert    vterm-shell-vi-s
-    vterm-shell-vi-l      vterm-shell-vi-w              vterm-shell-vi-e
+  '(vterm-shell-vi-cmd    vterm-shell-vi-self-insert    vterm-shell-vi-l
+    vterm-shell-vi-u      vterm-shell-vi-o              vterm-shell-vi-d
     vterm-tmux-copy       vterm-tmux-copy-self-insert   vterm-read-send-key
     vterm-vi              vterm-vi-self-insert          vterm-vi-escape
-    vterm-shell-vi-a      vterm-left                    vterm-right
+    vterm-shell-vi-fdel   vterm-left                    vterm-right
     vterm-up              vterm-down
     copy-to-r1            append-to-r1)
   "List of commands to blink io after.")
@@ -3527,12 +3545,15 @@ after a delay even if there more read commands follow."
                 (eq major-mode 'wdired-mode))
         (keyamp-blink keyamp-blinker-modify))
       (when (eq this-command 'ignore)
-        (keyamp-blink keyamp-blinker-idle))
-      (when (eq this-command 'keyamp-escape)
         (keyamp-blink keyamp-blinker-idle)
         (modify-all-frames-parameters '((cursor-type . hollow))))
+      (when (eq this-command 'keyamp-escape)
+        (keyamp-blink keyamp-blinker-idle)
+        (modify-all-frames-parameters '((cursor-type . hollow)))) ; Blinks with blinker timer
       (when (memq this-command keyamp-blink-io-commands)
-        (keyamp-blink keyamp-blinker-io))
+        (keyamp-blink keyamp-blinker-io)
+        (when (eq this-command 'vterm-shell-vi-cmd)
+          (modify-all-frames-parameters '((cursor-type . hollow)))))
       (when (memq this-command keyamp-blink-command-commands)
         (keyamp-blink keyamp-blinker-command)))))
 
