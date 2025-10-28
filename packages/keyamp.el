@@ -62,7 +62,7 @@
 
 (defconst keyamp-input-methods '(russian-computer hebrew)
   "Input methods, activate when not available otherwise. See
-`toggle-input-method', first one is primary.
+`toggle-primary-input-method', first one is primary.
 
 On activation Quail package also loaded which required for mapping
 translation of corresponding non-ASCII command key sequences and
@@ -120,7 +120,7 @@ Single non-ASCII chars mapped in `keyamp--map' macro."
    keyamp-input-methods)
   (activate-input-method nil))
 
-(defun toggle-input-method ()
+(defun toggle-primary-input-method ()
   "Toggle primary input method command.
 Activate when input method not available in OS."
   (interactive)
@@ -137,9 +137,9 @@ keyboard. E.g. use standard keyboard via bluetooth for terminal Emacs with
 non-QWERTY ASCII layout and toggle non-ASCII input method with the key.")
 
 (defun map-toggle-input-method ()
-  "Toggle map `toggle-input-method' to `toggle-input-method-key' and
+  "Toggle map `toggle-primary-input-method' to `toggle-input-method-key' and
 corresponding non-ASCII key for primary input method in insert mode."
-  (let ((cmd (when keyamp-insert-p 'toggle-input-method))
+  (let ((cmd (when keyamp-insert-p 'toggle-primary-input-method))
         (input-method-key
          (car (rassoc toggle-input-method-key keyamp-input-methods-to-std))))
     (keymap-set keyamp-map toggle-input-method-key cmd)
@@ -673,13 +673,13 @@ is enabled.")
     (";" . recentf-open-files)
     ("'" . list-timers)
     ("n" . list-processes)
-    ("m" . tt-conn)
+    ("m" . vt-conn)
     ("," . ai)
     ("." . open-last-closed)
     ("/" . goto-line)
 
     ("<prior>" . pass-otp)
-    ("<next>"  . tt-sftp)
+    ("<next>"  . vt-sftp)
     ("<home>"  . pass-generate)
     ("<end>"   . ignore)))
 
@@ -704,7 +704,7 @@ is enabled.")
 (keyamp--map-tab keyamp-rleader-map next-proj-buf)
 (keyamp--map keyamp-rleader-map
   '(;; Right leader left half
-    ("`" . toggle-input-method)            ("~" . toggle-std-to-cur-layout)
+    ("`" . toggle-primary-input-method)    ("~" . toggle-std-to-cur-layout)
     ("1" . view-lossage)
     ("2" . insert-kbd-macro)
     ("3" . ignore)
@@ -777,7 +777,7 @@ is enabled.")
     ("*" . view-messages)
 
     ("<prior>" . ignore)
-    ("<next>"  . tt-conn-localhost)
+    ("<next>"  . vt-conn-localhost)
     ("<home>"  . ignore)
     ("<end>"   . ignore)))
 
@@ -1319,8 +1319,8 @@ keyboard ASCII CHAR."
       (newline         . toggle-pin-window)
       (activate-region . rectangle)
       (toggle-case     . downloads)
-      (other-win       . jump-7)
-      (isearch-forward . jump-8)))
+      (other-win       . jump-8)
+      (isearch-forward . jump-7)))
 
   (advice-add 'activate-region :after
               (lambda () "virtual leader G transient"
@@ -1609,6 +1609,7 @@ keyboard ASCII CHAR."
       (cut-text-block      . dired-maybe-insert-subdir)
       (paste-or-prev       . dired-create-directory)
       (toggle-case         . dired-sort)
+      (toggle-prev-case    . vt-conn-tramp-docker)
       (copy-to-r1          . dired-do-copy)
       (paste-from-r1       . dired-do-rename)
       (mark-whole-buffer   . dired-toggle-marks)
@@ -2034,9 +2035,9 @@ keyboard ASCII CHAR."
       (undo                . vterm-undo)              ; E
       (del-word            . vterm-shell-vi-cmd)      ; R Sync point or do modify if in transient
       (query-replace       . vterm-vi)                ; SPC R Activate vi mode (TUI)
-      (cut-text-block      . tt-conn-reconnect)       ; T
-      (copy-text-block     . tt-sftp)                 ; SPC T
-      (shrink-whitespaces  . tt-conn-localhost)       ; A
+      (cut-text-block      . vt-conn-reconnect)       ; T
+      (copy-text-block     . vt-sftp)                 ; SPC T
+      (shrink-whitespaces  . vt-conn-localhost)       ; A
       (kill-line           . ignore)                  ; SPC A
       (open-line           . vterm-tmux-prev-window)  ; S
       (del-back            . vterm-shell-vi-cmd)      ; D Sync point or do modify if in transient
@@ -2048,11 +2049,12 @@ keyboard ASCII CHAR."
       (paste-from-r1       . vterm-tmux-copy)         ; SPC V Activate tmux copy mode
       (toggle-case         . prev-vterm-buf)          ; B
       (toggle-prev-case    . next-vterm-buf)          ; SPC B
+      (repeat-command      . prev-vterm-buf)          ; SPC 5
 
       ;; Right half
       (page-up-half        . vterm-tmux-copy-hpu)  ; DEL H
       (page-dn-half        . vterm-tmux-copy-hpd)  ; DEL ;
-      (dired-jump          . tt-conn-tramp)        ; DEL M
+      (dired-jump          . vt-conn-tramp)        ; DEL M
       (select-block        . vterm-up-vi-cmd)      ; DEL DEL
       (back-char           . vterm-left)
       (forw-char           . vterm-right)
@@ -3038,17 +3040,18 @@ keyboard ASCII CHAR."
 (defconst keyamp-blink-modify-commands
   '(kmacro-record               stopwatch
     python-format-buffer        save-buffer-isearch-cancel
-    toggle-input-method         emacs-lisp-indent)
+    toggle-primary-input-method emacs-lisp-indent)
   "List of commands to blink modify after.")
 
 (defconst keyamp-blink-io-commands
-  '(vterm-shell-vi-cmd    vterm-shell-vi-self-insert    vterm-shell-vi-l
-    vterm-shell-vi-u      vterm-shell-vi-o              vterm-shell-vi-d
-    vterm-tmux-copy       vterm-tmux-copy-self-insert   vterm-read-send-key
-    vterm-vi              vterm-vi-self-insert          vterm-vi-escape
-    vterm-shell-vi-fdel   vterm-left                    vterm-right
-    vterm-up              vterm-down
-    copy-to-r1            append-to-r1)
+  '(vterm-shell-vi-cmd     vterm-shell-vi-self-insert    vterm-shell-vi-l
+    vterm-shell-vi-u       vterm-shell-vi-o              vterm-shell-vi-d
+    vterm-tmux-copy        vterm-tmux-copy-self-insert   vterm-read-send-key
+    vterm-vi               vterm-vi-self-insert          vterm-vi-escape
+    vterm-shell-vi-fdel    vterm-left                    vterm-right
+    vterm-up               vterm-down
+    copy-to-r1             append-to-r1
+    vterm-tmux-next-window vterm-tmux-prev-window)
   "List of commands to blink io after.")
 
 (defconst keyamp-insert-commands
@@ -3373,7 +3376,9 @@ of quit minibuffer. Answer q to literal y or n question."
      ((keyamp-minibuffer-match "Set bookmark named")
       (keyamp-defer-command-bookmark 'bookmark-rename))
      ((keyamp-minibuffer-match "Old bookmark name")
-      (keyamp-defer-command-bookmark 'bookmark-delete)))
+      (keyamp-defer-command-bookmark 'bookmark-delete))
+     ((keyamp-minibuffer-match "Connect terminal")
+      (keyamp-defer-command 0 'vt-sftp)))
     (abort-recursive-edit)))
 
 (setq-default cursor-in-non-selected-windows nil)

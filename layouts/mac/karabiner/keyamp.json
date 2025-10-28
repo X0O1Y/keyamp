@@ -6786,7 +6786,7 @@
           ],
           "to_if_held_down": [
             {
-              "shell_command": "open -a 'Толк'",
+              "shell_command": "open -a 'Thorium'",
               "repeat": false,
               "halt": true
             }
@@ -6796,9 +6796,7 @@
               "key_code": "tab",
               "modifiers": [
                 "command"
-              ],
-              "halt": true,
-              "repeat": false
+              ]
             }
           ]
         },
@@ -6816,7 +6814,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Толк"
+                "/Thorium"
               ]
             }
           ],
@@ -6832,9 +6830,7 @@
               "key_code": "tab",
               "modifiers": [
                 "command"
-              ],
-              "halt": true,
-              "repeat": false
+              ]
             }
           ]
         },
@@ -6884,14 +6880,12 @@
               ]
             }
           ],
-          "to": [
+          "to_after_key_up": [
             {
               "key_code": "tab",
               "modifiers": [
                 "command"
-              ],
-              "halt": true,
-              "repeat": false
+              ]
             }
           ]
         },
@@ -6913,14 +6907,12 @@
               ]
             }
           ],
-          "to": [
+          "to_after_key_up": [
             {
               "key_code": "tab",
               "modifiers": [
                 "command"
-              ],
-              "halt": true,
-              "repeat": false
+              ]
             }
           ]
         },
@@ -6990,7 +6982,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/dbeaver"
+                "/Dictionary"
               ]
             }
           ],
@@ -7042,8 +7034,7 @@
           },
           "to_after_key_up": [
             {
-              "shell_command": "open -a dbeaver",
-              "halt": true
+              "shell_command": "open -a Dictionary"
             }
           ],
           "to_if_held_down": [
@@ -7135,7 +7126,7 @@
               ]
             }
           ],
-          "to": [
+          "to_after_key_up": [
             {
               "key_code": "h",
               "modifiers": [
@@ -7247,7 +7238,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Firefox"
+                "/vncviewer"
               ]
             }
           ],
@@ -7256,9 +7247,7 @@
               "key_code": "tab",
               "modifiers": [
                 "command"
-              ],
-              "halt": true,
-              "repeat": false
+              ]
             }
           ],
           "to_if_held_down": [
@@ -7281,7 +7270,7 @@
           },
           "to_after_key_up": [
             {
-              "shell_command": "open -a 'Firefox'"
+              "shell_command": "open -a 'VNC Viewer'"
             }
           ],
           "to_if_held_down": [
@@ -7309,8 +7298,7 @@
           },
           "to_after_key_up": [
             {
-              "shell_command": "~/.local/bin/clipboard d",
-              "halt": true
+              "shell_command": "~/.local/bin/clipboard d"
             }
           ],
           "to_if_held_down": [
@@ -7342,6 +7330,7 @@
             },
             {
               "shell_command": "/Applications/emacsclient --no-wait --eval '(let ((message-log-max nil)) (message \"Play online\"))' && sleep 0.5 && killall Music",
+              "repeat": false,
               "halt": true
             }
           ],
@@ -7377,6 +7366,7 @@
           "to_if_held_down": [
             {
               "shell_command": "/Applications/emacsclient --no-wait --eval '(let ((echo-cleanup-timeout 1) (message-log-max nil)) (message \"Play prev\"))' && /Applications/emacsclient --no-wait --eval '(play-prev)'",
+              "repeat": false,
               "halt": true
             },
             {
@@ -7431,12 +7421,19 @@
               ]
             }
           ],
-          "to": [
+          "to_after_key_up": [
             {
               "key_code": "h",
               "modifiers": [
                 "command"
               ]
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "shell_command": "open -a Karabiner-EventViewer",
+              "repeat": false,
+              "halt": true
             }
           ]
         },
@@ -7461,6 +7458,7 @@
           "to_if_held_down": [
             {
               "shell_command": "open -a Karabiner-EventViewer",
+              "repeat": false,
               "halt": true
             }
           ]

@@ -10,6 +10,7 @@
 
 (require 'bookmark)
 (require 'cl-lib)
+(require 'rect)
 
 
 
@@ -603,13 +604,25 @@ and others.")
   "Move cursor to the previous occurrence of punctuation.
 See `forward-punct'"
   (interactive "p")
-  (re-search-backward punctuation-regex nil t n))
+  (let ((p (point)))
+    (re-search-backward punctuation-regex nil t n)
+    (forward-char)
+    (when (eq p (point))
+      (backward-char)
+      (re-search-backward punctuation-regex nil t n)
+      (forward-char))))
 
 (defun forward-punct (&optional n)
   "Move cursor to the next occurrence of punctuation.
-The list of punctuations to jump to is defined by `punctuation-regex' "
+The list of punctuations to jump to is defined by `punctuation-regex'."
   (interactive "p")
-  (re-search-forward punctuation-regex nil t n))
+  (let ((p (point)))
+    (re-search-forward punctuation-regex nil t n)
+    (backward-char)
+    (when (eq p (point))
+      (forward-char)
+      (re-search-forward punctuation-regex nil t n)
+      (backward-char))))
 
 (defun backward-bracket ()
   "Move cursor to the previous occurrence of left bracket.
@@ -775,15 +788,17 @@ and `right-brackets'."
 (defun fchar ()
   "Forward char."
   (interactive)
-  (if (equal before-last-command this-command)
-      (progn
-        (command-execute 'forward-char)
-        (when (region-active-p)
-          (setq this-command 'deactivate-region)
-          (command-execute 'deactivate-region)))
-    (command-execute 'forward-char)
-    (when (eq last-command 'bchar)
-      (before-last-command))))
+  (if rectangle-mark-mode
+      (execute-kbd-macro (kbd "C-f")) ; wierd C forward-char started go new line
+    (if (equal before-last-command this-command)
+        (progn
+          (command-execute 'forward-char)
+          (when (region-active-p)
+            (setq this-command 'deactivate-region)
+            (command-execute 'deactivate-region)))
+      (command-execute 'forward-char)
+      (when (eq last-command 'bchar)
+        (before-last-command)))))
 
 (defun activate-region ()
   "Select region. If region active, then exchange point and mark."
@@ -2248,7 +2263,7 @@ command, so that next buffer shown is a user buffer."
     (previous-buffer)
     (while (< i buf-count-limit)
       (if (or (not (eq major-mode 'vterm-mode))
-              (string-equal (buffer-name) "*clock*"))
+              (string-equal (buffer-name) "*vterm clock*"))
           (progn
             (previous-buffer)
             (setq i (1+ i))
@@ -2266,7 +2281,7 @@ command, so that next buffer shown is a user buffer."
     (next-buffer)
     (while (< i buf-count-limit)
       (if (or (not (eq major-mode 'vterm-mode))
-              (string-equal (buffer-name) "*clock*"))
+              (string-equal (buffer-name) "*vterm clock*"))
           (progn
             (next-buffer)
             (setq i (1+ i))
@@ -3061,11 +3076,11 @@ Open new terminal if already in terminal."
       (if (eq major-mode 'vterm-mode)
           (let ((current-prefix-arg '-))
             (call-interactively 'next-vterm-buf))
-        (if (and (boundp 'tt-buffer)
-                 tt-buffer
-                 (get-buffer tt-buffer))
+        (if (and (boundp 'vt-buffer)
+                 vt-buffer
+                 (get-buffer vt-buffer))
             (progn
-              (switch-to-buffer tt-buffer)
+              (switch-to-buffer vt-buffer)
               (if (or (eq (point) (point-min))
                       (eq (point) (line-beginning-position)))
                   (vterm-reset-cursor-point)))
@@ -3605,13 +3620,8 @@ This checks in turn:
 (defun repeat-command ()
   "Custom `repeat-complex-command'."
   (interactive)
-  (cond
-   ((eq major-mode 'vterm-mode)
-    (setq this-command 'vterm-vi-quit)
-    (vterm-vi-quit))
-   (t
-    (setq this-command 'repeat-complex-command)
-    (call-interactively 'repeat-complex-command))))
+  (setq this-command 'repeat-complex-command)
+  (call-interactively 'repeat-complex-command))
 
 (defun dired-toggle-mark ()
   "Toggle mark for the current file."
