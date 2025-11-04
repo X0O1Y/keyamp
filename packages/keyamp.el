@@ -9,7 +9,7 @@
 
 ;;; Commentary:
 
-;; Keyamp provides 3 modes: insert, command and repeat. Command mode
+;; KEYAMP provides 3 modes: insert, command and repeat. Command mode
 ;; based on persistent transient keymap. Repeat mode adds transient
 ;; remaps on top of command mode for command chains easy repeat during
 ;; screen positioning, cursor move and editing. Mode line front space
@@ -566,8 +566,8 @@ is enabled.")
     ("i"  . previous-line)       ("I"  . keyamp-insert-and-self-insert)
     ("o"  . forw-word)           ("O"  . keyamp-insert-and-self-insert)
     ("p"  . jump-mark)           ("P"  . keyamp-insert-and-self-insert)
-    ("["  . alt-buf)             ("{"  . keyamp-insert-and-self-insert)
-    ("]"  . empty-bin)           ("}"  . keyamp-insert-and-self-insert)
+    ("["  . toggle-ibuffer)      ("{"  . keyamp-insert-and-self-insert)
+    ("]"  . neo-select)          ("}"  . keyamp-insert-and-self-insert)
     ("\\" . lock-screen)         ("|"  . keyamp-insert-and-self-insert)
 
     ("h" . beg-of-line)          ("H"  . keyamp-insert-and-self-insert)
@@ -760,7 +760,7 @@ is enabled.")
     ("p"  . mark-defun)
     ("["  . backward-sexp)
     ("]"  . forward-sexp)
-    ("\\" . gptel-menu)
+    ("\\" . empty-bin)
 
     ("h" . page-up-half)
     ("j" . isearch-wback)
@@ -1310,7 +1310,7 @@ keyboard ASCII CHAR."
 
 ;; G acts as leader key.
 (with-sparse-keymap
-  (keyamp--map-leader keymap '(buf-or-bookmark . toggle-ibuffer))
+  (keyamp--map-leader keymap '(toggle-ibuffer . toggle-ibuffer))
   (keyamp--map-escape keymap deactivate-region)
   (keyamp--map-return keymap tools)
   (keyamp--remap keymap
@@ -1640,7 +1640,7 @@ keyboard ASCII CHAR."
       ("d"  . dired-show-metadata)    ("h" . dired-rotate-img-180)
       ("l"  . dired-2png)             (";" . dired-scale-image)
       ("\'" . dired-zip-enc)          ("c" . dired-2jpg)
-      ("/"  . dired-zip)              ("." . dired-unzip))))
+      ("/"  . dired-zip)              ("." . dired-extract))))
 
 (with-eval-after-load 'rect ; sane rectangle controls
   (keyamp--remap rectangle-mark-mode-map
@@ -2643,6 +2643,11 @@ keyboard ASCII CHAR."
     '((keyamp-insert      . speedbar-toggle-line-expansion)
       (undo               . speedbar-up-directory)
       (del-back           . speedbar-edit-line))))
+
+(with-eval-after-load 'neotree
+  (keyamp--remap neotree-mode-map
+    '((keyamp-insert . neotree-ret)
+      (del-back      . neotree-quick-look))))
 
 (with-eval-after-load 'calendar
   (keyamp--remap calendar-mode-map

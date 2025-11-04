@@ -96,12 +96,13 @@
      ((eq major-mode 'gnus-group-mode)
       (setq this-command 'gnus-topic-prev)
       (gnus-topic-prev))
-     (t (if (equal last-command-keys "t") ; else SPC
-            (progn
-              (setq this-command 'page-up-half)
-              (page-up-half))
-          (setq this-command 'beg-of-block)
-          (beg-of-block)))))
+     (t
+      (if (equal last-command-keys "t") ; else SPC
+          (progn
+            (setq this-command 'page-up-half)
+            (page-up-half))
+        (setq this-command 'beg-of-block)
+        (beg-of-block)))))
    (t (command-execute 'previous-line)
       (when (eq last-command 'down-line)
         (before-last-command))))
@@ -129,18 +130,20 @@
      ((eq major-mode 'gnus-group-mode)
       (setq this-command 'gnus-topic-next)
       (gnus-topic-next))
-     (t (if (equal last-command-keys "d") ; else DEL
-            (progn
-              (setq this-command 'page-dn-half)
-              (page-dn-half))
-          (setq this-command 'end-of-block)
-          (end-of-block)))))
-   (t (command-execute 'next-line)
-      (when (and (eq major-mode 'gnus-summary-mode)
-                 (> (line-number-at-pos) 2))
-        (command-execute 'next-line)) ; double next line
-      (when (eq last-command 'up-line)
-        (before-last-command))))
+     (t
+      (if (equal last-command-keys "d") ; else DEL
+          (progn
+            (setq this-command 'page-dn-half)
+            (page-dn-half))
+        (setq this-command 'end-of-block)
+        (end-of-block)))))
+   (t
+    (command-execute 'next-line)
+    (when (and (eq major-mode 'gnus-summary-mode)
+               (> (line-number-at-pos) 2))
+      (command-execute 'next-line)) ; double next line
+    (when (eq last-command 'up-line)
+      (before-last-command))))
   (setq last-command-keys (this-command-keys)))
 
 (defun up-line-rev ()
@@ -154,8 +157,9 @@
        ((eq major-mode 'gnus-group-mode)
         (setq this-command 'gnus-topic-prev)
         (gnus-topic-prev))
-       (t (setq this-command 'up-line)
-          (up-line)))
+       (t
+        (setq this-command 'up-line)
+        (up-line)))
     (command-execute 'previous-line)
     (when (eq last-command 'down-line-rev)
       (before-last-command)))
@@ -183,8 +187,9 @@ and so does the other one."
          ((eq major-mode 'gnus-group-mode)
           (setq this-command 'gnus-topic-next)
           (gnus-topic-next))
-         (t (setq this-command 'down-line)
-            (down-line)))
+         (t
+          (setq this-command 'down-line)
+          (down-line)))
       (command-execute 'next-line)
       (when (and (eq major-mode 'gnus-summary-mode)
                  (> (line-number-at-pos) 2))
@@ -788,7 +793,8 @@ and `right-brackets'."
 (defun fchar ()
   "Forward char."
   (interactive)
-  (if rectangle-mark-mode
+  (if (and rectangle-mark-mode
+           (not (eq major-mode 'vterm-mode)))
       (execute-kbd-macro (kbd "C-f")) ; wierd C forward-char started go new line
     (if (equal before-last-command this-command)
         (progn
@@ -3372,7 +3378,7 @@ and reverse-search-history in bashrc."
           (ibuffer)))
       (condition-case nil
           (ibuffer-jump-to-buffer buf)
-        ;; magic number
+        ;; Magic number
         (error (ibuffer-forward-filter-group 4))))))
 
 (defun ibuffer-select-group ()
@@ -3941,6 +3947,15 @@ Marginalia annotation support."
       ((eq system-type 'windows-nt) "pwsh.exe -Command [guid]::NewGuid().toString()")
       ((eq system-type 'darwin) "uuidgen | tr '[:upper:]' '[:lower:]'")
       ((eq system-type 'gnu/linux) "uuidgen"))))))
+
+(defun reverse-string ()
+  "Read string from minibuffer and reverse."
+  (interactive)
+  (message
+   (concat
+    (reverse
+     (string-to-list
+      (read-string "Reverse string: "))))))
 
 (provide 'keycom)
 
