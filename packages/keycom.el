@@ -793,18 +793,15 @@ and `right-brackets'."
 (defun fchar ()
   "Forward char."
   (interactive)
-  (if (and rectangle-mark-mode
-           (not (eq major-mode 'vterm-mode)))
-      (execute-kbd-macro (kbd "C-f")) ; wierd C forward-char started go new line
-    (if (equal before-last-command this-command)
-        (progn
-          (command-execute 'forward-char)
-          (when (region-active-p)
-            (setq this-command 'deactivate-region)
-            (command-execute 'deactivate-region)))
-      (command-execute 'forward-char)
-      (when (eq last-command 'bchar)
-        (before-last-command)))))
+  (if (equal before-last-command this-command)
+      (progn
+        (command-execute 'forward-char)
+        (when (region-active-p)
+          (setq this-command 'deactivate-region)
+          (command-execute 'deactivate-region)))
+    (command-execute 'forward-char)
+    (when (eq last-command 'bchar)
+      (before-last-command))))
 
 (defun activate-region ()
   "Select region. If region active, then exchange point and mark."
@@ -1008,7 +1005,7 @@ is a matching one before it.
 What char is considered bracket or quote is determined by current syntax table."
   (if (and (eq major-mode 'python-ts-mode)
            (looking-back "\\s\"" 1))
-      (progn ; crazy shit with quotes - go to prev quote and then del cause sexp moves wrong
+      (progn ; Crazy shit with quotes - go to prev quote and then del cause sexp moves wrong
         (backward-char 1)
         (let ((skipChars (concat "^\"`'" (mapconcat #'identity brackets ""))))
           (skip-chars-backward skipChars)
@@ -3956,6 +3953,16 @@ Marginalia annotation support."
     (reverse
      (string-to-list
       (read-string "Reverse string: "))))))
+
+(defun reverse-region (start end)
+  "Reverse the region between point and mark."
+  (interactive "*r")
+  (goto-char end)
+  (let ((p end))
+    (while (> p start)
+      (insert (char-after (setq p (1- p))))))
+  (delete-region start end)
+  (goto-char start))
 
 (provide 'keycom)
 

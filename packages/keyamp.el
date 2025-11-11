@@ -1652,7 +1652,9 @@ keyboard ASCII CHAR."
       (copy-to-register    . copy-rectangle-to-register)
       (toggle-comment      . rectangle-number-lines)
       (cut-line            . clear-rectangle)
-      (clean-whitespace    . delete-whitespace-rectangle))))
+      (clean-whitespace    . delete-whitespace-rectangle)
+      (bchar               . rectangle-backward-char)
+      (fchar               . rectangle-forward-char))))
 
 (with-eval-after-load 'ibuf-ext
   (keyamp--map ibuffer-mode-map '(("<double-mouse-1>" . ibuffer-visit-buffer)))

@@ -345,6 +345,33 @@
           "from": {
             "key_code": "spacebar",
             "modifiers": {
+              "mandatory": [
+                "shift"
+              ],
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_unless",
+              "file_paths": [
+                "/Emacs"
+              ]
+            }
+          ],
+          "to": [
+            {
+              "key_code": "tab"
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "spacebar",
+            "modifiers": {
               "optional": [
                 "any"
               ]
@@ -392,6 +419,9 @@
                 }
               }
             ]
+          },
+          "parameters": {
+            "basic.to_delayed_action_delay_milliseconds": 200
           }
         },
         {
@@ -503,6 +533,36 @@
           "to": [
             {
               "key_code": "delete_or_backspace"
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "left_command",
+            "modifiers": {
+              "mandatory": [
+                "shift"
+              ],
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_unless",
+              "file_paths": [
+                "/Emacs"
+              ]
+            }
+          ],
+          "to": [
+            {
+              "key_code": "tab",
+              "modifiers": [
+                "shift"
+              ]
             }
           ]
         },
@@ -6797,6 +6857,11 @@
               "modifiers": [
                 "command"
               ]
+            },
+            {
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              }
             }
           ]
         },
@@ -6831,6 +6896,11 @@
               "modifiers": [
                 "command"
               ]
+            },
+            {
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              }
             }
           ]
         },
@@ -6851,7 +6921,7 @@
           ],
           "to_if_held_down": [
             {
-              "shell_command": "open -a 'Толк'",
+              "shell_command": "open -a 'Thorium'",
               "repeat": false,
               "halt": true
             }
@@ -8018,12 +8088,12 @@
       ]
     },
     {
-      "description": "f15",
+      "description": "f16",
       "manipulators": [
         {
           "type": "basic",
           "from": {
-            "key_code": "f15",
+            "key_code": "f16",
             "modifiers": {
               "optional": [
                 "any"
@@ -8061,7 +8131,7 @@
         {
           "type": "basic",
           "from": {
-            "key_code": "f15",
+            "key_code": "f16",
             "modifiers": {
               "optional": [
                 "any"
@@ -8097,7 +8167,7 @@
         {
           "type": "basic",
           "from": {
-            "key_code": "f15",
+            "key_code": "f16",
             "modifiers": {
               "optional": [
                 "any"
@@ -8127,12 +8197,12 @@
       ]
     },
     {
-      "description": "f16",
+      "description": "f15",
       "manipulators": [
         {
           "type": "basic",
           "from": {
-            "key_code": "f16",
+            "key_code": "f15",
             "modifiers": {
               "optional": [
                 "any"
@@ -8179,7 +8249,7 @@
         {
           "type": "basic",
           "from": {
-            "key_code": "f16",
+            "key_code": "f15",
             "modifiers": {
               "optional": [
                 "any"
@@ -8226,7 +8296,7 @@
         {
           "type": "basic",
           "from": {
-            "key_code": "f16",
+            "key_code": "f15",
             "modifiers": {
               "optional": [
                 "any"
