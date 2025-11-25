@@ -5,7 +5,7 @@
 ;;          __   _____   __
 ;;         |__| |_____| |__|
 ;;
-;; IDE workflow with ordinary on-screen keyboard
+;; IDE workflow with common virtual keyboard
 
 ;;; Commentary:
 
@@ -294,8 +294,8 @@ executing kbd macro."
                        (lambda (&rest _) "auto repeat"
                          (when (and (keyamp-unless-kbd-macro)
                                     (or (eq real-this-command 'repeat)
-                                        (eq this-command 'kill-region) ; exception
-                                        (eq this-command 'undo) ; exception
+                                        (eq this-command 'kill-region) ; Exception
+                                        (eq this-command 'undo) ; Exception
                                         (eq this-command ,(list 'quote cmd))))
                            (when (and ,CommandMode
                                       keyamp-insert-p)
@@ -882,7 +882,8 @@ is enabled.")
   (keyamp--map-leader keymap '(isearch-yank-kill . isearch-ring-retreat))
   (keyamp--map-return keymap isearch-direction-switch)
   (keyamp--map keymap '((keyamp-sret . isearch-forward-regexp) ("n" . save-buffer-isearch-cancel)))
-  (keyamp--map-tab keymap isearch-double-back) ; Repeat backward
+  (keyamp--map-tab keymap isearch-forw) ; Repeat prev search forward
+  (keyamp--map-backtab keymap isearch-double-back) ; Repeat prev search backward
   (keyamp--hook keymap '(isearch-mode-hook) nil nil :repeat))
 
 ;; Hit TAB to repeat after typing in search string and set following transient
@@ -958,7 +959,7 @@ is enabled.")
   (interactive)
   (let ((cmd (keymap-lookup overriding-local-map
                             (if (display-graphic-p) "<return>" "RET"))))
-    (keyamp-command-execute ; double remap
+    (keyamp-command-execute ; Double remap
      (if (or (equal cmd 'keyamp-insert)
              (null cmd))
          'keyamp-escape
@@ -1642,7 +1643,7 @@ keyboard ASCII CHAR."
       ("\'" . dired-zip-enc)          ("c" . dired-2jpg)
       ("/"  . dired-zip)              ("." . dired-extract))))
 
-(with-eval-after-load 'rect ; sane rectangle controls
+(with-eval-after-load 'rect ; Sane rectangle controls
   (keyamp--remap rectangle-mark-mode-map
     '((keyamp-insert       . string-rectangle)
       (insert-space-before . open-rectangle)
@@ -2136,7 +2137,7 @@ keyboard ASCII CHAR."
     (keyamp--remap keymap '((del-back . vterm-shell-vi-fdel)))
     (keyamp--set keymap '(vterm-shell-vi-fdel)))
 
-  ;; Config reference:
+  ;; Config Reference:
 
   ;;;;;; .inputrc
   ;; $if mode=vi
@@ -2185,10 +2186,10 @@ keyboard ASCII CHAR."
   ;; bindkey -M vicmd "^?" up-line-or-history
   ;; bindkey -M vicmd "e" undo
 
-  ;;;;;; Tmux copy mode vi
+  ;;;;;; tmux copy mode vi
   (with-sparse-keymap
     (keyamp--map-leader keymap '(vterm-tmux-copy-self-insert . vterm-tmux-copy-self-insert))
-    (keyamp--map-return keymap vterm-shell-vi-cmd) ; quit and sync prompt position
+    (keyamp--map-return keymap vterm-shell-vi-cmd) ; Quit and sync prompt position
     (keyamp--remap keymap
       '((previous-line   . vterm-tmux-copy-self-insert)
         (bchar           . vterm-tmux-copy-self-insert)
@@ -2238,7 +2239,7 @@ keyboard ASCII CHAR."
   ;; bind -T copy-mode-vi Tab send-keys -X search-reverse
   ;; bind -T copy-mode-vi BTab send-keys -X search-again
 
-  ;;;;;; Vi mode - keymap for TUI
+  ;;;;;; vi mode - keymap for TUI
   (with-sparse-keymap
     (keyamp--map-leader keymap '(vterm-vi-self-insert . vterm-vi-self-insert))
     (keyamp--map-escape keymap vterm-vi-escape)
@@ -3057,8 +3058,7 @@ keyboard ASCII CHAR."
     vterm-vi               vterm-vi-self-insert          vterm-vi-escape
     vterm-shell-vi-fdel    vterm-left                    vterm-right
     vterm-up               vterm-down
-    copy-to-r1             append-to-r1
-    vterm-tmux-next-window vterm-tmux-prev-window)
+    copy-to-r1             append-to-r1)
   "List of commands to blink io after.")
 
 (defconst keyamp-insert-commands
@@ -3222,6 +3222,10 @@ insert cancel the timer.")
       (cond
        (isearch-mode
         (isearch-cancel-clean))
+       ((eq major-mode 'vterm-mode)
+        (vterm-send-backspace)
+        (vterm-send-backspace)
+        (keyamp-command-execute 'keyamp-command))
        ((minibufferp)
         (keyamp-minibuffer-quit))
        (t
@@ -3235,8 +3239,9 @@ insert cancel the timer.")
       (setq before-last-command-event nil))))
 
 (add-hook 'post-self-insert-hook 'keyamp-SPC-SPC)
-(advice-add-macro '(isearch-printing-char minibuffer-complete-word)
-                  :after 'keyamp-SPC-SPC)
+(advice-add-macro
+ '(isearch-printing-char minibuffer-complete-word vterm--self-insert)
+ :after 'keyamp-SPC-SPC)
 
 (defun keyamp-SPC-DEL (&rest _)
   "Insert fast SPC DEL to move char forward while in insert mode."

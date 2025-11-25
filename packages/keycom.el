@@ -13,11 +13,10 @@
 (require 'rect)
 
 
-
 ;; Cursor movement
 
 (defun get-bounds-of-block ()
-  "Return the boundary (START . END) of current block."
+  "Return the boundary (BEG . END) of current block."
   (let (p1 p2 (blankRegexp "\n[ \t]*\n"))
     (save-excursion
       (setq p1 (if (re-search-backward blankRegexp nil 1)
@@ -2531,7 +2530,7 @@ for elisp files."
             (if (region-active-p)
                 (buffer-substring-no-properties (region-beginning) (region-end))
               (let ((p0 (point)) p1 p2
-                    (pathStops "^  \t\n\"`'“”|[]{}<>\\"))
+                    (pathStops "^  \t\n\"`'“”[]{}<>\\"))
                 (skip-chars-backward pathStops)
                 (setq p1 (point))
                 (goto-char p0)
@@ -2555,36 +2554,44 @@ for elisp files."
         (if (string-match-p "\\`https?://" path)
             (if (string-match-p "\\`https?://www.youtube.com" path)
                 (movie path)
-              (browse-url path))
-          (progn
-            (if (string-match "#" path)
-                (let ((fpath (substring path 0 (match-beginning 0)))
-                      (fractPart (substring path (1+ (match-beginning 0)))))
+              (if (catch 'matched
+                    (dolist (pattern browse-url-ff-patterns)
+                      (when (string-match-p pattern path)
+                        (throw 'matched t)))
+                    nil)
+                  (let ((browse-url-browser-function
+                         (lambda (url &optional _new-window)
+                           (start-process "" nil "open" "-a" "Firefox" url))))
+                    (browse-url path))
+                (browse-url path)))
+          (if (string-match "#" path)
+              (let ((fpath (substring path 0 (match-beginning 0)))
+                    (fractPart (substring path (1+ (match-beginning 0)))))
+                (if (file-exists-p fpath)
+                    (progn
+                      (find-file fpath)
+                      (goto-char (point-min))
+                      (search-forward fractPart))
+                  (when (y-or-n-p (format "No file %s. Create?" fpath))
+                    (find-file fpath))))
+            (if (string-match "^\\`\\(.+?\\):\\([0-9]+\\)\\(:[0-9]+\\)?\\'" path)
+                (let ((fpath (match-string-no-properties 1 path))
+                      (lineNum (string-to-number (match-string-no-properties 2 path))))
                   (if (file-exists-p fpath)
                       (progn
                         (find-file fpath)
                         (goto-char (point-min))
-                        (search-forward fractPart))
+                        (forward-line (1- lineNum)))
                     (when (y-or-n-p (format "No file %s. Create?" fpath))
                       (find-file fpath))))
-              (if (string-match "^\\`\\(.+?\\):\\([0-9]+\\)\\(:[0-9]+\\)?\\'" path)
-                  (let ((fpath (match-string-no-properties 1 path))
-                        (lineNum (string-to-number (match-string-no-properties 2 path))))
-                    (if (file-exists-p fpath)
-                        (progn
-                          (find-file fpath)
-                          (goto-char (point-min))
-                          (forward-line (1- lineNum)))
-                      (when (y-or-n-p (format "No file %s. Create?" fpath))
-                        (find-file fpath))))
-                (if (file-exists-p path)
-                    (if (and (> (length path) 0)
-                             (not (member path '("//" "/" "." ".." ":"))))
-                        (find-file path)
-                      (describe-foo-at-point-error))
-                  (if (file-exists-p (concat path ".el"))
-                      (find-file (concat path ".el"))
-                    (describe-foo-at-point-error)))))))))))
+              (if (file-exists-p path)
+                  (if (and (> (length path) 0)
+                           (not (member path '("//" "/" "." ".." ":"))))
+                      (find-file path)
+                    (describe-foo-at-point-error))
+                (if (file-exists-p (concat path ".el"))
+                    (find-file (concat path ".el"))
+                  (describe-foo-at-point-error))))))))))
 
 (defun url-paste-and-go ()
   "Go to URL from system clipboard."
@@ -3954,21 +3961,21 @@ Marginalia annotation support."
      (string-to-list
       (read-string "Reverse string: "))))))
 
-(defun reverse-region (start end)
+(defun reverse-region (beg end)
   "Reverse the region between point and mark."
   (interactive "*r")
   (goto-char end)
   (let ((p end))
-    (while (> p start)
+    (while (> p beg)
       (insert (char-after (setq p (1- p))))))
-  (delete-region start end)
-  (goto-char start))
+  (delete-region beg end)
+  (goto-char beg))
 
-(defun enumerate-lines (start end)
+(defun enumerate-lines (beg end)
   "Enumerate lines in region."
   (interactive "r")
   (save-excursion
-    (goto-char start)
+    (goto-char beg)
     (let ((n 1))
       (while (< (point) end)
         (beginning-of-line)
