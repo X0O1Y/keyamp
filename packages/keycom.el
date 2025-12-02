@@ -96,7 +96,7 @@
       (setq this-command 'gnus-topic-prev)
       (gnus-topic-prev))
      (t
-      (if (equal last-command-keys "t") ; else SPC
+      (if (equal last-command-keys "t") ; Else SPC
           (progn
             (setq this-command 'page-up-half)
             (page-up-half))
@@ -115,7 +115,7 @@
     (setq this-command 'forw-word-repeat)
     (forw-word-repeat))
    ((or (equal before-last-command 'previous-line)
-        (equal before-last-command 'dired-previous-line)) ; before select-word
+        (equal before-last-command 'dired-previous-line)) ; Before select-word
     (setq this-command 'up-line-rev)
     (up-line-rev))
    ((equal before-last-command 'fchar)
@@ -130,7 +130,7 @@
       (setq this-command 'gnus-topic-next)
       (gnus-topic-next))
      (t
-      (if (equal last-command-keys "d") ; else DEL
+      (if (equal last-command-keys "d") ; Else DEL
           (progn
             (setq this-command 'page-dn-half)
             (page-dn-half))
@@ -140,7 +140,7 @@
     (command-execute 'next-line)
     (when (and (eq major-mode 'gnus-summary-mode)
                (> (line-number-at-pos) 2))
-      (command-execute 'next-line)) ; double next line
+      (command-execute 'next-line)) ; Double next line
     (when (eq last-command 'up-line)
       (before-last-command))))
   (setq last-command-keys (this-command-keys)))
@@ -169,7 +169,7 @@
 down line if held down (triple press), but each leader might change direction,
 and so does the other one."
   (interactive)
-  (when (region-active-p) ; triple press
+  (when (region-active-p) ; Triple press
     (deactivate-mark)
     (double-jump-back)
     (command-execute 'next-line))
@@ -349,7 +349,7 @@ and so does the other one."
 (defun isearch-update-ring-force ()
   "Force push string to isearch ring."
   (unless (zerop (length isearch-string))
-    ;; update the ring data
+    ;; Update the ring data
     (isearch-update-ring isearch-string isearch-regexp)))
 
 (defun isearch-cancel-clean ()
@@ -456,7 +456,7 @@ Save point to register 6 before repeated call."
   (let ((p (point)))
     (if visual-line-mode
         (beginning-of-visual-line)
-      (if (eq major-mode 'eshell-mode) ; custom eshell bol
+      (if (eq major-mode 'eshell-mode) ; Custom eshell bol
           (if (= (line-number-at-pos) (count-lines (point-min) (point-max)))
               (progn
                 (beginning-of-line)
@@ -508,7 +508,7 @@ Save point to register 6 before repeated call."
 switch via K to half page move."
   (interactive)
   (if (equal before-last-command this-command)
-      (if (equal last-command-keys "t") ; else SPC
+      (if (equal last-command-keys "t") ; Else SPC
           (progn
             (setq this-command 'page-up-half)
             (page-up-half))
@@ -524,7 +524,7 @@ switch via K to half page move."
   "Back block. For reverse transient."
   (interactive)
   (if (equal before-last-command this-command)
-      (if (equal last-command-keys "t") ; else SPC
+      (if (equal last-command-keys "t") ; Else SPC
           (progn
             (setq this-command 'page-up-half)
             (page-up-half))
@@ -541,7 +541,7 @@ switch via K to half page move."
 switch via I to half page move."
   (interactive)
   (if (equal before-last-command this-command)
-      (if (equal last-command-keys "d") ; else DEL
+      (if (equal last-command-keys "d") ; Else DEL
           (progn
             (setq this-command 'page-dn-half)
             (page-dn-half))
@@ -557,7 +557,7 @@ switch via I to half page move."
   "Forw block. For reverse transient."
   (interactive)
   (if (equal before-last-command this-command)
-      (if (equal last-command-keys "d") ; else DEL
+      (if (equal last-command-keys "d") ; Else DEL
           (progn
             (setq this-command 'page-dn-half)
             (page-dn-half))
@@ -647,15 +647,15 @@ The list of brackets to jump to is defined by `left-brackets'
 and `right-brackets'."
   (interactive)
   (cond
-   ;; see equal sign mapping for russian, so because of conflict
+   ;; See equal sign mapping for russian, so because of conflict
    ;; while for Engram it is free and can be remapped
    ((equal "%" (this-command-keys))
     (setq this-command 'text-scale-increase) (text-scale-increase 1))
-   ;; next allows to call self insert if not russian
+   ;; Next allows to call self insert if not russian
    ((and (equal "=" (this-command-keys))
          (boundp 'frame-title-ru) (null frame-title-ru))
     (self-insert-command 1))
-   ;; base scenario
+   ;; Base scenario
    ((nth 3 (syntax-ppss)) (backward-up-list 1 'ESCAPE-STRINGS 'NO-SYNTAX-CROSSING))
    (t (cond
        ((eq (char-after) ?\") (forward-sexp))
@@ -701,7 +701,7 @@ and `right-brackets'."
              (not (or (eq last-command 'select-word)
                       (eq last-command 'back-word)
                       (eq last-command 'jump-mark))))
-    (push-mark (point) t)) ; virtual leader
+    (push-mark (point) t)) ; Virtual leader
   (if (equal before-last-command this-command)
       (progn
         (backward-word)
@@ -729,7 +729,7 @@ and `right-brackets'."
   (when (and (member (this-command-keys) (list "w" [?щ]))
              (not (or (eq last-command 'select-word)
                       (eq last-command 'forw-word))))
-    (push-mark (point) t)) ; virtual leader
+    (push-mark (point) t)) ; Virtual leader
   (if (equal before-last-command this-command)
       (progn
         (forward-word)
@@ -916,7 +916,7 @@ When `universal-argument' is called first, copy whole buffer
     (if (region-active-p)
         (progn
           (copy-region-as-kill (region-beginning) (region-end))
-          (setq this-command 'copy)) ; no repeat
+          (setq this-command 'copy)) ; No repeat
       (if (eq last-command this-command)
           (unless (eobp)
             (kill-append "\n" nil)
@@ -929,7 +929,7 @@ When `universal-argument' is called first, copy whole buffer
             (unless (eq (char-before) 10)
               (copy-region-as-kill (line-beginning-position) (line-end-position))
               (end-of-line))
-          ;; animate line first selection
+          ;; Animate line first selection
           (if (eq major-mode 'org-mode) ; TODO: exception, some issue
               (progn
                 (copy-region-as-kill (line-beginning-position) (line-end-position))
@@ -1243,19 +1243,19 @@ Cycle in this order: Init Caps, ALL CAPS, all lower. Calculates initial state."
     (save-restriction
       (narrow-to-region p1 p2)
       (let ((case-fold-search nil))
-        ;; after period or question mark or exclamation
+        ;; After period or question mark or exclamation
         (goto-char (point-min))
         (while (re-search-forward "\\(\\.\\|\\?\\|!\\)[ \n]+ *\\([a-zа-я]\\)" nil 1)
           (upcase-region (match-beginning 2) (match-end 2))
           (overlay-put (make-overlay
                         (match-beginning 2) (match-end 2)) 'face 'highlight))
-        ;; after a blank line, after a bullet, or beginning of buffer
+        ;; After a blank line, after a bullet, or beginning of buffer
         (goto-char (point-min))
         (while (re-search-forward "\\(\\`\\|• \\|\n\n\\)\\([a-zа-я]\\)" nil 1)
           (upcase-region (match-beginning 2) (match-end 2))
           (overlay-put (make-overlay
                         (match-beginning 2) (match-end 2)) 'face 'highlight))
-        ;; for HTML. first letter after tag
+        ;; For HTML. first letter after tag
         (when (eq major-mode 'html-mode)
           (goto-char (point-min))
           (while
@@ -1342,8 +1342,8 @@ one space or newline at each step, till no more white space."
   (if buffer-read-only
       (setq this-command 'ignore)
     (let* ((eol-count 0) (p0 (point))
-           p1 ; whitespace begin
-           p2 ; whitespace end
+           p1 ; Whitespace begin
+           p2 ; Whitespace end
            (charBefore (char-before)) (charAfter (char-after))
            (space-neighbor-p (or (eq charBefore 32) (eq charBefore 9)
                                  (eq charAfter 32) (eq charAfter 9))))
@@ -1822,7 +1822,7 @@ See also: `paste-from-r1', `copy-to-register'."
       (goto-char (point-min)))
     (apply fun r)))
 
-;; make replace from beginning of the buffer
+;; Make replace from beginning of the buffer
 (advice-add 'query-replace :around #'beg-of-buffer)
 (advice-add 'query-replace-regexp :around #'beg-of-buffer)
 
@@ -2032,33 +2032,33 @@ including bracket, else select current word."
    ((= (point) (point-min))
     (push-mark (point) t t)
     (skip-chars-forward "-_a-zа-яA-ZА-Я0-9"))
-   ((looking-at "\\s(") ; left bracket
+   ((looking-at "\\s(") ; Left bracket
     (mark-sexp))
-   ((looking-back ")" (- (point) 1)) ; right bracket
+   ((looking-back ")" (- (point) 1)) ; Right bracket
     (goto-match-br)
     (mark-sexp))
-   ((looking-at "\\s)") ; right bracket
+   ((looking-at "\\s)") ; Right bracket
     (backward-up-list)
     (mark-sexp))
-   ((looking-back "\"" (max (- (point) 1) (point-min))) ; string quote back
+   ((looking-back "\"" (max (- (point) 1) (point-min))) ; String quote back
     (goto-match-br)
     (mark-sexp))
-   ((looking-at "\\s \"") ; string quote after space
+   ((looking-at "\\s \"") ; String quote after space
     (mark-sexp))
    ((looking-back "[-_a-zа-яA-ZА-Я0-9]"
-                  (max (- (point) 1) (point-min))) ; left is word or symbol
+                  (max (- (point) 1) (point-min))) ; Left is word or symbol
     (skip-chars-backward "-_a-zа-яA-ZА-Я0-9")
     (push-mark)
     (skip-chars-forward "-_a-zа-яA-ZА-Я0-9")
     (setq mark-active t))
    ((and (looking-at "[:blank:]")
          (prog2 (backward-char)
-             (looking-at "[:blank:]") (forward-char))) ; left and right both space
+             (looking-at "[:blank:]") (forward-char))) ; Left and right both space
     (skip-chars-backward "[:blank:]") (push-mark (point) t t)
     (skip-chars-forward "[:blank:]"))
    ((and (eq major-mode 'js-mode)
          (looking-back "}" (- (point) 1)))
-    (bchar) ; no time to figure it out
+    (bchar) ; No time to figure it out
     (select-word))
    (t
     (mark-sexp)
@@ -2479,7 +2479,7 @@ Similar to `kill-buffer', with the following addition:
           (if (y-or-n-p (format "Buffer %s modified; Save?" (buffer-name)))
               (org-edit-src-save)
             (set-buffer-modified-p nil)))
-        ;; save to a list of closed buffer
+        ;; Save to a list of closed buffer
         (when (buffer-file-name)
           (setq recently-closed-buffers
                 (cons (cons (buffer-name) (buffer-file-name))
@@ -2851,7 +2851,7 @@ When called in Emacs Lisp, if Fname is given, open that."
     (when doIt
       (cond
        ((and (string-equal major-mode 'dired-mode)
-             (= 1 (length fileList)) ; single video file
+             (= 1 (length fileList)) ; Single video file
              (member (file-name-extension
                       (downcase (file-truename (nth 0 fileList))))
                      video-extensions))
@@ -3256,20 +3256,20 @@ and reverse-search-history in bashrc."
 (defun vterm-shell-vi-push-right (Key)
   "Send key to shell prompt vi cmd mode."
   (let ((x (point)))
-    (vterm-send-key Key)        ; workaround vi go after last char
-    (sit-for vterm-timer-delay) ; delay to sync
-    (when (and (eq x (point))   ; point did not move
-               (if-let ((p1 (1+ (point))) ; all blank after next char until eol
+    (vterm-send-key Key)        ; Workaround vi go after last char
+    (sit-for vterm-timer-delay) ; Delay to sync
+    (when (and (eq x (point))   ; Point did not move
+               (if-let ((p1 (1+ (point))) ; All blank after next char until eol
                         (p2 (line-end-position))
                         ((>= p2 p1)))
                    (string-blank-p (buffer-substring-no-properties p1 p2))
                  t)
-               (let ((p1 (1- (point))) ; not blank before prev char
+               (let ((p1 (1- (point))) ; Not blank before prev char
                      (p2 (line-end-position)))
                  (not (string-blank-p (buffer-substring-no-properties p2 p1)))))
-      (vterm-send-key (kbd "C-m")) ; so activate insert
-      (vterm-send-key "<right>")   ; go after last char
-      (vterm-send-key (kbd "SPC")) ; add space and back to cmd mode
+      (vterm-send-key (kbd "C-m")) ; So activate insert
+      (vterm-send-key "<right>")   ; Go after last char
+      (vterm-send-key (kbd "SPC")) ; Add space and back to cmd mode
       (vterm-send-key (kbd "^[")))))
 
 (defun vterm-shell-vi-l ()
@@ -3300,6 +3300,7 @@ and reverse-search-history in bashrc."
 (defun vterm-vi ()
   "Activate vi mode transient."
   (interactive)
+  (blink-cursor-mode 1)
   (vterm-reset-cursor-point))
 
 (defun vterm-vi-self-insert ()
@@ -3339,7 +3340,7 @@ and reverse-search-history in bashrc."
 
 (defun vterm-reset-cursor-shape ()
   "Kill local cursor type variable in order to restore cursor change shape."
-  (when (eq major-mode 'vterm-mode) ; sometimes binds and hinders indicate
+  (when (eq major-mode 'vterm-mode) ; Sometimes binds and hinders indicate
     (kill-local-variable 'cursor-type)))
 
 (advice-add 'vterm-reset-cursor-point :after #'vterm-reset-cursor-shape)
@@ -3440,7 +3441,7 @@ and reverse-search-history in bashrc."
   (cond
    ((eq major-mode 'org-mode) (org-todo))
    ((eq major-mode 'org-agenda-mode)
-    (if (org-get-at-bol 'org-marker) ; avoid error
+    (if (org-get-at-bol 'org-marker) ; Avoid error
         (org-agenda-todo)
       (novel)))
    (t (setq this-command 'ignore)
@@ -3452,7 +3453,7 @@ and reverse-search-history in bashrc."
 (defun toggle-gnus ()
   "Toggle gnus."
   (interactive)
-  (if (and (boundp onlinep) onlinep) ; need own online predicate
+  (if (and (boundp onlinep) onlinep) ; Need own online predicate
       (progn
         (when (display-graphic-p)
           (make-frame-command)
@@ -3527,13 +3528,13 @@ This is toy version. Target is async version over comint not included here."
           (insert
            (shell-command-to-string (format "sqlcmd -S %s -Q \"%s\"" conn query)))))
        ((string-equal sql-type "Postgres")
-        (if (eq system-type 'windows-nt) ; use temp file
+        (if (eq system-type 'windows-nt) ; Use temp file
             (let* ((localapp (string-replace "\\" "/" (getenv "localappdata")))
                    (file (format "%s%s-%x.sql" (concat localapp "/Temp/")
                                  (format-time-string "%Y%m%d-%H%M%S")
                                  (random #xfffff))))
               (with-temp-buffer
-                (prin1 query (current-buffer)) ; with quotes
+                (prin1 query (current-buffer)) ; With quotes
                 (write-region (1+ (point-min)) (1- (point-max)) file nil 'quiet))
               (insert
                (shell-command-to-string (format "psql --file \"%s\" --quiet %s" file conn))))
@@ -3541,9 +3542,9 @@ This is toy version. Target is async version over comint not included here."
           (insert
            (shell-command-to-string (format "psql --command \"%s\" --quiet %s" query conn)))))
        ((string-equal sql-type "SQLite")
-        ;; attach database can't parse ~
+        ;; Attach database can't parse ~
         (setq query (replace-regexp-in-string "~" (getenv "HOME") query))
-        ;; way to send attach and dot commands along with sql query
+        ;; Way to send attach and dot commands along with sql query
         (let ((res (shell-command-to-string
                     (format "sqlite3 <<EOF\n%s\nEOF" query))))
           (if (zerop (length res))
@@ -3701,7 +3702,9 @@ Use as around advice e.g. for mouse left click after double click."
       (translate)
     (when (use-region-p)
       (deactivate-mark))
-    (select-word)))
+    (if (eq this-command last-command)
+        (select-block)
+      (select-word))))
 
 (defun calendar-split ()
   "Split calendar."
@@ -3801,7 +3804,7 @@ Use as around advice e.g. for mouse left click after double click."
    ((buffer-file-name)
     (if (buffer-modified-p)
         (save-buffer)
-      (setq this-command 'ignore) ; indicate only if modified
+      (setq this-command 'ignore) ; Indicate only if modified
       (command-execute 'ignore)))
    ((string-match (concat "^" new-buffer-prefix "*.") (buffer-name))
     (command-execute 'write-file))
@@ -3842,7 +3845,7 @@ Use as around advice e.g. for mouse left click after double click."
     (unless (characterp char)
       (user-error "%s is not a valid character"
                   (key-description (vector char))))
-    (if (eq char 27) ; escape not inserted
+    (if (eq char 27) ; Escape not inserted
         (ignore)
       (if (> arg 0)
           (if (eq overwrite-mode 'overwrite-mode-binary)
@@ -3982,6 +3985,34 @@ Marginalia annotation support."
         (insert (format "%d. " n))
         (forward-line)
         (setq n (1+ n))))))
+
+(defun split-view ()
+  "Split display on 2x2 windows and select different buffers.
+Click mouse select a window and close the others."
+  (interactive)
+  (when-let (((display-graphic-p))
+             (bufs (seq-filter
+                  (lambda (buf)
+                    (buffer-file-name buf))
+                  (buffer-list))))
+    (when-let ((win (get-buffer-window "*Org Agenda*")))
+      (select-window win)
+      (delete-window))
+    (delete-other-windows)
+    (split-window-below)
+    (split-window-right)
+    (other-window 1)
+    (other-window 1)
+    (split-window-right)
+    (dotimes (i (* 2 2))
+      (select-window (nth i (window-list)))
+      (switch-to-buffer (nth i bufs)))
+    (let ((keymap (make-sparse-keymap)))
+      (keymap-set keymap "<down-mouse-1>"
+                  #'(lambda ()
+                      (interactive)
+                      (run-with-timer 0.1 nil 'delete-other-windows)))
+      (set-transient-map keymap))))
 
 (provide 'keycom)
 

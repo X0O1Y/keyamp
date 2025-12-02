@@ -845,7 +845,7 @@ is enabled.")
 (keyamp--map global-map '(("<f10>" . exec-query) ("<f12>" . keyamp-escape)))
 
 (when (display-graphic-p) ; Mouse
-  (keyamp--map global-map '(("<double-mouse-1>" . select-word) ("<mouse-3>" . mouse-3)))
+  (keyamp--map global-map '(("<double-mouse-1>" . select-quote) ("<mouse-3>" . mouse-3)))
   (advice-add 'mouse-set-point   :around #'lookup-around)
   (advice-add 'mouse-set-point   :before #'scroll-one-pixel)
   (advice-add 'mouse-set-point   :after  #'keyamp-command-if-insert)
@@ -1003,6 +1003,7 @@ is enabled.")
       (del-back            . switch-to-buffer)
       (toggle-comment      . ignore)
       (cut-line            . ignore)
+      (kill-line           . split-view)
       (copy-line           . ignore)
       (paste-or-prev       . tasks)
       (backward-bracket    . dired-jump)
@@ -1154,9 +1155,6 @@ is enabled.")
   (keyamp--map-return keymap keyamp-ret)
   (keyamp--remap keymap '((previous-line . up-line) (next-line . down-line-rev)))
   (keyamp--set keymap '(up-line-rev down-line-rev)))
-
-(with-sparse-keymap ; Dummy
-  (keyamp--set keymap '(beg-of-buf end-of-buf)))
 
 (with-sparse-keymap
   (keyamp--map-leader keymap '(end-of-block . end-of-block-rev))
@@ -2039,9 +2037,9 @@ keyboard ASCII CHAR."
       (del-word            . vterm-shell-vi-cmd)      ; R Sync point or do modify if in transient
       (query-replace       . vterm-vi)                ; SPC R Activate vi mode (TUI)
       (cut-text-block      . vt-conn-reconnect)       ; T
-      (copy-text-block     . vt-sftp)                 ; SPC T
+      (copy-text-block     . vt-sftp-jump)            ; SPC T
       (shrink-whitespaces  . vt-conn-localhost)       ; A
-      (kill-line           . ignore)                  ; SPC A
+      (kill-line           . vt-split-view)           ; SPC A
       (open-line           . vterm-tmux-prev-window)  ; S
       (del-back            . vterm-shell-vi-cmd)      ; D Sync point or do modify if in transient
       (newline             . vterm-tmux-next-window)  ; F
@@ -2055,10 +2053,10 @@ keyboard ASCII CHAR."
       (repeat-command      . prev-vterm-buf)          ; SPC 5
 
       ;; Right half
-      (page-up-half        . vterm-tmux-copy-hpu)  ; DEL H
-      (page-dn-half        . vterm-tmux-copy-hpd)  ; DEL ;
-      (dired-jump          . vt-conn-tramp)        ; DEL M
-      (select-block        . vterm-up-vi-cmd)      ; DEL DEL
+      (page-up-half        . vterm-tmux-copy-hpu)     ; DEL H
+      (page-dn-half        . vterm-tmux-copy-hpd)     ; DEL ;
+      (dired-jump          . vt-conn-tramp)           ; DEL M
+      (select-block        . vterm-up-vi-cmd)         ; DEL DEL
       (back-char           . vterm-left)
       (forw-char           . vterm-right)
       (up-line             . vterm-up)
@@ -2098,7 +2096,7 @@ keyboard ASCII CHAR."
   (with-sparse-keymap
     (keyamp--remap keymap
       '((bchar         . vterm-left) (fchar     . vterm-right)
-        (previous-line . vterm-up)   (next-line . vterm-down)))
+        (previous-line . vterm-up) (next-line . vterm-down)))
     (keyamp--set keymap '(vterm-left vterm-right vterm-up vterm-down)))
 
   ;;;;;; Shell prompt vi cmd mode
@@ -2205,7 +2203,7 @@ keyboard ASCII CHAR."
         (isearch-forward . vterm-tmux-copy-self-insert)))
     (keyamp--set keymap
       '(vterm-tmux-copy     vterm-tmux-copy-self-insert
-        vterm-tmux-copy-hpu vterm-tmux-copy-hpd) :command))
+                            vterm-tmux-copy-hpu vterm-tmux-copy-hpd) :command))
 
   (with-sparse-keymap
     (keyamp--map-return keymap keyamp-ret)
@@ -2951,14 +2949,6 @@ keyboard ASCII CHAR."
                  Info-forward-node                       t
                  Info-prev-reference                     t
                  Info-next-reference                     t
-                 isearch-wback                           t
-                 isearch-wforw                           t
-                 isearch-back                            t
-                 isearch-double-back                     t
-                 isearch-forw                            t
-                 isearch-ring-advance                    t
-                 isearch-ring-retreat                    t
-                 isearch-yank-kill                       t
                  keyamp--hook-indicate                   t
                  minibuffer-previous-completion          t
                  minibuffer-next-completion              t
@@ -2988,9 +2978,6 @@ keyboard ASCII CHAR."
                  vterm-vi-save-quit                      t
                  vterm-vi-quit                           t
                  vterm-up-vi-cmd                         t
-                 vterm-vi                                t
-                 vterm-vi-self-insert                    t
-                 vterm-vi-escape                         t
                  vterm-tmux-copy                         t
                  vterm-tmux-copy-hpu                     t
                  vterm-tmux-copy-hpd                     t
@@ -3179,7 +3166,10 @@ insert cancel the timer.")
 ;; Modes
 
 (defvar keyamp-insert-p t "Non-nil means insert is on.")
-(defvar keyamp--deactivate-command-fun nil)
+(defvar keyamp--deactivate-command-fun nil "Deactivate command mode function.")
+(defconst keyamp-blink-cursor-mode t
+  "Use blink cursor to indicate transient maps like vi or recursive modes like
+ isearch. Disable blink cursor with `keyamp-idle-init'.")
 
 (defun keyamp-command-init ()
   "Set command mode."
@@ -3193,7 +3183,9 @@ insert cancel the timer.")
     (funcall keyamp--deactivate-command-fun))
   (setq keyamp--deactivate-command-fun
         (set-transient-map keyamp-command-map (lambda () t)))
-  (keyamp-indicate-command))
+  (keyamp-indicate-command)
+  (when keyamp-blink-cursor-mode
+    (blink-cursor-mode -1)))
 
 (defun keyamp-insert-init (&rest _)
   "Enter insert mode."
