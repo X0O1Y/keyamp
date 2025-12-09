@@ -3597,10 +3597,12 @@ This checks in turn:
      ((setq sym (variable-at-point))
       (describe-variable sym)))))
 
-(defconst video-extensions '("mkv" "mp4" "avi" "mov" "ts" "mts" "m2ts" "webm" "vob" "aiff")
+(defconst video-extensions
+  '("mkv" "mp4" "avi" "mov" "ts" "mts" "m2ts" "webm" "vob" "aiff")
   "Open these video file extensions with `open-in-external-app'.")
 
-(defconst external-extensions `("mp3" "m4a" "flac" "torrent" "exe" "xlsx" "docx" "dmg")
+(defconst external-extensions
+  '("mp3" "m4a" "flac" "torrent" "exe" "xlsx" "docx" "dmg")
   "Open these file extensions with `open-in-external-app'.")
 
 (setq external-extensions (append external-extensions video-extensions))
@@ -3944,7 +3946,7 @@ Marginalia annotation support."
   (delete-other-windows)
   (split-window-right))
 
-(defun kill-random-uuid ()
+(defun kill-uuid ()
   "Generate and copy UUID to kill ring."
   (interactive)
   (kill-new

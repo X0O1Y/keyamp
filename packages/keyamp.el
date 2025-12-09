@@ -515,8 +515,8 @@ is enabled.")
 (keyamp--map keyamp-map
   '(;; Control sequences as leader prefixes for scripting
     ("C-^" . keyamp-lleader-map) ("C-_" . keyamp-rleader-map)
-    ("C-+" . keyamp-lleader-map) ("C-И" . keyamp-rleader-map) ; russian-computer
-                                 ("C-b" . keyamp-rleader-map) ; hebrew
+    ("C-+" . keyamp-lleader-map) ("C-И" . keyamp-rleader-map) ; Russian-computer
+                                 ("C-b" . keyamp-rleader-map) ; Hebrew
 
     ("<home>"  . beg-of-buf)
     ("<end>"   . end-of-buf)
@@ -761,6 +761,7 @@ is enabled.")
     ("["  . backward-sexp)
     ("]"  . forward-sexp)
     ("\\" . empty-bin)
+    (")"  . empty-bin) ; Corner case for Russian
 
     ("h" . page-up-half)
     ("j" . isearch-wback)
