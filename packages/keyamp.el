@@ -507,6 +507,10 @@ is enabled.")
 
 (define-prefix-command 'keyamp-lleader-map)
 (define-prefix-command 'keyamp-rleader-map)
+(define-prefix-command 'keyamp-script-leader-map)
+
+;; Leader prefix ignores scripting leader
+(keyamp--map-std keyamp-script-leader-map 'ignore)
 
 (defconst keyamp-sret "C-t" "Shift return control sequence.")
 (defconst keyamp-sesc "C-q" "Shift escape control sequence.")
@@ -567,7 +571,7 @@ is enabled.")
     ("o"  . forw-word)           ("O"  . keyamp-insert-and-self-insert)
     ("p"  . jump-mark)           ("P"  . keyamp-insert-and-self-insert)
     ("["  . toggle-ibuffer)      ("{"  . keyamp-insert-and-self-insert)
-    ("]"  . neo-select)          ("}"  . keyamp-insert-and-self-insert)
+    ("]"  . tree-view)           ("}"  . keyamp-insert-and-self-insert)
     ("\\" . lock-screen)         ("|"  . keyamp-insert-and-self-insert)
 
     ("h" . beg-of-line)          ("H"  . keyamp-insert-and-self-insert)
@@ -678,10 +682,14 @@ is enabled.")
     ("." . open-last-closed)
     ("/" . goto-line)
 
-    ("<prior>" . pass-otp)
-    ("<next>"  . vt-sftp)
-    ("<home>"  . pass-generate)
-    ("<end>"   . ignore)))
+    ("<prior>" . ignore)
+    ("<next>"  . ignore)
+    ("<home>"  . ignore)
+    ("<end>"   . ignore)
+
+    ("C-^" . keyamp-script-leader-map)     ("C-_" . keyamp-script-leader-map)
+    ("C-+" . keyamp-script-leader-map)     ("C-И" . keyamp-script-leader-map)
+                                           ("C-b" . keyamp-script-leader-map)))
 
 (if (display-graphic-p)
     (keyamp--map keyamp-lleader-map
@@ -778,9 +786,13 @@ is enabled.")
     ("*" . view-messages)
 
     ("<prior>" . ignore)
-    ("<next>"  . vt-conn-localhost)
+    ("<next>"  . ignore)
     ("<home>"  . ignore)
-    ("<end>"   . ignore)))
+    ("<end>"   . ignore)
+
+    ("C-^" . keyamp-script-leader-map)     ("C-_" . keyamp-script-leader-map)
+    ("C-+" . keyamp-script-leader-map)     ("C-И" . keyamp-script-leader-map)
+                                           ("C-b" . keyamp-script-leader-map)))
 
 (if (display-graphic-p)
     (keyamp--map keyamp-rleader-map
@@ -835,6 +847,10 @@ is enabled.")
     ("a" . describe-face)      (";" . lookup-wiktionary)
     ("g" . apropos-command)    ("h" . describe-coding-system)
     ("n" . describe-function)))
+(keyamp--map help-map
+  '(("C-^" . keyamp-script-leader-map) ("C-_" . keyamp-script-leader-map)
+    ("C-+" . keyamp-script-leader-map) ("C-И" . keyamp-script-leader-map)
+                                       ("C-b" . keyamp-script-leader-map)))
 
 (dotimes (n 10) ; Help command + number to send corresponding fn key
   (keymap-set help-map (format "%d" (% n 10))
@@ -953,7 +969,8 @@ is enabled.")
     (keyamp-command-execute 'gnus-topic-select-group))
    ((eq last-command 'up-line)
     (keyamp-command-execute 'split-window-below)) ; Below down-line default
-   (t (keyamp-command-execute 'page-dn-half))))
+   (t
+    (keyamp-command-execute 'page-dn-half))))
 
 (defun keyamp-ret ()
   "Return key command for transient use."
@@ -983,7 +1000,6 @@ is enabled.")
 
 (defvar keyamp-delay-1 1 "Delay 1 second.")
 (defvar keyamp-delay-2 2 "Delay 2 seconds.")
-(defvar keyamp-delay-3 3 "Delay 3 seconds.")
 
 (with-sparse-keymap
   ;; Leader layer to become transient main. Base map for next leaders adjustment
@@ -1001,7 +1017,7 @@ is enabled.")
       (cut-text-block      . ignore)
       (goto-match-br       . ignore)
       (shrink-whitespaces  . ignore)
-      (del-back            . switch-to-buffer)
+      (del-back            . buf-or-bookmark)
       (toggle-comment      . ignore)
       (cut-line            . ignore)
       (kill-line           . split-view)
@@ -1445,7 +1461,7 @@ keyboard ASCII CHAR."
 
 (with-sparse-keymap
   (keyamp--remap keymap '((undo . org-shiftup) (del-back . org-shiftdown)))
-  (keyamp--set keymap '(org-shiftup org-shiftdown) nil nil nil keyamp-delay-3))
+  (keyamp--set keymap '(org-shiftup org-shiftdown)))
 
 (with-sparse-keymap
   (keyamp--remap keymap '((undo . todo)))
@@ -1570,11 +1586,13 @@ keyboard ASCII CHAR."
   (lambda () "ido-completion-map created after ido setup only"
     (keyamp--remap ido-completion-map
       '((keyamp-insert . ido-exit-minibuffer)
-        (previous-line . hist-back)      (select-block       . hist-back)
-        (next-line     . ido-next-match) (select-word        . ido-next-match)
-        (up-line       . hist-back)      (down-line          . ido-next-match)
-        (comp-forw     . ido-next-match) (ido-complete-space . self-insert-command)
-        (comp-forw-rev . ido-next-match-rev)))))
+        (previous-line . hist-back)          (select-block           . hist-back)
+        (next-line     . ido-next-match)     (select-word            . ido-next-match)
+        (up-line       . hist-back)          (down-line              . ido-next-match)
+        (comp-forw     . ido-next-match)     (ido-complete-space     . self-insert-command)
+        (comp-forw-rev . ido-next-match-rev) (indent-for-tab-command . ido-next-match)))
+    (keyamp--map-tab ido-completion-map ido-next-match)
+    (keyamp--map-backtab ido-completion-map ido-next-match-rev)))
 
 (with-sparse-keymap
   (keyamp--map-leader keymap '(next-line . previous-line))
@@ -1595,9 +1613,10 @@ keyboard ASCII CHAR."
   (keyamp--remap dired-mode-map
     '((keyamp-insert       . dired-find-file)
       (backward-bracket    . dired-jump)
-      (insert-space-before . dired-extract)
+      (insert-space-before . dired-unzip)
       (reformat-lines      . dired-decrypt)
       (del-word            . dired-unmark-all-marks)
+      (query-replace       . dired-zip)
       (backward-del-word   . dired-do-chmod)
       (shrink-whitespaces  . dired-hide-details-mode)
       (kill-line           . dired-encrypt)
@@ -1622,8 +1641,11 @@ keyboard ASCII CHAR."
   (advice-add 'dired-toggle-marks :before #'dired-unmark-all-marks))
 
 (with-eval-after-load 'wdired
-  (keyamp--map wdired-mode-map '((keyamp-sesc . wdired-abort-changes) (keyamp-sret . wdired-finish-edit)))
-  (advice-add-macro '(wdired-abort-changes wdired-finish-edit) :after 'keyamp-command))
+  (keyamp--map wdired-mode-map
+    '((keyamp-sesc . wdired-abort-changes)
+      (keyamp-sret . wdired-finish-edit)))
+  (advice-add-macro '(wdired-abort-changes wdired-finish-edit)
+                    :after 'keyamp-command))
 
 (with-eval-after-load 'dired-utils
   (keyamp--map-backtab dired-mode-map dired-rleader-map)
@@ -1639,8 +1661,8 @@ keyboard ASCII CHAR."
       ("a"  . dired-image-autocrop)   ("s" . dired-open-marked)
       ("d"  . dired-show-metadata)    ("h" . dired-rotate-img-180)
       ("l"  . dired-2png)             (";" . dired-scale-image)
-      ("\'" . dired-zip-enc)          ("c" . dired-2jpg)
-      ("/"  . dired-zip)              ("." . dired-extract))))
+      ("\'" . ignore)                 ("c" . dired-2jpg)
+      ("/"  . ignore)                 ("." . ignore))))
 
 (with-eval-after-load 'rect ; Sane rectangle controls
   (keyamp--remap rectangle-mark-mode-map
@@ -1706,7 +1728,7 @@ keyboard ASCII CHAR."
 
   (with-sparse-keymap
     (keyamp--remap keymap '((del-back . ibuffer-do-delete)))
-    (keyamp--set keymap '(ibuffer-do-delete) nil nil nil keyamp-delay-3)))
+    (keyamp--set keymap '(ibuffer-do-delete))))
 
 (with-eval-after-load 'company
   (keyamp--map-tab company-active-map company-complete-common)
@@ -1785,7 +1807,9 @@ keyboard ASCII CHAR."
 
   (keyamp--map-return query-replace-map edit-replacement)
   (keyamp--map-escape query-replace-map exit)
-  (keyamp--map query-replace-map '(("d" . skip) ("k" . act))))
+  ;; Russian Т on ! place Engram, not nice but kind of exclusion
+  ;; One should use shift 1 in Russian but before must notice input source
+  (keyamp--map query-replace-map '(("d" . skip) ("k" . act) ("Т" . automatic))))
 
 (with-eval-after-load 'shr
   (keyamp--remap shr-map '((keyamp-insert . shr-browse-url))))

@@ -2265,7 +2265,8 @@ command, so that next buffer shown is a user buffer."
     (previous-buffer)
     (while (< i buf-count-limit)
       (if (or (not (eq major-mode 'vterm-mode))
-              (string-equal (buffer-name) "*vterm clock*"))
+              (string-equal (buffer-name) "*vterm clock*")
+              (string-equal (buffer-name) "*vterm localhost*"))
           (progn
             (previous-buffer)
             (setq i (1+ i))
@@ -2283,7 +2284,8 @@ command, so that next buffer shown is a user buffer."
     (next-buffer)
     (while (< i buf-count-limit)
       (if (or (not (eq major-mode 'vterm-mode))
-              (string-equal (buffer-name) "*vterm clock*"))
+              (string-equal (buffer-name) "*vterm clock*")
+              (string-equal (buffer-name) "*vterm localhost*"))
           (progn
             (next-buffer)
             (setq i (1+ i))
@@ -2292,7 +2294,9 @@ command, so that next buffer shown is a user buffer."
         (setq i (1+ buf-count-limit))))
     (if (and (eq buf (current-buffer))
              (not (eq major-mode 'vterm-mode)))
-        (vterm)
+        (if-let ((buf (get-buffer "*vterm localhost*")))
+            (switch-to-buffer buf)
+          (vterm))
       (if (or (eq (point) (point-min))
               (eq (point) (line-beginning-position)))
           (vterm-reset-cursor-point)))))
@@ -3173,6 +3177,12 @@ and reverse-search-history in bashrc."
   (vterm-send-key (kbd "["))
   (vterm-reset-cursor-point))
 
+(defun vterm-tmux-paste ()
+  "Paste from copy mode in tmux."
+  (interactive)
+  (vterm-tmux-prefix)
+  (vterm-send-key (kbd "]")))
+
 (defun vterm-tmux-copy-hpu ()
   "Activate copy mode in tmux and half page up immediately."
   (interactive)
@@ -3747,9 +3757,9 @@ Use as around advice e.g. for mouse left click after double click."
 
 (defun shrink-win ()
   "Shrink window to fit rows count."
-  (if-let ((num (count-lines (point-min) (point-max)))
-           ((< num (window-total-height))))
-      (enlarge-window (- num (window-total-height)))))
+  (when-let ((num (count-lines (point-min) (point-max)))
+             ((< num (window-total-height))))
+    (enlarge-window (- num (window-total-height)))))
 
 (defun shrink-completion-win ()
   "Shrink completion window."
@@ -3994,9 +4004,9 @@ Click mouse select a window and close the others."
   (interactive)
   (when-let (((display-graphic-p))
              (bufs (seq-filter
-                  (lambda (buf)
-                    (buffer-file-name buf))
-                  (buffer-list))))
+                    (lambda (buf)
+                      (buffer-file-name buf))
+                    (buffer-list))))
     (when-let ((win (get-buffer-window "*Org Agenda*")))
       (select-window win)
       (delete-window))
@@ -4006,6 +4016,11 @@ Click mouse select a window and close the others."
     (other-window 1)
     (other-window 1)
     (split-window-right)
+    (when (eq major-mode 'dired-mode)
+      (setq bufs (seq-filter
+                  (lambda (buf)
+                    (eq (with-current-buffer buf major-mode) 'dired-mode))
+                  (buffer-list))))
     (dotimes (i (* 2 2))
       (select-window (nth i (window-list)))
       (switch-to-buffer (nth i bufs)))
@@ -4015,6 +4030,15 @@ Click mouse select a window and close the others."
                       (interactive)
                       (run-with-timer 0.1 nil 'delete-other-windows)))
       (set-transient-map keymap))))
+
+(defun tree-view ()
+  "Tree view dir."
+  (interactive)
+  (cond
+   ((fboundp 'neo-select)
+    (command-execute 'neo-select))
+   (t
+    (command-execute 'ignore))))
 
 (provide 'keycom)
 
