@@ -421,7 +421,7 @@
             ]
           },
           "parameters": {
-            "basic.to_delayed_action_delay_milliseconds": 200
+            "basic.to_delayed_action_delay_milliseconds": 150
           }
         },
         {
@@ -728,6 +728,54 @@
               "type": "variable_if",
               "name": "insert mode activated",
               "value": 0
+            },
+            {
+              "type": "variable_if",
+              "name": "hand swap activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "w"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "equal_sign",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "w",
+              "repeat": false,
+              "halt": true
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "w",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 0
             }
           ],
           "to_after_key_up": [
@@ -786,6 +834,40 @@
     {
       "description": "e",
       "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "e",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 0
+            },
+            {
+              "type": "variable_if",
+              "name": "hand swap activated",
+              "value": 1
+            }
+          ],
+          "to": [
+            {
+              "key_code": "e"
+            }
+          ]
+        },
         {
           "type": "basic",
           "from": {
@@ -1129,6 +1211,54 @@
               "type": "variable_if",
               "name": "insert mode activated",
               "value": 0
+            },
+            {
+              "type": "variable_if",
+              "name": "hand swap activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "u"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "b",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "o",
+              "repeat": false,
+              "halt": true
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "u",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 0
             }
           ],
           "to_after_key_up": [
@@ -1185,6 +1315,54 @@
     {
       "description": "i",
       "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "i",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 0
+            },
+            {
+              "type": "variable_if",
+              "name": "hand swap activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "i"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "b",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "i",
+              "repeat": false,
+              "halt": true
+            }
+          ]
+        },
         {
           "type": "basic",
           "from": {
@@ -1268,6 +1446,56 @@
     {
       "description": "o",
       "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "o",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 0
+            },
+            {
+              "type": "variable_if",
+              "name": "hand swap activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "o"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "a",
+              "modifiers": [
+                "control"
+              ]
+            },
+            {
+              "key_code": "a",
+              "modifiers": [
+                "control"
+              ],
+              "repeat": false,
+              "halt": true
+            }
+          ]
+        },
         {
           "type": "basic",
           "from": {
@@ -1511,6 +1739,72 @@
           },
           "conditions": [
             {
+              "input_sources": [
+                {
+                  "input_source_id": "com.apple.keylayout.RussianWin"
+                }
+              ],
+              "type": "input_source_if"
+            },
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 0
+            },
+            {
+              "type": "variable_if",
+              "name": "hand swap activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "equal_sign",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "equal_sign",
+              "modifiers": [
+                "left_shift"
+              ]
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "equal_sign",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "backslash",
+              "repeat": false,
+              "halt": true
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "close_bracket",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
               "type": "frontmost_application_if",
               "file_paths": [
                 "/Emacs"
@@ -1688,6 +1982,40 @@
               "type": "variable_if",
               "name": "insert mode activated",
               "value": 0
+            },
+            {
+              "type": "variable_if",
+              "name": "hand swap activated",
+              "value": 1
+            }
+          ],
+          "to": [
+            {
+              "key_code": "s"
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "s",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 0
             }
           ],
           "to_after_key_up": [
@@ -1779,6 +2107,43 @@
               "type": "variable_if",
               "name": "insert mode activated",
               "value": 0
+            },
+            {
+              "type": "variable_if",
+              "name": "hand swap activated",
+              "value": 1
+            }
+          ],
+          "to": [
+            {
+              "key_code": "d"
+            }
+          ],
+          "parameters": {
+            "basic.to_if_held_down_threshold_milliseconds": 120
+          }
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "d",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 0
             }
           ],
           "to_after_key_up": [
@@ -1841,6 +2206,40 @@
     {
       "description": "f",
       "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "f",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 0
+            },
+            {
+              "type": "variable_if",
+              "name": "hand swap activated",
+              "value": 1
+            }
+          ],
+          "to": [
+            {
+              "key_code": "f"
+            }
+          ]
+        },
         {
           "type": "basic",
           "from": {
@@ -2107,6 +2506,54 @@
               "type": "variable_if",
               "name": "insert mode activated",
               "value": 0
+            },
+            {
+              "type": "variable_if",
+              "name": "hand swap activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "j"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "b",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "j",
+              "repeat": false,
+              "halt": true
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "j",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 0
             }
           ],
           "to_after_key_up": [
@@ -2247,6 +2694,54 @@
     {
       "description": "l",
       "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "l",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 0
+            },
+            {
+              "type": "variable_if",
+              "name": "hand swap activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "l"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "b",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "l",
+              "repeat": false,
+              "halt": true
+            }
+          ]
+        },
         {
           "type": "basic",
           "from": {
@@ -2496,6 +2991,183 @@
           },
           "conditions": [
             {
+              "input_sources": [
+                {
+                  "input_source_id": "com.apple.keylayout.RussianWin"
+                }
+              ],
+              "type": "input_source_if"
+            },
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 0
+            },
+            {
+              "type": "variable_if",
+              "name": "hand swap activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "equal_sign",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "4",
+              "modifiers": [
+                "left_shift"
+              ]
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "equal_sign",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "6",
+              "modifiers": [
+                "left_shift"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "z",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "input_sources": [
+                {
+                  "input_source_id": "com.apple.keylayout.RussianWin"
+                }
+              ],
+              "type": "input_source_if"
+            },
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 0
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "equal_sign",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "4",
+              "modifiers": [
+                "left_shift"
+              ]
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "equal_sign",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "6",
+              "modifiers": [
+                "left_shift"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "z",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 0
+            },
+            {
+              "type": "variable_if",
+              "name": "hand swap activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "z"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "equal_sign",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "z",
+              "repeat": false,
+              "halt": true
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "z",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
               "type": "frontmost_application_if",
               "file_paths": [
                 "/Emacs"
@@ -2557,6 +3229,54 @@
     {
       "description": "x",
       "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "x",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 0
+            },
+            {
+              "type": "variable_if",
+              "name": "hand swap activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "x"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "equal_sign",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "v",
+              "repeat": false,
+              "halt": true
+            }
+          ]
+        },
         {
           "type": "basic",
           "from": {
@@ -2704,6 +3424,54 @@
     {
       "description": "v",
       "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "v",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 0
+            },
+            {
+              "type": "variable_if",
+              "name": "hand swap activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "v"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "equal_sign",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "x",
+              "repeat": false,
+              "halt": true
+            }
+          ]
+        },
         {
           "type": "basic",
           "from": {
@@ -3236,6 +4004,191 @@
             {
               "input_sources": [
                 {
+                  "input_source_id": "com.apple.keylayout.RussianWin"
+                }
+              ],
+              "type": "input_source_if"
+            },
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 0
+            },
+            {
+              "type": "variable_if",
+              "name": "hand swap activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "b",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "4",
+              "modifiers": [
+                "left_shift"
+              ]
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "b",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "6",
+              "modifiers": [
+                "left_shift"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "slash",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "input_sources": [
+                {
+                  "input_source_id": "com.apple.keylayout.RussianWin"
+                }
+              ],
+              "type": "input_source_if"
+            },
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 0
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "b",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "4",
+              "modifiers": [
+                "left_shift"
+              ]
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "b",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "6",
+              "modifiers": [
+                "left_shift"
+              ]
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "slash",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "input_sources": [
+                {
+                  "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+                }
+              ],
+              "type": "input_source_if"
+            },
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 0
+            },
+            {
+              "type": "variable_if",
+              "name": "hand swap activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "slash"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "equal_sign",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "/",
+              "repeat": false,
+              "halt": true
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "slash",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "input_sources": [
+                {
                   "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
                 }
               ],
@@ -3285,93 +4238,6 @@
           },
           "conditions": [
             {
-              "input_sources": [
-                {
-                  "input_source_id": "com.apple.keylayout.RussianWin"
-                }
-              ],
-              "type": "input_source_if"
-            },
-            {
-              "type": "frontmost_application_if",
-              "file_paths": [
-                "/Emacs"
-              ]
-            },
-            {
-              "type": "variable_if",
-              "name": "insert mode activated",
-              "value": 0
-            }
-          ],
-          "to_after_key_up": [
-            {
-              "key_code": "equal_sign"
-            }
-          ],
-          "to_if_held_down": [
-            {
-              "key_code": "b",
-              "modifiers": [
-                "left_shift",
-                "left_control"
-              ]
-            },
-            {
-              "key_code": "equal_sign",
-              "halt": true
-            }
-          ]
-        },
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "slash",
-            "modifiers": {
-              "optional": [
-                "any"
-              ]
-            }
-          },
-          "conditions": [
-            {
-              "input_sources": [
-                {
-                  "input_source_id": "com.apple.keylayout.RussianWin"
-                }
-              ],
-              "type": "input_source_if"
-            },
-            {
-              "type": "frontmost_application_if",
-              "file_paths": [
-                "/Emacs"
-              ]
-            },
-            {
-              "type": "variable_if",
-              "name": "insert mode activated",
-              "value": 2
-            }
-          ],
-          "to": [
-            {
-              "key_code": "slash"
-            }
-          ]
-        },
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "slash",
-            "modifiers": {
-              "optional": [
-                "any"
-              ]
-            }
-          },
-          "conditions": [
-            {
               "type": "frontmost_application_if",
               "file_paths": [
                 "/Emacs"
@@ -3394,6 +4260,54 @@
     {
       "description": "`",
       "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "grave_accent_and_tilde",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 0
+            },
+            {
+              "type": "variable_if",
+              "name": "hand swap activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "grave_accent_and_tilde"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "b",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "grave_accent_and_tilde",
+              "repeat": false,
+              "halt": true
+            }
+          ]
+        },
         {
           "type": "basic",
           "from": {
@@ -6130,6 +7044,119 @@
           },
           "conditions": [
             {
+              "input_sources": [
+                {
+                  "input_source_id": "com.apple.keylayout.RussianWin"
+                }
+              ],
+              "type": "input_source_if"
+            },
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 0
+            },
+            {
+              "type": "variable_if",
+              "name": "hand swap activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "hyphen"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "equal_sign",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "5",
+              "modifiers": [
+                "left_shift"
+              ],
+              "repeat": false,
+              "halt": true
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "hyphen",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "input_sources": [
+                {
+                  "input_source_id": "com.apple.keylayout.RussianWin"
+                }
+              ],
+              "type": "input_source_if"
+            },
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 0
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "hyphen"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "b",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "5",
+              "modifiers": [
+                "left_shift"
+              ],
+              "repeat": false,
+              "halt": true
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "hyphen",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
               "type": "frontmost_application_if",
               "file_paths": [
                 "/Emacs"
@@ -6178,6 +7205,119 @@
           },
           "conditions": [
             {
+              "input_sources": [
+                {
+                  "input_source_id": "com.apple.keylayout.RussianWin"
+                }
+              ],
+              "type": "input_source_if"
+            },
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 0
+            },
+            {
+              "type": "variable_if",
+              "name": "hand swap activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "equal_sign"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "equal_sign",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "5",
+              "modifiers": [
+                "left_shift"
+              ],
+              "repeat": false,
+              "halt": true
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "equal_sign",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "input_sources": [
+                {
+                  "input_source_id": "com.apple.keylayout.RussianWin"
+                }
+              ],
+              "type": "input_source_if"
+            },
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 0
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "equal_sign"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "b",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "5",
+              "modifiers": [
+                "left_shift"
+              ],
+              "repeat": false,
+              "halt": true
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "equal_sign",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
               "type": "frontmost_application_if",
               "file_paths": [
                 "/Emacs"
@@ -6214,6 +7354,133 @@
     {
       "description": "backslash",
       "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "backslash",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "input_sources": [
+                {
+                  "input_source_id": "com.apple.keylayout.RussianWin"
+                }
+              ],
+              "type": "input_source_if"
+            },
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 0
+            },
+            {
+              "type": "variable_if",
+              "name": "hand swap activated",
+              "value": 1
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "equal_sign",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "1",
+              "modifiers": [
+                "left_shift"
+              ]
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "equal_sign",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "backslash",
+              "repeat": false,
+              "halt": true
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "backslash",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "conditions": [
+            {
+              "input_sources": [
+                {
+                  "input_source_id": "com.apple.keylayout.RussianWin"
+                }
+              ],
+              "type": "input_source_if"
+            },
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 0
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "b",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "equal_sign",
+              "modifiers": [
+                "left_shift"
+              ]
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "b",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "backslash",
+              "repeat": false,
+              "halt": true
+            }
+          ]
+        },
         {
           "type": "basic",
           "from": {
@@ -6973,7 +8240,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Termius"
+                "/Terminal"
               ]
             }
           ],
@@ -7003,7 +8270,7 @@
           ],
           "to_if_held_down": [
             {
-              "shell_command": "open -a 'Termius'",
+              "shell_command": "open -a 'Terminal'",
               "repeat": false,
               "halt": true
             }
@@ -7624,9 +8891,9 @@
           },
           "conditions": [
             {
-              "type": "frontmost_application_unless",
+              "type": "frontmost_application_if",
               "file_paths": [
-                "/Thorium"
+                "/Firefox"
               ]
             }
           ],
@@ -7643,14 +8910,6 @@
               "modifiers": [
                 "command"
               ]
-            },
-            {
-              "shell_command": "sleep 0.1 && /Applications/emacsclient --no-wait --eval '(frame-title-en)'"
-            },
-            {
-              "select_input_source": {
-                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
-              }
             },
             {
               "select_input_source": {
@@ -7679,14 +8938,9 @@
           ],
           "to_if_held_down": [
             {
-              "shell_command": "open -a 'Emacs' && /Applications/emacsclient --no-wait --eval '(frame-title-en)'",
+              "shell_command": "open -a 'Firefox'",
               "repeat": false,
               "halt": true
-            },
-            {
-              "select_input_source": {
-                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
-              }
             }
           ],
           "to_after_key_up": [
@@ -7697,12 +8951,32 @@
               ]
             },
             {
-              "shell_command": "sleep 0.1 && /Applications/emacsclient --no-wait --eval '(frame-title-en)'"
-            },
-            {
               "select_input_source": {
                 "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
               }
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "f13",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "to_after_key_up": [
+            {
+              "shell_command": "open -a 'Firefox'"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "shell_command": "open -a 'Thorium'",
+              "repeat": false,
+              "halt": true
             }
           ]
         }

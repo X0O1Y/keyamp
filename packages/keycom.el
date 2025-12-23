@@ -3714,9 +3714,7 @@ Use as around advice e.g. for mouse left click after double click."
       (translate)
     (when (use-region-p)
       (deactivate-mark))
-    (if (eq this-command last-command)
-        (select-block)
-      (select-word))))
+    (select-word)))
 
 (defun calendar-split ()
   "Split calendar."

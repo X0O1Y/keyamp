@@ -150,6 +150,8 @@ corresponding non-ASCII key for primary input method in insert mode."
 Activate when `keyamp-cur-layout' not available in OS. The layout must
 present in `quail-keyboard-layout-alist'."
   (interactive)
+  (when (get 'toggle-hand-swap 'state)
+    (user-error "Hand swap is active"))
   (if (get 'toggle-std-to-cur-layout 'state)
       (progn
         (quail-set-keyboard-layout "standard")
@@ -172,6 +174,101 @@ present in `quail-keyboard-layout-alist'."
      (lambda (pair)
        (keymap-set key-translation-map (car pair) (when define (cdr pair))))
      keyamp--convert-table)))
+
+(defconst keyamp--hand-swap
+  `(("SPC" . ,(if (display-graphic-p) "<backspace>" "DEL"))
+    ("DEL" . ,(unless (display-graphic-p) "SPC"))
+    ("<backspace>" . ,(when (display-graphic-p) "SPC"))
+    ("C-^" . "C-_") ("C-+" . "C-И")
+    ("C-_" . "C-^") ("C-И" . "C-+")
+    ("<prior>" . "<next>")  ("<end>"  . "<home>")
+    ("<next>"  . "<prior>") ("<home>" . "<end>")
+
+    ;; Standard (QWERTY)
+    ("1" . "0") ("2" . "9") ("3" . "8")  ("4" . "7") ("5" . "6")
+    ("0" . "1") ("9" . "2") ("8" . "3")  ("7" . "4") ("6" . "5")
+    ("-" . "=") ("=" . "-") ("]" . "\\") ("\\" . "]")
+    ("'" . "[") ("[" . "'")
+    ("q" . "p") ("w" . "u") ("e" . "i")  ("r" . "o") ("t" . "y")
+    ("a" . "h") ("s" . "j") ("d" . "k")  ("f" . "l") ("g" . ";")
+    ("z" . "/") ("v" . ".") ("c" . ",")  ("x" . "m") ("b" . "n")
+    ("y" . "t") ("u" . "w") ("i" . "e")  ("o" . "r") ("p" . "q")
+    ("h" . "g") ("j" . "f") ("k" . "d")  ("l" . "s") (";" . "a")
+    ("n" . "b") ("m" . "v") ("," . "c")  ("." . "x") ("/" . "z")
+
+    ;; Russian-computer (non-ASCII only)
+    ("э" . "х") ("х" . "э")
+    ("й" . "з") ("ц" . "г") ("у" . "ш")  ("к" . "щ") ("е" . "н")
+    ("ф" . "р") ("ы" . "о") ("в" . "л")  ("а" . "д") ("п" . "ж")
+                ("ч" . "ь") ("с" . "б")  ("м" . "ю") ("и" . "т")
+    ("н" . "е") ("г" . "ц") ("ш" . "у")  ("щ" . "к") ("з" . "й")
+    ("р" . "п") ("о" . "а") ("л" . "в")  ("д" . "ы") ("ж" . "ф")
+    ("т" . "и") ("ь" . "ч") ("б" . "с")  ("ю" . "м"))
+  "Alist for hand-swapping keys. Notice: f->l but l->s.")
+
+(defun hand-swap-activate ()
+  "Activate hand swap."
+  (when keyamp-karabinerp
+    (keyamp-set-var-karabiner keyamp-karabiner-hand-swap "1"))
+  (mapc
+   (lambda (pair)
+     (keymap-set key-translation-map
+                 (keyamp--convert-kbd-str (car pair))
+                 (when-let ((char (cdr pair)))
+                   (keyamp--convert-kbd-str char))))
+   keyamp--hand-swap)
+  (when (display-graphic-p)
+    (keymap-set key-translation-map "S-SPC"         "<backtab>")
+    (keymap-set key-translation-map "S-<backspace>" "<tab>")
+    (when (fboundp 'set-cursor-face-swap)
+      (set-cursor-face-swap)
+      (add-hook 'after-make-frame-functions 'set-cursor-face-swap 90))))
+
+(defun hand-swap-deactivate ()
+  "Deactivate hand swap."
+  (when keyamp-karabinerp
+    (keyamp-set-var-karabiner keyamp-karabiner-hand-swap "0"))
+  (mapc
+   (lambda (pair)
+     (keymap-set key-translation-map
+                 (keyamp--convert-kbd-str (car pair)) nil))
+   keyamp--hand-swap)
+  (when (display-graphic-p)
+    (keymap-set key-translation-map "S-SPC"         "<tab>")
+    (keymap-set key-translation-map "S-<backspace>" "<backtab>")
+    (when (fboundp 'set-cursor-face)
+      (set-cursor-face)
+      (remove-hook 'after-make-frame-functions 'set-cursor-face-swap))))
+
+(defconst toggle-hand-swap-silent (display-graphic-p)
+  "Toggle hand swap without message.")
+
+(defun toggle-hand-swap ()
+  "Toggle hand swap, scripting leaders and Russian support.
+Insert mode not affected."
+  (interactive)
+  (when (get 'toggle-std-to-cur-layout 'state)
+    (user-error "Standard keyboard is active"))
+  (if (get 'toggle-hand-swap 'state)
+      (progn
+        (put 'toggle-hand-swap 'state nil)
+        (hand-swap-deactivate)
+        (remove-hook 'keyamp-insert-hook    'hand-swap-deactivate)
+        (remove-hook 'keyamp-command-hook   'hand-swap-activate)
+        (remove-hook 'kill-emacs-hook       'hand-swap-deactivate)
+        (remove-hook 'isearch-mode-hook     'hand-swap-deactivate)
+        (remove-hook 'isearch-mode-end-hook 'hand-swap-activate)
+        (unless toggle-hand-swap-silent
+          (message "Deactivated hand swap")))
+    (put 'toggle-hand-swap 'state t)
+    (hand-swap-activate)
+    (add-hook 'keyamp-insert-hook    'hand-swap-deactivate)
+    (add-hook 'keyamp-command-hook   'hand-swap-activate)
+    (add-hook 'kill-emacs-hook       'hand-swap-deactivate)
+    (add-hook 'isearch-mode-hook     'hand-swap-deactivate)
+    (add-hook 'isearch-mode-end-hook 'hand-swap-activate)
+    (unless toggle-hand-swap-silent
+      (message "Activated hand swap"))))
 
 
 ;; Macros
@@ -520,7 +617,7 @@ is enabled.")
   '(;; Control sequences as leader prefixes for scripting
     ("C-^" . keyamp-lleader-map) ("C-_" . keyamp-rleader-map)
     ("C-+" . keyamp-lleader-map) ("C-И" . keyamp-rleader-map) ; Russian-computer
-                                 ("C-b" . keyamp-rleader-map) ; Hebrew
+                                 ("C-b" . keyamp-rleader-map) ; Hebrew (experimental)
 
     ("<home>"  . beg-of-buf)
     ("<end>"   . end-of-buf)
@@ -559,7 +656,7 @@ is enabled.")
     ;; Right half
     ("6" . pass)                 ("^"  . keyamp-insert-and-self-insert)
     ("7" . jump-to-register)     ("&"  . keyamp-insert-and-self-insert)
-    ("8" . point-to-register)    ("*"  . goto-match-br) ; QWERTY * -> = Engram, QWERTY / -> = RU PC Karabiner
+    ("8" . point-to-register)    ("*"  . keyamp-insert-and-self-insert)
     ("9" . proced-defer)         ("("  . keyamp-insert-and-self-insert)
     ("0" . sh-defer)             (")"  . keyamp-insert-and-self-insert)
     ("-" . enlarge-window)       ("_"  . keyamp-insert-and-self-insert)
@@ -605,7 +702,7 @@ is enabled.")
 (keyamp--map-backtab keyamp-lleader-map volume-decrease)
 (keyamp--map keyamp-lleader-map
   '(;; Left leader left half
-    ("`" . revert-buffer)
+    ("`" . revert-buffer)                  ("~" . toggle-std-to-cur-layout)
     ("1" . periodic-chart)
     ("2" . kmacro-play-toggle)
     ("3" . delete-window)
@@ -636,8 +733,8 @@ is enabled.")
     ("8" . sql)
     ("9" . screenshot)
     ("0" . eww)
-    ("-" . snake)
-    ("=" . tetris)
+    ("-" . ignore)
+    ("=" . toggle-hand-swap)
 
     ("y" . find-name-dired)
     ("u" . flymake-goto-prev-error)
@@ -651,6 +748,10 @@ is enabled.")
     ("["  . toggle-frame-maximized)
     ("]"  . make-frame-command)
     ("\\" . yt-dlp)
+
+    ;; Scripting corner cases for Russian
+    ("G"  . toggle-comment)     ; slash
+    ("H"  . universal-argument) ; slash hold down
 
     ("h"  . prog-new)
 
@@ -758,18 +859,24 @@ is enabled.")
     ("8" . insert-register)
     ("9" . org-insert-source-code)
     ("0" . toggle-theme)
-    ("-" . enlarge-window-horizontally)
-    ("=" . ignore)
+    ("-" . toggle-hand-swap)
+    ("=" . toggle-hand-swap) ; Corner case for Russian
 
     ("y"  . toggle-case-fold-search)
     ("u"  . backward-punct)
     ("i"  . beg-of-block-rev)
     ("o"  . forward-punct)
     ("p"  . mark-defun)
-    ("["  . backward-sexp)
-    ("]"  . forward-sexp)
+    ("["  . ignore)
+    ("]"  . ignore)
     ("\\" . empty-bin)
-    (")"  . empty-bin) ; Corner case for Russian
+
+    ;; TODO: Scripting corner cases for Russian
+    (")"  . empty-bin)     ; backslash hold down
+    ("("  . lock-screen)   ; backslash
+    ("N"  . tree-view)     ; close bracket
+    ("G"  . goto-match-br) ; slash
+    ("H"  . view-messages) ; slash hold down
 
     ("h" . page-up-half)
     ("j" . isearch-wback)
@@ -824,9 +931,7 @@ is enabled.")
   (keymap-set key-translation-map "S-SPC"         "<tab>")
   (keymap-set key-translation-map "S-<backspace>" "<backtab>")
   (keymap-set key-translation-map "S-<return>"    keyamp-sret)
-  (keymap-set key-translation-map "S-<escape>"    keyamp-sesc)
-  (keymap-set key-translation-map "S-<next>"      "C-u")
-  (keymap-set key-translation-map "S-<prior>"     "C-g"))
+  (keymap-set key-translation-map "S-<escape>"    keyamp-sesc))
 
 (setq help-map (make-sparse-keymap))
 (fset 'help-command help-map)
@@ -1033,7 +1138,7 @@ is enabled.")
 
   (keyamp--set keymap
     '(prev-buf                   next-buf
-      save-close-buf             tools
+      save-close-buf
       prev-proj-buf              next-proj-buf
       prev-eww-buf               next-eww-buf
       prev-eshell-buf            next-eshell-buf
@@ -1094,10 +1199,6 @@ is enabled.")
 (with-sparse-keymap
   (keyamp--remap keymap '((open-line . tasks) (newline . next-buf)))
   (keyamp--set keymap '(tasks org-agenda-tasks)))
-
-(with-sparse-keymap
-  (keyamp--remap keymap '((open-line . prev-buf) (newline . alt-buf)))
-  (keyamp--set keymap '(tools)))
 
 (with-sparse-keymap
   (keyamp--remap keymap '((open-line . prev-buf) (newline . config)))
@@ -1642,8 +1743,7 @@ keyboard ASCII CHAR."
 
 (with-eval-after-load 'wdired
   (keyamp--map wdired-mode-map
-    '((keyamp-sesc . wdired-abort-changes)
-      (keyamp-sret . wdired-finish-edit)))
+    '((keyamp-sesc . wdired-abort-changes) (keyamp-sret . wdired-finish-edit)))
   (advice-add-macro '(wdired-abort-changes wdired-finish-edit)
                     :after 'keyamp-command))
 
@@ -1807,7 +1907,7 @@ keyboard ASCII CHAR."
 
   (keyamp--map-return query-replace-map edit-replacement)
   (keyamp--map-escape query-replace-map exit)
-  ;; Russian Т on ! place Engram, not nice but kind of exclusion
+  ;; Russian Т on ! place Engram, not nice but kind of exception
   ;; One should use shift 1 in Russian but before must notice input source
   (keyamp--map query-replace-map '(("d" . skip) ("k" . act) ("Т" . automatic))))
 
@@ -2794,7 +2894,6 @@ keyboard ASCII CHAR."
                  sun-moon                                t
                  sync                                    t
                  tasks                                   t
-                 tools                                   t
                  view-messages                           t)))
 
 (defconst keyamp-screen-read-commands-hash
@@ -3094,6 +3193,9 @@ keyboard ASCII CHAR."
   "/Library/Application Support/org.pqrs/Karabiner-Elements/bin/karabiner_cli"
   "Karabiner-Elements CLI executable. Optional for mode sync.")
 
+(defconst keyamp-karabinerp (executable-find keyamp-karabiner-cli)
+  "Karabiner use predicate.")
+
 (defconst keyamp-idle-indicator    "•" "Idle indicator.")
 (defconst keyamp-screen-indicator  "•" "Screen indicator.")
 (defconst keyamp-read-indicator    "•" "Read indicator.")
@@ -3162,13 +3264,16 @@ insert cancel the timer.")
 
 ;; Karabiner
 
-(defun keyamp-set-var-karabiner (var val)
-  "Set karabiner VAR to VAL via shell command."
+(defun keyamp-set-var-karabiner (K V)
+  "Set karabiner variable K to value V via shell command."
   (call-process keyamp-karabiner-cli nil 0 nil
-                "--set-variables" (concat "{\"" var "\":" val "}")))
+                "--set-variables" (concat "{\"" K "\":" V "}")))
 
 (defconst keyamp-karabiner-insert-mode "insert mode activated"
   "Karabiner keyamp insert mode variable.")
+
+(defconst keyamp-karabiner-hand-swap "hand swap activated"
+  "Karabiner hand swap variable.")
 
 (defun keyamp-insert-karabiner ()
   "Sync insert mode with karabiner."
@@ -3180,12 +3285,21 @@ insert cancel the timer.")
 
 (defun keyamp-karabiner-init ()
   "Init karabiner."
-  (when (executable-find keyamp-karabiner-cli)
+  (when keyamp-karabinerp
     (add-hook 'keyamp-insert-hook    'keyamp-insert-karabiner)
     (add-hook 'keyamp-command-hook   'keyamp-command-karabiner)
     (add-hook 'isearch-mode-hook     'keyamp-insert-karabiner)
     (add-hook 'isearch-mode-end-hook 'keyamp-command-karabiner)
     (add-hook 'minibuffer-setup-hook 'keyamp-insert-karabiner)))
+
+(defun keyamp-karabiner-deactivate ()
+  "Deactivate karabiner."
+  (when keyamp-karabinerp
+    (remove-hook 'keyamp-insert-hook    'keyamp-insert-karabiner)
+    (remove-hook 'keyamp-command-hook   'keyamp-command-karabiner)
+    (remove-hook 'isearch-mode-hook     'keyamp-insert-karabiner)
+    (remove-hook 'isearch-mode-end-hook 'keyamp-command-karabiner)
+    (remove-hook 'minibuffer-setup-hook 'keyamp-insert-karabiner)))
 
 
 ;; Modes
@@ -3292,7 +3406,20 @@ insert cancel the timer.")
     (keyamp-command-execute 'ignore))
    (t
     (keyamp-insert)
-    (self-insert-command 1))))
+    (if (get 'toggle-hand-swap 'state)
+        (let ((key (this-command-keys)))
+          (when (vectorp key)
+            (setq key (char-to-string (aref key 0))))
+          (if (> (string-to-char key) 127)
+              (setq key (car (rassoc key keyamp--hand-swap)))
+            (setq key (keyamp--convert-kbd-str
+                       (car (rassoc
+                             (car (rassoc key keyamp--convert-table))
+                             keyamp--hand-swap)))))
+          (if key ; Self-insert posts already translated key
+              (execute-kbd-macro (kbd key))
+            (self-insert-command 1)))
+      (self-insert-command 1)))))
 
 (defun minibuffer-complete-around (fun &rest r)
   "Minibuffer complete by TAB applied only for file path completion, otherwise
@@ -3665,9 +3792,11 @@ after a delay even if there more read commands follow."
 (cl-defmethod keyamp-blink-end ((obj keyamp-blinker))
   "End blink with blinker."
   (when (eq (oref obj indicator) mode-line-front-space)
-    (keyamp-indicate (oref obj curIndicator) (oref obj curCursor) (oref obj curColor))))
+    (keyamp-indicate (oref obj curIndicator)
+                     (oref obj curCursor) (oref obj curColor))))
 
-(defconst keyamp-blink-idle-duration (/ keyamp-blink-duration 2) "Blink idle duration.")
+(defconst keyamp-blink-idle-duration (/ keyamp-blink-duration 2)
+  "Blink idle duration.")
 
 (defconst keyamp-blinker-idle
   (keyamp-blinker :indicator keyamp-idle-indicator :color 'keyamp-idle-color
@@ -3745,13 +3874,17 @@ Cleanup echo area. Quit minibuffer. Quit wait key sequence."
       (isearch-cancel-clean))
     (when (region-active-p)
       (deactivate-mark))
+    (when (get 'toggle-hand-swap 'state)
+      (toggle-hand-swap))
     (keyamp-command)
     (when-let ((buf (get-buffer " *Echo Area 0*"))
                ((cl-plusp (buffer-size buf))))
       (run-at-time nil nil 'message nil))
     (when (minibufferp)
       (keyamp-minibuffer-quit))
-    (keyboard-quit)))
+    (keyboard-quit)
+    (when (fboundp 'minibuffer-line)
+      (minibuffer-line))))
 
 (defun keyamp-idle-detect ()
   "Idle detect."
