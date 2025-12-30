@@ -179,8 +179,14 @@ present in `quail-keyboard-layout-alist'."
   `(("SPC" . ,(if (display-graphic-p) "<backspace>" "DEL"))
     ("DEL" . ,(unless (display-graphic-p) "SPC"))
     ("<backspace>" . ,(when (display-graphic-p) "SPC"))
+    ("S-SPC" . ,(when (display-graphic-p) "<backtab>"))
+    ("S-<backspace>" . ,(when (display-graphic-p) "<tab>"))
+    ("TAB" . ,(unless (display-graphic-p) "<backtab>"))
+    ("<backtab>" . ,(unless (display-graphic-p) "TAB"))
+
     ("C-^" . "C-_") ("C-+" . "C-И")
     ("C-_" . "C-^") ("C-И" . "C-+")
+
     ("<prior>" . "<next>")  ("<end>"  . "<home>")
     ("<next>"  . "<prior>") ("<home>" . "<end>")
 
@@ -196,7 +202,7 @@ present in `quail-keyboard-layout-alist'."
     ("h" . "g") ("j" . "f") ("k" . "d")  ("l" . "s") (";" . "a")
     ("n" . "b") ("m" . "v") ("," . "c")  ("." . "x") ("/" . "z")
 
-    ;; Russian-computer (non-ASCII only)
+    ;; Russian-computer (non-ASCII pairs only)
     ("э" . "х") ("х" . "э")
     ("й" . "з") ("ц" . "г") ("у" . "ш")  ("к" . "щ") ("е" . "н")
     ("ф" . "р") ("ы" . "о") ("в" . "л")  ("а" . "д") ("п" . "ж")
@@ -217,12 +223,16 @@ present in `quail-keyboard-layout-alist'."
                  (when-let ((char (cdr pair)))
                    (keyamp--convert-kbd-str char))))
    keyamp--hand-swap)
-  (when (display-graphic-p)
-    (keymap-set key-translation-map "S-SPC"         "<backtab>")
-    (keymap-set key-translation-map "S-<backspace>" "<tab>")
-    (when (fboundp 'set-cursor-face-swap)
-      (set-cursor-face-swap)
-      (add-hook 'after-make-frame-functions 'set-cursor-face-swap 90))))
+  (when (fboundp 'set-cursor-face-swap)
+    (set-cursor-face-swap)
+    (add-hook 'after-make-frame-functions 'set-cursor-face-swap 90))
+  (setq keyamp-idle-indicator    keyamp-idle-indicator-hand-swap)
+  (setq keyamp-screen-indicator  keyamp-screen-indicator-hand-swap)
+  (setq keyamp-read-indicator    keyamp-read-indicator-hand-swap)
+  (setq keyamp-command-indicator keyamp-command-indicator-hand-swap)
+  (setq keyamp-io-indicator      keyamp-io-indicator-hand-swap)
+  (setq keyamp-insert-indicator  keyamp-insert-indicator-hand-swap)
+  (setq keyamp-modify-indicator  keyamp-modify-indicator-hand-swap))
 
 (defun hand-swap-deactivate ()
   "Deactivate hand swap."
@@ -233,22 +243,31 @@ present in `quail-keyboard-layout-alist'."
      (keymap-set key-translation-map
                  (keyamp--convert-kbd-str (car pair)) nil))
    keyamp--hand-swap)
-  (when (display-graphic-p)
-    (keymap-set key-translation-map "S-SPC"         "<tab>")
-    (keymap-set key-translation-map "S-<backspace>" "<backtab>")
-    (when (fboundp 'set-cursor-face)
-      (set-cursor-face)
-      (remove-hook 'after-make-frame-functions 'set-cursor-face-swap))))
+  (keyamp-key-translation) ; Restore
+  (when (fboundp 'set-cursor-face)
+    (set-cursor-face)
+    (remove-hook 'after-make-frame-functions 'set-cursor-face-swap))
+  (setq keyamp-idle-indicator    keyamp-idle-indicator-default)
+  (setq keyamp-screen-indicator  keyamp-screen-indicator-default)
+  (setq keyamp-read-indicator    keyamp-read-indicator-default)
+  (setq keyamp-command-indicator keyamp-command-indicator-default)
+  (setq keyamp-io-indicator      keyamp-io-indicator-default)
+  (setq keyamp-insert-indicator  keyamp-insert-indicator-default)
+  (setq keyamp-modify-indicator  keyamp-modify-indicator-default))
 
-(defconst toggle-hand-swap-silent (display-graphic-p)
-  "Toggle hand swap without message.")
+(defconst toggle-hand-swap-silent t "Toggle hand swap without message.")
 
 (defun toggle-hand-swap ()
   "Toggle hand swap, scripting leaders and Russian support.
 Insert mode not affected."
   (interactive)
-  (when (get 'toggle-std-to-cur-layout 'state)
+  (cond
+   ((get 'toggle-std-to-cur-layout 'state)
     (user-error "Standard keyboard is active"))
+   (keyamp-insert-p
+    (user-error "Insert mode is active"))
+   (isearch-mode
+    (user-error "Isearch is active")))
   (if (get 'toggle-hand-swap 'state)
       (progn
         (put 'toggle-hand-swap 'state nil)
@@ -926,12 +945,18 @@ is enabled.")
 (keyamp--map global-map '((keyamp-sret . hippie-expand)))
 (keyamp--remap global-map '((quoted-insert . quoted-insert-custom)))
 
-(when (display-graphic-p)
-  (keymap-set global-map          "<tab>" 'indent-for-tab-command) ; /lisp/indent.el.gz:816
-  (keymap-set key-translation-map "S-SPC"         "<tab>")
-  (keymap-set key-translation-map "S-<backspace>" "<backtab>")
-  (keymap-set key-translation-map "S-<return>"    keyamp-sret)
-  (keymap-set key-translation-map "S-<escape>"    keyamp-sesc))
+(when (display-graphic-p) ; /lisp/indent.el.gz:816
+  (keymap-set global-map "<tab>" 'indent-for-tab-command))
+
+(defun keyamp-key-translation ()
+  "Key translations."
+  (when (display-graphic-p)
+    (keymap-set key-translation-map "S-SPC"         "<tab>")
+    (keymap-set key-translation-map "S-<backspace>" "<backtab>")
+    (keymap-set key-translation-map "S-<return>"    keyamp-sret)
+    (keymap-set key-translation-map "S-<escape>"    keyamp-sesc)))
+
+(keyamp-key-translation)
 
 (setq help-map (make-sparse-keymap))
 (fset 'help-command help-map)
@@ -1098,7 +1123,8 @@ is enabled.")
     (keyamp-command-execute 'eshell-interrupt-process))
    ((eq major-mode 'vterm-mode)
     (keyamp-command-execute 'term-interrupt-subjob))
-   (t (keyamp-command-execute 'ignore))))
+   (t
+    (keyamp-command-execute 'ignore))))
 
 
 ;; Repeat mode - screen commands
@@ -1610,11 +1636,11 @@ keyboard ASCII CHAR."
                 (lambda () (when (minibufferp)
                              (set-transient-map keymap)))))
 
-  ;; Hit D/DEL for No, K/SPC for Yes to answer non-literal Y or N.
+  ;; Hit D/SPC for No, K/DEL for Yes to answer non-literal Y or N.
   (keyamp--remap y-or-n-p-map
     '((select-word   . y-or-n-p-insert-n) (del-back  . y-or-n-p-insert-n)
-      (paste-or-prev . y-or-n-p-insert-y) (next-line . y-or-n-p-insert-y)
-      (select-block  . y-or-n-p-insert-n)))
+      (paste-or-prev . y-or-n-p-insert-n) (next-line . y-or-n-p-insert-y)
+      (select-block  . y-or-n-p-insert-y) (hist-back . y-or-n-p-insert-y)))
 
   (keyamp--remap minibuffer-local-map
     '((previous-line . hist-back) (next-line . hist-forw)
@@ -2379,7 +2405,7 @@ keyboard ASCII CHAR."
   (defun vterm-vi-auto (&rest _)
     "Auto enable vi mode."
     (when (string-match " vi " vterm-last-command)
-      (keyamp-cancel-input-timer)
+      (keyamp-input-timer-cancel)
       (keyamp-command)
       (keyamp-command-execute 'vterm-vi)))
 
@@ -2814,7 +2840,7 @@ keyboard ASCII CHAR."
   (advice-add 'calcDigit-start :after #'keyamp-input-timer))
   (advice-add-macro
     '(calc-plus calc-minus calc-times calc-divide
-      calc-mod  calc-inv   calc-power calc-enter) :after 'keyamp-start-input-timer)
+      calc-mod  calc-inv   calc-power calc-enter) :after 'keyamp-input-timer)
 
 (with-eval-after-load 'calc-ext
   (keyamp--remap calc-mode-map
@@ -3196,13 +3222,32 @@ keyboard ASCII CHAR."
 (defconst keyamp-karabinerp (executable-find keyamp-karabiner-cli)
   "Karabiner use predicate.")
 
-(defconst keyamp-idle-indicator    "•" "Idle indicator.")
-(defconst keyamp-screen-indicator  "•" "Screen indicator.")
-(defconst keyamp-read-indicator    "•" "Read indicator.")
-(defconst keyamp-command-indicator "•" "Command indicator.")
-(defconst keyamp-io-indicator      "•" "IO indicator.")
-(defconst keyamp-insert-indicator  "•" "Insert indicator.")
-(defconst keyamp-modify-indicator  "•" "Modify indicator.")
+(defconst keyamp-indicator-default   "•" "Default indicator.")
+(defconst keyamp-indicator-hand-swap "∘" "Hand swap indicator.")
+
+(defconst keyamp-idle-indicator-default    keyamp-indicator-default "Idle indicator.")
+(defconst keyamp-screen-indicator-default  keyamp-indicator-default "Screen indicator.")
+(defconst keyamp-read-indicator-default    keyamp-indicator-default "Read indicator.")
+(defconst keyamp-command-indicator-default keyamp-indicator-default "Command indicator.")
+(defconst keyamp-io-indicator-default      keyamp-indicator-default "IO indicator.")
+(defconst keyamp-insert-indicator-default  keyamp-indicator-default "Insert indicator.")
+(defconst keyamp-modify-indicator-default  keyamp-indicator-default "Modify indicator.")
+
+(defconst keyamp-idle-indicator-hand-swap    keyamp-indicator-hand-swap "Idle indicator hand swap.")
+(defconst keyamp-screen-indicator-hand-swap  keyamp-indicator-hand-swap "Screen indicator hand swap.")
+(defconst keyamp-read-indicator-hand-swap    keyamp-indicator-hand-swap "Read indicator hand swap.")
+(defconst keyamp-command-indicator-hand-swap keyamp-indicator-hand-swap "Command indicator hand swap.")
+(defconst keyamp-io-indicator-hand-swap      keyamp-indicator-hand-swap "IO indicator hand swap.")
+(defconst keyamp-insert-indicator-hand-swap  keyamp-indicator-hand-swap "Insert indicator hand swap.")
+(defconst keyamp-modify-indicator-hand-swap  keyamp-indicator-hand-swap "Modify indicator hand swap.")
+
+(defvar keyamp-idle-indicator    keyamp-idle-indicator-default    "Idle indicator.")
+(defvar keyamp-screen-indicator  keyamp-screen-indicator-default  "Screen indicator.")
+(defvar keyamp-read-indicator    keyamp-read-indicator-default    "Read indicator.")
+(defvar keyamp-command-indicator keyamp-command-indicator-default "Command indicator.")
+(defvar keyamp-io-indicator      keyamp-io-indicator-default      "IO indicator.")
+(defvar keyamp-insert-indicator  keyamp-insert-indicator-default  "Insert indicator.")
+(defvar keyamp-modify-indicator  keyamp-modify-indicator-default  "Modify indicator.")
 
 (defvar keyamp-idle-color    "#ab82ff" "Idle color.")
 (defvar keyamp-screen-color  "#1e90ff" "Screen color.")
@@ -3233,33 +3278,28 @@ keyboard ASCII CHAR."
   "Timer activates repeat read mode if no action follows. Any command or self
 insert cancel the timer.")
 
-(defun keyamp-cancel-input-timer ()
+(defun keyamp-input-timer-cancel ()
   "Cancel `keyamp-input-timer'."
-  (remove-hook 'post-command-hook 'keyamp-cancel-input-timer)
-  (remove-hook 'post-self-insert-hook 'keyamp-cancel-input-timer)
+  (remove-hook 'pre-command-hook 'keyamp-input-timer-cancel)
+  (remove-hook 'post-self-insert-hook 'keyamp-input-timer-cancel)
   (when (timerp keyamp-input-timer)
     (cancel-timer keyamp-input-timer)))
 
+(defun keyamp-input-timer (&rest _)
+  "Start `keyamp-input-timer'."
+  (keyamp-input-timer-cancel)
+  (add-hook 'pre-command-hook 'keyamp-input-timer-cancel)
+  (add-hook 'post-self-insert-hook 'keyamp-input-timer-cancel)
+  (setq keyamp-input-timer
+        (run-with-timer keyamp-input-timeout nil 'keyamp-input-timer-payload)))
+
 (defun keyamp-input-timer-payload ()
   "Payload for `keyamp-input-timer'."
-  (keyamp-cancel-input-timer)
+  (keyamp-input-timer-cancel)
   (when keyamp-insert-p
     (keyamp-command)
     (keyamp-indicate-read-defer)
     (keyamp-blink-start keyamp-command-color keyamp-read-color)))
-
-(defun keyamp-start-input-timer (&rest _)
-  "Start `keyamp-input-timer'."
-  (remove-hook 'post-command-hook 'keyamp-start-input-timer)
-  (keyamp-cancel-input-timer)
-  (add-hook 'post-command-hook 'keyamp-cancel-input-timer)
-  (add-hook 'post-self-insert-hook 'keyamp-cancel-input-timer)
-  (setq keyamp-input-timer
-        (run-with-timer keyamp-input-timeout nil 'keyamp-input-timer-payload)))
-
-(defun keyamp-input-timer (&rest _)
-  "Add `keyamp-start-input-timer' to `post-command-hook'."
-  (add-hook 'post-command-hook 'keyamp-start-input-timer))
 
 
 ;; Karabiner
@@ -3308,7 +3348,7 @@ insert cancel the timer.")
 (defvar keyamp--deactivate-command-fun nil "Deactivate command mode function.")
 (defconst keyamp-blink-cursor-mode t
   "Use blink cursor to indicate transient maps like vi or recursive modes like
- isearch. Disable blink cursor with `keyamp-idle-init'.")
+ isearch. Disable blink cursor with `keyamp-command-init'.")
 
 (defun keyamp-command-init ()
   "Set command mode."
@@ -3406,8 +3446,9 @@ insert cancel the timer.")
     (keyamp-command-execute 'ignore))
    (t
     (keyamp-insert)
-    (if (get 'toggle-hand-swap 'state)
-        (let ((key (this-command-keys)))
+    (if-let (((get 'toggle-hand-swap 'state))
+             (key (this-command-keys)))
+        (progn
           (when (vectorp key)
             (setq key (char-to-string (aref key 0))))
           (if (> (string-to-char key) 127)
@@ -3416,7 +3457,7 @@ insert cancel the timer.")
                        (car (rassoc
                              (car (rassoc key keyamp--convert-table))
                              keyamp--hand-swap)))))
-          (if key ; Self-insert posts already translated key
+          (if key ; This key code comes from OS
               (execute-kbd-macro (kbd key))
             (self-insert-command 1)))
       (self-insert-command 1)))))
@@ -3640,7 +3681,8 @@ after a delay even if there more read commands follow."
     (keyamp-blink-start keyamp-read-color keyamp-screen-color))
    ((eq this-command 'save-close-buf)
     (keyamp-blink-start keyamp-modify-color keyamp-screen-color))
-   (t (keyamp-blink-start keyamp-command-color keyamp-screen-color))))
+   (t
+    (keyamp-blink-start keyamp-command-color keyamp-screen-color))))
 
 (defun keyamp-indicate-command ()
   "Indicate command."
@@ -3649,7 +3691,8 @@ after a delay even if there more read commands follow."
   (cond
    ((memq this-command keyamp-screen-command-commands)
     (keyamp-blink-start keyamp-screen-color keyamp-command-color))
-   (t (keyamp-blink-start keyamp-accent-color keyamp-command-color))))
+   (t
+    (keyamp-blink-start keyamp-accent-color keyamp-command-color))))
 
 (defun keyamp-indicate-io (&rest _)
   "Indicate io feedback from emacsclient evals or processes calls."
@@ -3700,7 +3743,8 @@ after a delay even if there more read commands follow."
         (keyamp-blink-start keyamp-read-color keyamp-modify-color))
        ((gethash this-command keyamp-modify-commands-hash)
         (keyamp-indicate-modify))
-       (t (keyamp-indicate-command)))
+       (t
+        (keyamp-indicate-command)))
       (when (or defining-kbd-macro
                 (memq this-command keyamp-blink-modify-commands)
                 (eq major-mode 'wdired-mode))
@@ -3756,7 +3800,7 @@ after a delay even if there more read commands follow."
     :initarg :color
     :documentation "Color.")
    (duration
-    :initform (eval keyamp-blink-duration)
+    :initform (symbol-value 'keyamp-blink-duration)
     :initarg :duration
     :documentation "Duration.")
    (timer
@@ -3782,7 +3826,8 @@ after a delay even if there more read commands follow."
   (oset obj curColor (face-attribute 'mode-line-front-space-face :foreground))
   (oset obj curCursor (frame-parameter nil 'cursor-type))
   (unless (eq (oref obj curColor) (oref obj color))
-    (keyamp-indicate (oref obj indicator) (oref obj curCursor) (eval (oref obj color)))
+    (keyamp-indicate (symbol-value (oref obj indicator))
+                     (oref obj curCursor) (symbol-value (oref obj color)))
     (when (timerp (oref obj timer))
       (cancel-timer (oref obj timer)))
     (oset obj timer (run-with-timer (oref obj duration) nil 'keyamp-blink-end obj))))
@@ -3790,8 +3835,10 @@ after a delay even if there more read commands follow."
 (cl-defgeneric keyamp-blink-end (obj) "End blink.")
 
 (cl-defmethod keyamp-blink-end ((obj keyamp-blinker))
-  "End blink with blinker."
-  (when (eq (oref obj indicator) mode-line-front-space)
+  "End blink with blinker. Reset values only if no changes."
+  (when (and (eq (symbol-value (oref obj indicator)) mode-line-front-space)
+             (eq (symbol-value (oref obj color)) (face-attribute 'mode-line-front-space-face :foreground))
+             (eq (oref obj curCursor) (frame-parameter nil 'cursor-type)))
     (keyamp-indicate (oref obj curIndicator)
                      (oref obj curCursor) (oref obj curColor))))
 
@@ -3799,24 +3846,24 @@ after a delay even if there more read commands follow."
   "Blink idle duration.")
 
 (defconst keyamp-blinker-idle
-  (keyamp-blinker :indicator keyamp-idle-indicator :color 'keyamp-idle-color
+  (keyamp-blinker :indicator 'keyamp-idle-indicator :color 'keyamp-idle-color
                   :duration keyamp-blink-idle-duration)
   "Blinker idle.")
 
 (defconst keyamp-blinker-command
-  (keyamp-blinker :indicator keyamp-command-indicator :color 'keyamp-command-color)
+  (keyamp-blinker :indicator 'keyamp-command-indicator :color 'keyamp-command-color)
   "Blinker command.")
 
 (defconst keyamp-blinker-io
-  (keyamp-blinker :indicator keyamp-io-indicator :color 'keyamp-io-color)
+  (keyamp-blinker :indicator 'keyamp-io-indicator :color 'keyamp-io-color)
   "Blinker io.")
 
 (defconst keyamp-blinker-insert
-  (keyamp-blinker :indicator keyamp-insert-indicator :color 'keyamp-insert-color)
+  (keyamp-blinker :indicator 'keyamp-insert-indicator :color 'keyamp-insert-color)
   "Blinker insert.")
 
 (defconst keyamp-blinker-modify
-  (keyamp-blinker :indicator keyamp-modify-indicator :color 'keyamp-modify-color)
+  (keyamp-blinker :indicator 'keyamp-modify-indicator :color 'keyamp-modify-color)
   "Blinker modify.")
 
 (defconst keyamp-prefix-io
@@ -3868,8 +3915,8 @@ after a delay even if there more read commands follow."
 (defun keyamp-idle-init ()
   "Idle init.
 Cancel isearch. Deactivate region. Deactivate transient keymaps.
-Cleanup echo area. Quit minibuffer. Quit wait key sequence."
-  (let ((default-directory user-emacs-directory))
+Cleanup echo area. Quit minibuffer. Indicate idle. Quit wait key sequence."
+  (let ((default-directory (expand-file-name "~/")))
     (when isearch-mode
       (isearch-cancel-clean))
     (when (region-active-p)
@@ -3882,9 +3929,11 @@ Cleanup echo area. Quit minibuffer. Quit wait key sequence."
       (run-at-time nil nil 'message nil))
     (when (minibufferp)
       (keyamp-minibuffer-quit))
-    (keyboard-quit)
     (when (fboundp 'minibuffer-line)
-      (minibuffer-line))))
+      (minibuffer-line))
+    (keyamp-blink-start keyamp-idle-color keyamp-command-color)
+    (when (keymapp (key-binding (this-command-keys-vector) t))
+      (discard-input))))
 
 (defun keyamp-idle-detect ()
   "Idle detect."

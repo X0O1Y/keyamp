@@ -2372,7 +2372,8 @@ command, so that next buffer shown is a user buffer."
 (defun alt-buf ()
   "Alternate buffer."
   (interactive)
-  (if (string-equal (buffer-name (other-buffer)) "*Ibuffer*")
+  (if (or (string-equal (buffer-name (other-buffer)) "*Ibuffer*")
+          (string-equal (buffer-name (other-buffer)) "*vterm clock*"))
       (toggle-ibuffer)
     (switch-to-buffer (other-buffer))))
 

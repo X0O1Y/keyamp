@@ -8319,7 +8319,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Dictionary"
+                "/Finder"
               ]
             }
           ],
@@ -8371,7 +8371,7 @@
           },
           "to_after_key_up": [
             {
-              "shell_command": "open -a Dictionary"
+              "shell_command": "open -a Finder"
             }
           ],
           "to_if_held_down": [
