@@ -4,16 +4,16 @@
 Input model based on [[file:packages/keyamp.el][Keyamp]] for Emacs.
 
 ** Keyboard Layouts
-- ANSI keyboard
+- Standard keyboard
 - Virtual keyboard
 - Split keyboard
 
-* ANSI keyboard
+* Standard keyboard
 
-- QWERTY included by default
-- [[http://www.keyboard-layout-editor.com/#/gists/106550cd49793787784ed1b9c9117c3d][Layout]] based on [[file:layouts/mac/ukelele/Engram.bundle][Engineer Engram]]
-- [[file:layouts/mac/karabiner/karabiner.json][Karabiner]] config file. Emacs Keyamp mode integration
+- QWERTY by default ([[http://www.keyboard-layout-editor.com/#/gists/106550cd49793787784ed1b9c9117c3d][Layout]] based on [[file:layouts/mac/ukelele/Engram.bundle][Engineer Engram]])
+- [[file:layouts/mac/karabiner/karabiner.json][Karabiner]] Emacs integration
 - Automatic non-ASCII layouts support for command bindings
+- Standard keyboard non-QWERTY ASCII layout on Emacs level
 - Hand swap
 
 [[screenshots/ansi-keyboard.png]]
