@@ -3271,7 +3271,7 @@
               ]
             },
             {
-              "key_code": "v",
+              "key_code": "x",
               "repeat": false,
               "halt": true
             }
@@ -3466,7 +3466,7 @@
               ]
             },
             {
-              "key_code": "x",
+              "key_code": "v",
               "repeat": false,
               "halt": true
             }
