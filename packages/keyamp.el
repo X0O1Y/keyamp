@@ -218,7 +218,7 @@ present in `quail-keyboard-layout-alist'."
     ("q" . "p")  ("w" . "u")  ("e" . "i") ("r" . "o")  ("t" . "y")
     ("a" . "h")  ("s" . "j")  ("d" . "k") ("f" . "l")  ("g" . ";")
     ("z" . "/")  ("x" . ".")  ("c" . ",") ("v" . "m")  ("b" . "n")
-    ("y" . "t")  ("u" . "w")  ("i" . "e") ("o" . "r")  ("p" . "q")
+    ("y" . "t")  ("u" . "r")  ("i" . "e") ("o" . "w")  ("p" . "q")
     ("h" . "g")  ("j" . "s")  ("k" . "d") ("l" . "f")  (";" . "a")
     ("n" . "b")  ("m" . "v")  ("," . "c") ("." . "x")  ("/" . "z")
 
@@ -238,7 +238,7 @@ present in `quail-keyboard-layout-alist'."
     ("й" . "з")  ("ц" . "г")  ("у" . "ш") ("к" . "щ")  ("е" . "н")
     ("ф" . "р")  ("ы" . "о")  ("в" . "л") ("а" . "д")  ("п" . "ж")
                  ("ч" . "ю")  ("с" . "б") ("м" . "ь")  ("и" . "т")
-    ("н" . "е")  ("г" . "ц")  ("ш" . "у") ("щ" . "к")  ("з" . "й")
+    ("н" . "е")  ("г" . "к")  ("ш" . "у") ("щ" . "ц")  ("з" . "й")
     ("р" . "п")  ("о" . "а")  ("л" . "в") ("д" . "ы")  ("ж" . "ф")
     ("т" . "и")  ("ь" . "м")  ("б" . "с") ("ю" . "ч")
 
@@ -251,10 +251,58 @@ present in `quail-keyboard-layout-alist'."
     ("Т" . "И")  ("Ь" . "М")  ("Б" . "С") ("Ю" . "Ч"))
   "Alist for hand-swapping keys.")
 
+(defconst keyamp--hand-swap-direction
+  '(("w" . "r") ("s" . "f") ("m" . "."))
+  "Alist for hand-swapping keys pairs which must swap direction back.
+E.g. \"s\" swap with \"f\" and vise versa because horizontal must stay same.
+Keep only left to right pair in the alist, remap right to left as well.")
+
+(defconst keyamp--hand-swap-suffix "-hand-swap" "Hand swap suffix for naming.")
+
+(defun keyamp--hand-swap-direction-advice (&optional Remove)
+  "Advice add for hand swap direction or remove if REMOVE."
+  (mapc
+   (lambda (pair)
+     (mapc
+      (lambda (char)
+        (when-let ((cmd (lookup-key keyamp-command-map (keyamp--convert-kbd-str char)))
+                   (cmd-swap (intern (concat (symbol-name cmd) keyamp--hand-swap-suffix))))
+          (if Remove
+              (advice-remove cmd cmd-swap)
+            (advice-add cmd :override cmd-swap))))
+      (list (car pair) (cdr pair))))
+   keyamp--hand-swap-direction))
+
+(defun keyamp--hand-swap-direction-defun (Pair)
+  "Generate defun for hand swap direction advice."
+  (when-let ((cmd (lookup-key keyamp-command-map (keyamp--convert-kbd-str (car Pair))))
+             (cmd-swap (lookup-key keyamp-command-map (keyamp--convert-kbd-str (cdr Pair)))))
+    (eval
+     `(defun ,(intern (concat (symbol-name cmd-swap) keyamp--hand-swap-suffix)) ()
+        ,(format "Hand swap direction swap back for `%s'." cmd-swap)
+        (interactive)
+        (keyamp--hand-swap-direction-advice :remove)
+        (unwind-protect
+            (keyamp-command-execute ',cmd)
+          (keyamp--hand-swap-direction-advice))))))
+
 (defun hand-swap-activate ()
   "Activate hand swap."
   (when keyamp-karabinerp
     (keyamp-set-var-karabiner keyamp-karabiner-hand-swap "1"))
+  (unless (fboundp ; Once
+           (intern
+            (concat
+             (symbol-name
+              (lookup-key keyamp-command-map
+                          (keyamp--convert-kbd-str
+                           (caar keyamp--hand-swap-direction))))
+             keyamp--hand-swap-suffix)))
+    (mapc
+     (lambda (pair)
+       (keyamp--hand-swap-direction-defun pair)
+       (keyamp--hand-swap-direction-defun (cons (cdr pair) (car pair))))
+     keyamp--hand-swap-direction))
   (mapc
    (lambda (pair)
      (keymap-set key-translation-map
@@ -262,10 +310,7 @@ present in `quail-keyboard-layout-alist'."
                  (when-let ((char (cdr pair)))
                    (keyamp--convert-kbd-str char))))
    keyamp--hand-swap)
-  (advice-add 'open-line :override #'open-line-hand-swap)
-  (advice-add 'newline :override #'newline-hand-swap)
-  (advice-add 'backward-bracket :override #'backward-bracket-hand-swap)
-  (advice-add 'forward-bracket :override #'forward-bracket-hand-swap)
+  (keyamp--hand-swap-direction-advice)
   (when (fboundp 'set-cursor-face-hand-swap)
     (set-cursor-face-hand-swap)
     (add-hook 'after-make-frame-functions 'set-cursor-face-hand-swap 90))
@@ -281,10 +326,7 @@ present in `quail-keyboard-layout-alist'."
                  (keyamp--convert-kbd-str (car pair)) nil))
    keyamp--hand-swap)
   (keyamp-key-translation) ; Restore
-  (advice-remove 'open-line #'open-line-hand-swap)
-  (advice-remove 'newline #'newline-hand-swap)
-  (advice-remove 'backward-bracket #'backward-bracket-hand-swap)
-  (advice-remove 'forward-bracket #'forward-bracket-hand-swap)
+  (keyamp--hand-swap-direction-advice :remove)
   (when (fboundp 'set-cursor-face)
     (set-cursor-face)
     (remove-hook 'after-make-frame-functions 'set-cursor-face-hand-swap))
@@ -3233,7 +3275,7 @@ keyboard ASCII CHAR."
 (defconst keyamp-blink-modify-commands
   '(kmacro-record               stopwatch
     python-format-buffer        save-buffer-isearch-cancel
-    toggle-primary-input-method emacs-lisp-indent)
+    emacs-lisp-indent)
   "List of commands to blink modify after.")
 
 (defconst keyamp-blink-io-commands

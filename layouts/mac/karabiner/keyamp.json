@@ -421,7 +421,7 @@
             ]
           },
           "parameters": {
-            "basic.to_delayed_action_delay_milliseconds": 150
+            "basic.to_delayed_action_delay_milliseconds": 200
           }
         },
         {
@@ -585,12 +585,6 @@
             }
           ],
           "to": [
-            {
-              "set_variable": {
-                "name": "spacebar pressed",
-                "value": 0
-              }
-            },
             {
               "key_code": "delete_or_backspace"
             }
@@ -1232,7 +1226,7 @@
               ]
             },
             {
-              "key_code": "o",
+              "key_code": "u",
               "repeat": false,
               "halt": true
             }

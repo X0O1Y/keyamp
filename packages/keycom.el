@@ -640,34 +640,6 @@ The list of brackets to jump to is defined by `right-brackets'."
   (interactive)
   (re-search-forward (regexp-opt right-brackets) nil t))
 
-(defun backward-bracket-hand-swap ()
-  "Hand swap corner case for `backward-bracket'."
-  (advice-remove 'forward-bracket #'forward-bracket-hand-swap)
-  (command-execute 'forward-bracket)
-  (advice-add 'forward-bracket :override #'forward-bracket-hand-swap))
-
-(defun forward-bracket-hand-swap ()
-  "Hand swap corner case for `forward-bracket'."
-  (advice-remove 'backward-bracket #'backward-bracket-hand-swap)
-  (command-execute 'backward-bracket)
-  (advice-add 'backward-bracket :override #'backward-bracket-hand-swap))
-
-(defun open-line-hand-swap ()
-  "Hand swap corner case for `open-line'."
-  (interactive)
-  (advice-remove 'newline #'newline-hand-swap)
-  (command-execute 'newline)
-  (advice-add 'newline :override #'newline-hand-swap))
-
-(defun newline-hand-swap ()
-  "Hand swap corner case for `newline'."
-  (interactive)
-  (advice-remove 'open-line #'open-line-hand-swap)
-  (advice-remove 'newline #'newline-hand-swap) ; open-line runs newline inside
-  (command-execute 'open-line)
-  (advice-add 'open-line :override #'open-line-hand-swap)
-  (advice-add 'newline :override #'newline-hand-swap))
-
 (defun goto-match-br ()
   "Move cursor to the matching bracket.
 If cursor is not on a bracket, call `backward-up-list'.
@@ -3641,7 +3613,7 @@ This checks in turn:
   "Open these video file extensions with `open-in-external-app'.")
 
 (defconst external-extensions
-  '("mp3" "m4a" "flac" "torrent" "exe" "xlsx" "docx" "dmg")
+  '("mp3" "m4a" "flac" "torrent" "exe" "xlsx" "docx" "dmg" "ods")
   "Open these file extensions with `open-in-external-app'.")
 
 (setq external-extensions (append external-extensions video-extensions))
@@ -3652,8 +3624,8 @@ This checks in turn:
   (if (string-equal (file-name-extension buffer-file-name) "json")
       (progn
         (json-pretty-print-buffer)
-        (message "%s" "Pretty print json"))
-    (message "%s" "Not json")))
+        (message "%s" "Pretty print JSON"))
+    (user-error "%s" "Not JSON")))
 
 (defun org-insert-source-code ()
   "Insert source code block."
