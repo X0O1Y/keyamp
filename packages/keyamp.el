@@ -958,7 +958,7 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
     ("9" . org-insert-source-code)
     ("0" . toggle-theme)
     ("-" . reformat-lines)
-    ("=" . mark-defun) ; Corner case for Russian
+    ("=" . mark-defun)
 
     ("y"  . toggle-case-fold-search)
     ("u"  . backward-punct)
