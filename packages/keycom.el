@@ -3122,6 +3122,11 @@ Open new terminal if already in terminal."
 
 (advice-add 'vterm-send-return :before #'vterm-capture-command)
 
+(defun vterm-set-point (&rest _)
+  "Set point to cur point for vterm."
+  (when (eq major-mode 'vterm-mode)
+    (vterm-goto-char (point))))
+
 (defun vterm-read-send-key ()
   "Read next input event and send it to the libvterm.
 Custom, added prompt on event read."
@@ -3311,7 +3316,6 @@ and reverse-search-history in bashrc."
 (defun vterm-vi ()
   "Activate vi mode transient."
   (interactive)
-  (blink-cursor-mode 1)
   (vterm-reset-cursor-point))
 
 (defun vterm-vi-self-insert ()
@@ -3801,7 +3805,14 @@ Use as around advice e.g. for mouse left click after double click."
   (when pixel-scroll-mode
     (pixel-scroll-pixel-up 1)))
 
-(defalias 'view-messages 'view-echo-area-messages)
+(defun view-messages ()
+  "Custom for `view-echo-area-messages', display window below selected."
+  (interactive)
+  (with-current-buffer (messages-buffer)
+    (goto-char (point-max))
+    (let ((win (display-buffer-below-selected (current-buffer) nil)))
+      (set-window-point win (point))
+      win)))
 
 (defun save-all-unsaved ()
   (interactive)

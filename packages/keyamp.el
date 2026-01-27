@@ -472,13 +472,16 @@ Map `keymap-set' over each corresponding non-ASCII input method char to CMD."
   "Return t if not defining or executing kbd macro."
   (not (or defining-kbd-macro executing-kbd-macro)))
 
-(defmacro keyamp--set (KeymapName CmdList &optional CommandMode InsertMode How Timeout)
+(defmacro keyamp--set (KeymapName CmdList &optional
+                                  CommandMode InsertMode How Timeout On-enter On-exit)
   "Map `set-transient-map' using `advice-add' over a list CMDLIST.
 
 Advice default HOW :after might be changed by specific HOW. Activate
 COMMANDMODE or INSERTMODE mode optionally. Deactivate repeat mode
 after idle for TIMEOUT seconds. Ignore the advice when defining or
-executing kbd macro."
+executing kbd macro.
+Optional arg ON-EXIT, if non-nil, specifies a function that is
+called, with no arguments, after MAP is deactivated."
   (declare (indent defun))
   `(progn
      ,@(mapcar
@@ -493,7 +496,7 @@ executing kbd macro."
                            (when (and ,CommandMode
                                       keyamp-insert-p)
                              (keyamp-command))
-                           (keyamp-repeat-init ,KeymapName)
+                           (keyamp-repeat-init ,KeymapName ,On-enter ,On-exit)
                            (keyamp-cancel-repeat-idle-timer)
                            (when (and ,Timeout
                                       (not keyamp-insert-p))
@@ -848,10 +851,6 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
     ("]"  . make-frame-command)
     ("\\" . yt-dlp)
 
-    ;; TODO: Scripting corner cases for Russian
-    ("G"  . toggle-comment)     ; slash
-    ("H"  . universal-argument) ; slash hold down
-
     ("h"  . prog-new)
 
                                            ("j i"   . widen)
@@ -889,7 +888,12 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
 
     ("C-^" . keyamp-script-leader-map)     ("C-_" . keyamp-script-leader-map)
     ("C-+" . keyamp-script-leader-map)     ("C-И" . keyamp-script-leader-map)
-                                           ("C-b" . keyamp-script-leader-map)))
+    ("C-b" . keyamp-script-leader-map)
+
+    ;; Scripting corner cases for Russian
+    ("G"  . toggle-comment)     ; Slash
+    ("H"  . universal-argument) ; Slash hold down
+    ))
 
 (if (display-graphic-p)
     (keyamp--map keyamp-lleader-map
@@ -969,13 +973,6 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
     ("]"  . make-frame-command) ; Same for left leader
     ("\\" . empty-bin)
 
-    ;; TODO: Scripting corner cases for Russian
-    (")"  . empty-bin)     ; backslash hold down
-    ("("  . lock-screen)   ; backslash
-    ("N"  . tree-view)     ; close bracket
-    ("G"  . goto-match-br) ; slash
-    ("H"  . view-messages) ; slash hold down
-
     ("h" . page-up-half)
     ("j" . isearch-wback)
     ("k" . end-of-block)
@@ -997,7 +994,15 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
 
     ("C-^" . keyamp-script-leader-map)     ("C-_" . keyamp-script-leader-map)
     ("C-+" . keyamp-script-leader-map)     ("C-И" . keyamp-script-leader-map)
-                                           ("C-b" . keyamp-script-leader-map)))
+    ("C-b" . keyamp-script-leader-map)
+
+    ;; Scripting corner cases for Russian
+    (")"  . empty-bin)     ; Backslash hold down
+    ("("  . lock-screen)   ; Backslash
+    ("N"  . tree-view)     ; Close bracket
+    ("G"  . goto-match-br) ; Slash
+    ("H"  . view-messages) ; Slash hold down
+    ))
 
 (if (display-graphic-p)
     (keyamp--map keyamp-rleader-map
@@ -1078,6 +1083,7 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
   (advice-add 'mouse-set-point   :around #'lookup-around)
   (advice-add 'mouse-set-point   :before #'scroll-one-pixel)
   (advice-add 'mouse-set-point   :after  #'keyamp-command-if-insert)
+  (advice-add 'mouse-set-point   :after  #'vterm-set-point)
   (advice-add 'mouse-drag-region :before #'copy-selection))
 
 (advice-add 'keyamp-insert :before #'delete-before)
@@ -1831,6 +1837,7 @@ keyboard ASCII CHAR."
       (backward-bracket    . dired-jump)
       (insert-space-before . dired-unzip)
       (reformat-lines      . dired-decrypt)
+      (periodic-chart      . dired-decrypt)
       (del-word            . dired-unmark-all-marks)
       (query-replace       . dired-zip)
       (backward-del-word   . dired-do-chmod)
@@ -2272,7 +2279,8 @@ keyboard ASCII CHAR."
   (keyamp--remap vterm-mode-map
     '(;; Left half
       (insert-space-before . vterm-shell-vi-cmd)      ; Q Sync point and activate shell vi cmd mode transient
-      (reformat-lines      . vterm-tmux-close-window) ; SPC Q
+      (reformat-lines      . vterm-tmux-close-window) ; SPC -
+      (periodic-chart      . vterm-tmux-close-window) ; SPC 1
       (backward-del-word   . vterm-shell-vi-cmd)      ; W Sync point or do modify if in transient
       (undo                . vterm-undo)              ; E
       (del-word            . vterm-shell-vi-cmd)      ; R Sync point or do modify if in transient
@@ -2359,9 +2367,20 @@ keyboard ASCII CHAR."
         vterm-shell-vi-cmd    vterm-shell-vi-self-insert
         vterm-shell-vi-l      vterm-shell-vi-u
         vterm-shell-vi-o      vterm-shell-vi-d
-        vterm-shell-vi-fdel))
+        vterm-shell-vi-fdel) nil nil nil nil
+        'keyamp-blink-cursor-mode-activate
+        'keyamp-blink-cursor-mode-deactivate)
     ;; Vi insert sync with keyamp
-    (add-hook 'keyamp-insert-hook 'vterm-shell-vi-insert))
+    (add-hook 'keyamp-insert-hook 'vterm-shell-vi-insert)
+    (advice-add 'vterm-set-point :after
+            (lambda (&rest _) "transient"
+              (when (eq major-mode 'vterm-mode)
+                (let ((p (point)))
+                  (vterm-reset-cursor-point)
+                  (if (eq (point) p)
+                      (keyamp-repeat-init keymap 'keyamp-blink-cursor-mode-activate
+                                          'keyamp-blink-cursor-mode-deactivate)
+                    (goto-char p)))))))
 
   (with-sparse-keymap ; Move word repeat
     (keyamp--remap keymap '((bchar . vterm-shell-vi-u) (fchar . vterm-shell-vi-o)))
@@ -2444,7 +2463,7 @@ keyboard ASCII CHAR."
         (isearch-forward . vterm-tmux-copy-self-insert)))
     (keyamp--set keymap
       '(vterm-tmux-copy     vterm-tmux-copy-self-insert
-                            vterm-tmux-copy-hpu vterm-tmux-copy-hpd) :command))
+        vterm-tmux-copy-hpu vterm-tmux-copy-hpd) :command))
 
   (with-sparse-keymap
     (keyamp--map-return keymap keyamp-ret)
@@ -2490,7 +2509,8 @@ keyboard ASCII CHAR."
       '(("<left>" . vterm-vi-self-insert) ("<right>" . vterm-vi-self-insert)
         ("<up>"   . vterm-vi-self-insert) ("<down>"  . vterm-vi-self-insert)
         ("C-q" . keyamp-command)))
-    (keyamp--set keymap '(vterm-vi vterm-vi-self-insert vterm-vi-escape) :command))
+    (keyamp--set keymap '(vterm-vi vterm-vi-self-insert vterm-vi-escape) :command nil nil nil
+      'keyamp-blink-cursor-mode-activate 'keyamp-blink-cursor-mode-deactivate))
 
   (defun vterm-vi-auto (&rest _)
     "Auto enable vi mode."
@@ -2824,6 +2844,7 @@ keyboard ASCII CHAR."
   (keyamp--remap python-ts-mode-map
     '((newline           . python-return-and-indent)
       (reformat-lines    . python-format-buffer)
+      (periodic-chart    . python-format-buffer)
       (describe-variable . xref-find-references)))
   (with-sparse-keymap
     (keyamp--map-leader keymap '(python-indent-or-complete . python-de-indent))
@@ -3464,6 +3485,16 @@ insert cancel the timer.")
   "Use blink cursor to indicate transient maps like vi or recursive modes like
  isearch. Disable blink cursor with `keyamp-command-init'.")
 
+(defun keyamp-blink-cursor-mode-activate ()
+  "Activate function of transient map indication with blink cursor."
+  (when keyamp-blink-cursor-mode
+    (blink-cursor-mode 1)))
+
+(defun keyamp-blink-cursor-mode-deactivate ()
+  "Deactivate function of transient map indication with blink cursor."
+  (when keyamp-blink-cursor-mode
+    (blink-cursor-mode -1)))
+
 (defun keyamp-command-init ()
   "Set command mode."
   (keyamp-repeat-deactivate)
@@ -3476,9 +3507,7 @@ insert cancel the timer.")
     (funcall keyamp--deactivate-command-fun))
   (setq keyamp--deactivate-command-fun
         (set-transient-map keyamp-command-map (lambda () t)))
-  (keyamp-indicate-command)
-  (when keyamp-blink-cursor-mode
-    (blink-cursor-mode -1)))
+  (keyamp-indicate-command))
 
 (defun keyamp-insert-init (&rest _)
   "Enter insert mode."
@@ -3755,10 +3784,16 @@ after a delay even if there more read commands follow."
 (defvar keyamp--deactivate-repeat-fun nil "Repeat mode deactivate function.")
 (defvar keyamp--repeat-idle-timer nil "Repeat mode idle timer.")
 
-(defun keyamp-repeat-init (Keymap)
-  "Init repeat mode."
+(defun keyamp-repeat-init (Keymap &optional On-enter On-exit)
+  "Init repeat mode.
+Optional arg ON-ENTER, if non-nil, specifies a function that is
+called, with no arguments, before KEYMAP is activated.
+Optional arg ON-EXIT, if non-nil, specifies a function that is
+called, with no arguments, after KEYMAP is deactivated."
   (setq keyamp-repeat-p t)
-  (setq keyamp--deactivate-repeat-fun (set-transient-map Keymap)))
+  (when (functionp On-enter)
+    (funcall On-enter))
+  (setq keyamp--deactivate-repeat-fun (set-transient-map Keymap nil On-exit)))
 
 (defun keyamp-cancel-repeat-idle-timer ()
   "Cancel `keyamp--repeat-idle-timer'."
@@ -3868,9 +3903,7 @@ after a delay even if there more read commands follow."
       (when (memq this-command '(keyamp-escape ignore keyamp-ignore))
         (keyamp-blink keyamp-blinker-idle))
       (when (memq this-command keyamp-blink-io-commands)
-        (keyamp-blink keyamp-blinker-io)
-        (when (eq this-command 'vterm-shell-vi-cmd)
-          (modify-all-frames-parameters '((cursor-type . hollow)))))
+        (keyamp-blink keyamp-blinker-io))
       (when (memq this-command keyamp-blink-command-commands)
         (keyamp-blink keyamp-blinker-command)))))
 
