@@ -733,9 +733,9 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
     ("`" . alternate-frame)      ("~"  . keyamp-insert-and-self-insert)
     ("1" . kmacro-record)        ("!"  . keyamp-insert-and-self-insert)
     ("2" . kmacro-play)          ("@"  . keyamp-insert-and-self-insert)
-    ("3" . kmacro-helper)        ("#"  . keyamp-insert-and-self-insert)
+    ("3" . terminal)             ("#"  . keyamp-insert-and-self-insert)
     ("4" . append-to-r1)         ("$"  . keyamp-insert-and-self-insert)
-    ("5" . terminal)             ("%"  . keyamp-insert-and-self-insert)
+    ("5" . config)               ("%"  . keyamp-insert-and-self-insert)
 
     ("q" . insert-space-before)  ("Q"  . keyamp-insert-and-self-insert)
     ("w" . backward-del-word)    ("W"  . keyamp-insert-and-self-insert)
@@ -756,7 +756,7 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
     ("b" . toggle-case)          ("B"  . keyamp-insert-and-self-insert)
 
     ;; Right half
-    ("6" . pass)                 ("^"  . keyamp-insert-and-self-insert)
+    ("6" . search-string)        ("^"  . keyamp-insert-and-self-insert)
     ("7" . jump-to-register)     ("&"  . keyamp-insert-and-self-insert)
     ("8" . point-to-register)    ("*"  . keyamp-insert-and-self-insert)
     ("9" . proced-defer)         ("("  . keyamp-insert-and-self-insert)
@@ -764,11 +764,11 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
     ("-" . enlarge-window)       ("_"  . keyamp-insert-and-self-insert)
     ("=" . goto-match-br)        ("+"  . keyamp-insert-and-self-insert)
 
-    ("y"  . occur-cur-word)      ("Y"  . keyamp-insert-and-self-insert)
+    ("y"  . pass)                ("Y"  . keyamp-insert-and-self-insert)
     ("u"  . back-word)           ("U"  . keyamp-insert-and-self-insert)
     ("i"  . previous-line)       ("I"  . keyamp-insert-and-self-insert)
     ("o"  . forw-word)           ("O"  . keyamp-insert-and-self-insert)
-    ("p"  . jump-mark)           ("P"  . keyamp-insert-and-self-insert)
+    ("p"  . buf-or-bookmark)     ("P"  . keyamp-insert-and-self-insert)
     ("["  . toggle-ibuffer)      ("{"  . keyamp-insert-and-self-insert)
     ("]"  . tree-view)           ("}"  . keyamp-insert-and-self-insert)
     ("\\" . lock-screen)         ("|"  . keyamp-insert-and-self-insert)
@@ -791,10 +791,10 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
     ("<up>"    . up-line)
     ("<down>"  . down-line)
 
-    ("<prior>" . pass)
-    ("<next>"  . next-vterm-buf)
-    ("<home>"  . password-store)
-    ("<end>"   . prev-vterm-buf)))
+    ("<prior>" . ignore)
+    ("<next>"  . ignore)
+    ("<home>"  . ignore)
+    ("<end>"   . ignore)))
 
 (keyamp--map-leader keyamp-lleader-map '(select-word . select-quote))
 (keyamp--map-return keyamp-lleader-map execute-extended-command)
@@ -830,7 +830,7 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
     ("b" . toggle-prev-case)
 
     ;; Left leader right half
-    ("6" . quit)
+    ("6" . find-name-dired)
     ("7" . number-to-register)
     ("8" . sql)
     ("9" . screenshot)
@@ -838,7 +838,7 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
     ("-" . reformat-lines)
     ("=" . mark-defun)
 
-    ("y" . find-name-dired)
+    ("y" . quit)
     ("u" . flymake-goto-prev-error)
 
     ("i i"   . copy-file-path)
@@ -846,7 +846,7 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
     ("i <escape>" . ignore)                ("i RET" . show-in-desktop)
 
     ("o"  . flymake-goto-next-error)
-    ("p"  . show-kill-ring)
+    ("p"  . bookmark-jump-remote)
     ("["  . toggle-frame-maximized)
     ("]"  . make-frame-command)
     ("\\" . yt-dlp)
@@ -956,7 +956,7 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
     ("b" . title-case-region-or-line)
 
     ;; Right leader right half
-    ("6" . password-store)
+    ("6" . toggle-case-fold-search)
     ("7" . copy-to-register)
     ("8" . insert-register)
     ("9" . org-insert-source-code)
@@ -964,7 +964,7 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
     ("-" . reformat-lines)
     ("=" . mark-defun)
 
-    ("y"  . toggle-case-fold-search)
+    ("y"  . password-store)
     ("u"  . backward-punct)
     ("i"  . beg-of-block-rev)
     ("o"  . forward-punct)
@@ -974,7 +974,7 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
     ("\\" . empty-bin)
 
     ("h" . page-up-half)
-    ("j" . isearch-wback)
+    ("j" . occur-cur-word)
     ("k" . end-of-block)
     ("l" . isearch-wforw)
     (";" . page-dn-half)
@@ -1001,7 +1001,7 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
     ("("  . lock-screen)   ; Backslash
     ("N"  . tree-view)     ; Close bracket
     ("G"  . goto-match-br) ; Slash
-    ("H"  . view-messages) ; Slash hold down
+    ("H"  . goto-match-br) ; Slash hold down
     ))
 
 (if (display-graphic-p)
@@ -1017,10 +1017,10 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
         ("<mouse-3>" . ignore))))
 
 (keyamp--map-double
-  '((keyamp-escape  . alternate-frame) (other-win     . buf-or-bookmark)
+  '((keyamp-escape  . alternate-frame) (other-win     . jump-mark)
     (beg-of-line    . beg-of-buf)      (end-of-lyne   . end-of-buf)
     (proced-defer   . save-close-buf)  (sh-defer      . delete-other-windows)
-    (occur-cur-word . search-string)   (kmacro-record . keyamp-delete)))
+    (kmacro-record  . keyamp-delete)))
 
 
 ;; Remaps
@@ -1075,11 +1075,8 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
 ;; Pass single key through the network
 (keyamp--map global-map '(("<f10>" . exec-query) ("<f12>" . keyamp-escape)))
 
-;; Disable universal arg for digit 6
-(keyamp--map universal-argument-map '(("6" . nil)))
-
 (when (display-graphic-p) ; Mouse
-  (keyamp--map global-map '(("<double-mouse-1>" . select-quote) ("<mouse-3>" . mouse-3)))
+  (keyamp--map global-map '(("<double-mouse-1>" . open-file) ("<mouse-3>" . mouse-3)))
   (advice-add 'mouse-set-point   :around #'lookup-around)
   (advice-add 'mouse-set-point   :before #'scroll-one-pixel)
   (advice-add 'mouse-set-point   :after  #'keyamp-command-if-insert)
@@ -1243,7 +1240,7 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
       (cut-text-block      . ignore)
       (goto-match-br       . ignore)
       (shrink-whitespaces  . ignore)
-      (del-back            . buf-or-bookmark)
+      (del-back            . save-close-buf)
       (toggle-comment      . ignore)
       (cut-line            . ignore)
       (kill-line           . split-view)
@@ -1251,7 +1248,6 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
       (paste-or-prev       . tasks)
       (backward-bracket    . dired-jump)
       (forward-bracket     . save-close-buf)
-      (kmacro-helper       . config)
       (up-line             . view-messages)
       (down-line           . screen-idle)
       (back-char           . next-buf)
@@ -1343,7 +1339,8 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
 (with-sparse-keymap
   (keyamp--remap keymap
     '((open-line       . prev-buf)       (newline       . next-buf)
-      (forward-bracket . save-close-buf) (keyamp-insert . keyamp-escape)))
+      (forward-bracket . save-close-buf) (keyamp-insert . keyamp-escape)
+      (del-back        . save-close-buf)))
   (keyamp--set keymap '(save-close-buf)))
 
 (with-sparse-keymap
@@ -1355,7 +1352,8 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
   (keyamp--set keymap '(volume-increase volume-decrease) nil nil nil keyamp-delay-2))
 
 (with-sparse-keymap
-  (keyamp--remap keymap '((open-line . shrink-window-horizontally) (newline . enlarge-window-horizontally)))
+  (keyamp--remap keymap
+    '((open-line . shrink-window-horizontally) (newline . enlarge-window-horizontally)))
   (keyamp--set keymap '(enlarge-window-horizontally shrink-window-horizontally)
     nil nil nil keyamp-delay-2))
 
@@ -1479,6 +1477,11 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
   (keyamp--remap keymap '((previous-line . backward-sexp) (next-line . forward-sexp)))
   (keyamp--set keymap '(backward-sexp forward-sexp)))
 
+(with-sparse-keymap
+  (keyamp--remap keymap '((other-win . jump-mark)))
+  (keyamp--set keymap '(jump-mark) nil nil nil nil
+    'keyamp-blink-cursor-mode-activate 'keyamp-blink-cursor-mode-deactivate))
+
 ;; U and O act as leader keys.
 (defvar keyamp--deactivate-leader-fun nil "Virtual leader deactivate function.")
 (defvar keyamp-virtual-leader-timer nil "Virtual leader deactivate timer.")
@@ -1526,12 +1529,10 @@ keyboard ASCII CHAR."
               (lambda () "virtual leader" (keyamp-virtual-leader-init keymap))))
 
 (with-sparse-keymap
-  (keyamp--map-leader keymap '(newline . open-line))
-  (keyamp--remap keymap '((open-line . downloads) (newline . tools)))
   (keyamp--remap keymap
     '((back-word     . select-line)   (forw-word        . select-block)
       (previous-line . beg-of-block)  (next-line        . end-of-block)
-      (bchar         . isearch-wback) (backward-bracket . dired-jump)))
+      (bchar         . isearch-wback) (backward-bracket . home-jump)))
   (advice-add 'forw-word :after
               (lambda () "virtual leader" (keyamp-virtual-leader-init keymap))))
 
@@ -1543,20 +1544,19 @@ keyboard ASCII CHAR."
 (advice-add-macro '(select-word      select-quote
                     select-line      select-block
                     backup-and-copy  isearch-wback
-                    prev-buf         tools)
+                    home-jump)
                   :before 'keyamp-virtual-leader-return-before)
 
 ;; G acts as leader key.
 (with-sparse-keymap
-  (keyamp--map-leader keymap '(toggle-ibuffer . toggle-ibuffer))
+  (keyamp--map-leader keymap '(nil . keyamp-delete))
   (keyamp--map-escape keymap deactivate-region)
-  (keyamp--map-return keymap buf-or-bookmark)
+  (keyamp--map-return keymap downloads)
   (keyamp--remap keymap
     '((undo            . todo)
       (del-back        . delete-window)
       (newline         . toggle-pin-window)
       (activate-region . rectangle)
-      (toggle-case     . downloads)
       (other-win       . jump-8)
       (isearch-forward . jump-7)))
 
@@ -1572,10 +1572,9 @@ keyboard ASCII CHAR."
     (deactivate-region)))
 
 (advice-add-macro
- '(buf-or-bookmark   jump-6
-   jump-7            jump-8
-   downloads         delete-window
-   toggle-pin-window toggle-ibuffer)
+ '(vt-conn   toggle-pin-window
+   jump-7    jump-8
+   downloads delete-window keyamp-delete)
  :before 'keyamp-deactivate-region)
 
 (with-sparse-keymap
@@ -1716,6 +1715,7 @@ keyboard ASCII CHAR."
     (keyamp--map-tab keymap comp-forw)
     (keyamp--map-backtab keymap comp-forw-rev)
     (keyamp--map-std keymap 'keyamp-insert-minibuffer)
+    (keyamp--map keymap '(("K" . comp-forw))) ; Exception
     (keyamp--map keymap
       '(("<left>"  . isearch-backward)         ("<right>" . keyamp-minibuffer-shift)
         ("<up>"    . select-word)              ("<down>"  . comp-forw)
@@ -1764,9 +1764,8 @@ keyboard ASCII CHAR."
                     :after 'keyamp-insert-init)
 
   (keyamp--map minibuffer-inactive-mode-map
-    '(("<mouse-1>" . toggle-ibuffer) ("<double-mouse-1>" . ignore)
-      ("<left-fringe> <mouse-1>"  . execute-extended-command)
-      ("<right-fringe> <mouse-1>" . view-messages)))
+    '(("<mouse-1>" . toggle-messages)      ("<double-mouse-1>" . ignore)
+      ("<left-fringe> <mouse-1>" . ignore) ("<right-fringe> <mouse-1>" . ignore)))
   (keyamp--remap minibuffer-inactive-mode-map '((mouse-3 . radio-next))))
 
 (with-eval-after-load 'icomplete
@@ -1836,7 +1835,6 @@ keyboard ASCII CHAR."
     '((keyamp-insert       . dired-find-file)
       (backward-bracket    . dired-jump)
       (insert-space-before . dired-unzip)
-      (reformat-lines      . dired-decrypt)
       (periodic-chart      . dired-decrypt)
       (del-word            . dired-unmark-all-marks)
       (query-replace       . dired-zip)
@@ -1846,7 +1844,7 @@ keyboard ASCII CHAR."
       (open-line           . prev-dired-buf)
       (del-back            . dired-toggle-mark)
       (newline             . next-dired-buf)
-      (toggle-comment      . revert-buffer)
+      (toggle-comment      . dired-omit-mode)
       (cut-line            . dired-kill-subdir)
       (cut-text-block      . dired-maybe-insert-subdir)
       (paste-or-prev       . dired-create-directory)
@@ -1854,8 +1852,7 @@ keyboard ASCII CHAR."
       (toggle-prev-case    . vt-conn-tramp-docker)
       (copy-to-r1          . dired-do-copy)
       (paste-from-r1       . dired-do-rename)
-      (mark-whole-buffer   . dired-toggle-marks)
-      (kmacro-helper       . config)))
+      (mark-whole-buffer   . dired-toggle-marks)))
 
   (with-sparse-keymap
     (keyamp--map-leader keymap '(dired-toggle-mark . dired-toggle-mark))
@@ -1917,14 +1914,12 @@ keyboard ASCII CHAR."
       (goto-match-br       . view-messages)
       (shrink-whitespaces  . calendar-split)
       (open-line           . prev-buf)
-      (del-back            . alt-buf)
+      (del-back            . ibuffer-do-delete)
       (newline             . next-buf)
-      (toggle-comment      . view-messages)
       (cut-line            . prev-eww-buf)
       (paste-or-prev       . tasks)
       (toggle-case         . downloads)
-      (forward-bracket     . ibuffer-do-delete)
-      (kmacro-helper       . config)
+      (forward-bracket     . nil)
       (del-word            . toggle-gnus)
       (forw-char           . screen-idle-return)
       (back-char           . screen-idle)
@@ -2071,11 +2066,10 @@ keyboard ASCII CHAR."
       (paste-or-prev     . tasks)
       (toggle-case       . downloads)
       (backward-bracket  . dired-jump)
-      (kmacro-helper     . config)
       (forw-char         . screen-idle-escape)
       (back-char         . screen-idle-return)
       (kmacro-record     . alarm)
-      (pass              . stopwatch-lap)
+      (search-string     . stopwatch-lap)
       (jump-to-register  . stopwatch)
       (point-to-register . timer)
       (insert-register   . timer-stop)
@@ -2276,10 +2270,10 @@ keyboard ASCII CHAR."
   (keyamp--map-tab vterm-mode-map vterm-send-tab)
   (keyamp--map-backtab vterm-mode-map vterm-send-backtab)
 
+  (keyamp--map vterm-mode-map '(("C-c C-c" . vterm-c-c)))
   (keyamp--remap vterm-mode-map
     '(;; Left half
       (insert-space-before . vterm-shell-vi-cmd)      ; Q Sync point and activate shell vi cmd mode transient
-      (reformat-lines      . vterm-tmux-close-window) ; SPC -
       (periodic-chart      . vterm-tmux-close-window) ; SPC 1
       (backward-del-word   . vterm-shell-vi-cmd)      ; W Sync point or do modify if in transient
       (undo                . vterm-undo)              ; E
@@ -2316,7 +2310,8 @@ keyboard ASCII CHAR."
 
   (with-sparse-keymap
     (keyamp--map-leader keymap '(next-line . previous-line))
-    (keyamp--remap keymap '((previous-line . vterm-up-vi-cmd) (next-line . vterm-down)))
+    (keyamp--remap keymap
+      '((previous-line . vterm-up-vi-cmd) (next-line . vterm-down)))
     (keyamp--set keymap '(vterm-history-search) nil :insert)
     (keyamp--set keymap '(vterm-up-vi-cmd vterm-down vterm-yank-pop) :command))
 
@@ -2324,7 +2319,8 @@ keyboard ASCII CHAR."
     (keyamp--map-leader keymap '(vterm-tmux-copy . vterm-up-vi-cmd))
     (keyamp--map-tab keymap change-wd)
     (keyamp--map-backtab keymap vterm-history-search)
-    (keyamp--set keymap '(vterm-send-return term-interrupt-subjob) nil :insert)
+    (keyamp--set keymap '(vterm-send-return term-interrupt-subjob vterm-c-c)
+      nil :insert)
     (keyamp--set keymap '(vterm-vi-save-quit vterm-vi-quit))
 
     (defun keyamp-input-timer-payload-vterm ()
@@ -2333,13 +2329,16 @@ keyboard ASCII CHAR."
                  keyamp-insert-p)
         (keyamp-repeat-deactivate-init keymap)))
 
-    (advice-add 'keyamp-input-timer-payload :after #'keyamp-input-timer-payload-vterm))
+    (advice-add 'keyamp-input-timer-payload
+                :after #'keyamp-input-timer-payload-vterm))
 
-  (advice-add-macro '(vterm-send-return term-interrupt-subjob) :after 'keyamp-input-timer)
+  (advice-add-macro '(vterm-send-return term-interrupt-subjob vterm-c-c)
+                    :after 'keyamp-input-timer)
 
   (with-sparse-keymap
     (keyamp--map-return keymap keyamp-ret)
-    (keyamp--remap keymap '((open-line . vterm-tmux-prev-window) (newline . vterm-tmux-next-window)))
+    (keyamp--remap keymap
+      '((open-line . vterm-tmux-prev-window) (newline . vterm-tmux-next-window)))
     (keyamp--set keymap '(vterm-tmux-prev-window vterm-tmux-next-window)))
 
   (with-sparse-keymap
@@ -2598,7 +2597,6 @@ keyboard ASCII CHAR."
       (undo               . split-window-below)
       (del-word           . gnus-group-enter-server-mode)
       (cut-text-block     . calc)
-      (goto-match-br      . view-messages)
       (open-line          . prev-buf)
       (del-back           . gnus-group-get-new-news)
       (newline            . next-buf)
@@ -2606,8 +2604,7 @@ keyboard ASCII CHAR."
       (copy-line          . screen-idle)
       (paste-or-prev      . tasks)
       (backward-bracket   . downloads)
-      (forward-bracket    . save-close-buf)
-      (kmacro-helper      . config))))
+      (forward-bracket    . save-close-buf))))
 
 (with-eval-after-load 'gnus-art
   (push 'gnus-article-mode keyamp-lines-move-modes)
@@ -2660,10 +2657,10 @@ keyboard ASCII CHAR."
       (sh-defer           . recentf-open-most-recent-file-0)
       (kmacro-record      . recentf-open-most-recent-file-1)
       (kmacro-play        . recentf-open-most-recent-file-2)
-      (kmacro-helper      . recentf-open-most-recent-file-3)
+      (terminal           . recentf-open-most-recent-file-3)
       (append-to-r1       . recentf-open-most-recent-file-4)
-      (terminal           . recentf-open-most-recent-file-5)
-      (pass               . recentf-open-most-recent-file-6)
+      (config             . recentf-open-most-recent-file-5)
+      (search-string      . recentf-open-most-recent-file-6)
       (jump-to-register   . recentf-open-most-recent-file-7)
       (point-to-register  . recentf-open-most-recent-file-8)
       (proced-defer       . recentf-open-most-recent-file-9)))
@@ -2674,9 +2671,9 @@ keyboard ASCII CHAR."
 (with-sparse-keymap
   (keyamp--remap keymap
     '((sh-defer          . radio-channel-0) (kmacro-record    . radio-channel-1)
-      (kmacro-play       . radio-channel-2) (kmacro-helper    . radio-channel-3)
-      (append-to-r1      . radio-channel-4) (terminal         . radio-channel-5)
-      (pass              . radio-channel-6) (jump-to-register . radio-channel-7)
+      (kmacro-play       . radio-channel-2) (terminal         . radio-channel-3)
+      (append-to-r1      . radio-channel-4) (config           . radio-channel-5)
+      (search-string     . radio-channel-6) (jump-to-register . radio-channel-7)
       (point-to-register . radio-channel-8) (proced-defer     . radio-channel-9)))
   (keyamp--set keymap
     '(radio radio-next radio-prev radio-channel-0
@@ -2890,7 +2887,7 @@ keyboard ASCII CHAR."
     (keyamp--remap keymap
       '((point-to-register . toggle-sql-type)
         (jump-to-register  . toggle-sql-async-conn)
-        (pass              . toggle-sql-async-remote)))
+        (search-string     . toggle-sql-async-remote)))
     (keyamp--remap keymap '((jump-to-register . toggle-sql-async-conn)))
     (keyamp--set keymap
       '(sql toggle-sql-type exec-query
@@ -2937,8 +2934,7 @@ keyboard ASCII CHAR."
       (cut-text-block    . calc)
       (cut-line          . prev-eww-buf)
       (backward-bracket  . downloads)
-      (forward-bracket   . save-close-buf)
-      (kmacro-helper     . config)))
+      (forward-bracket   . save-close-buf)))
   (keyamp--remap special-mode-map
     '((undo              . split-window-below)
       (del-back          . alt-buf)

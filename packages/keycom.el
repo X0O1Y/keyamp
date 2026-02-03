@@ -426,18 +426,10 @@ Save point to register 6 before repeated call."
   (interactive)
   (if (region-active-p)
       (exchange-point-and-mark)
-    (unless (eq this-command last-command)
-      (point-to-register ?6))
     (let ((p (point)))
       (set-mark-command t)
       (when (eql p (point))
         (set-mark-command t)))))
-
-(defun jump-6 ()
-  "Jump to register 6."
-  (interactive)
-  (when (get-register ?6)
-    (jump-to-register ?6)))
 
 (defun jump-7 ()
   "Jump to register 7."
@@ -656,15 +648,23 @@ and `right-brackets'."
          (boundp 'frame-title-ru) (null frame-title-ru))
     (self-insert-command 1))
    ;; Base scenario
-   ((nth 3 (syntax-ppss)) (backward-up-list 1 'ESCAPE-STRINGS 'NO-SYNTAX-CROSSING))
-   (t (cond
-       ((eq (char-after) ?\") (forward-sexp))
-       ((eq (char-before) ?\") (backward-sexp))
-       ((looking-at (regexp-opt left-brackets)) (forward-sexp))
-       ((prog2 (backward-char)
-            (looking-at (regexp-opt right-brackets)) (forward-char))
-        (backward-sexp))
-       (t (backward-up-list 1 'ESCAPE-STRINGS 'NO-SYNTAX-CROSSING))))))
+   ((nth 3 (syntax-ppss))
+    (backward-up-list 1 'ESCAPE-STRINGS 'NO-SYNTAX-CROSSING))
+   (t
+    (cond
+     ((eq (char-after) ?\")
+      (forward-sexp))
+     ((eq (char-before) ?\")
+      (backward-sexp))
+     ((looking-at (regexp-opt left-brackets))
+      (forward-sexp))
+     ((prog2
+          (backward-char)
+          (looking-at (regexp-opt right-brackets))
+        (forward-char))
+      (backward-sexp))
+     (t
+      (backward-up-list 1 'ESCAPE-STRINGS 'NO-SYNTAX-CROSSING))))))
 
 (defun sort-lines-block-or-region ()
   "Like `sort-lines' but if no region, do the current block."
@@ -2438,12 +2438,14 @@ Switch to the same buffer type after close, e.g. user or project."
                  (concat user-emacs-directory "temp/")
                  (format-time-string "%Y%m%d-%H%M%S")
                  (random #xfffff))))))
-  (let ((type (if (project-buffer-p) "proj" "user")))
+  (let ((type (if (project-buffer-p) "proj" "user"))
+        (mode major-mode))
     (close-current-buffer)
     (cond
      ((eq major-mode 'dired-mode) nil)
      ((eq major-mode 'ibuffer-mode) nil)
-     ((eq major-mode 'vterm-mode)
+     ((and (eq major-mode 'vterm-mode)
+           (eq mode 'vterm-mode))
       (prev-vterm-buf))
      ((string-equal type "proj")
       (unless (project-buffer-p)
@@ -2794,21 +2796,12 @@ If the current buffer is not associated with a file nor dired, nothing's done."
   (isearch-repeat-backward)
   (setq this-command 'isearch-wback))
 
-(defun occur-cur-word-run ()
+(defun occur-cur-word ()
   "Call `occur' on current word."
   (interactive)
   (setq defer-timer nil)
   (occur (cur-word))
   (enlarge-window-split))
-
-(defun occur-cur-word ()
-  "Defer in order to reuse double key press for another command."
-  (interactive)
-  (if (timerp defer-timer)
-      (progn
-        (cancel-timer defer-timer)
-        (setq defer-timer nil))
-    (setq defer-timer (run-with-timer defer-timeout nil 'occur-cur-word-run))))
 
 (defun search-string ()
   "Search string in all files of current directory."
@@ -3021,8 +3014,7 @@ before actually send the cd command."
 (defun kmacro-helper ()
   "Keyboard macro helper. Ad hoc redefine."
   (interactive)
-  (setq this-command 'config)
-  (command-execute 'config))
+  t)
 
 (defvar kmacro-playp nil "Keyboard macro playback predicate.")
 (defvar kmacro-play-timer nil "Keyboard macro playback timer.")
@@ -3165,6 +3157,14 @@ Custom, added prompt on event read."
   "Send `<backtab>' to the libvterm. Keep custom."
   (interactive)
   (vterm-send-key "<backtab>"))
+
+(defun vterm-c-c ()
+  "Send invoking key to libvterm."
+  (interactive)
+  (when vterm--term
+    (dolist (key (vterm--translate-event-to-args
+                  last-command-event))
+      (apply #'vterm-send-key key))))
 
 (defun vterm-history-search ()
   "History search. Map C-o to history-incremental-search-backward in zshrc
@@ -3712,14 +3712,17 @@ Use as around advice e.g. for mouse left click after double click."
       (save-buffers-kill-terminal)))
 
 (defun mouse-3 (e)
-  "Mouse right click. Select word or if eww buffer then lookup translation."
+  "Mouse right click. Select word or if eww buffer then lookup translation.
+Second right click to select quote."
   (interactive "e")
   (mouse-set-point e)
   (if (eq major-mode 'eww-mode)
       (translate)
-    (when (use-region-p)
-      (deactivate-mark))
-    (select-word)))
+    (if (use-region-p)
+        (progn
+          (deactivate-mark)
+          (select-quote))
+      (select-word))))
 
 (defun calendar-split ()
   "Split calendar."
@@ -3813,6 +3816,13 @@ Use as around advice e.g. for mouse left click after double click."
     (let ((win (display-buffer-below-selected (current-buffer) nil)))
       (set-window-point win (point))
       win)))
+
+(defun toggle-messages ()
+  "Toggle `view-messages'."
+  (interactive)
+  (if-let ((win (get-buffer-window (messages-buffer))))
+      (delete-window win)
+    (view-messages)))
 
 (defun save-all-unsaved ()
   (interactive)
@@ -3955,10 +3965,24 @@ Marginalia annotation support."
     (let ((choice (minibuffer-with-setup-hook
                       (lambda ()
                         (setq-local completion-ignore-case t))
-                    (completing-read "M-x buffer: " collection nil t))))
+                    (completing-read "Buffer: " collection nil t))))
       (if (member choice buffers)
           (switch-to-buffer choice)
         (bookmark-jump choice)))))
+
+(defun bookmark-jump-remote ()
+  "Jump to bookmark whose remote matches current default-directory."
+  (interactive)
+  (if-let ((remote-method (file-remote-p default-directory))
+           (remote-prefix (substring default-directory 0 (length remote-method)))
+           (candidates
+            (cl-remove-if-not
+             (lambda (b)
+               (when-let ((loc (bookmark-location b)))
+                 (string-prefix-p remote-prefix loc)))
+             (bookmark-all-names))))
+      (bookmark-jump (completing-read "Jump remote bookmark: " candidates nil t))
+    (message "No matching bookmarks found")))
 
 (defun split-window-r ()
   "Delete other windows then split window right"
@@ -4050,9 +4074,21 @@ Click mouse select a window and close the others."
    (t
     (command-execute 'lock-screen))))
 
+(defun home-jump ()
+  "Jump to home dir (or / if remote root) via TRAMP."
+  (interactive)
+  (let* ((remote (file-remote-p default-directory))
+         (user (and remote (tramp-file-name-user (tramp-dissect-file-name remote)))))
+    (find-file
+     (if (and remote
+              (equal user "root"))
+         (concat remote "/")
+       "~/"))))
+
 (provide 'keycom)
 
 ;; Local Variables:
 ;; byte-compile-warnings: (not free-vars lexical unresolved)
 ;; End:
 ;;; keycom.el ends here
+
