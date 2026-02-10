@@ -3617,7 +3617,7 @@ This checks in turn:
   "Open these video file extensions with `open-in-external-app'.")
 
 (defconst external-extensions
-  '("mp3" "m4a" "flac" "torrent" "exe" "xlsx" "docx" "dmg" "ods")
+  '("mp3" "m4a" "flac" "torrent" "exe" "xlsx" "xlsb" "docx" "dmg" "ods")
   "Open these file extensions with `open-in-external-app'.")
 
 (setq external-extensions (append external-extensions video-extensions))
@@ -3970,18 +3970,44 @@ Marginalia annotation support."
           (switch-to-buffer choice)
         (bookmark-jump choice)))))
 
+(defconst bookmark-jump-remote-places
+  '("/"
+    "~/"
+    "/home/"
+    "/root/"
+    "/etc/"
+    "/var/log/"
+    "/var/www/"
+    "/tmp/"
+    "/usr/local/"
+    "/opt/"
+    "/srv/"
+    "/mnt/"
+    "/media/"
+    "~/.config/"
+    "~/.ssh/"
+    "/proc/"
+    "/sys/")
+  "Common jumping points on Unix-like machines.")
+
 (defun bookmark-jump-remote ()
   "Jump to bookmark whose remote matches current default-directory."
   (interactive)
   (if-let ((remote-method (file-remote-p default-directory))
            (remote-prefix (substring default-directory 0 (length remote-method)))
-           (candidates
-            (cl-remove-if-not
-             (lambda (b)
-               (when-let ((loc (bookmark-location b)))
-                 (string-prefix-p remote-prefix loc)))
-             (bookmark-all-names))))
-      (bookmark-jump (completing-read "Jump remote bookmark: " candidates nil t))
+           (cands-paths
+            (mapcar (lambda (p) (concat remote-prefix p))
+                    bookmark-jump-remote-places))
+           (cands (append cands-paths
+                          (cl-remove-if-not
+                           (lambda (b)
+                             (when-let ((loc (bookmark-location b)))
+                               (string-prefix-p remote-prefix loc)))
+                           (bookmark-all-names))))
+           (target (completing-read "Jump remote bookmark: " cands nil t)))
+      (if (member target cands-paths)
+          (find-file target)
+        (bookmark-jump target))
     (message "No matching bookmarks found")))
 
 (defun split-window-r ()

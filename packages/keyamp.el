@@ -1017,10 +1017,10 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
         ("<mouse-3>" . ignore))))
 
 (keyamp--map-double
-  '((keyamp-escape  . alternate-frame) (other-win     . jump-mark)
-    (beg-of-line    . beg-of-buf)      (end-of-lyne   . end-of-buf)
-    (proced-defer   . save-close-buf)  (sh-defer      . delete-other-windows)
-    (kmacro-record  . keyamp-delete)))
+  '((keyamp-escape . alternate-frame) (other-win   . jump-mark)
+    (beg-of-line   . beg-of-buf)      (end-of-lyne . end-of-buf)
+    (proced-defer  . save-close-buf)  (sh-defer    . delete-other-windows)
+    (kmacro-record . keyamp-delete)))
 
 
 ;; Remaps
@@ -1206,17 +1206,12 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
        cmd))))
 
 (defun keyamp-delete ()
-  "Keyamp delete command."
+  "Command for G leader control."
   (interactive)
-  (cond
-   ((eq major-mode 'dired-mode)
-    (keyamp-command-execute 'dired-do-delete))
-   ((eq major-mode 'eshell-mode)
-    (keyamp-command-execute 'eshell-interrupt-process))
-   ((eq major-mode 'vterm-mode)
-    (keyamp-command-execute 'term-interrupt-subjob))
-   (t
-    (keyamp-command-execute 'ignore))))
+  (if (eq major-mode 'dired-mode)
+      (set-transient-map keyamp-g-leader-map)
+    (set-mark-command nil) ; Activate region and emulate DEL press, see G leader
+    (set-transient-map keyamp-rleader-map)))
 
 
 ;; Repeat mode - screen commands
@@ -1550,15 +1545,14 @@ keyboard ASCII CHAR."
 ;; G acts as leader key.
 (with-sparse-keymap
   (keyamp--map-leader keymap '(nil . keyamp-delete))
+  (define-prefix-command 'keyamp-g-leader-map)
+  (keyamp--map-leader keyamp-g-leader-map '(nil . dired-do-delete))
   (keyamp--map-escape keymap deactivate-region)
   (keyamp--map-return keymap downloads)
   (keyamp--remap keymap
-    '((undo            . todo)
-      (del-back        . delete-window)
-      (newline         . toggle-pin-window)
-      (activate-region . rectangle)
-      (other-win       . jump-8)
-      (isearch-forward . jump-7)))
+    '((activate-region . rectangle)
+      (other-win       . delete-window)
+      (isearch-forward . jump-8)))
 
   (advice-add 'activate-region :after
               (lambda () "virtual leader G transient"
@@ -1571,11 +1565,8 @@ keyboard ASCII CHAR."
   (when (eq (mark) (point))
     (deactivate-region)))
 
-(advice-add-macro
- '(vt-conn   toggle-pin-window
-   jump-7    jump-8
-   downloads delete-window keyamp-delete)
- :before 'keyamp-deactivate-region)
+(advice-add-macro '(keyamp-delete jump-8 downloads delete-window)
+                  :before 'keyamp-deactivate-region)
 
 (with-sparse-keymap
   ;; Repeat half page up/down with I/K or DEL/SPC.
@@ -2293,7 +2284,7 @@ keyboard ASCII CHAR."
       (paste-from-r1       . vterm-tmux-copy)         ; SPC V Activate tmux copy mode
       (toggle-case         . prev-vterm-buf)          ; B
       (toggle-prev-case    . next-vterm-buf)          ; SPC B
-      (repeat-command      . prev-vterm-buf)          ; SPC 5
+      (revert-buffer       . prev-vterm-buf)          ; SPC 3
 
       ;; Right half
       (page-up-half        . vterm-tmux-copy-hpu)     ; DEL H
