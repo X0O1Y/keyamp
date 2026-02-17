@@ -69,23 +69,54 @@ translation of corresponding non-ASCII command key sequences and
 mapping to non-QWERTY layouts. Mappings defined in QWERTY notation
 throughout the code of the package.")
 
-(defvar keyamp-input-methods-to-std nil
-  "Input methods to standard keyboard (QWERTY layout) ASCII char.
-Primary methods pairs come first.")
+(eval-and-compile
+  (defvar keyamp-input-methods-to-std
+    '(("1" . "1") ("2" . "2") ("3" . "3") ("4" . "4") ("5" . "5")
+      ("6" . "6") ("7" . "7") ("8" . "8") ("9" . "9") ("0" . "0")
+      ("b" . "-") ("*" . "=") ("ё" . "`") ("й" . "q") ("ц" . "w")
+      ("у" . "e") ("к" . "r") ("е" . "t") ("н" . "y") ("г" . "u")
+      ("ш" . "i") ("щ" . "o") ("з" . "p") ("х" . "[") ("ъ" . "]")
+      ("ф" . "a") ("ы" . "s") ("в" . "d") ("а" . "f") ("п" . "g")
+      ("р" . "h") ("о" . "j") ("л" . "k") ("д" . "l") ("ж" . ";")
+      ("э" . "'") (")" . "\\") ("я" . "z") ("ч" . "x") ("с" . "c")
+      ("м" . "v") ("и" . "b") ("т" . "n") ("ь" . "m") ("б" . ",")
+      ("ю" . ".") ("h" . "/") ("N" . "!") ("y" . "@") ("№" . "#")
+      ("G" . "$") ("=" . "%") ("H" . "^") ("n" . "&") ("&" . "*")
 
-(mapc
- (lambda (method)
-   (activate-input-method method)
-   (mapc
-    (lambda (map)
-      (when-let ((to (char-to-string (car map)))
-                 (from (quail-get-translation (cadr map) to 1))
-                 ((characterp from))
-                 (from (char-to-string from)))
-        (push (cons from to) keyamp-input-methods-to-std)))
-    (cdr (quail-map)))
-   (activate-input-method nil))
- (reverse keyamp-input-methods))
+      ("Й" . "Q") ("Ц" . "W") ("У" . "E") ("К" . "R") ("Е" . "T")
+      ("Н" . "Y") ("Г" . "U") ("Ш" . "I") ("Щ" . "O") ("З" . "P")
+      ("Х" . "{") ("Ъ" . "}") ("Ф" . "A") ("Ы" . "S") ("В" . "D")
+      ("А" . "F") ("П" . "G") ("Р" . "H") ("О" . "J") ("Л" . "K")
+      ("Д" . "L") ("Ж" . ":") ("Э" . "\"") ("Я" . "Z") ("Ч" . "X")
+      ("С" . "C") ("М" . "V") ("И" . "B") ("Т" . "N") ("Ь" . "M")
+      ("Б" . "<") ("Ю" . ">") ("g" . "?") (";" . "`") ("'" . "w")
+      ("ק" . "e") ("ר" . "r") ("א" . "t") ("ט" . "y") ("ו" . "u")
+      ("ן" . "i") ("ם" . "o") ("פ" . "p") ("]" . "[") ("[" . "]")
+      ("ש" . "a") ("ד" . "s") ("ג" . "d") ("כ" . "f") ("ע" . "g")
+      ("י" . "h") ("ח" . "j") ("ל" . "k") ("ך" . "l") ("ף" . ";")
+      ("," . "'") ("ז" . "z") ("ס" . "x") ("ב" . "c") ("ה" . "v")
+      ("נ" . "b") ("מ" . "n") ("צ" . "m") ("ת" . ",") ("ץ" . ".")
+      ("." . "/") (")" . "(") ("(" . ")") ("}" . "{") ("{" . "}")
+      (">" . "<") ("<" . ">"))
+    "Input methods to standard keyboard (QWERTY layout) ASCII char.
+Primary method pairs come first. Keep data in code for compiled."))
+
+(defun keyamp-input-methods-to-std ()
+  "Recreate `keyamp-input-methods-to-std'."
+  (setq keyamp-input-methods-to-std nil)
+  (mapc
+   (lambda (method)
+     (activate-input-method method)
+     (mapc
+      (lambda (map)
+        (when-let ((to (char-to-string (car map)))
+                   (from (quail-get-translation (cadr map) to 1))
+                   ((characterp from))
+                   (from (char-to-string from)))
+          (push (cons from to) keyamp-input-methods-to-std)))
+      (cdr (quail-map)))
+     (activate-input-method nil))
+   (reverse keyamp-input-methods)))
 
 (push '("engineer-engram" . "\
                               \
@@ -416,8 +447,18 @@ converted according to `keyamp--convert-table'."
     (split-string CharStr " +"))
    " "))
 
+(eval-and-compile
+  (defun keyamp--std-to-non-ascii-list (Key)
+    "Standard keyboard ASCII char to list of input methods keys."
+    (mapcar
+     #'car
+     (seq-filter
+      (lambda (pair)
+        (string-equal (cdr pair) Key))
+      keyamp-input-methods-to-std))))
+
 (defmacro keyamp--map (KeymapName KeyCmdAlist)
-  "Map `keymap-set' over a alist KEYCMDALIST, with key layout remap."
+  "Map `keymap-set' over a alist KEYCMDALIST. Map input methods keys too."
   (declare (indent defun))
   `(progn
      ,@(mapcar
@@ -431,12 +472,8 @@ converted according to `keyamp--convert-table'."
           (mapcan
            (lambda (non-ascii)
              (when (> (string-to-char non-ascii) 127)
-               `((keymap-set ,KeymapName ,non-ascii ,(list 'quote (cdr pair))))))
-           (mapcar #'car
-                   (seq-filter
-                    (lambda (x)
-                      (string-equal (cdr x) (car pair)))
-                    keyamp-input-methods-to-std))))
+               `((keymap-set ,KeymapName ,non-ascii ',(cdr pair)))))
+           (keyamp--std-to-non-ascii-list (car pair))))
         (cadr KeyCmdAlist))))
 
 (defun keyamp--map-std (KeymapName Cmd)
@@ -450,11 +487,7 @@ Map `keymap-set' over each corresponding non-ASCII input method char to CMD."
         (lambda (non-ascii)
           (when (> (string-to-char non-ascii) 127)
             (keymap-set KeymapName non-ascii Cmd)))
-        (mapcar #'car
-                (seq-filter
-                 (lambda (x)
-                   (string-equal (cdr x) charStr))
-                 keyamp-input-methods-to-std)))))
+        (keyamp--std-to-non-ascii-list charStr))))
    keyamp-ascii-chars))
 
 (defmacro keyamp--remap (KeymapName CmdCmdAlist)
@@ -721,10 +754,10 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
     ("C-+" . keyamp-lleader-map) ("C-И" . keyamp-rleader-map) ; Russian-computer
                                  ("C-b" . keyamp-rleader-map) ; Hebrew (experimental)
 
-    ("<home>"  . beg-of-buf)
-    ("<end>"   . end-of-buf)
-    ("<prior>" . page-up-half)
-    ("<next>"  . page-dn-half)))
+    ("<home>"  . ignore)
+    ("<end>"   . ignore)
+    ("<prior>" . ignore)
+    ("<next>"  . ignore)))
 
 (keyamp--map-leader keyamp-command-map '(keyamp-lleader-map . keyamp-rleader-map))
 (keyamp--map-return keyamp-command-map keyamp-insert)
@@ -1474,8 +1507,7 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
 
 (with-sparse-keymap
   (keyamp--remap keymap '((other-win . jump-mark)))
-  (keyamp--set keymap '(jump-mark) nil nil nil nil
-    'keyamp-blink-cursor-mode-activate 'keyamp-blink-cursor-mode-deactivate))
+  (keyamp--set keymap '(jump-mark)))
 
 ;; U and O act as leader keys.
 (defvar keyamp--deactivate-leader-fun nil "Virtual leader deactivate function.")
@@ -1493,11 +1525,7 @@ keyboard ASCII CHAR."
   (mapcar
    (lambda (map)
      (vector (string-to-char map)))
-   (mapcar #'car
-           (seq-filter
-            (lambda (x)
-              (string-equal (cdr x) char))
-            keyamp-input-methods-to-std))))
+   (keyamp--std-to-non-ascii-list char)))
 
 (defun keyamp-virtual-leader-init (Keymap)
   "Set virtual leader transient KEYMAP."
@@ -1771,6 +1799,7 @@ keyboard ASCII CHAR."
     (keyamp--map-return keymap keyamp-minibuffer-return)
     (keyamp--remap keymap '((previous-line . comp-back) (next-line . comp-forw)))
     (keyamp--remap keymap '((up-line . comp-back) (down-line . comp-forw)))
+    (keyamp--map keymap '(("K" . comp-forw))) ; Exception: K hold down
     (keyamp--set keymap '(comp-back comp-forw)))
 
   (with-sparse-keymap
@@ -1810,6 +1839,7 @@ keyboard ASCII CHAR."
   (keyamp--map-leader keymap '(next-line . previous-line))
   (keyamp--remap keymap '((previous-line . ido-prev-match) (next-line . ido-next-match)))
   (keyamp--remap keymap '((up-line . ido-prev-match) (down-line . ido-next-match)))
+  (keyamp--map keymap '(("K" . ido-next-match)))
   (keyamp--set keymap '(ido-prev-match ido-next-match)))
 
 (with-sparse-keymap
@@ -1902,7 +1932,7 @@ keyboard ASCII CHAR."
       (backward-del-word   . sun-moon)
       (undo                . split-window-below)
       (cut-text-block      . calc)
-      (goto-match-br       . view-messages)
+      (goto-match-br       . toggle-messages)
       (shrink-whitespaces  . calendar-split)
       (open-line           . prev-buf)
       (del-back            . ibuffer-do-delete)
@@ -2046,7 +2076,7 @@ keyboard ASCII CHAR."
   (keyamp--remap org-agenda-mode-map
     '((keyamp-insert     . org-agenda-tasks)
       (del-word          . toggle-gnus)
-      (goto-match-br     . view-messages)
+      (goto-match-br     . toggle-messages)
       (open-line         . prev-buf)
       (del-back          . calendar-split)
       (newline           . next-buf)
@@ -2281,7 +2311,7 @@ keyboard ASCII CHAR."
       (toggle-comment      . vterm-read-send-key)     ; Z
       (cut-line            . vterm-clear)             ; X
       (paste-or-prev       . vterm-yank)              ; V
-      (paste-from-r1       . vterm-tmux-copy)         ; SPC V Activate tmux copy mode
+      (paste-from-r1       . paste-from-r1-vt)        ; SPC V
       (toggle-case         . prev-vterm-buf)          ; B
       (toggle-prev-case    . next-vterm-buf)          ; SPC B
       (revert-buffer       . prev-vterm-buf)          ; SPC 3
@@ -2811,7 +2841,8 @@ keyboard ASCII CHAR."
   (keyamp--map-tab emacs-lisp-mode-map emacs-lisp-indent)
   (keyamp--map-backtab emacs-lisp-mode-map emacs-lisp-indent)
   (keyamp--remap emacs-lisp-mode-map
-    '((reformat-lines . emacs-lisp-remove-paren-pair))))
+    '((reformat-lines . emacs-lisp-remove-paren-pair)
+      (periodic-chart . emacs-lisp-remove-paren-pair))))
 
 (with-eval-after-load 'perl-mode
   (keyamp--map-backtab perl-mode-map nil))
@@ -4119,6 +4150,7 @@ Cleanup echo area. Quit minibuffer. Indicate idle. Quit wait key sequence."
     (add-hook 'minibuffer-exit-hook  'keyamp-deactivate-region)
     (add-hook 'isearch-mode-hook     'keyamp-repeat-deactivate)
     (add-hook 'isearch-mode-end-hook 'keyamp-command)
+    (advice-add 'debugger-setup-buffer :after (lambda (&rest _) (keyamp-command)))
     (add-function :after after-focus-change-function #'keyamp-command-if-insert)))
 
 (provide 'keyamp)

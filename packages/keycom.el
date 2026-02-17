@@ -1805,6 +1805,15 @@ See also: `paste-from-r1', `copy-to-register'."
   (when (region-active-p) (delete-region (region-beginning) (region-end)))
   (insert-register ?1 t))
 
+(defun paste-from-r1-vt ()
+  "Copy register ?1 to kill-ring and yank it in vterm."
+  (interactive)
+  (when (eq major-mode 'vterm-mode)
+    (with-temp-buffer
+      (insert (substring-no-properties (get-register ?1)))
+      (copy-region-as-kill (point-min) (point-max)))
+    (vterm-yank)))
+
 (defun isearch-yank-r1 ()
   "Pull string from register-1 into search string."
   (interactive)
@@ -1842,9 +1851,9 @@ If there is selection, delete it first."
               '("ISO date: 2018-04-12"
                 "ISO full: 2018-04-12T22:46:11-07:00"
                 "ISO space: 2018-04-12 22:46:11-07:00"
-                "org mode:  <2018-04-12 Thu>"
-                "all digits:  20180412224611"
-                "weekday:  2018-04-12 Thursday"))
+                "org mode: <2018-04-12 Thu>"
+                "all digits: 20180412224611"
+                "weekday: 2018-04-12 Thursday"))
            (if (eq major-mode 'org-mode)
                "org mode: <2018-04-12 Thu>"
              "ISO date: 2018-04-12"))))
@@ -1854,12 +1863,15 @@ If there is selection, delete it first."
      (cond
       ((string-match "^ISO date" style) (format-time-string "%Y-%m-%d"))
       ((string-match "^org mode" style)
-       (concat " <" (let ((mm (number-to-string
-                                 (- (string-to-number (format-time-string "%M"))
-                                    (mod (string-to-number
-                                          (format-time-string "%M")) 5)))))
-                      (concat (format-time-string "%Y-%m-%d %a %H:")
-                              (if (= 1 (length mm)) "0") mm)) ">"))
+       (concat (when (and (not (bobp))
+                          (not (eq (char-before) ?\s)))
+                 " ") ; add space if no space
+               "<" (let ((mm (number-to-string
+                              (- (string-to-number (format-time-string "%M"))
+                                 (mod (string-to-number
+                                       (format-time-string "%M")) 5)))))
+                     (concat (format-time-string "%Y-%m-%d %a %H:")
+                             (if (= 1 (length mm)) "0") mm)) ">"))
       ((string-match "^all digits" style) (format-time-string "%Y%m%d%H%M%S"))
       ((string-match "^ISO full" style)
        (concat
@@ -3454,13 +3466,15 @@ and reverse-search-history in bashrc."
   "Modification of `org-todo'. Capitalize task."
   (interactive)
   (cond
-   ((eq major-mode 'org-mode) (org-todo))
+   ((eq major-mode 'org-mode)
+    (org-todo))
    ((eq major-mode 'org-agenda-mode)
     (if (org-get-at-bol 'org-marker) ; Avoid error
         (org-agenda-todo)
       (novel)))
-   (t (setq this-command 'ignore)
-      (command-execute 'ignore)))
+   (t
+    (setq this-command 'ignore)
+    (command-execute 'ignore)))
   (when (eq major-mode 'org-mode)
     (beginning-of-line)
     (title-case-region-or-line)))
@@ -3974,6 +3988,7 @@ Marginalia annotation support."
   '("/"
     "~/"
     "/home/"
+    "/home/gitlab-runner/builds/"
     "/root/"
     "/etc/"
     "/var/log/"
@@ -3985,6 +4000,7 @@ Marginalia annotation support."
     "/mnt/"
     "/media/"
     "~/.config/"
+    "~/.config/public-server/"
     "~/.ssh/"
     "/proc/"
     "/sys/")
