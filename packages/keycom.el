@@ -639,15 +639,6 @@ The list of brackets to jump to is defined by `left-brackets'
 and `right-brackets'."
   (interactive)
   (cond
-   ;; See equal sign mapping for russian, so because of conflict
-   ;; while for Engram it is free and can be remapped
-   ((equal "%" (this-command-keys))
-    (setq this-command 'text-scale-increase) (text-scale-increase 1))
-   ;; Next allows to call self insert if not russian
-   ((and (equal "=" (this-command-keys))
-         (boundp 'frame-title-ru) (null frame-title-ru))
-    (self-insert-command 1))
-   ;; Base scenario
    ((nth 3 (syntax-ppss))
     (backward-up-list 1 'ESCAPE-STRINGS 'NO-SYNTAX-CROSSING))
    (t
@@ -2117,7 +2108,12 @@ This function is used by buffer switching command and close buffer
 command, so that next buffer shown is a user buffer."
   (cond
    ((string-equal "*" (substring (buffer-name) 0 1)) nil)
-   ((memq major-mode '(eww-mode dired-mode help-mode doc-view-mode diary-mode)) nil)
+   ((memq major-mode '(messages-buffer-mode
+                       eww-mode
+                       dired-mode
+                       help-mode
+                       doc-view-mode
+                       diary-mode)) nil)
    ((string-equal (buffer-name) "scratch.el") nil)
    ((string-equal (buffer-name) "tetris-scores") nil)
    ((string-equal (buffer-name) "snake-scores") nil)
@@ -3991,6 +3987,7 @@ Marginalia annotation support."
     "/home/gitlab-runner/builds/"
     "/root/"
     "/etc/"
+    "/etc/systemd/system/"
     "/var/log/"
     "/var/www/"
     "/tmp/"

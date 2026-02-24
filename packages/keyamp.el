@@ -71,35 +71,30 @@ throughout the code of the package.")
 
 (eval-and-compile
   (defvar keyamp-input-methods-to-std
-    '(("1" . "1") ("2" . "2") ("3" . "3") ("4" . "4") ("5" . "5")
-      ("6" . "6") ("7" . "7") ("8" . "8") ("9" . "9") ("0" . "0")
-      ("b" . "-") ("*" . "=") ("ё" . "`") ("й" . "q") ("ц" . "w")
-      ("у" . "e") ("к" . "r") ("е" . "t") ("н" . "y") ("г" . "u")
-      ("ш" . "i") ("щ" . "o") ("з" . "p") ("х" . "[") ("ъ" . "]")
-      ("ф" . "a") ("ы" . "s") ("в" . "d") ("а" . "f") ("п" . "g")
-      ("р" . "h") ("о" . "j") ("л" . "k") ("д" . "l") ("ж" . ";")
-      ("э" . "'") (")" . "\\") ("я" . "z") ("ч" . "x") ("с" . "c")
-      ("м" . "v") ("и" . "b") ("т" . "n") ("ь" . "m") ("б" . ",")
-      ("ю" . ".") ("h" . "/") ("N" . "!") ("y" . "@") ("№" . "#")
-      ("G" . "$") ("=" . "%") ("H" . "^") ("n" . "&") ("&" . "*")
-
-      ("Й" . "Q") ("Ц" . "W") ("У" . "E") ("К" . "R") ("Е" . "T")
-      ("Н" . "Y") ("Г" . "U") ("Ш" . "I") ("Щ" . "O") ("З" . "P")
-      ("Х" . "{") ("Ъ" . "}") ("Ф" . "A") ("Ы" . "S") ("В" . "D")
-      ("А" . "F") ("П" . "G") ("Р" . "H") ("О" . "J") ("Л" . "K")
+    '(("ё" . "`") ("й" . "q") ("ц" . "w")  ("у" . "e") ("к" . "r")
+      ("е" . "t") ("н" . "y") ("г" . "u")  ("ш" . "i") ("щ" . "o")
+      ("з" . "p") ("х" . "[") ("ъ" . "]")  ("ф" . "a") ("ы" . "s")
+      ("в" . "d") ("а" . "f") ("п" . "g")  ("р" . "h") ("о" . "j")
+      ("л" . "k") ("д" . "l") ("ж" . ";")  ("э" . "'") ("я" . "z")
+      ("ч" . "x") ("с" . "c") ("м" . "v")  ("и" . "b") ("т" . "n")
+      ("ь" . "m") ("б" . ",") ("ю" . ".")  ("№" . "#") ("Ё" . "~")
+      ("Н" . "Y") ("Г" . "U") ("Ш" . "I")  ("Щ" . "O") ("З" . "P")
+      ("Х" . "{") ("Ъ" . "}") ("Ф" . "A")  ("Ы" . "S") ("В" . "D")
+      ("А" . "F") ("П" . "G") ("Р" . "H")  ("О" . "J") ("Л" . "K")
       ("Д" . "L") ("Ж" . ":") ("Э" . "\"") ("Я" . "Z") ("Ч" . "X")
-      ("С" . "C") ("М" . "V") ("И" . "B") ("Т" . "N") ("Ь" . "M")
-      ("Б" . "<") ("Ю" . ">") ("g" . "?") (";" . "`") ("'" . "w")
+      ("С" . "C") ("М" . "V") ("И" . "B")  ("Т" . "N") ("Ь" . "M")
+      ("Б" . "<") ("Ю" . ">")
+
       ("ק" . "e") ("ר" . "r") ("א" . "t") ("ט" . "y") ("ו" . "u")
-      ("ן" . "i") ("ם" . "o") ("פ" . "p") ("]" . "[") ("[" . "]")
-      ("ש" . "a") ("ד" . "s") ("ג" . "d") ("כ" . "f") ("ע" . "g")
-      ("י" . "h") ("ח" . "j") ("ל" . "k") ("ך" . "l") ("ף" . ";")
-      ("," . "'") ("ז" . "z") ("ס" . "x") ("ב" . "c") ("ה" . "v")
-      ("נ" . "b") ("מ" . "n") ("צ" . "m") ("ת" . ",") ("ץ" . ".")
-      ("." . "/") (")" . "(") ("(" . ")") ("}" . "{") ("{" . "}")
-      (">" . "<") ("<" . ">"))
+      ("ן" . "i") ("ם" . "o") ("פ" . "p") ("ש" . "a") ("ד" . "s")
+      ("ג" . "d") ("כ" . "f") ("ע" . "g") ("י" . "h") ("ח" . "j")
+      ("ל" . "k") ("ך" . "l") ("ף" . ";") ("ז" . "z") ("ס" . "x")
+      ("ב" . "c") ("ה" . "v") ("נ" . "b") ("מ" . "n") ("צ" . "m")
+      ("ת" . ",") ("ץ" . "."))
     "Input methods to standard keyboard (QWERTY layout) ASCII char.
-Primary method pairs come first. Keep data in code for compiled."))
+Primary method pairs come first. Keep data in code for compiled package
+since the list is required for `keyamp--map' macro expansion.
+Eval `keyamp-input-methods-to-std' to recreate the list."))
 
 (defun keyamp-input-methods-to-std ()
   "Recreate `keyamp-input-methods-to-std'."
@@ -112,6 +107,7 @@ Primary method pairs come first. Keep data in code for compiled."))
         (when-let ((to (char-to-string (car map)))
                    (from (quail-get-translation (cadr map) to 1))
                    ((characterp from))
+                   ((> from (1- (expt 2 7))))
                    (from (char-to-string from)))
           (push (cons from to) keyamp-input-methods-to-std)))
       (cdr (quail-map)))
@@ -191,6 +187,14 @@ corresponding non-ASCII key for primary input method in insert mode."
 (defconst toggle-std-to-cur-layout-silent t
   "Toggle standard keyboard without message.")
 
+(defun toggle-std-to-cur-layout-keymap (&optional Set)
+  "Toggle standard keyboard routine.
+Modify `key-translation-map', set when SET otherwise unset."
+  (mapc
+   (lambda (pair)
+     (keymap-set key-translation-map (car pair) (when Set (cdr pair))))
+   keyamp--convert-table))
+
 (defun toggle-std-to-cur-layout ()
   "Toggle translation standard keyboard to `keyamp-cur-layout' command.
 Activate when `keyamp-cur-layout' not available in OS. The layout must
@@ -219,11 +223,7 @@ present in `quail-keyboard-layout-alist'."
     (when (and (not toggle-std-to-cur-layout-silent)
                (eq this-command 'toggle-std-to-cur-layout))
       (message "Activated standard keyboard")))
-  (let ((define (get 'toggle-std-to-cur-layout 'state)))
-    (mapc
-     (lambda (pair)
-       (keymap-set key-translation-map (car pair) (when define (cdr pair))))
-     keyamp--convert-table))
+  (toggle-std-to-cur-layout-keymap (get 'toggle-std-to-cur-layout 'state))
   (keyamp-indicator keyamp-command-indicator))
 
 (defconst keyamp--hand-swap
@@ -317,6 +317,18 @@ Keep only left to right pair in the alist, remap right to left as well.")
             (keyamp-command-execute ',cmd)
           (keyamp--hand-swap-direction-advice))))))
 
+(defun toggle-hand-swap-keymap (&optional Set)
+  "Toggle hand swap routine.
+Modify `key-translation-map', set when SET otherwise unset."
+  (mapc
+   (lambda (pair)
+     (keymap-set key-translation-map
+                 (keyamp--convert-kbd-str (car pair))
+                 (when-let ((Set)
+                            (char (cdr pair)))
+                   (keyamp--convert-kbd-str char))))
+   keyamp--hand-swap))
+
 (defun hand-swap-activate ()
   "Activate hand swap."
   (when keyamp-karabinerp
@@ -334,13 +346,27 @@ Keep only left to right pair in the alist, remap right to left as well.")
        (keyamp--hand-swap-direction-defun pair)
        (keyamp--hand-swap-direction-defun (cons (cdr pair) (car pair))))
      keyamp--hand-swap-direction))
-  (mapc
-   (lambda (pair)
-     (keymap-set key-translation-map
-                 (keyamp--convert-kbd-str (car pair))
-                 (when-let ((char (cdr pair)))
-                   (keyamp--convert-kbd-str char))))
-   keyamp--hand-swap)
+  (if (get 'toggle-std-to-cur-layout 'state) ; Support standard keyboard
+      (progn
+        (toggle-std-to-cur-layout-keymap)
+        (mapc
+         (lambda (pair)
+           (keymap-set key-translation-map
+                       (car pair)
+                       (keyamp--convert-kbd-str
+                        (cdr
+                         (assoc
+                          (car (rassoc (cdr pair) keyamp--convert-table))
+                          keyamp--hand-swap)))))
+         keyamp--convert-table)
+        (mapc
+         (lambda (pair)
+           (keymap-set key-translation-map
+                       (car pair)
+                       (when-let ((char (cdr pair)))
+                         (keyamp--convert-kbd-str char))))
+         keyamp--hand-swap))
+    (toggle-hand-swap-keymap t))
   (keyamp--hand-swap-direction-advice)
   (when (fboundp 'set-cursor-face-hand-swap)
     (set-cursor-face-hand-swap)
@@ -351,17 +377,21 @@ Keep only left to right pair in the alist, remap right to left as well.")
   "Deactivate hand swap."
   (when keyamp-karabinerp
     (keyamp-set-var-karabiner keyamp-karabiner-hand-swap "0"))
-  (mapc
-   (lambda (pair)
-     (keymap-set key-translation-map
-                 (keyamp--convert-kbd-str (car pair)) nil))
-   keyamp--hand-swap)
+  (if (get 'toggle-std-to-cur-layout 'state)
+      (progn
+        (toggle-hand-swap-keymap)
+        (toggle-std-to-cur-layout-keymap)
+        (toggle-std-to-cur-layout-keymap t))
+    (toggle-hand-swap-keymap))
   (keyamp-key-translation) ; Restore
   (keyamp--hand-swap-direction-advice :remove)
   (when (fboundp 'set-cursor-face)
     (set-cursor-face)
     (remove-hook 'after-make-frame-functions 'set-cursor-face-hand-swap))
-  (keyamp-use-indicators "default"))
+  (keyamp-use-indicators
+   (if (get 'toggle-std-to-cur-layout 'state)
+       "standard"
+     "default")))
 
 (defconst toggle-hand-swap-silent t "Toggle hand swap without message.")
 
@@ -370,8 +400,6 @@ Keep only left to right pair in the alist, remap right to left as well.")
 Insert mode not affected."
   (interactive)
   (cond
-   ((get 'toggle-std-to-cur-layout 'state)
-    (user-error "Standard keyboard is active"))
    (keyamp-insert-p
     (user-error "Insert mode is active"))
    (isearch-mode
@@ -795,7 +823,7 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
     ("9" . proced-defer)         ("("  . keyamp-insert-and-self-insert)
     ("0" . sh-defer)             (")"  . keyamp-insert-and-self-insert)
     ("-" . enlarge-window)       ("_"  . keyamp-insert-and-self-insert)
-    ("=" . goto-match-br)        ("+"  . keyamp-insert-and-self-insert)
+    ("=" . text-scale-increase)  ("+"  . keyamp-insert-and-self-insert)
 
     ("y"  . pass)                ("Y"  . keyamp-insert-and-self-insert)
     ("u"  . back-word)           ("U"  . keyamp-insert-and-self-insert)
@@ -836,7 +864,7 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
 (keyamp--map-tab keyamp-lleader-map read-only-mode)
 (keyamp--map-backtab keyamp-lleader-map volume-decrease)
 (keyamp--map keyamp-lleader-map
-  '(;; Left leader left half
+  '( ;; Left leader left half
     ("`" . toggle-primary-input-method)
     ("1" . periodic-chart)
     ("2" . kmacro-play-toggle)
@@ -886,10 +914,10 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
 
     ("h"  . prog-new)
 
-                                           ("j i"   . widen)
-                                           ("j l"   . narrow-to-region-or-block)
-                                           ("j k"   . narrow-to-defun)
-                                           ("j j"   . diff-buffers)
+    ("j i"   . widen)
+    ("j l"   . narrow-to-region-or-block)
+    ("j k"   . narrow-to-defun)
+    ("j j"   . diff-buffers)
     ("j DEL" . whitespace-mode)            ("j SPC" . hl-line-mode)
     ("j <escape>" . ignore)                ("j RET" . toggle-word-wrap)
 
@@ -924,8 +952,10 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
     ("C-b" . keyamp-script-leader-map)
 
     ;; Scripting corner cases for Russian
-    ("G"  . toggle-comment)     ; Slash
-    ("H"  . universal-argument) ; Slash hold down
+    ("G"  . toggle-comment)      ; Slash
+    ("H"  . universal-argument)  ; Slash hold down
+    ("Y"  . enlarge-window)      ; Hyphen
+    ("T"  . text-scale-increase) ; Equal sign
     ))
 
 (if (display-graphic-p)
@@ -1034,7 +1064,7 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
     ("("  . lock-screen)   ; Backslash
     ("N"  . tree-view)     ; Close bracket
     ("G"  . goto-match-br) ; Slash
-    ("H"  . goto-match-br) ; Slash hold down
+    ("H"  . view-messages) ; Slash hold down
     ))
 
 (if (display-graphic-p)
@@ -1160,8 +1190,7 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
 (keyamp--map-tab isearch-mode-map isearch-forw)
 (keyamp--map-backtab isearch-mode-map isearch-back)
 (keyamp--map isearch-mode-map
-  '(("C-^" . keyamp-lleader-map)
-    ("C-t" . isearch-complete)))
+  '(("C-^" . keyamp-lleader-map) ("C-t" . isearch-complete)))
 (keyamp--remap isearch-mode-map '((paste-from-r1 . isearch-yank-r1)))
 
 (with-sparse-keymap
@@ -1271,9 +1300,10 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
       (del-back            . save-close-buf)
       (toggle-comment      . ignore)
       (cut-line            . ignore)
-      (kill-line           . split-view)
+      (kill-line           . ignore)
       (copy-line           . ignore)
       (paste-or-prev       . tasks)
+      (toggle-case         . tools)
       (backward-bracket    . dired-jump)
       (forward-bracket     . save-close-buf)
       (up-line             . view-messages)
@@ -1359,7 +1389,8 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
 
 (with-sparse-keymap
   (keyamp--remap keymap
-    '((backward-bracket . dired-jump) (forward-bracket . save-close-buf)))
+    '((backward-bracket . dired-jump) (forward-bracket . save-close-buf)
+      (del-back         . save-close-buf)))
   (keyamp--set keymap
     '(dired-jump downloads dired-find-file ibuffer-visit-buffer open-last-closed
       bookmark-jump widget-button-press alt-buf)))
@@ -1580,7 +1611,8 @@ keyboard ASCII CHAR."
   (keyamp--remap keymap
     '((activate-region . rectangle)
       (other-win       . delete-window)
-      (isearch-forward . jump-8)))
+      (isearch-forward . jump-8)
+      (tools           . jump-7)))
 
   (advice-add 'activate-region :after
               (lambda () "virtual leader G transient"
@@ -1593,7 +1625,7 @@ keyboard ASCII CHAR."
   (when (eq (mark) (point))
     (deactivate-region)))
 
-(advice-add-macro '(keyamp-delete jump-8 downloads delete-window)
+(advice-add-macro '(keyamp-delete jump-8 jump-7 downloads delete-window)
                   :before 'keyamp-deactivate-region)
 
 (with-sparse-keymap
@@ -1645,15 +1677,6 @@ keyboard ASCII CHAR."
   (keyamp--map-leader keymap '(down-line . up-line))
   (keyamp--remap keymap '((undo . button-back) (del-back . button-forw)))
   (keyamp--set keymap '(button-back button-forw)))
-
-(with-sparse-keymap
-  (keyamp--map-leader keymap '(next-line . next-line))
-  (keyamp--remap keymap '((next-line . recenter-top-bottom)))
-  (keyamp--set keymap '(recenter-top-bottom)) nil nil nil keyamp-delay-2)
-
-(with-sparse-keymap
-  (keyamp--map-return keymap toggle-truncate-lines)
-  (keyamp--set keymap '(toggle-truncate-lines)))
 
 
 ;; Repeat mode - modify commands
@@ -1939,7 +1962,7 @@ keyboard ASCII CHAR."
       (newline             . next-buf)
       (cut-line            . prev-eww-buf)
       (paste-or-prev       . tasks)
-      (toggle-case         . downloads)
+      (toggle-case         . tools)
       (forward-bracket     . nil)
       (del-word            . toggle-gnus)
       (forw-char           . screen-idle-return)
@@ -2047,7 +2070,8 @@ keyboard ASCII CHAR."
   (keyamp--map-escape query-replace-map exit)
   ;; Russian Т on ! place Engram, not nice but kind of exception
   ;; One should use shift 1 in Russian but before must notice input source
-  (keyamp--map query-replace-map '(("d" . skip) ("k" . act) ("Т" . automatic))))
+  (keyamp--map query-replace-map '(("d" . skip) ("k" . act) ("Т" . automatic)))
+  (keyamp--map-leader query-replace-map '(skip . act)))
 
 (with-eval-after-load 'shr
   (keyamp--remap shr-map '((keyamp-insert . shr-browse-url))))
@@ -2085,7 +2109,7 @@ keyboard ASCII CHAR."
       (toggle-comment    . org-agenda-redo)
       (cut-line          . prev-eww-buf)
       (paste-or-prev     . tasks)
-      (toggle-case       . downloads)
+      (toggle-case       . tools)
       (backward-bracket  . dired-jump)
       (forw-char         . screen-idle-escape)
       (back-char         . screen-idle-return)
