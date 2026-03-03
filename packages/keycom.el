@@ -2729,6 +2729,7 @@ If the current buffer is not associated with a file, nothing's done."
         (let ((backupName
                (concat fname "~" (format-time-string dateTimeFormat) "~")))
           (copy-file fname backupName t)
+          (kill-new backupName)
           (message "Backup %s" (replace-regexp-in-string (getenv "HOME") "~" fname)))
       (if (eq major-mode 'dired-mode)
           (progn
@@ -2753,8 +2754,8 @@ If the current buffer is not associated with a file nor dired, nothing's done."
 (defun backup-and-copy ()
   "Make backup and copy file path."
   (interactive)
-  (copy-file-path)
-  (make-backup-and-save))
+  (make-backup-and-save)
+  (copy-file-path))
 
 (defun save-buffer-silent ()
   "Save buffer without message."
@@ -3444,12 +3445,14 @@ and reverse-search-history in bashrc."
 (defun downloads ()
   "Go to downloads or temp."
   (interactive)
-  (if (equal (replace-regexp-in-string (getenv "HOME") "~" default-directory)
-             downloads-dir)
-      (find-file "~/.emacs.d/temp")
+  (if-let ((tmp (concat user-emacs-directory "temp/"))
+           ((equal (replace-regexp-in-string (getenv "HOME") "~" default-directory)
+                   downloads-dir))
+           ((eq major-mode 'dired-mode)))
+      (find-file tmp)
     (if (file-exists-p downloads-dir)
         (find-file downloads-dir)
-      (find-file "~/.emacs.d/temp"))))
+      (find-file tmp))))
 
 (defun org-agenda-tasks ()
   "Same as `org-agenda-switch-to', but call `tasks' in case of error."
@@ -3624,11 +3627,11 @@ This checks in turn:
 
 (defconst video-extensions
   '("mkv" "mp4" "avi" "mov" "ts" "mts" "m2ts" "webm" "vob" "aiff")
-  "Open these video file extensions with `open-in-external-app'.")
+  "Open video file extensions with `open-in-external-app'.")
 
 (defconst external-extensions
-  '("mp3" "m4a" "flac" "torrent" "exe" "xlsx" "xlsb" "docx" "dmg" "ods")
-  "Open these file extensions with `open-in-external-app'.")
+  '("mp3" "m4a" "flac" "torrent" "exe" "xlsx" "xlsb" "docx" "dmg" "ods" "7z")
+  "Open file extensions with `open-in-external-app'.")
 
 (setq external-extensions (append external-extensions video-extensions))
 
@@ -3987,7 +3990,9 @@ Marginalia annotation support."
     "/home/gitlab-runner/builds/"
     "/root/"
     "/etc/"
+    "/etc/nginx/"
     "/etc/systemd/system/"
+    "/etc/ssh/"
     "/var/log/"
     "/var/www/"
     "/tmp/"

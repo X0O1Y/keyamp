@@ -471,7 +471,7 @@ converted according to `keyamp--convert-table'."
    'identity
    (mapcar
     (lambda (char)
-      (if-let (x (cdr (assoc char keyamp--convert-table))) x char))
+      (or (cdr (assoc char keyamp--convert-table)) char))
     (split-string CharStr " +"))
    " "))
 
@@ -499,7 +499,7 @@ converted according to `keyamp--convert-table'."
         (lambda (pair)
           (mapcan
            (lambda (non-ascii)
-             (when (> (string-to-char non-ascii) 127)
+             (when (> (string-to-char non-ascii) (1- (expt 2 7)))
                `((keymap-set ,KeymapName ,non-ascii ',(cdr pair)))))
            (keyamp--std-to-non-ascii-list (car pair))))
         (cadr KeyCmdAlist))))
@@ -513,7 +513,7 @@ Map `keymap-set' over each corresponding non-ASCII input method char to CMD."
        (keymap-set KeymapName charStr Cmd)
        (mapc
         (lambda (non-ascii)
-          (when (> (string-to-char non-ascii) 127)
+          (when (> (string-to-char non-ascii) (1- (expt 2 7)))
             (keymap-set KeymapName non-ascii Cmd)))
         (keyamp--std-to-non-ascii-list charStr))))
    keyamp-ascii-chars))
@@ -552,7 +552,6 @@ called, with no arguments, after MAP is deactivated."
                          (when (and (keyamp-unless-kbd-macro)
                                     (or (eq real-this-command 'repeat)
                                         (eq this-command 'kill-region) ; Exception
-                                        (eq this-command 'undo) ; Exception
                                         (eq this-command ,(list 'quote cmd))))
                            (when (and ,CommandMode
                                       keyamp-insert-p)
@@ -899,7 +898,7 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
     ("-" . reformat-lines)
     ("=" . mark-defun)
 
-    ("y" . quit)
+    ("y" . pass-otp)
     ("u" . flymake-goto-prev-error)
 
     ("i i"   . copy-file-path)
@@ -910,14 +909,14 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
     ("p"  . bookmark-jump-remote)
     ("["  . toggle-frame-maximized)
     ("]"  . make-frame-command)
-    ("\\" . yt-dlp)
+    ("\\" . quit)
 
     ("h"  . prog-new)
 
-    ("j i"   . widen)
-    ("j l"   . narrow-to-region-or-block)
-    ("j k"   . narrow-to-defun)
-    ("j j"   . diff-buffers)
+                                           ("j i"   . widen)
+                                           ("j l"   . narrow-to-region-or-block)
+                                           ("j k"   . narrow-to-defun)
+                                           ("j j"   . diff-buffers)
     ("j DEL" . whitespace-mode)            ("j SPC" . hl-line-mode)
     ("j <escape>" . ignore)                ("j RET" . toggle-word-wrap)
 
@@ -1082,8 +1081,7 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
 (keyamp--map-double
   '((keyamp-escape . alternate-frame) (other-win   . jump-mark)
     (beg-of-line   . beg-of-buf)      (end-of-lyne . end-of-buf)
-    (proced-defer  . save-close-buf)  (sh-defer    . delete-other-windows)
-    (kmacro-record . keyamp-delete)))
+    (proced-defer  . save-close-buf)  (sh-defer    . delete-other-windows)))
 
 
 ;; Remaps
@@ -1389,8 +1387,7 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
 
 (with-sparse-keymap
   (keyamp--remap keymap
-    '((backward-bracket . dired-jump) (forward-bracket . save-close-buf)
-      (del-back         . save-close-buf)))
+    '((backward-bracket . dired-jump) (forward-bracket . save-close-buf)))
   (keyamp--set keymap
     '(dired-jump downloads dired-find-file ibuffer-visit-buffer open-last-closed
       bookmark-jump widget-button-press alt-buf)))
@@ -1586,7 +1583,7 @@ keyboard ASCII CHAR."
   (keyamp--remap keymap
     '((back-word     . select-line)   (forw-word        . select-block)
       (previous-line . beg-of-block)  (next-line        . end-of-block)
-      (bchar         . isearch-wback) (backward-bracket . home-jump)))
+      (bchar         . isearch-wback) (backward-bracket . downloads)))
   (advice-add 'forw-word :after
               (lambda () "virtual leader" (keyamp-virtual-leader-init keymap))))
 
@@ -1598,7 +1595,7 @@ keyboard ASCII CHAR."
 (advice-add-macro '(select-word      select-quote
                     select-line      select-block
                     backup-and-copy  isearch-wback
-                    home-jump)
+                    downloads)
                   :before 'keyamp-virtual-leader-return-before)
 
 ;; G acts as leader key.
@@ -1607,7 +1604,7 @@ keyboard ASCII CHAR."
   (define-prefix-command 'keyamp-g-leader-map)
   (keyamp--map-leader keyamp-g-leader-map '(nil . dired-do-delete))
   (keyamp--map-escape keymap deactivate-region)
-  (keyamp--map-return keymap downloads)
+  (keyamp--map-return keymap bookmark-set)
   (keyamp--remap keymap
     '((activate-region . rectangle)
       (other-win       . delete-window)
@@ -1625,7 +1622,7 @@ keyboard ASCII CHAR."
   (when (eq (mark) (point))
     (deactivate-region)))
 
-(advice-add-macro '(keyamp-delete jump-8 jump-7 downloads delete-window)
+(advice-add-macro '(keyamp-delete jump-8 jump-7 bookmark-set delete-window)
                   :before 'keyamp-deactivate-region)
 
 (with-sparse-keymap
@@ -1694,10 +1691,6 @@ keyboard ASCII CHAR."
   (keyamp--set keymap '(del-forw) nil nil nil keyamp-delay-2))
 
 (with-sparse-keymap
-  (keyamp--remap keymap '((split-window-below . undo-redo)))
-  (keyamp--set keymap '(undo undo-redo)))
-
-(with-sparse-keymap
   (keyamp--remap keymap '((del-back . cut-text-block)))
   (keyamp--set keymap '(cut-text-block)))
 
@@ -1753,13 +1746,13 @@ keyboard ASCII CHAR."
     (keyamp--map-leader keymap '(paste-or-prev . hist-back))
     (keyamp--map-escape keymap keyamp-minibuffer-escape)
     (keyamp--map-return keymap keyamp-minibuffer-return)
-    (keyamp--map keymap '(("C-t" . keyamp-minibuffer-shift)))
+    (keyamp--map keymap '(("C-t" . minibuffer-complete)))
     (keyamp--map-tab keymap comp-forw)
     (keyamp--map-backtab keymap comp-forw-rev)
     (keyamp--map-std keymap 'keyamp-insert-minibuffer)
     (keyamp--map keymap '(("K" . comp-forw))) ; Exception
     (keyamp--map keymap
-      '(("<left>"  . isearch-backward)         ("<right>" . keyamp-minibuffer-shift)
+      '(("<left>"  . isearch-backward)         ("<right>" . minibuffer-complete)
         ("<up>"    . select-word)              ("<down>"  . comp-forw)
         ("<prior>" . keyamp-minibuffer-escape) ("<next>"  . keyamp-minibuffer-escape)))
 
@@ -1783,8 +1776,8 @@ keyboard ASCII CHAR."
       (select-block  . hist-back)
       (up-line       . hist-back) (down-line . hist-forw)))
 
-  (keyamp--map-tab minibuffer-local-completion-map comp-forw) ; minibuffer-complete
-  (keyamp--map minibuffer-local-completion-map '(("C-t" . keyamp-minibuffer-shift)))
+  (keyamp--map-tab minibuffer-local-completion-map comp-forw)
+  (keyamp--map minibuffer-local-completion-map '(("C-t" . minibuffer-complete)))
   (keyamp--remap minibuffer-mode-map
     '((previous-line . hist-back) (next-line . hist-forw)
       (select-block  . hist-back)
@@ -1876,27 +1869,29 @@ keyboard ASCII CHAR."
     '(("<double-mouse-1>" . dired-find-file)
       ("<mouse-1>" . mouse-set-point) ("<mouse-2>" . mouse-set-point)))
   (keyamp--remap dired-mode-map
-    '((keyamp-insert       . dired-find-file)
-      (backward-bracket    . dired-jump)
-      (insert-space-before . dired-unzip)
-      (periodic-chart      . dired-decrypt)
-      (del-word            . dired-unmark-all-marks)
-      (query-replace       . dired-zip)
-      (backward-del-word   . dired-do-chmod)
-      (shrink-whitespaces  . dired-hide-details-mode)
-      (kill-line           . dired-encrypt)
-      (open-line           . prev-dired-buf)
-      (del-back            . dired-toggle-mark)
-      (newline             . next-dired-buf)
-      (toggle-comment      . dired-omit-mode)
-      (cut-line            . dired-kill-subdir)
-      (cut-text-block      . dired-maybe-insert-subdir)
-      (paste-or-prev       . dired-create-directory)
-      (toggle-case         . dired-sort)
-      (toggle-prev-case    . vt-conn-tramp-docker)
-      (copy-to-r1          . dired-do-copy)
-      (paste-from-r1       . dired-do-rename)
-      (mark-whole-buffer   . dired-toggle-marks)))
+    '((keyamp-insert        . dired-find-file)
+      (backward-bracket     . dired-jump)
+      (insert-space-before  . dired-size)
+      (del-word             . dired-unmark-all-marks)
+      (query-replace        . dired-unzip)
+      (query-replace-regexp . dired-zip)
+      (backward-del-word    . dired-do-chmod)
+      (shrink-whitespaces   . dired-hide-details-mode)
+      (kill-line            . vt-conn-tramp-docker)
+      (open-line            . prev-dired-buf)
+      (del-back             . dired-toggle-mark)
+      (newline              . next-dired-buf)
+      (toggle-comment       . dired-omit-mode)
+      (cut-line             . dired-kill-subdir)
+      (cut-text-block       . dired-maybe-insert-subdir)
+      (copy-text-block      . dired-decrypt)
+      (calc                 . dired-encrypt)
+      (paste-or-prev        . dired-create-directory)
+      (toggle-case          . dired-sort)
+      (toggle-prev-case     . ignore)
+      (copy-to-r1           . dired-do-copy)
+      (paste-from-r1        . dired-do-rename)
+      (mark-whole-buffer    . dired-toggle-marks)))
 
   (with-sparse-keymap
     (keyamp--map-leader keymap '(dired-toggle-mark . dired-toggle-mark))
@@ -1919,13 +1914,12 @@ keyboard ASCII CHAR."
   (keyamp--map-tab (define-prefix-command 'dired-lleader-map) dired-omit-mode)
   (keyamp--map-leader dired-lleader-map '(dired-size . nil))
   (keyamp--map dired-lleader-map
-    '(("e"  . dired-optimize-png)     ("u" . dired-2drawing)
-      ("o"  . dired-rotate-img-right) ("p" . dired-rotate-img-left)
-      ("a"  . dired-image-autocrop)   ("s" . dired-open-marked)
-      ("d"  . dired-show-metadata)    ("h" . dired-rotate-img-180)
-      ("l"  . dired-2png)             (";" . dired-scale-image)
-      ("\'" . ignore)                 ("c" . dired-2jpg)
-      ("/"  . ignore)                 ("." . ignore))))
+    '(("e" . dired-optimize-png)     ("u" . dired-2drawing)
+      ("o" . dired-rotate-img-right) ("p" . dired-rotate-img-left)
+      ("a" . dired-image-autocrop)   ("s" . dired-open-marked)
+      ("d" . dired-show-metadata)    ("h" . dired-rotate-img-180)
+      ("l" . dired-2png)             (";" . dired-scale-image)
+      ("c" . dired-2jpg))))
 
 (with-eval-after-load 'rect ; Sane rectangle controls
   (keyamp--remap rectangle-mark-mode-map
@@ -2239,7 +2233,7 @@ keyboard ASCII CHAR."
       (back-char        . image-previous-file) (forw-char    . image-next-file)
       (previous-line    . image-decrease-size) (next-line    . image-increase-size)
       (open-line        . image-previous-file) (newline      . image-next-file)
-      (undo             . image-dired)         (del-back     . image-rotate)
+      (undo             . ignore)              (del-back     . image-rotate)
       (select-word      . image-next-file)     (select-block . image-previous-file)
       (backward-bracket . dired-jump)))
 
@@ -2315,11 +2309,11 @@ keyboard ASCII CHAR."
   (keyamp--map-tab vterm-mode-map vterm-send-tab)
   (keyamp--map-backtab vterm-mode-map vterm-send-backtab)
 
-  (keyamp--map vterm-mode-map '(("C-c C-c" . vterm-c-c)))
+  (keyamp--map vterm-mode-map '(("C-t" . vterm-send-tab)))
   (keyamp--remap vterm-mode-map
     '(;; Left half
       (insert-space-before . vterm-shell-vi-cmd)      ; Q Sync point and activate shell vi cmd mode transient
-      (periodic-chart      . vterm-tmux-close-window) ; SPC 1
+      (periodic-chart      . vt-split-view)           ; SPC 1
       (backward-del-word   . vterm-shell-vi-cmd)      ; W Sync point or do modify if in transient
       (undo                . vterm-undo)              ; E
       (del-word            . vterm-shell-vi-cmd)      ; R Sync point or do modify if in transient
@@ -2327,7 +2321,7 @@ keyboard ASCII CHAR."
       (cut-text-block      . vt-conn-reconnect)       ; T
       (copy-text-block     . vt-sftp-jump)            ; SPC T
       (shrink-whitespaces  . vt-conn-localhost)       ; A
-      (kill-line           . vt-split-view)           ; SPC A
+      (kill-line           . vterm-tmux-close-window) ; SPC A
       (open-line           . vterm-tmux-prev-window)  ; S
       (del-back            . vterm-shell-vi-cmd)      ; D Sync point or do modify if in transient
       (newline             . vterm-tmux-next-window)  ; F
@@ -2364,7 +2358,7 @@ keyboard ASCII CHAR."
     (keyamp--map-leader keymap '(vterm-tmux-copy . vterm-up-vi-cmd))
     (keyamp--map-tab keymap change-wd)
     (keyamp--map-backtab keymap vterm-history-search)
-    (keyamp--set keymap '(vterm-send-return term-interrupt-subjob vterm-c-c)
+    (keyamp--set keymap '(vterm-send-return term-interrupt-subjob)
       nil :insert)
     (keyamp--set keymap '(vterm-vi-save-quit vterm-vi-quit))
 
@@ -2421,7 +2415,8 @@ keyboard ASCII CHAR."
               (when (eq major-mode 'vterm-mode)
                 (let ((p (point)))
                   (vterm-reset-cursor-point)
-                  (if (eq (point) p)
+                  (if (and (not (string-equal "*vterm clock*" (buffer-name)))
+                           (eq (point) p))
                       (keyamp-repeat-init keymap 'keyamp-blink-cursor-mode-activate
                                           'keyamp-blink-cursor-mode-deactivate)
                     (goto-char p)))))))
@@ -2926,7 +2921,7 @@ keyboard ASCII CHAR."
     '((eval-defun-visual   . exec-query-remote)
       (eval-region-or-sexp . exec-query)
       (number-to-register  . toggle-sql-async-conn)
-      (quit                . toggle-sql-async-remote)
+      (find-name-dired     . toggle-sql-async-remote)
       (reformat-lines      . sql-format-buffer)
       (empty-bin           . cb-generate-ddl)))
   (with-sparse-keymap
@@ -3377,51 +3372,40 @@ keyboard ASCII CHAR."
 
 (defconst keyamp-indicator-default   "•" "Default keyamp indicator.")
 (defconst keyamp-indicator-hand-swap "∘" "Hand swap indicator.")
-(defconst keyamp-indicator-standard  "°" "Standard keyboard indicator.")
+(defconst keyamp-indicator-standard  "•" "Standard keyboard indicator.")
 
-(defconst keyamp-idle-indicator-default      keyamp-indicator-default "Idle indicator.")
-(defconst keyamp-screen-indicator-default    keyamp-indicator-default "Screen indicator.")
-(defconst keyamp-read-indicator-default      keyamp-indicator-default "Read indicator.")
-(defconst keyamp-command-indicator-default   keyamp-indicator-default "Command indicator.")
-(defconst keyamp-io-indicator-default        keyamp-indicator-default "IO indicator.")
-(defconst keyamp-insert-indicator-default    keyamp-indicator-default "Insert indicator.")
-(defconst keyamp-modify-indicator-default    keyamp-indicator-default "Modify indicator.")
+(defconst keyamp-transient-states '(idle screen read command io insert modify)
+  "Keyamp transient states.")
 
-(defconst keyamp-idle-indicator-hand-swap    keyamp-indicator-hand-swap "Idle indicator hand swap.")
-(defconst keyamp-screen-indicator-hand-swap  keyamp-indicator-hand-swap "Screen indicator hand swap.")
-(defconst keyamp-read-indicator-hand-swap    keyamp-indicator-hand-swap "Read indicator hand swap.")
-(defconst keyamp-command-indicator-hand-swap keyamp-indicator-hand-swap "Command indicator hand swap.")
-(defconst keyamp-io-indicator-hand-swap      keyamp-indicator-hand-swap "IO indicator hand swap.")
-(defconst keyamp-insert-indicator-hand-swap  keyamp-indicator-hand-swap "Insert indicator hand swap.")
-(defconst keyamp-modify-indicator-hand-swap  keyamp-indicator-hand-swap "Modify indicator hand swap.")
+(defun keyamp-def-indicators ()
+  "Define keyamp indicators variables."
+  (mapc
+   (lambda (type)
+     (mapc
+      (lambda (state)
+        (let ((var (intern (format "keyamp-%s-indicator-%s" state type))))
+          (set-default var (symbol-value
+                            (intern (format "keyamp-indicator-%s" type))))
+          (put var 'variable-documentation
+               (format "Indicator %s %s." (symbol-name state) type)))
+        (when (string-equal type "default")
+          (let ((var (intern (format "keyamp-%s-indicator" state))))
+            (set-default var (symbol-value
+                              (intern (format "keyamp-indicator-%s" type))))
+            (put var 'variable-documentation
+                 (format "Indicator %s." (symbol-name state))))))
+      keyamp-transient-states))
+   '("default" "hand-swap" "standard")))
 
-(defconst keyamp-idle-indicator-standard     keyamp-indicator-standard "Idle indicator standard.")
-(defconst keyamp-screen-indicator-standard   keyamp-indicator-standard "Screen indicator standard.")
-(defconst keyamp-read-indicator-standard     keyamp-indicator-standard "Read indicator standard.")
-(defconst keyamp-command-indicator-standard  keyamp-indicator-standard "Command indicator standard.")
-(defconst keyamp-io-indicator-standard       keyamp-indicator-standard "IO indicator standard.")
-(defconst keyamp-insert-indicator-standard   keyamp-indicator-standard "Insert indicator standard.")
-(defconst keyamp-modify-indicator-standard   keyamp-indicator-standard "Modify indicator standard.")
+(keyamp-def-indicators)
 
-(defvar keyamp-idle-indicator    keyamp-idle-indicator-default    "Idle indicator.")
-(defvar keyamp-screen-indicator  keyamp-screen-indicator-default  "Screen indicator.")
-(defvar keyamp-read-indicator    keyamp-read-indicator-default    "Read indicator.")
-(defvar keyamp-command-indicator keyamp-command-indicator-default "Command indicator.")
-(defvar keyamp-io-indicator      keyamp-io-indicator-default      "IO indicator.")
-(defvar keyamp-insert-indicator  keyamp-insert-indicator-default  "Insert indicator.")
-(defvar keyamp-modify-indicator  keyamp-modify-indicator-default  "Modify indicator.")
-
-(defun keyamp-use-indicators (Suffix)
-  "Set keyamp indicators to variants ending with SUFFIX (e.g., \"default\")."
-  (mapc (lambda (var)
-          (set var (symbol-value (intern (format "%s-%s" var Suffix)))))
-        '(keyamp-idle-indicator
-          keyamp-screen-indicator
-          keyamp-read-indicator
-          keyamp-command-indicator
-          keyamp-io-indicator
-          keyamp-insert-indicator
-          keyamp-modify-indicator)))
+(defun keyamp-use-indicators (Type)
+  "Set keyamp indicators to variants ending with TYPE."
+  (mapc
+   (lambda (state)
+     (let ((var (intern (format "keyamp-%s-indicator" state))))
+       (set var (symbol-value (intern (format "%s-%s" var Type))))))
+   keyamp-transient-states))
 
 (defvar keyamp-idle-color    "#AB82FF" "Idle color.")
 (defvar keyamp-screen-color  "#1E90FF" "Screen color.")
@@ -3630,31 +3614,26 @@ insert cancel the timer.")
    (buffer-read-only
     (keyamp-command-execute 'ignore))
    (t
+    (when (and (default-value 'delete-selection-mode)
+               (use-region-p))
+      (kill-region (region-beginning) (region-end)))
     (keyamp-insert)
     (if-let (((get 'toggle-hand-swap 'state))
              (key (this-command-keys)))
         (progn
           (when (vectorp key)
             (setq key (char-to-string (aref key 0))))
-          (if (> (string-to-char key) 127)
+          (if (> (string-to-char key) (1- (expt 2 7)))
               (setq key (car (rassoc key keyamp--hand-swap)))
             (setq key (keyamp--convert-kbd-str
-                       (car (rassoc
-                             (car (rassoc key keyamp--convert-table))
-                             keyamp--hand-swap)))))
+                       (car
+                        (rassoc
+                         (or (car (rassoc key keyamp--convert-table)) key)
+                         keyamp--hand-swap)))))
           (if key ; This key code comes from OS
               (execute-kbd-macro (kbd key))
             (self-insert-command 1)))
       (self-insert-command 1)))))
-
-(defun minibuffer-complete-around (fun &rest r)
-  "Minibuffer complete by TAB applied only for file path completion, otherwise
-completion forward."
-  (if (eq (icomplete--category) 'file)
-      (apply fun r)
-    (comp-forw)))
-
-(advice-add 'minibuffer-complete :around 'minibuffer-complete-around)
 
 (defun keyamp-minibuffer-return ()
   "Exit if file completion. It means use content of minibuffer as it is,
@@ -3662,7 +3641,7 @@ no select completion candidates. Else force complete and exit, that
 is, select and use first completion candidate. In case file
 completion, for most cases no need to complete, because there is NO
 right candidate. Otherwise, in all cases one MUST select a candidate.
-Simply hit TAB to minibuffer-complete file name if the name exists."
+Hit C-t to minibuffer-complete file name if the name exists."
   (interactive)
   (if (eq (icomplete--category) 'file)
       (exit-minibuffer)
@@ -3686,7 +3665,7 @@ Else activate insert mode and self insert."
     (when (vectorp key)
       (setq key (char-to-string (aref key 0))))
     (when-let ((key-standard (cdr (assoc key keyamp-input-methods-to-std)))
-               ((> (string-to-char key) 127)))
+               ((> (string-to-char key) (1- (expt 2 7)))))
       (setq key (keyamp--convert-kbd-str key-standard)))
     (cond
      ((keyamp-minibuffer-y-or-n)
@@ -3720,48 +3699,6 @@ of quit minibuffer. Answer q to literal y or n question."
   "Return true if minibuffer prompt empty."
   (and (minibufferp)
        (zerop (- (buffer-size) (length (minibuffer-prompt))))))
-
-(defun keyamp-minibuffer-match (String)
-  "Return true if minibuffer prompt match STRING."
-  (string-match String (minibuffer-prompt)))
-
-(defun keyamp-defer-command-bookmark (Fun)
-  "To defer bookmark command `last-nonmenu-event' must be not list."
-  (run-at-time nil nil (lambda ()
-                         (let ((last-nonmenu-event t))
-                           (keyamp-command-execute Fun)))))
-
-(defun keyamp-copy-minibuffer ()
-  "Kill minibuffer content to ring for reuse."
-  (when-let ((str (buffer-substring (1+ (length (minibuffer-prompt))) (point-max)))
-             ((cl-plusp (length str))))
-    (kill-new str)))
-
-(defun keyamp-minibuffer-shift ()
-  "Quit minibuffer and call some minibuffer command. Single motion switch."
-  (interactive)
-  (when (keyamp-unless-kbd-macro)
-    (keyamp-copy-minibuffer)
-    (cond
-     ((keyamp-minibuffer-match "Query replace")
-      (keyamp-defer-command 0 'query-replace-regexp))
-     ((keyamp-minibuffer-match "Search")
-      (keyamp-defer-command 0 'find-name-dired))
-     ((keyamp-minibuffer-match "Find-name")
-      (keyamp-defer-command 0 'search-string))
-     ((keyamp-minibuffer-match "Rename visited file")
-      (keyamp-defer-command 0 'find-file))
-     ((keyamp-minibuffer-match "Find file")
-      (keyamp-defer-command 0 'write-file))
-     ((keyamp-minibuffer-match "Write file")
-      (keyamp-defer-command 0 'rename-visited-file))
-     ((keyamp-minibuffer-match "Set bookmark named")
-      (keyamp-defer-command-bookmark 'bookmark-rename))
-     ((keyamp-minibuffer-match "Old bookmark name")
-      (keyamp-defer-command-bookmark 'bookmark-delete))
-     ((keyamp-minibuffer-match "Connect terminal")
-      (keyamp-defer-command 0 'vt-sftp)))
-    (abort-recursive-edit)))
 
 (setq-default cursor-in-non-selected-windows nil)
 
