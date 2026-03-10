@@ -932,7 +932,7 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
     ("k DEL" . flyspell-buffer)            ("k SPC" . ispell-word)
     ("k <escape>" . ignore)                ("k RET" . list-matching-lines)
 
-    ("l" . screen-idle)
+    ("l" . isearch-wforw)
     (";" . recentf-open-files)
     ("'" . list-timers)
     ("n" . list-processes)
@@ -1038,7 +1038,7 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
     ("h" . page-up-half)
     ("j" . occur-cur-word)
     ("k" . end-of-block)
-    ("l" . isearch-wforw)
+    ("l" . bookmark-set)
     (";" . page-dn-half)
     ("'" . scratch)
 
@@ -1099,7 +1099,7 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
     (keymap-set key-translation-map "S-SPC"         "<tab>")
     (keymap-set key-translation-map "S-<backspace>" "<backtab>")
     (keymap-set key-translation-map "S-<return>"    "C-t")
-    (keymap-set key-translation-map "S-<escape>"    "C-q")))
+    (keymap-set key-translation-map "S-<escape>"    "<escape>")))
 
 (keyamp-key-translation)
 
@@ -1604,7 +1604,7 @@ keyboard ASCII CHAR."
   (define-prefix-command 'keyamp-g-leader-map)
   (keyamp--map-leader keyamp-g-leader-map '(nil . dired-do-delete))
   (keyamp--map-escape keymap deactivate-region)
-  (keyamp--map-return keymap bookmark-set)
+  (keyamp--map-return keymap screen-idle)
   (keyamp--remap keymap
     '((activate-region . rectangle)
       (other-win       . delete-window)
@@ -1622,7 +1622,7 @@ keyboard ASCII CHAR."
   (when (eq (mark) (point))
     (deactivate-region)))
 
-(advice-add-macro '(keyamp-delete jump-8 jump-7 bookmark-set delete-window)
+(advice-add-macro '(keyamp-delete jump-8 jump-7 screen-idle delete-window)
                   :before 'keyamp-deactivate-region)
 
 (with-sparse-keymap
@@ -1765,11 +1765,11 @@ keyboard ASCII CHAR."
                 (lambda () (when (minibufferp)
                              (set-transient-map keymap)))))
 
-  ;; Hit D/SPC for No, K/DEL for Yes to answer non-literal Y or N.
+  ;; Hit D/DEL for No, K/SPC for Yes to answer non-literal Y or N.
   (keyamp--remap y-or-n-p-map
-    '((select-word   . y-or-n-p-insert-n) (del-back  . y-or-n-p-insert-n)
-      (paste-or-prev . y-or-n-p-insert-n) (next-line . y-or-n-p-insert-y)
-      (select-block  . y-or-n-p-insert-y) (hist-back . y-or-n-p-insert-y)))
+    '((select-word   . y-or-n-p-insert-y) (del-back  . y-or-n-p-insert-n)
+      (paste-or-prev . y-or-n-p-insert-y) (next-line . y-or-n-p-insert-y)
+      (select-block  . y-or-n-p-insert-n) (hist-back . y-or-n-p-insert-n)))
 
   (keyamp--remap minibuffer-local-map
     '((previous-line . hist-back) (next-line . hist-forw)
@@ -2065,7 +2065,7 @@ keyboard ASCII CHAR."
   ;; Russian Т on ! place Engram, not nice but kind of exception
   ;; One should use shift 1 in Russian but before must notice input source
   (keyamp--map query-replace-map '(("d" . skip) ("k" . act) ("Т" . automatic)))
-  (keyamp--map-leader query-replace-map '(skip . act)))
+  (keyamp--map-leader query-replace-map '(act . skip)))
 
 (with-eval-after-load 'shr
   (keyamp--remap shr-map '((keyamp-insert . shr-browse-url))))
@@ -2333,12 +2333,12 @@ keyboard ASCII CHAR."
       (toggle-case         . prev-vterm-buf)          ; B
       (toggle-prev-case    . next-vterm-buf)          ; SPC B
       (revert-buffer       . prev-vterm-buf)          ; SPC 3
+      (select-word         . vterm-up-vi-cmd)         ; SPC SPC
 
       ;; Right half
       (page-up-half        . vterm-tmux-copy-hpu)     ; DEL H
       (page-dn-half        . vterm-tmux-copy-hpd)     ; DEL ;
       (dired-jump          . vt-conn-tramp)           ; DEL M
-      (select-block        . vterm-up-vi-cmd)         ; DEL DEL
       (back-char           . vterm-left)
       (forw-char           . vterm-right)
       (up-line             . vterm-up)
@@ -2348,18 +2348,17 @@ keyboard ASCII CHAR."
   (add-hook 'keyamp-insert-hook 'vterm-reset-cursor-point)
 
   (with-sparse-keymap
-    (keyamp--map-leader keymap '(next-line . previous-line))
+    (keyamp--map-leader keymap '(previous-line . next-line))
     (keyamp--remap keymap
       '((previous-line . vterm-up-vi-cmd) (next-line . vterm-down)))
     (keyamp--set keymap '(vterm-history-search) nil :insert)
     (keyamp--set keymap '(vterm-up-vi-cmd vterm-down vterm-yank-pop) :command))
 
   (with-sparse-keymap
-    (keyamp--map-leader keymap '(vterm-tmux-copy . vterm-up-vi-cmd))
+    (keyamp--map-leader keymap '(vterm-up-vi-cmd . vterm-tmux-copy))
     (keyamp--map-tab keymap change-wd)
     (keyamp--map-backtab keymap vterm-history-search)
-    (keyamp--set keymap '(vterm-send-return term-interrupt-subjob)
-      nil :insert)
+    (keyamp--set keymap '(vterm-send-return term-interrupt-subjob) nil :insert)
     (keyamp--set keymap '(vterm-vi-save-quit vterm-vi-quit))
 
     (defun keyamp-input-timer-payload-vterm ()
@@ -2382,8 +2381,8 @@ keyboard ASCII CHAR."
 
   (with-sparse-keymap
     (keyamp--remap keymap
-      '((bchar         . vterm-left) (fchar     . vterm-right)
-        (previous-line . vterm-up) (next-line . vterm-down)))
+      '((bchar         . vterm-left)      (fchar     . vterm-right)
+        (previous-line . vterm-up-vi-cmd) (next-line . vterm-down)))
     (keyamp--set keymap '(vterm-left vterm-right vterm-up vterm-down)))
 
   ;;;;;; Shell prompt vi cmd mode
@@ -3271,11 +3270,11 @@ keyboard ASCII CHAR."
                  up-line-rev                             t
                  volume-increase                         t
                  volume-decrease                         t
-                 vterm-down                              t
                  vterm-send-return                       t
                  vterm-vi-save-quit                      t
                  vterm-vi-quit                           t
                  vterm-up-vi-cmd                         t
+                 vterm-down                              t
                  vterm-tmux-copy                         t
                  vterm-tmux-copy-hpu                     t
                  vterm-tmux-copy-hpd                     t

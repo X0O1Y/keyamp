@@ -10,6 +10,389 @@
                 },
                 "rules": [
                     {
+                        "description": "delete_or_backspace",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 0
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "delete_or_backspace",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "parameters": { "basic.to_if_held_down_threshold_milliseconds": 120 },
+                                "to_after_key_up": [{ "key_code": "delete_or_backspace" }],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "delete_or_backspace",
+                                        "repeat": true
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "delete_or_backspace",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [{ "key_code": "delete_or_backspace" }],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_unless"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "delete_or_backspace",
+                                    "modifiers": {
+                                        "mandatory": ["shift"],
+                                        "optional": ["any"]
+                                    }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "tab",
+                                        "modifiers": ["shift"]
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_unless"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "delete_or_backspace",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [{ "key_code": "delete_or_backspace" }],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "spacebar",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 0
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "spacebar",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "parameters": { "basic.to_if_held_down_threshold_milliseconds": 120 },
+                                "to_after_key_up": [{ "key_code": "spacebar" }],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "spacebar",
+                                        "repeat": true
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_unless"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "spacebar",
+                                    "modifiers": {
+                                        "mandatory": ["shift"],
+                                        "optional": ["any"]
+                                    }
+                                },
+                                "to": [{ "key_code": "tab" }],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "return_or_enter",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Windows"],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "return_or_enter",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [{ "key_code": "return_or_enter" }],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "f12",
+                                        "repeat": false
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 0
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "return_or_enter",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "parameters": { "basic.to_if_held_down_threshold_milliseconds": 150 },
+                                "to_after_key_up": [{ "key_code": "return_or_enter" }],
+                                "to_if_held_down": [
+                                    {
+                                        "set_variable": {
+                                            "name": "left_command pressed",
+                                            "value": 0
+                                        }
+                                    },
+                                    {
+                                        "halt": true,
+                                        "key_code": "escape",
+                                        "repeat": false
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "return_or_enter",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [{ "key_code": "return_or_enter" }],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "escape",
+                                        "repeat": false
+                                    },
+                                    {
+                                        "set_variable": {
+                                            "name": "left_command pressed",
+                                            "value": 0
+                                        }
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/UTM", "/Windows"],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "return_or_enter",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [{ "key_code": "return_or_enter" }],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "r",
+                                        "modifiers": ["control"],
+                                        "repeat": false
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_unless"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "return_or_enter",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [{ "key_code": "return_or_enter" }],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "escape",
+                                        "repeat": false
+                                    },
+                                    {
+                                        "set_variable": {
+                                            "name": "left_command pressed",
+                                            "value": 0
+                                        }
+                                    }
+                                ],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
+                        "description": "escape",
+                        "manipulators": [
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_unless"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "escape",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "left_command",
+                                        "lazy": true
+                                    }
+                                ],
+                                "to_if_alone": [{ "key_code": "escape" }],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 0
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "escape",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [{ "key_code": "escape" }],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "quote",
+                                        "modifiers": ["control"],
+                                        "repeat": false
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Emacs"],
+                                        "type": "frontmost_application_if"
+                                    },
+                                    {
+                                        "name": "insert mode activated",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "escape",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to_after_key_up": [
+                                    { "key_code": "escape" },
+                                    {
+                                        "set_variable": {
+                                            "name": "left_command pressed",
+                                            "value": 0
+                                        }
+                                    }
+                                ],
+                                "to_if_held_down": [
+                                    {
+                                        "halt": true,
+                                        "key_code": "quote",
+                                        "modifiers": ["left_control"],
+                                        "repeat": false
+                                    }
+                                ],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "file_paths": ["/Windows"],
+                                        "type": "frontmost_application_if"
+                                    }
+                                ],
+                                "from": {
+                                    "key_code": "escape",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [
+                                    {
+                                        "key_code": "left_control",
+                                        "lazy": true
+                                    }
+                                ],
+                                "to_if_alone": [{ "key_code": "escape" }],
+                                "type": "basic"
+                            }
+                        ]
+                    },
+                    {
                         "description": "mouse",
                         "manipulators": [
                             {
@@ -185,116 +568,6 @@
                                     "modifiers": { "optional": ["any"] }
                                 },
                                 "to": [{ "key_code": "right_arrow" }],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "spacebar",
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "spacebar pressed",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "spacebar",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [{ "key_code": "spacebar" }],
-                                "to_after_key_up": [{ "shell_command": "'/Library/Application Support/org.pqrs/Karabiner-Elements/bin/karabiner_cli' --set-variables '{\"spacebar pressed\": 1}'; sleep 0.5; '/Library/Application Support/org.pqrs/Karabiner-Elements/bin/karabiner_cli' --set-variables '{\"spacebar pressed\": 0}'" }],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": ["/Emacs"],
-                                        "type": "frontmost_application_unless"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "spacebar",
-                                    "modifiers": {
-                                        "mandatory": ["shift"],
-                                        "optional": ["any"]
-                                    }
-                                },
-                                "to": [{ "key_code": "tab" }],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": ["/Emacs"],
-                                        "type": "frontmost_application_unless"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "spacebar",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "parameters": { "basic.to_delayed_action_delay_milliseconds": 200 },
-                                "to": [
-                                    {
-                                        "set_variable": {
-                                            "name": "spacebar pressed",
-                                            "value": 1
-                                        }
-                                    },
-                                    {
-                                        "key_code": "left_command",
-                                        "lazy": true
-                                    }
-                                ],
-                                "to_delayed_action": {
-                                    "to_if_canceled": [
-                                        {
-                                            "set_variable": {
-                                                "name": "spacebar pressed",
-                                                "value": 0
-                                            }
-                                        }
-                                    ],
-                                    "to_if_invoked": [
-                                        {
-                                            "set_variable": {
-                                                "name": "spacebar pressed",
-                                                "value": 0
-                                            }
-                                        }
-                                    ]
-                                },
-                                "to_if_alone": [{ "key_code": "spacebar" }],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": ["/Emacs"],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "insert mode activated",
-                                        "type": "variable_if",
-                                        "value": 0
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "spacebar",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "parameters": { "basic.to_if_held_down_threshold_milliseconds": 120 },
-                                "to_after_key_up": [{ "key_code": "spacebar" }],
-                                "to_if_held_down": [
-                                    {
-                                        "halt": true,
-                                        "key_code": "spacebar",
-                                        "repeat": true
-                                    }
-                                ],
                                 "type": "basic"
                             }
                         ]
@@ -5140,146 +5413,6 @@
                         ]
                     },
                     {
-                        "description": "return_or_enter",
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": ["/Windows"],
-                                        "type": "frontmost_application_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "return_or_enter",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [{ "key_code": "return_or_enter" }],
-                                "to_if_held_down": [
-                                    {
-                                        "halt": true,
-                                        "key_code": "f12",
-                                        "repeat": false
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": ["/Emacs"],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "insert mode activated",
-                                        "type": "variable_if",
-                                        "value": 0
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "return_or_enter",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "parameters": { "basic.to_if_held_down_threshold_milliseconds": 150 },
-                                "to_after_key_up": [{ "key_code": "return_or_enter" }],
-                                "to_if_held_down": [
-                                    {
-                                        "set_variable": {
-                                            "name": "left_command pressed",
-                                            "value": 0
-                                        }
-                                    },
-                                    {
-                                        "halt": true,
-                                        "key_code": "escape",
-                                        "repeat": false
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": ["/Emacs"],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "insert mode activated",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "return_or_enter",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [{ "key_code": "return_or_enter" }],
-                                "to_if_held_down": [
-                                    {
-                                        "halt": true,
-                                        "key_code": "escape",
-                                        "repeat": false
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "left_command pressed",
-                                            "value": 0
-                                        }
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": ["/UTM", "/Windows"],
-                                        "type": "frontmost_application_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "return_or_enter",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [{ "key_code": "return_or_enter" }],
-                                "to_if_held_down": [
-                                    {
-                                        "halt": true,
-                                        "key_code": "r",
-                                        "modifiers": ["control"],
-                                        "repeat": false
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": ["/Emacs"],
-                                        "type": "frontmost_application_unless"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "return_or_enter",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [{ "key_code": "return_or_enter" }],
-                                "to_if_held_down": [
-                                    {
-                                        "halt": true,
-                                        "key_code": "escape",
-                                        "repeat": false
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "left_command pressed",
-                                            "value": 0
-                                        }
-                                    }
-                                ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
                         "description": "tab",
                         "manipulators": [
                             {
@@ -5329,119 +5462,6 @@
                                         "modifiers": ["command"]
                                     }
                                 ],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "escape",
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": ["/Emacs"],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "insert mode activated",
-                                        "type": "variable_if",
-                                        "value": 0
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "escape",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [{ "key_code": "escape" }],
-                                "to_if_held_down": [
-                                    {
-                                        "halt": true,
-                                        "key_code": "quote",
-                                        "modifiers": ["control"],
-                                        "repeat": false
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": ["/Emacs"],
-                                        "type": "frontmost_application_if"
-                                    },
-                                    {
-                                        "name": "insert mode activated",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "escape",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to_after_key_up": [
-                                    { "key_code": "escape" },
-                                    {
-                                        "set_variable": {
-                                            "name": "left_command pressed",
-                                            "value": 0
-                                        }
-                                    }
-                                ],
-                                "to_if_held_down": [
-                                    {
-                                        "halt": true,
-                                        "key_code": "quote",
-                                        "modifiers": ["left_control"],
-                                        "repeat": false
-                                    }
-                                ],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": ["/Windows"],
-                                        "type": "frontmost_application_if"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "escape",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "left_control",
-                                        "lazy": true
-                                    }
-                                ],
-                                "to_if_alone": [{ "key_code": "escape" }],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "file_paths": ["/Emacs"],
-                                        "type": "frontmost_application_unless"
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "escape",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [
-                                    {
-                                        "key_code": "left_command",
-                                        "lazy": true
-                                    },
-                                    {
-                                        "set_variable": {
-                                            "name": "left_command pressed",
-                                            "value": 0
-                                        }
-                                    }
-                                ],
-                                "to_if_alone": [{ "key_code": "escape" }],
                                 "type": "basic"
                             }
                         ]
@@ -6721,7 +6741,7 @@
                         },
                         {
                             "from": { "key_code": "delete_or_backspace" },
-                            "to": [{ "key_code": "f13" }]
+                            "to": [{ "key_code": "delete_or_backspace" }]
                         },
                         {
                             "from": { "key_code": "escape" },
@@ -6737,7 +6757,7 @@
                         },
                         {
                             "from": { "key_code": "left_command" },
-                            "to": [{ "key_code": "spacebar" }]
+                            "to": [{ "key_code": "escape" }]
                         },
                         {
                             "from": { "key_code": "left_control" },
@@ -6753,7 +6773,7 @@
                         },
                         {
                             "from": { "key_code": "right_command" },
-                            "to": [{ "key_code": "left_command" }]
+                            "to": [{ "key_code": "return_or_enter" }]
                         },
                         {
                             "from": { "key_code": "right_option" },
@@ -6761,7 +6781,7 @@
                         },
                         {
                             "from": { "key_code": "spacebar" },
-                            "to": [{ "key_code": "return_or_enter" }]
+                            "to": [{ "key_code": "spacebar" }]
                         }
                     ]
                 },

@@ -3964,12 +3964,13 @@ Marginalia annotation support."
                                           (with-current-buffer b
                                             (derived-mode-p 'dired-mode)))
                                         (buffer-list))))
-         (bookmarks (cl-remove-if (lambda (bm)
-                                    (let ((bm-file (bookmark-get-filename bm)))
-                                      (cl-some (lambda (buf)
-                                                 (string= (buffer-file-name buf) bm-file))
-                                               (buffer-list))))
-                                  (bookmark-all-names)))
+         (bookmarks (cl-remove-if
+                     (lambda (bm)
+                       (let ((bm-file (bookmark-get-filename bm)))
+                         (cl-some (lambda (buf)
+                                    (string= (buffer-file-name buf) bm-file))
+                                  (buffer-list))))
+                     (bookmark-all-names)))
          (candidates (append buffers bookmarks))
          (collection (lambda (string pred action)
                        (if (eq action 'metadata)
@@ -3991,10 +3992,12 @@ Marginalia annotation support."
     "/root/"
     "/etc/"
     "/etc/nginx/"
+    "/etc/docker/"
     "/etc/systemd/system/"
     "/etc/ssh/"
     "/var/log/"
     "/var/www/"
+    "/var/lib/docker"
     "/tmp/"
     "/usr/local/"
     "/opt/"
@@ -4112,11 +4115,8 @@ Click mouse select a window and close the others."
 (defun tree-view ()
   "Tree view dir."
   (interactive)
-  (cond
-   ((fboundp 'neo-select)
-    (command-execute 'neo-select))
-   (t
-    (command-execute 'lock-screen))))
+  (when (fboundp 'neo-select)
+    (command-execute 'neo-select)))
 
 (defun home-jump ()
   "Jump to home dir (or / if remote root) via TRAMP."
