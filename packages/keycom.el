@@ -3116,10 +3116,10 @@ Open new terminal if already in terminal."
         (setq p1 (1+ (point)))
         (end-of-line)
         (setq p2 (point))))
-    (if (and p1 p2)
-        (setq vterm-last-command
-              (string-trim
-               (buffer-substring-no-properties p1 p2))))))
+    (when (and p1 p2)
+      (setq vterm-last-command
+            (string-trim
+             (buffer-substring-no-properties p1 p2))))))
 
 (advice-add 'vterm-send-return :before #'vterm-capture-command)
 
@@ -3168,12 +3168,9 @@ Custom, added prompt on event read."
   (vterm-send-key "<backtab>"))
 
 (defun vterm-c-c ()
-  "Send invoking key to libvterm."
+  "Send C-c to libvterm."
   (interactive)
-  (when vterm--term
-    (dolist (key (vterm--translate-event-to-args
-                  last-command-event))
-      (apply #'vterm-send-key key))))
+  (vterm-send-key (kbd "C-c")))
 
 (defun vterm-history-search ()
   "History search. Map C-o to history-incremental-search-backward in zshrc
@@ -3198,24 +3195,6 @@ and reverse-search-history in bashrc."
   (vterm-tmux-prefix)
   (vterm-send-key (kbd "]")))
 
-(defun vterm-tmux-copy-hpu ()
-  "Activate copy mode in tmux and half page up immediately."
-  (interactive)
-  (vterm-tmux-copy)
-  (sit-for vterm-timer-delay)
-  (vterm-send-key (kbd "SPC"))
-  (vterm-send-key (kbd "."))
-  (vterm-reset-cursor-point))
-
-(defun vterm-tmux-copy-hpd ()
-  "Activate copy mode in tmux and half page down immediately."
-  (interactive)
-  (vterm-tmux-copy)
-  (sit-for vterm-timer-delay)
-  (vterm-send-key (kbd "DEL"))
-  (vterm-send-key (kbd "."))
-  (vterm-reset-cursor-point))
-
 (defun vterm-tmux-split-pane ()
   "Split pane in tmux."
   (interactive)
@@ -3229,35 +3208,11 @@ and reverse-search-history in bashrc."
       (vterm-send-key (kbd "DEL")) ; vterm-module.c:996 missing DEL
     (vterm--self-insert)))
 
-(defun vterm-tmux-new-window ()
-  "Tmux create window."
-  (interactive)
-  (vterm-tmux-prefix)
-  (vterm-send-key (kbd "c")))
-
-(defun vterm-tmux-close-window ()
-  "Tmux close window."
-  (interactive)
-  (vterm-tmux-prefix)
-  (vterm-send-key (kbd "&")))
-
-(defun vterm-tmux-next-window ()
-  "Tmux next window."
-  (interactive)
-  (vterm-tmux-prefix)
-  (vterm-send-key (kbd "n")))
-
-(defun vterm-tmux-prev-window ()
-  "Tmux prev window."
-  (interactive)
-  (vterm-tmux-prefix)
-  (vterm-send-key (kbd "p")))
-
 (defun vterm-shell-vi-cmd ()
   "Activate vi cmd mode in shell prompt. Deactivate tmux copy mode."
   (interactive)
-  (when (and (eq major-mode 'vterm-mode)
-             (vterm-reset-cursor-point))
+  (when (eq major-mode 'vterm-mode)
+    (vterm-reset-cursor-point)
     (vterm-send-key (kbd "^["))))
 
 (defun vterm-shell-vi-insert ()
@@ -3481,7 +3436,8 @@ and reverse-search-history in bashrc."
 (defun toggle-gnus ()
   "Toggle gnus."
   (interactive)
-  (if (and (boundp onlinep) onlinep) ; Need own online predicate
+  (if (and (boundp onlinep)
+           onlinep) ; Need own online predicate
       (progn
         (when (display-graphic-p)
           (make-frame-command)

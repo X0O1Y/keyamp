@@ -1,7 +1,7 @@
 ;;; keyamp.el --- Keyboard Amplifier -*- coding: utf-8; lexical-binding: t; -*-
 
 ;; Author: Egor Maltsev <X0O1@YA.RU>
-;; Version: 1.3 2025-09-22 Standard
+;; Version: 1.4 2026-03-10 Hand swap
 ;;          __   _____   __
 ;;         |__| |_____| |__|
 ;;
@@ -78,6 +78,7 @@ throughout the code of the package.")
       ("л" . "k") ("д" . "l") ("ж" . ";")  ("э" . "'") ("я" . "z")
       ("ч" . "x") ("с" . "c") ("м" . "v")  ("и" . "b") ("т" . "n")
       ("ь" . "m") ("б" . ",") ("ю" . ".")  ("№" . "#") ("Ё" . "~")
+      ("Й" . "Q") ("Ц" . "W") ("У" . "E")  ("К" . "R") ("Е" . "T")
       ("Н" . "Y") ("Г" . "U") ("Ш" . "I")  ("Щ" . "O") ("З" . "P")
       ("Х" . "{") ("Ъ" . "}") ("Ф" . "A")  ("Ы" . "S") ("В" . "D")
       ("А" . "F") ("П" . "G") ("Р" . "H")  ("О" . "J") ("Л" . "K")
@@ -270,7 +271,7 @@ present in `quail-keyboard-layout-alist'."
     ("ф" . "р")  ("ы" . "о")  ("в" . "л") ("а" . "д")  ("п" . "ж")
                  ("ч" . "ю")  ("с" . "б") ("м" . "ь")  ("и" . "т")
     ("н" . "е")  ("г" . "к")  ("ш" . "у") ("щ" . "ц")  ("з" . "й")
-    ("р" . "п")  ("о" . "а")  ("л" . "в") ("д" . "ы")  ("ж" . "ф")
+    ("р" . "п")  ("о" . "ы")  ("л" . "в") ("д" . "а")  ("ж" . "ф")
     ("т" . "и")  ("ь" . "м")  ("б" . "с") ("ю" . "ч")
 
     ("Ё" . "Ё")  ("Э" . "Х")  ("Х" . "Э")
@@ -329,6 +330,78 @@ Modify `key-translation-map', set when SET otherwise unset."
                    (keyamp--convert-kbd-str char))))
    keyamp--hand-swap))
 
+(defconst keyamp--hand-swap-direction-prefix '(("s" . "f") ("j" . "l"))
+  "Alist for hand-swapping keys pairs which must spin before read prefix
+command sequence.")
+
+(defun keyamp--hand-swap-direction-prefix-off ()
+  "See `keyamp--hand-swap-direction-prefix-on'."
+  (remove-hook 'post-command-hook 'keyamp--hand-swap-direction-prefix-off)
+  (mapc
+   (lambda (pair) ; Restore input source hand swap
+     (when (> (string-to-char (car pair)) (1- (expt 2 7)))
+       (keymap-set key-translation-map
+                   (keyamp--convert-kbd-str (car pair))
+                   (when-let ((char (cdr pair)))
+                     (keyamp--convert-kbd-str char)))))
+   keyamp--hand-swap)
+  (mapc
+   (lambda (pair)
+     (keymap-set key-translation-map
+                 (keyamp--convert-kbd-str (cdr (assoc (cdr pair) keyamp--hand-swap)))
+                 (keyamp--convert-kbd-str (cdr pair)))
+     (keymap-set key-translation-map
+                 (keyamp--convert-kbd-str (cdr (assoc (car pair) keyamp--hand-swap)))
+                 (keyamp--convert-kbd-str (car pair)))
+     (keymap-set key-translation-map
+                 (car (rassoc (cdr (assoc (cdr pair) keyamp--hand-swap))
+                              keyamp-input-methods-to-std))
+                 (car (rassoc (cdr pair) keyamp-input-methods-to-std)))
+     (keymap-set key-translation-map
+                 (car (rassoc (cdr (assoc (car pair) keyamp--hand-swap))
+                              keyamp-input-methods-to-std))
+                 (car (rassoc (car pair) keyamp-input-methods-to-std))))
+   keyamp--hand-swap-direction-prefix))
+
+(defun keyamp--hand-swap-direction-prefix-on ()
+  "Spin for hand swap direction. Prefix sequences must mirror while direction
+mirror then spin. E.g. s->j direction but s->l prefix. Corner case.
+Input source key to std with hand swap back to read prefix sequence from input
+source. Not possible double remap with `local-function-key-map'."
+  (when (or (member (this-single-command-keys) keyamp-prefix-io)
+            (member (this-single-command-keys) keyamp-prefix-modify))
+    (mapc
+     (lambda (pair) ; Input source to std with hand swap back
+       (when (> (string-to-char (car pair)) (1- (expt 2 7)))
+         (keymap-set key-translation-map
+                     (car pair)
+                     (keyamp--convert-kbd-str
+                      (cdr
+                       (assoc
+                        (cdr
+                         (assoc
+                          (car pair) keyamp-input-methods-to-std))
+                                  keyamp--hand-swap))))))
+     keyamp--hand-swap)
+    (mapc
+     (lambda (pair)
+       (keymap-set key-translation-map
+                   (keyamp--convert-kbd-str (cdr (assoc (cdr pair) keyamp--hand-swap)))
+                   (keyamp--convert-kbd-str (car pair)))
+       (keymap-set key-translation-map
+                   (keyamp--convert-kbd-str (cdr (assoc (car pair) keyamp--hand-swap)))
+                   (keyamp--convert-kbd-str (cdr pair)))
+       (keymap-set key-translation-map
+                   (car (rassoc (cdr (assoc (cdr pair) keyamp--hand-swap))
+                                keyamp-input-methods-to-std))
+                   (keyamp--convert-kbd-str (car pair)))
+       (keymap-set key-translation-map
+                   (car (rassoc (cdr (assoc (car pair) keyamp--hand-swap))
+                                keyamp-input-methods-to-std))
+                   (keyamp--convert-kbd-str (cdr pair))))
+     keyamp--hand-swap-direction-prefix)
+    (add-hook 'post-command-hook 'keyamp--hand-swap-direction-prefix-off)))
+
 (defun hand-swap-activate ()
   "Activate hand swap."
   (when keyamp-karabinerp
@@ -368,6 +441,7 @@ Modify `key-translation-map', set when SET otherwise unset."
          keyamp--hand-swap))
     (toggle-hand-swap-keymap t))
   (keyamp--hand-swap-direction-advice)
+  (advice-add 'keyamp-indicate-prefix :after 'keyamp--hand-swap-direction-prefix-on)
   (when (fboundp 'set-cursor-face-hand-swap)
     (set-cursor-face-hand-swap)
     (add-hook 'after-make-frame-functions 'set-cursor-face-hand-swap 90))
@@ -385,6 +459,7 @@ Modify `key-translation-map', set when SET otherwise unset."
     (toggle-hand-swap-keymap))
   (keyamp-key-translation) ; Restore
   (keyamp--hand-swap-direction-advice :remove)
+  (advice-remove 'keyamp-indicate-prefix 'keyamp--hand-swap-direction-prefix-on)
   (when (fboundp 'set-cursor-face)
     (set-cursor-face)
     (remove-hook 'after-make-frame-functions 'set-cursor-face-hand-swap))
@@ -1254,17 +1329,6 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
    (t
     (keyamp-command-execute 'page-dn-half))))
 
-(defun keyamp-ret ()
-  "Return key command for transient use."
-  (interactive)
-  (let ((cmd (keymap-lookup overriding-local-map
-                            (if (display-graphic-p) "<return>" "RET"))))
-    (keyamp-command-execute ; Double remap
-     (if (or (equal cmd 'keyamp-insert)
-             (null cmd))
-         'keyamp-escape
-       cmd))))
-
 (defun keyamp-delete ()
   "Command for G leader control."
   (interactive)
@@ -1420,7 +1484,6 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
   ;; Initiate by triple DEL/SPC (hold down).
   ;; I/K or DEL/SPC to move by lines. See `return-before'.
   (keyamp--map-leader keymap '(down-line . down-line-rev))
-  (keyamp--map-return keymap keyamp-ret)
   (keyamp--map-tab keymap keyamp-tab)
   (keyamp--map-backtab keymap hscroll-left)
   (keyamp--map keymap '(("<up>" . up-line-rev)))
@@ -1445,19 +1508,16 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
 
 (with-sparse-keymap ; Swap leaders up/down
   (keyamp--map-leader keymap '(up-line-rev . down-line-rev))
-  (keyamp--map-return keymap keyamp-ret)
   (keyamp--remap keymap '((previous-line . up-line) (next-line . down-line-rev)))
   (keyamp--set keymap '(up-line-rev down-line-rev)))
 
 (with-sparse-keymap
   (keyamp--map-leader keymap '(end-of-block . end-of-block-rev))
-  (keyamp--map-return keymap keyamp-ret)
   (keyamp--remap keymap '((previous-line . beg-of-block-rev) (next-line . end-of-block)))
   (keyamp--set keymap '(beg-of-block end-of-block)))
 
 (with-sparse-keymap
   (keyamp--map-leader keymap '(beg-of-block-rev . end-of-block-rev))
-  (keyamp--map-return keymap keyamp-ret)
   (keyamp--remap keymap '((previous-line . beg-of-block) (next-line . end-of-block)))
   (keyamp--set keymap '(beg-of-block-rev end-of-block-rev)))
 
@@ -1628,7 +1688,6 @@ keyboard ASCII CHAR."
 (with-sparse-keymap
   ;; Repeat half page up/down with I/K or DEL/SPC.
   (keyamp--map-leader keymap '(page-dn-half . page-up-half))
-  (keyamp--map-return keymap keyamp-ret)
   (keyamp--map-tab keymap scroll-up-command)
   (keyamp--map-backtab keymap scroll-down-command)
   (keyamp--remap keymap
@@ -1640,7 +1699,6 @@ keyboard ASCII CHAR."
 
 (with-sparse-keymap ; Swap leaders up/down
   (keyamp--map-leader keymap '(page-up-half-rev . page-dn-half-rev))
-  (keyamp--map-return keymap keyamp-ret)
   (keyamp--remap keymap '((previous-line . page-up-half) (next-line . page-dn-half)))
   (keyamp--set keymap '(page-up-half-rev page-dn-half-rev)))
 
@@ -1648,7 +1706,6 @@ keyboard ASCII CHAR."
   ;; Initially TAB makes half page forward, following presses do full page.
   ;; Arrows always do half page and keep TAB transient, see previous keymap.
   (keyamp--map-leader keymap '(next-line . previous-line))
-  (keyamp--map-return keymap keyamp-ret)
   (keyamp--map-tab keymap next-line)
   (keyamp--map-backtab keymap previous-line)
   (keyamp--remap keymap
@@ -2092,27 +2149,28 @@ keyboard ASCII CHAR."
   (keyamp--map org-agenda-mode-map
     '(("<double-mouse-1>" . org-agenda-tasks) ("<mouse-3>" . mouse-3)))
   (keyamp--remap org-agenda-mode-map
-    '((keyamp-insert     . org-agenda-tasks)
-      (del-word          . toggle-gnus)
-      (goto-match-br     . toggle-messages)
-      (open-line         . prev-buf)
-      (del-back          . calendar-split)
-      (newline           . next-buf)
-      (previous-line     . up-line-rev)
-      (next-line         . down-line)
-      (toggle-comment    . org-agenda-redo)
-      (cut-line          . prev-eww-buf)
-      (paste-or-prev     . tasks)
-      (toggle-case       . tools)
-      (backward-bracket  . dired-jump)
-      (forw-char         . screen-idle-escape)
-      (back-char         . screen-idle-return)
-      (kmacro-record     . alarm)
-      (search-string     . stopwatch-lap)
-      (jump-to-register  . stopwatch)
-      (point-to-register . timer)
-      (insert-register   . timer-stop)
-      (proced-defer      . timer-display))))
+    '((keyamp-insert      . org-agenda-tasks)
+      (del-word           . toggle-gnus)
+      (goto-match-br      . toggle-messages)
+      (shrink-whitespaces . scratch)
+      (open-line          . prev-buf)
+      (del-back           . calendar-split)
+      (newline            . next-buf)
+      (previous-line      . up-line-rev)
+      (next-line          . down-line)
+      (toggle-comment     . org-agenda-redo)
+      (cut-line           . prev-eww-buf)
+      (paste-or-prev      . tasks)
+      (toggle-case        . tools)
+      (backward-bracket   . dired-jump)
+      (forw-char          . screen-idle-escape)
+      (back-char          . screen-idle-return)
+      (kmacro-record      . alarm)
+      (search-string      . stopwatch-lap)
+      (jump-to-register   . stopwatch)
+      (point-to-register  . timer)
+      (insert-register    . timer-stop)
+      (proced-defer       . timer-display))))
 
 (defvar screen-idle-keymap (make-sparse-keymap))
 (keyamp--map-tab screen-idle-keymap novel)
@@ -2309,7 +2367,7 @@ keyboard ASCII CHAR."
   (keyamp--map-tab vterm-mode-map vterm-send-tab)
   (keyamp--map-backtab vterm-mode-map vterm-send-backtab)
 
-  (keyamp--map vterm-mode-map '(("C-t" . vterm-send-tab)))
+  (keyamp--map vterm-mode-map '(("C-t" . vterm-send-tab) ("C-q" . vterm-c-c)))
   (keyamp--remap vterm-mode-map
     '(;; Left half
       (insert-space-before . vterm-shell-vi-cmd)      ; Q Sync point and activate shell vi cmd mode transient
@@ -2321,23 +2379,23 @@ keyboard ASCII CHAR."
       (cut-text-block      . vt-conn-reconnect)       ; T
       (copy-text-block     . vt-sftp-jump)            ; SPC T
       (shrink-whitespaces  . vt-conn-localhost)       ; A
-      (kill-line           . vterm-tmux-close-window) ; SPC A
-      (open-line           . vterm-tmux-prev-window)  ; S
+      (kill-line           . vt-close-window)         ; SPC A
+      (open-line           . vt-prev-window)          ; S
       (del-back            . vterm-shell-vi-cmd)      ; D Sync point or do modify if in transient
-      (newline             . vterm-tmux-next-window)  ; F
-      (new-empty-buffer    . vterm-tmux-new-window)   ; SPC G
+      (newline             . vt-next-window)          ; F
+      (new-empty-buffer    . vt-new-window)           ; SPC G
       (toggle-comment      . vterm-read-send-key)     ; Z
       (cut-line            . vterm-clear)             ; X
       (paste-or-prev       . vterm-yank)              ; V
       (paste-from-r1       . paste-from-r1-vt)        ; SPC V
       (toggle-case         . prev-vterm-buf)          ; B
-      (toggle-prev-case    . next-vterm-buf)          ; SPC B
+      (toggle-prev-case    . vt-command-copy)         ; SPC B
       (revert-buffer       . prev-vterm-buf)          ; SPC 3
       (select-word         . vterm-up-vi-cmd)         ; SPC SPC
 
       ;; Right half
-      (page-up-half        . vterm-tmux-copy-hpu)     ; DEL H
-      (page-dn-half        . vterm-tmux-copy-hpd)     ; DEL ;
+      (page-up-half        . vt-page-up-half)         ; DEL H
+      (page-dn-half        . vt-page-dn-half)         ; DEL ;
       (dired-jump          . vt-conn-tramp)           ; DEL M
       (back-char           . vterm-left)
       (forw-char           . vterm-right)
@@ -2351,6 +2409,7 @@ keyboard ASCII CHAR."
     (keyamp--map-leader keymap '(previous-line . next-line))
     (keyamp--remap keymap
       '((previous-line . vterm-up-vi-cmd) (next-line . vterm-down)))
+    (keyamp--map-backtab keymap vterm-history-search)
     (keyamp--set keymap '(vterm-history-search) nil :insert)
     (keyamp--set keymap '(vterm-up-vi-cmd vterm-down vterm-yank-pop) :command))
 
@@ -2370,14 +2429,8 @@ keyboard ASCII CHAR."
     (advice-add 'keyamp-input-timer-payload
                 :after #'keyamp-input-timer-payload-vterm))
 
-  (advice-add-macro '(vterm-send-return term-interrupt-subjob vterm-c-c)
+  (advice-add-macro '(vterm-send-return term-interrupt-subjob)
                     :after 'keyamp-input-timer)
-
-  (with-sparse-keymap
-    (keyamp--map-return keymap keyamp-ret)
-    (keyamp--remap keymap
-      '((open-line . vterm-tmux-prev-window) (newline . vterm-tmux-next-window)))
-    (keyamp--set keymap '(vterm-tmux-prev-window vterm-tmux-next-window)))
 
   (with-sparse-keymap
     (keyamp--remap keymap
@@ -2500,14 +2553,13 @@ keyboard ASCII CHAR."
         (activate-region . vterm-tmux-copy-self-insert)
         (isearch-forward . vterm-tmux-copy-self-insert)))
     (keyamp--set keymap
-      '(vterm-tmux-copy     vterm-tmux-copy-self-insert
-        vterm-tmux-copy-hpu vterm-tmux-copy-hpd) :command))
+      '(vterm-tmux-copy vterm-tmux-copy-self-insert
+        vt-page-up-half vt-page-dn-half) :command))
 
   (with-sparse-keymap
-    (keyamp--map-return keymap keyamp-ret)
     (keyamp--remap keymap
-      '((previous-line . vterm-tmux-copy-hpu) (next-line . vterm-tmux-copy-hpd)))
-    (keyamp--set keymap '(vterm-tmux-copy-hpu vterm-tmux-copy-hpd)))
+      '((previous-line . vt-page-up-half) (next-line . vt-page-dn-half)))
+    (keyamp--set keymap '(vt-page-up-half vt-page-dn-half)))
 
   ;;;;;; tmux.conf
   ;; bind -T copy-mode-vi c send-keys -X copy-pipe-and-cancel 'tee > /tmp/tmux-copy~$(date "+%Y-%m-%d_%H%M%S")~'
@@ -2570,6 +2622,7 @@ keyboard ASCII CHAR."
 (keyamp--map-std keyamp-ignore-map 'ignore)
 (keyamp--map keyamp-ignore-map
   '(("<down-mouse-1>" . ignore) ("<mouse-1>" . ignore) ("<drag-mouse-1>" . ignore)
+    ("<mouse-2>"      . ignore) ("<mouse-3>" . ignore)
     ("<left>" . ignore) ("<right>" . ignore)
     ("<up>"   . ignore) ("<down>"  . ignore)))
 
@@ -3229,6 +3282,7 @@ keyboard ASCII CHAR."
                  gnus-topic-select-group                 t
                  page-up-half                            t
                  page-dn-half                            t
+                 page-up-half-rev                        t
                  hist-forw                               t
                  hist-back                               t
                  hscroll-left                            t
@@ -3276,8 +3330,8 @@ keyboard ASCII CHAR."
                  vterm-up-vi-cmd                         t
                  vterm-down                              t
                  vterm-tmux-copy                         t
-                 vterm-tmux-copy-hpu                     t
-                 vterm-tmux-copy-hpd                     t
+                 vt-page-up-half                         t
+                 vt-page-dn-half                         t
                  vterm-tmux-copy-self-insert             t
                  widget-backward                         t
                  widget-forward                          t
@@ -3875,8 +3929,7 @@ called, with no arguments, after KEYMAP is deactivated."
        (t
         (keyamp-indicate-command)))
       (when (or defining-kbd-macro
-                (memq this-command keyamp-blink-modify-commands)
-                (eq major-mode 'wdired-mode))
+                (memq this-command keyamp-blink-modify-commands))
         (keyamp-blink keyamp-blinker-modify))
       (when (memq this-command '(keyamp-escape ignore keyamp-ignore))
         (keyamp-blink keyamp-blinker-idle))
@@ -4028,7 +4081,7 @@ called, with no arguments, after KEYMAP is deactivated."
         prefix-arg) ; C-u
     (keyamp-blink-flash keyamp-modify-color))))
 
-(defvar keyamp-prefix-delay 0.1 "Delay before indicate prefix keymap.")
+(defvar keyamp-prefix-delay (/ 50 1000.0) "Delay before indicate prefix keymap.")
 
 (defun keyamp-prefix ()
   "Run `keyamp-indicate-prefix' with idle timer."
