@@ -6070,7 +6070,10 @@
           ],
           "to_after_key_up": [
             {
-              "key_code": "7"
+              "key_code": "8",
+              "modifiers": [
+                "left_shift"
+              ]
             }
           ],
           "to_if_held_down": [
@@ -6600,7 +6603,10 @@
           ],
           "to_after_key_up": [
             {
-              "key_code": "9"
+              "key_code": "equal_sign",
+              "modifiers": [
+                "left_shift"
+              ]
             }
           ],
           "to_if_held_down": [
@@ -7170,12 +7176,7 @@
         {
           "type": "basic",
           "from": {
-            "key_code": "equal_sign",
-            "modifiers": {
-              "optional": [
-                "any"
-              ]
-            }
+            "key_code": "equal_sign"
           },
           "conditions": [
             {
@@ -8528,7 +8529,10 @@
           },
           "to_after_key_up": [
             {
-              "shell_command": "open -a 'VNC Viewer'"
+              "key_code": "down_arrow",
+              "modifiers": [
+                "control"
+              ]
             }
           ],
           "to_if_held_down": [
@@ -8759,7 +8763,7 @@
             "key_code": "f11",
             "modifiers": {
               "mandatory": [
-                "control"
+                "shift"
               ]
             }
           },
@@ -8796,7 +8800,7 @@
             "key_code": "f12",
             "modifiers": {
               "mandatory": [
-                "control"
+                "shift"
               ]
             }
           },

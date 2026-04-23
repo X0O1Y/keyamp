@@ -441,6 +441,12 @@ source. Not possible double remap with `local-function-key-map'."
          keyamp--hand-swap))
     (toggle-hand-swap-keymap t))
   (keyamp--hand-swap-direction-advice)
+  (when (and (advice-member-p 'keyamp-virtual-lleader 'back-word)
+             (advice-member-p 'keyamp-virtual-rleader 'forw-word))
+    (advice-remove 'back-word 'keyamp-virtual-lleader)
+    (advice-remove 'forw-word 'keyamp-virtual-rleader)
+    (advice-add 'back-word :after 'keyamp-virtual-rleader)
+    (advice-add 'forw-word :after 'keyamp-virtual-lleader))
   (advice-add 'keyamp-indicate-prefix :after 'keyamp--hand-swap-direction-prefix-on)
   (when (fboundp 'set-cursor-face-hand-swap)
     (set-cursor-face-hand-swap)
@@ -459,6 +465,12 @@ source. Not possible double remap with `local-function-key-map'."
     (toggle-hand-swap-keymap))
   (keyamp-key-translation) ; Restore
   (keyamp--hand-swap-direction-advice :remove)
+  (when (and (advice-member-p 'keyamp-virtual-rleader 'back-word)
+             (advice-member-p 'keyamp-virtual-lleader 'forw-word))
+    (advice-remove 'back-word 'keyamp-virtual-rleader)
+    (advice-remove 'forw-word 'keyamp-virtual-lleader)
+    (advice-add 'back-word :after 'keyamp-virtual-lleader)
+    (advice-add 'forw-word :after 'keyamp-virtual-rleader))
   (advice-remove 'keyamp-indicate-prefix 'keyamp--hand-swap-direction-prefix-on)
   (when (fboundp 'set-cursor-face)
     (set-cursor-face)
@@ -802,16 +814,15 @@ Prefix sequence may contain last key ESC."
 
 (defun keyamp-lookup-key (map key)
   (catch 'found
-    (map-keymap (lambda (k b) (if (equal key k) (throw 'found b))) map)))
+    (map-keymap (lambda (k b) (when (equal key k) (throw 'found b))) map)))
 
 (defun keyamp-catch-tty-ESC ()
   "Setup key mappings of current terminal to turn a tty's ESC into <escape>."
   (when-let (((memq (terminal-live-p (frame-terminal)) '(t pc)))
              (esc-binding (keyamp-lookup-key input-decode-map ?\e))
-             (ESC-key "ESC")
              (esc `(menu-item "" ,esc-binding :filter keyamp-tty-ESC-filter)))
-    (keymap-set input-decode-map ESC-key esc)
-    (keymap-set key-translation-map ESC-key "<escape>")))
+    (keymap-set input-decode-map "ESC" esc)
+    (keymap-set key-translation-map "ESC" "<escape>")))
 
 
 ;; Keymaps
@@ -1064,6 +1075,7 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
     ("w" . sun-moon)
 
     ("e e"   . todo)                       ("e k"   . weather)
+    ("e d"   . org-shiftdown)
     ("e SPC" . clock)                      ("e DEL" . calendar)
     ("e <escape>" . ignore)                ("e RET" . insert-date)
 
@@ -1154,7 +1166,7 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
         ("<mouse-3>" . ignore))))
 
 (keyamp--map-double
-  '((keyamp-escape . alternate-frame) (other-win   . jump-mark)
+  '((keyamp-escape . screen-idle-esc) (other-win   . jump-mark)
     (beg-of-line   . beg-of-buf)      (end-of-lyne . end-of-buf)
     (proced-defer  . save-close-buf)  (sh-defer    . delete-other-windows)))
 
@@ -1636,16 +1648,20 @@ keyboard ASCII CHAR."
   (keyamp--map keymap '(("i" . keyamp-lleader-i-map)))
   (keyamp--map keyamp-lleader-i-map '(("i" . backup-and-copy)))
   (keyamp--remap keymap '((back-word . select-word) (forw-word . select-quote)))
-  (advice-add 'back-word :after
-              (lambda () "virtual leader" (keyamp-virtual-leader-init keymap))))
+  (defun keyamp-virtual-lleader ()
+    "Virtual leader left."
+    (keyamp-virtual-leader-init keymap))
+  (advice-add 'back-word :after 'keyamp-virtual-lleader))
 
 (with-sparse-keymap
   (keyamp--remap keymap
     '((back-word     . select-line)   (forw-word        . select-block)
       (previous-line . beg-of-block)  (next-line        . end-of-block)
       (bchar         . isearch-wback) (backward-bracket . downloads)))
-  (advice-add 'forw-word :after
-              (lambda () "virtual leader" (keyamp-virtual-leader-init keymap))))
+  (defun keyamp-virtual-rleader ()
+    "Virtual leader right."
+    (keyamp-virtual-leader-init keymap))
+  (advice-add 'forw-word :after 'keyamp-virtual-rleader))
 
 (defun keyamp-virtual-leader-return-before (&rest _)
   "Return before, that is, compensate word move."
@@ -1940,7 +1956,7 @@ keyboard ASCII CHAR."
       (newline              . next-dired-buf)
       (toggle-comment       . dired-omit-mode)
       (cut-line             . dired-kill-subdir)
-      (cut-text-block       . dired-maybe-insert-subdir)
+      (cut-text-block       . dired-subtree-insert)
       (copy-text-block      . dired-decrypt)
       (calc                 . dired-encrypt)
       (paste-or-prev        . dired-create-directory)
@@ -2388,7 +2404,7 @@ keyboard ASCII CHAR."
       (cut-line            . vterm-clear)             ; X
       (paste-or-prev       . vterm-yank)              ; V
       (paste-from-r1       . paste-from-r1-vt)        ; SPC V
-      (toggle-case         . prev-vterm-buf)          ; B
+      (toggle-case         . vt-position)             ; B
       (toggle-prev-case    . vt-command-copy)         ; SPC B
       (revert-buffer       . prev-vterm-buf)          ; SPC 3
       (select-word         . vterm-up-vi-cmd)         ; SPC SPC
@@ -3771,16 +3787,17 @@ of quit minibuffer. Answer q to literal y or n question."
   (unless (eq this-command last-command)
     (force-mode-line-update t)))
 
-(defun keyamp-indicator-color (Color)
-  "Set `mode-line-front-space-face' face COLOR."
-  (set-face-attribute 'mode-line-front-space-face nil :foreground Color))
+(defun keyamp-indicator-color (Color &optional Normal)
+  "Set `mode-line-front-space-face` face COLOR."
+  (set-face-attribute 'mode-line-front-space-face nil
+                      :foreground Color :weight (if Normal 'normal 'bold)))
 
-(defun keyamp-indicate (Indicator Cursor Color)
+(defun keyamp-indicate (Indicator Cursor Color &optional Normal)
   "Indicate mode with INDICATOR, CURSOR and COLOR."
   (keyamp-cancel-indicate-read-timer)
   (keyamp-indicator Indicator)
   (keyamp-cursor-type Cursor)
-  (keyamp-indicator-color Color))
+  (keyamp-indicator-color Color Normal))
 
 (defun keyamp-indicate-read ()
   "Indicate read."
@@ -3946,7 +3963,7 @@ called, with no arguments, after KEYMAP is deactivated."
 
 (defun keyamp-blinking (Color1 Color2)
   "Blinking."
-  (keyamp-indicator-color Color1)
+  (keyamp-indicator-color Color1 t)
   (when (timerp keyamp-blink-off-timer)
     (cancel-timer keyamp-blink-off-timer))
   (setq keyamp-blink-off-timer
@@ -4003,7 +4020,7 @@ called, with no arguments, after KEYMAP is deactivated."
   (oset obj curCursor (frame-parameter nil 'cursor-type))
   (unless (eq (oref obj curColor) (oref obj color))
     (keyamp-indicate (symbol-value (oref obj indicator))
-                     (oref obj curCursor) (symbol-value (oref obj color)))
+                     (oref obj curCursor) (symbol-value (oref obj color)) t)
     (when (timerp (oref obj timer))
       (cancel-timer (oref obj timer)))
     (oset obj timer (run-with-timer (oref obj duration) nil 'keyamp-blink-end obj))))
@@ -4045,21 +4062,21 @@ called, with no arguments, after KEYMAP is deactivated."
 
 (defconst keyamp-prefix-io
   `([?\s] [?\d] [backspace]
-    [?\d ,(string-to-char (keyamp--convert-kbd-str "i"))]
-    [?\d ,(string-to-char (keyamp--convert-kbd-str "j"))]
-    [?\d ,(string-to-char (keyamp--convert-kbd-str "k"))]
-    [backspace ,(string-to-char (keyamp--convert-kbd-str "i"))]
-    [backspace ,(string-to-char (keyamp--convert-kbd-str "j"))]
-    [backspace ,(string-to-char (keyamp--convert-kbd-str "k"))]
+    [?\s ,(string-to-char (keyamp--convert-kbd-str "i"))]
+    [?\s ,(string-to-char (keyamp--convert-kbd-str "j"))]
+    [?\s ,(string-to-char (keyamp--convert-kbd-str "k"))]
     [?\C-h]
     [?\C-_ ,(string-to-char (keyamp--convert-kbd-str "n"))]
     [?\C-И ,(string-to-char (car (rassoc "n" keyamp-input-methods-to-std)))])
   "Indicate prefixes with io.")
 
 (defconst keyamp-prefix-modify
-  `([?\s ,(string-to-char (keyamp--convert-kbd-str "e"))]
-    [?\s ,(string-to-char (keyamp--convert-kbd-str "d"))]
-    [?\s ,(string-to-char (keyamp--convert-kbd-str "f"))])
+  `([?\d ,(string-to-char (keyamp--convert-kbd-str "e"))]
+    [?\d ,(string-to-char (keyamp--convert-kbd-str "d"))]
+    [?\d ,(string-to-char (keyamp--convert-kbd-str "f"))]
+    [backspace ,(string-to-char (keyamp--convert-kbd-str "e"))]
+    [backspace ,(string-to-char (keyamp--convert-kbd-str "d"))]
+    [backspace ,(string-to-char (keyamp--convert-kbd-str "f"))])
   "Indicate prefixes with modify.")
 
 (defconst keyamp-blink-flash 0.3 "Blink flash duration.")

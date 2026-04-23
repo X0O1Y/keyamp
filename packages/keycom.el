@@ -473,7 +473,8 @@ Save point to register 6 before repeated call."
     (beg-of-line-raw))
    (visual-line-mode
     (end-of-visual-line))
-   (t (end-of-line))))
+   (t
+    (end-of-line))))
 
 (defun back-block ()
   "Move cursor to the end of prev block."
@@ -2412,7 +2413,7 @@ With prefix arg, find the previous file."
                      (length files))))
       (find-file (nth pos files)))))
 
-(defconst new-buffer-prefix "buffer" "New buffer prefix.")
+(defconst new-buffer-prefix "Buffer" "New buffer prefix.")
 
 (defun new-empty-buffer ()
   "Create a new empty buffer. New buffer is named buffer, buffer<2>, etc."
@@ -3097,9 +3098,11 @@ Open new terminal if already in terminal."
                  (get-buffer vt-buffer))
             (progn
               (switch-to-buffer vt-buffer)
-              (if (or (eq (point) (point-min))
-                      (eq (point) (line-beginning-position)))
-                  (vterm-reset-cursor-point)))
+              (when (or (eq (point) (point-min))
+                        (eq (point) (line-beginning-position)))
+                (vterm-reset-cursor-point))
+              (when (fboundp 'vt-position)
+                (vt-position)))
           (call-interactively 'next-vterm-buf)))
     (shell)))
 
