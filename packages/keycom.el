@@ -773,10 +773,10 @@ and `right-brackets'."
   (if (equal before-last-command this-command)
       (progn
         (command-execute 'backward-char)
-        (if (region-active-p)
-            (progn
-              (setq this-command 'deactivate-region)
-              (command-execute 'deactivate-region))))
+        (when (region-active-p)
+          (progn
+            (setq this-command 'deactivate-region)
+            (command-execute 'deactivate-region))))
     (command-execute 'backward-char)
     (when (eq last-command 'fchar)
       (before-last-command))))
@@ -3849,7 +3849,10 @@ Second right click to select quote."
     (unless (characterp char)
       (user-error "%s is not a valid character"
                   (key-description (vector char))))
-    (if (eq char 27) ; Escape not inserted
+    (if (or (and (equal (lookup-key key-translation-map (kbd "TAB")) (kbd "<escape>")) ; Hack so far
+                 (eq char 9))
+            (eq char 27) ; Escape not inserted
+            )
         (ignore)
       (if (> arg 0)
           (if (eq overwrite-mode 'overwrite-mode-binary)
@@ -4087,6 +4090,18 @@ Click mouse select a window and close the others."
               (equal user "root"))
          (concat remote "/")
        "~/"))))
+
+(defun hide-virtual-keyboard ()
+  "Display an overlay with the text at the end of *Minibuf-0*.
+The overlay is automatically removed after timeout. Tap it."
+  (interactive)
+  (with-current-buffer (get-buffer " *Minibuf-0*")
+    (let ((ov (make-overlay (point-max) (point-max))))
+      (overlay-put ov 'before-string "x:////")
+      (run-at-time 4 nil
+                   (lambda (ov) (when (overlayp ov)
+                                  (delete-overlay ov)))
+                   ov))))
 
 (provide 'keycom)
 
