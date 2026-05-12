@@ -41,8 +41,6 @@ Emacs in pocket with unicode support. [[https://apps.apple.com/us/app/termius-te
 
 [[screenshots/virtual-keyboard.png]]
 
-[[screenshots/virtual-keyboard2.png]]
-
 * Split keyboard
 
 - Kinesis Advantage2 [[http://www.keyboard-layout-editor.com/#/gists/6a1a62133ab9f741589bd556cb946792][layout]] and [[file:layouts/kinesis/advantage2/qwerty2.txt][config]]:
