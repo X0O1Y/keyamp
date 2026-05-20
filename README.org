@@ -21,8 +21,6 @@ Input model based on [[file:packages/keyamp.el][Keyamp]] for Emacs.
 
 [[screenshots/desktop.png]]
 
-[[screenshots/desktop2.png]]
-
 * Virtual keyboard
 
 Emacs in pocket with unicode support. [[https://apps.apple.com/us/app/termius-terminal-ssh-client/id549039908][Termius]] client. Custom keyboard.

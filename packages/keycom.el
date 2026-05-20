@@ -96,7 +96,8 @@
       (setq this-command 'gnus-topic-prev)
       (gnus-topic-prev))
      (t
-      (if (equal last-command-keys "t") ; Else SPC
+      (if (or (equal last-command-keys "t")
+              (equal last-command-keys "k")) ; Else SPC
           (progn
             (setq this-command 'page-up-half)
             (page-up-half))
@@ -111,6 +112,12 @@
   "Down line for transient use."
   (interactive)
   (cond
+   ((or (and (equal last-command-keys " ")
+             (member (this-command-keys) (list (kbd "DEL") [backspace])))
+        (and (member last-command-keys (list (kbd "DEL") [backspace]))
+             (equal (this-command-keys) " ")))
+    (setq this-command 'up-line-rev) ; Swap direction
+    (up-line-rev))
    ((equal before-last-command 'forw-word)
     (setq this-command 'forw-word-repeat)
     (forw-word-repeat))
@@ -130,7 +137,8 @@
       (setq this-command 'gnus-topic-next)
       (gnus-topic-next))
      (t
-      (if (equal last-command-keys "d") ; Else DEL
+      (if (or (equal last-command-keys "d")
+              (equal last-command-keys "i")) ; Else DEL
           (progn
             (setq this-command 'page-dn-half)
             (page-dn-half))
@@ -159,9 +167,16 @@
        (t
         (setq this-command 'up-line)
         (up-line)))
-    (command-execute 'previous-line)
-    (when (eq last-command 'down-line-rev)
-      (before-last-command)))
+    (if (or (and (equal last-command-keys " ")
+                 (member (this-command-keys) (list (kbd "DEL") [backspace])))
+            (and (member last-command-keys (list (kbd "DEL") [backspace]))
+                 (equal (this-command-keys) " ")))
+        (progn
+          (setq this-command 'down-line-rev) ; Swap direction
+          (down-line-rev))
+      (command-execute 'previous-line)
+      (when (eq last-command 'down-line-rev)
+        (before-last-command))))
   (setq last-command-keys (this-command-keys)))
 
 (defun down-line-rev ()
@@ -501,7 +516,8 @@ Save point to register 6 before repeated call."
 switch via K to half page move."
   (interactive)
   (if (equal before-last-command this-command)
-      (if (equal last-command-keys "t") ; Else SPC
+      (if (or (equal last-command-keys "k")
+              (equal last-command-keys "t")) ; Else SPC
           (progn
             (setq this-command 'page-up-half)
             (page-up-half))
@@ -517,7 +533,8 @@ switch via K to half page move."
   "Back block. For reverse transient."
   (interactive)
   (if (equal before-last-command this-command)
-      (if (equal last-command-keys "t") ; Else SPC
+      (if (or (equal last-command-keys "k")
+              (equal last-command-keys "t")) ; Else SPC
           (progn
             (setq this-command 'page-up-half)
             (page-up-half))
@@ -534,7 +551,8 @@ switch via K to half page move."
 switch via I to half page move."
   (interactive)
   (if (equal before-last-command this-command)
-      (if (equal last-command-keys "d") ; Else DEL
+      (if (or (equal last-command-keys "i")
+              (equal last-command-keys "d")) ; Else DEL
           (progn
             (setq this-command 'page-dn-half)
             (page-dn-half))
@@ -550,7 +568,8 @@ switch via I to half page move."
   "Forw block. For reverse transient."
   (interactive)
   (if (equal before-last-command this-command)
-      (if (equal last-command-keys "d") ; Else DEL
+      (if (or (equal last-command-keys "i")
+              (equal last-command-keys "d")) ; Else DEL
           (progn
             (setq this-command 'page-dn-half)
             (page-dn-half))
@@ -689,7 +708,7 @@ and `right-brackets'."
 (defun back-word ()
   "Backward word. Fast double direction switch breaks beat to char move."
   (interactive)
-  (when (and (member (this-command-keys) (list "l" [?г]))
+  (when (and (member (this-command-keys) (list "u" "l" [?г]))
              (not (or (eq last-command 'select-word)
                       (eq last-command 'back-word)
                       (eq last-command 'jump-mark))))
@@ -718,7 +737,7 @@ and `right-brackets'."
 (defun forw-word ()
   "Forward word."
   (interactive)
-  (when (and (member (this-command-keys) (list "w" [?щ]))
+  (when (and (member (this-command-keys) (list "o" "w" [?щ]))
              (not (or (eq last-command 'select-word)
                       (eq last-command 'forw-word))))
     (push-mark (point) t)) ; Virtual leader
@@ -1117,8 +1136,8 @@ Else try cut bracket. If error e.g. no match, then delete char."
   (interactive)
   (if (eq major-mode 'vterm-mode)
       (progn
-        (setq this-command 'vterm-shell-vi-fdel)
-        (command-execute 'vterm-shell-vi-fdel))
+        (setq this-command 'vt-shell-vi-del)
+        (command-execute 'vt-shell-vi-del))
     (if buffer-read-only
         (setq this-command 'ignore)
       (delete-char 1))))
@@ -3086,13 +3105,15 @@ before actually send the cd command."
       (one-window-p)))
 
 (defun terminal ()
-  "Split terminal window below. Switch to terminal if already split.
-Open new terminal if already in terminal."
+  "Terminal."
   (interactive)
   (if (fboundp 'vterm)
       (if (eq major-mode 'vterm-mode)
-          (let ((current-prefix-arg '-))
-            (call-interactively 'next-vterm-buf))
+          (let ((current-prefix-arg '-)
+                (buf (current-buffer)))
+            (call-interactively 'next-vterm-buf)
+            (when (eq buf (current-buffer))
+              (call-interactively 'vt-conn-localhost)))
         (if (and (boundp 'vt-buffer)
                  vt-buffer
                  (get-buffer vt-buffer))
@@ -3138,187 +3159,6 @@ Custom, added prompt on event read."
   (dolist (key (vterm--translate-event-to-args
                 (read-event "Press key to send...")))
     (apply #'vterm-send-key key)))
-
-(defun vterm-up-vi-cmd ()
-  "Send `<up>' to the libvterm. Activate shell vi cmd mode."
-  (interactive)
-  (vterm-send-key "<up>")
-  (vterm-shell-vi-cmd))
-
-(defun vterm-up ()
-  "Send `<up>' to the libvterm."
-  (interactive)
-  (vterm-send-key "<up>"))
-
-(defun vterm-down ()
-  "Send `<down>' to the libvterm."
-  (interactive)
-  (vterm-send-key "<down>"))
-
-(defun vterm-left ()
-  "Send `<left>' to the libvterm."
-  (interactive)
-  (vterm-send-key "<left>"))
-
-(defun vterm-right ()
-  "Send `<right>' to the libvterm."
-  (interactive)
-  (vterm-send-key "<right>"))
-
-(defun vterm-send-backtab ()
-  "Send `<backtab>' to the libvterm. Keep custom."
-  (interactive)
-  (vterm-send-key "<backtab>"))
-
-(defun vterm-c-c ()
-  "Send C-c to libvterm."
-  (interactive)
-  (vterm-send-key (kbd "C-c")))
-
-(defun vterm-history-search ()
-  "History search. Map C-o to history-incremental-search-backward in zshrc
-and reverse-search-history in bashrc."
-  (interactive)
-  (vterm-send-key (kbd "C-o")))
-
-(defun vterm-tmux-prefix ()
-  "Send tmux prefix key."
-  (vterm-send-key (kbd "C-b")))
-
-(defun vterm-tmux-copy ()
-  "Activate copy mode in tmux. Prefix + ] to paste."
-  (interactive)
-  (vterm-tmux-prefix)
-  (vterm-send-key (kbd "["))
-  (vterm-reset-cursor-point))
-
-(defun vterm-tmux-paste ()
-  "Paste from copy mode in tmux."
-  (interactive)
-  (vterm-tmux-prefix)
-  (vterm-send-key (kbd "]")))
-
-(defun vterm-tmux-split-pane ()
-  "Split pane in tmux."
-  (interactive)
-  (vterm-tmux-prefix)
-  (vterm-send-key (kbd "%")))
-
-(defun vterm-tmux-copy-self-insert ()
-  "Send key to tmux copy mode."
-  (interactive)
-  (if (eq last-command-event 127)
-      (vterm-send-key (kbd "DEL")) ; vterm-module.c:996 missing DEL
-    (vterm--self-insert)))
-
-(defun vterm-shell-vi-cmd ()
-  "Activate vi cmd mode in shell prompt. Deactivate tmux copy mode."
-  (interactive)
-  (when (eq major-mode 'vterm-mode)
-    (vterm-reset-cursor-point)
-    (vterm-send-key (kbd "^["))))
-
-(defun vterm-shell-vi-insert ()
-  "Activate vi insert mode in shell prompt."
-  (interactive)
-  (when (and (eq major-mode 'vterm-mode)
-             (string-match vterm-prompt-regexp
-                           (buffer-substring-no-properties
-                            (line-beginning-position) (line-end-position)))
-             (not (eq this-command 'term-interrupt-subjob))
-             (not (eq this-command 'vterm-send-return))
-             (not (eq this-command 'vterm-history-search)))
-    (vterm-send-key (kbd "^["))
-    (vterm-send-key (kbd "C-m"))))
-
-(defun vterm-shell-vi-self-insert ()
-  "Send key to shell prompt vi cmd mode."
-  (interactive)
-  (vterm--self-insert))
-
-(defun vterm-shell-vi-push-right (Key)
-  "Send key to shell prompt vi cmd mode."
-  (let ((x (point)))
-    (vterm-send-key Key)        ; Workaround vi go after last char
-    (sit-for vterm-timer-delay) ; Delay to sync
-    (when (and (eq x (point))   ; Point did not move
-               (if-let ((p1 (1+ (point))) ; All blank after next char until eol
-                        (p2 (line-end-position))
-                        ((>= p2 p1)))
-                   (string-blank-p (buffer-substring-no-properties p1 p2))
-                 t)
-               (let ((p1 (1- (point))) ; Not blank before prev char
-                     (p2 (line-end-position)))
-                 (not (string-blank-p (buffer-substring-no-properties p2 p1)))))
-      (vterm-send-key (kbd "C-m")) ; So activate insert
-      (vterm-send-key "<right>")   ; Go after last char
-      (vterm-send-key (kbd "SPC")) ; Add space and back to cmd mode
-      (vterm-send-key (kbd "^[")))))
-
-(defun vterm-shell-vi-l ()
-  "Send key to shell prompt vi cmd mode."
-  (interactive)
-  (vterm-shell-vi-push-right "s"))
-
-(defun vterm-shell-vi-u ()
-  "Send key to shell prompt vi cmd mode."
-  (interactive)
-  (vterm-send-key "l"))
-
-(defun vterm-shell-vi-o ()
-  "Send key to shell prompt vi cmd mode."
-  (interactive)
-  (vterm-shell-vi-push-right "w"))
-
-(defun vterm-shell-vi-d ()
-  "Send key to shell prompt vi cmd mode."
-  (interactive)
-  (vterm-send-key "e"))
-
-(defun vterm-shell-vi-fdel ()
-  "Send key to shell prompt vi cmd mode."
-  (interactive)
-  (vterm-send-key "a"))
-
-(defun vterm-vi ()
-  "Activate vi mode transient."
-  (interactive)
-  (vterm-reset-cursor-point))
-
-(defun vterm-vi-self-insert ()
-  "Send key to vi mode."
-  (interactive)
-  (cond
-   ((eq last-command-event 127)
-    (vterm-send-key (kbd "DEL")))
-   ((eq last-command-event 13)
-    (vterm-send-return))
-   ((equal (this-command-keys) (kbd "<return>"))
-    (vterm-send-return))
-   (t (vterm--self-insert))))
-
-(defun vterm-vi-escape ()
-  "Send key to vi mode. Specialized."
-  (interactive)
-  (vterm--self-insert))
-
-(defun vterm-vi-quit ()
-  "Quit vi without save."
-  (interactive)
-  (when (and (y-or-n-p "Quit vi?")
-             (eq major-mode 'vterm-mode))
-    (vterm-send-key (kbd "^["))
-    (vterm-send-key "Z")
-    (vterm-send-key "Q")))
-
-(defun vterm-vi-save-quit ()
-  "Save and quit vi."
-  (interactive)
-  (when (and (y-or-n-p "Save and quit vi?")
-             (eq major-mode 'vterm-mode))
-    (vterm-send-key (kbd "^["))
-    (vterm-send-key "Z")
-    (vterm-send-key "Z")))
 
 (defun vterm-reset-cursor-shape ()
   "Kill local cursor type variable in order to restore cursor change shape."
@@ -3612,8 +3452,8 @@ This checks in turn:
     (insert "bash")
     (newline))
    ((eq major-mode 'vterm-mode)
-    (setq this-command 'vterm-vi-save-quit)
-    (vterm-vi-save-quit))
+    (setq this-command 'vt-vi-save-quit)
+    (vt-vi-save-quit))
    (t
     (message "%s" "Not org"))))
 
@@ -3812,8 +3652,9 @@ Second right click to select quote."
       (command-execute 'ignore)))
    ((string-match (concat "^" new-buffer-prefix "*.") (buffer-name))
     (command-execute 'write-file))
-   (t (setq this-command 'ignore)
-      (command-execute 'ignore))))
+   (t
+    (setq this-command 'ignore)
+    (command-execute 'ignore))))
 
 (defun empty-bin ()
   "Empty bin on macOS."
@@ -4092,16 +3933,15 @@ Click mouse select a window and close the others."
        "~/"))))
 
 (defun hide-virtual-keyboard ()
-  "Display an overlay with the text at the end of *Minibuf-0*.
+  "Display an overlay with the text at the beg of *Minibuf-0*.
 The overlay is automatically removed after timeout. Tap it."
   (interactive)
   (with-current-buffer (get-buffer " *Minibuf-0*")
-    (let ((ov (make-overlay (point-max) (point-max))))
-      (overlay-put ov 'before-string "x:////")
+    (let ((ov (make-overlay (point-min) (point-min))))
+      (overlay-put ov 'before-string "kb://⌄ ")
       (run-at-time 4 nil
-                   (lambda (ov) (when (overlayp ov)
-                                  (delete-overlay ov)))
-                   ov))))
+                   (lambda () (when (overlayp ov)
+                                (delete-overlay ov)))))))
 
 (provide 'keycom)
 
