@@ -37,8 +37,6 @@ Emacs in pocket with unicode support. [[https://apps.apple.com/us/app/termius-te
 *** Bluetooth keyboard
 - [[https://bluetooth-keyboard.com/keypad/][KeyPad]] use your Mac keyboard as a bluetooth keyboard
 
-[[screenshots/virtual-keyboard.png]]
-
 * Split keyboard
 
 - Kinesis Advantage2 [[http://www.keyboard-layout-editor.com/#/gists/6a1a62133ab9f741589bd556cb946792][layout]] and [[file:layouts/kinesis/advantage2/qwerty2.txt][config]]:
