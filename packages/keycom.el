@@ -271,15 +271,17 @@ and so does the other one."
 (defun comp-forw-rev ()
   "Completion forward for transient use. Reverse."
   (interactive)
-  (if (eq (icomplete--category) 'file)
-      (isearch-backward)
-    (if (equal before-last-command this-command)
-        (progn
-          (setq this-command 'abort-recursive-edit)
-          (abort-recursive-edit))
-      (command-execute 'icomplete-forward-completions)
-      (when (eq last-command 'comp-back-rev)
-        (before-last-command)))))
+  (if (not (icomplete--category))
+      (alt-buf)
+    (if (eq (icomplete--category) 'file)
+        (isearch-backward)
+      (if (equal before-last-command this-command)
+          (progn
+            (setq this-command 'abort-recursive-edit)
+            (abort-recursive-edit))
+        (command-execute 'icomplete-forward-completions)
+        (when (eq last-command 'comp-back-rev)
+          (before-last-command))))))
 
 (defun hist-back ()
   "History backward for transient use."
@@ -2400,10 +2402,14 @@ command, so that next buffer shown is a user buffer."
 (defun alt-buf ()
   "Alternate buffer."
   (interactive)
-  (if (or (string-equal (buffer-name (other-buffer)) "*Ibuffer*")
-          (string-equal (buffer-name (other-buffer)) "*vterm clock*"))
-      (toggle-ibuffer)
-    (switch-to-buffer (other-buffer))))
+  (cond
+   ((minibufferp)
+    (other-win))
+   ((or (string-equal (buffer-name (other-buffer)) "*Ibuffer*")
+        (string-equal (buffer-name (other-buffer)) "*vterm clock*"))
+    (toggle-ibuffer))
+   (t
+    (switch-to-buffer (other-buffer)))))
 
 (defun find-next-dir-file (&optional backward)
   "Find the next file (by name) in the current directory.
@@ -3127,6 +3133,16 @@ before actually send the cd command."
           (call-interactively 'next-vterm-buf)))
     (shell)))
 
+(defun toggle-terminal ()
+  "Toggle terminal."
+  (interactive)
+  (if (eq major-mode 'vterm-mode)
+      (progn
+        (setq this-command 'alt-buf)
+        (alt-buf))
+    (setq this-command 'terminal)
+    (terminal)))
+
 (defvar vterm-last-command "" "Vterm last command.")
 (defconst vterm-prompt-regexp "└" "Vterm prompt regexp.")
 
@@ -3567,11 +3583,60 @@ Second right click to select quote."
              (< 16 (window-height)))
     (enlarge-window (round (fceiling (* 0.3 (window-height)))))))
 
+(defun split-window-rotate ()
+  "Rotate window split."
+  (interactive)
+  (when-let ((root (car (window-tree)))
+             ((listp root))
+             (w1 (nth 2 root))
+             (w2 (nth 3 root))
+             (b1 (window-buffer w1))
+             (b2 (window-buffer w2)))
+    (cond
+     ((car root) ; currently vertically split
+      (delete-window w2)
+      (set-window-buffer (split-window-horizontally) b2))
+     (t
+      (delete-window w1) ; currently horizontally split
+      (set-window-buffer (split-window-vertically) b1)))))
+
+(defun any-window-dedicated-p (&optional frame)
+  "Return t if any window in FRAME (default selected frame) is dedicated."
+  (let ((frame (or frame (selected-frame))))
+    (catch 'found
+      (dolist (win (window-list frame))
+        (when (window-dedicated-p win)
+          (throw 'found t))))))
+
+(defun split-window-below-wrap (fun &rest r)
+  "Split only if one window else rotate the split."
+  (if (or (not (eq this-command 'split-window-below))
+          (or (one-window-p)
+              (any-window-dedicated-p)))
+      (apply fun r)
+    (split-window-rotate)))
+
+(advice-add 'split-window-below :around #'split-window-below-wrap)
+
 (defun other-win ()
-  "Other window."
+  "Other Window."
   (interactive)
   (setq this-command 'other-window)
   (other-window 1))
+
+(defun enlarge-window-any ()
+  "Enlarge current window in any direction."
+  (interactive)
+  (if (window-in-direction 'right)
+      (enlarge-window-horizontally 1)
+    (enlarge-window 1)))
+
+(defun shrink-window-any ()
+  "Shrink current window in any direction."
+  (interactive)
+  (if (window-in-direction 'right)
+      (shrink-window-horizontally 1)
+    (shrink-window 1)))
 
 (defun shrink-win ()
   "Shrink window to fit rows count."
@@ -3652,6 +3717,8 @@ Second right click to select quote."
       (command-execute 'ignore)))
    ((string-match (concat "^" new-buffer-prefix "*.") (buffer-name))
     (command-execute 'write-file))
+   ((eq major-mode 'image-mode)
+    (command-execute 'image-save))
    (t
     (setq this-command 'ignore)
     (command-execute 'ignore))))
@@ -3932,16 +3999,23 @@ Click mouse select a window and close the others."
          (concat remote "/")
        "~/"))))
 
+(defvar hide-virtual-keyboard-ov nil "Hide keyboard overlay.")
+
 (defun hide-virtual-keyboard ()
   "Display an overlay with the text at the beg of *Minibuf-0*.
 The overlay is automatically removed after timeout. Tap it."
   (interactive)
   (with-current-buffer (get-buffer " *Minibuf-0*")
-    (let ((ov (make-overlay (point-min) (point-min))))
-      (overlay-put ov 'before-string "kb://⌄ ")
-      (run-at-time 4 nil
-                   (lambda () (when (overlayp ov)
-                                (delete-overlay ov)))))))
+    (if (overlayp hide-virtual-keyboard-ov)
+        (progn
+          (delete-overlay hide-virtual-keyboard-ov)
+          (setq hide-virtual-keyboard-ov nil))
+      (setq hide-virtual-keyboard-ov (make-overlay (point-min) (point-min)))
+      (overlay-put hide-virtual-keyboard-ov 'before-string "kb://⌄ ")
+      (run-with-idle-timer 4 nil
+                           (lambda () (when (overlayp hide-virtual-keyboard-ov)
+                                        (delete-overlay hide-virtual-keyboard-ov)
+                                        (setq hide-virtual-keyboard-ov nil)))))))
 
 (provide 'keycom)
 

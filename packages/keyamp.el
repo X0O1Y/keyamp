@@ -914,7 +914,7 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
     ("8" . point-to-register)    ("*"  . keyamp-insert-and-self-insert)
     ("9" . proced-defer)         ("("  . keyamp-insert-and-self-insert)
     ("0" . sh-defer)             (")"  . keyamp-insert-and-self-insert)
-    ("-" . enlarge-window)       ("_"  . keyamp-insert-and-self-insert)
+    ("-" . enlarge-window-any)   ("_"  . keyamp-insert-and-self-insert)
     ("=" . text-scale-increase)  ("+"  . keyamp-insert-and-self-insert)
 
     ("y"  . pass)                ("Y"  . keyamp-insert-and-self-insert)
@@ -1064,14 +1064,26 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
     ("T"  . text-scale-increase) ; Equal sign
     ))
 
+(when keyamp-touch-screenp
+  (keyamp--map keyamp-lleader-map
+    '(("<left>"  . hl-line-mode)
+      ("<right>" . display-line-numbers-mode)
+      ("<up>"    . read-only-mode)
+      ("<down>"  . whitespace-mode)
+
+      ("<prior>" . ignore)
+      ("<next>"  . ignore)
+      ("<home>"  . ignore)
+      ("<end>"   . ignore) ("<select>" . ignore))))
+
 (when (display-graphic-p)
   (keyamp--map keyamp-lleader-map
-    '(("i DEL" . nil) ("i <backspace>" . count-matches)
-      ("i RET" . nil) ("i <return>"    . show-in-desktop)
-      ("j DEL" . nil) ("j <backspace>" . whitespace-mode)
-      ("j RET" . nil) ("j <return>"    . toggle-word-wrap)
-      ("k DEL" . nil) ("k <backspace>" . flyspell-buffer)
-      ("k RET" . nil) ("k <return>"    . find-file)
+    '(("i DEL" . nil)                     ("i <backspace>" . count-matches)
+      ("i RET" . nil)                     ("i <return>"    . show-in-desktop)
+      ("j DEL" . nil)                     ("j <backspace>" . whitespace-mode)
+      ("j RET" . nil)                     ("j <return>"    . toggle-word-wrap)
+      ("k DEL" . nil)                     ("k <backspace>" . flyspell-buffer)
+      ("k RET" . nil)                     ("k <return>"    . find-file)
       ("<mouse-1>" . ignore)
       ("<mouse-2>" . ignore)
       ("<mouse-3>" . ignore)
@@ -1178,20 +1190,32 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
     ("H"  . view-messages)   ; Slash hold down
     ))
 
+(when keyamp-touch-screenp
+  (keyamp--map keyamp-rleader-map
+    '(("<left>"  . toggle-truncate-lines)
+      ("<right>" . scratch)
+      ("<up>"    . toggle-messages)
+      ("<down>"  . delete-other-windows)
+
+      ("<prior>" . ignore)
+      ("<next>"  . ignore)
+      ("<home>"  . ignore)
+      ("<end>"   . ignore) ("<select>" . ignore))))
+
 (when (display-graphic-p)
   (keyamp--map keyamp-rleader-map
-    '(("e DEL" . nil) ("e <backspace>" . calendar)
-      ("e RET" . nil) ("e <return>"    . insert-date)
-      ("d DEL" . nil) ("d <backspace>" . eval-defun-visual)
-      ("d RET" . nil) ("d <return>"    . shell-command)
-      ("f DEL" . nil) ("f <backspace>" . insert-ascii-double-quote)
-      ("f RET" . nil) ("f <return>"    . emoji-insert)
+    '(("e DEL" . nil)                     ("e <backspace>" . calendar)
+      ("e RET" . nil)                     ("e <return>"    . insert-date)
+      ("d DEL" . nil)                     ("d <backspace>" . eval-defun-visual)
+      ("d RET" . nil)                     ("d <return>"    . shell-command)
+      ("f DEL" . nil)                     ("f <backspace>" . insert-ascii-double-quote)
+      ("f RET" . nil)                     ("f <return>"    . emoji-insert)
       ("<mouse-1>" . ignore)
       ("<mouse-2>" . ignore)
       ("<mouse-3>" . ignore))))
 
 (keyamp--map-double
-  '((keyamp-escape . toggle-ibuffer)  (other-win   . jump-mark)
+  '((keyamp-escape . toggle-terminal) (other-win   . jump-mark)
     (beg-of-line   . beg-of-buf)      (end-of-lyne . end-of-buf)
     (proced-defer  . save-close-buf)  (sh-defer    . delete-other-windows)))
 
@@ -1241,7 +1265,6 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
       ("õ" . ignore)
       ("ō" . ignore)
       ("ő" . ignore)
-      ("p" . ignore)
       ("à" . kill-line)
       ("á" . ignore)
       ("â" . ignore)
@@ -1284,7 +1307,23 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
 
 (keyamp--map global-map '(("C-t" . hippie-expand))) ; Global map for wdired
 (keyamp--remap global-map '((quoted-insert . quoted-insert-custom)))
-(keyamp--map-backtab global-map alt-buf)
+
+(when keyamp-touch-screenp
+  (keyamp--map-backtab global-map buf-or-bookmark))
+
+(defun keyamp-map-override-insert ()
+  "Toggle map override insert mode only."
+  (keyamp--map-backtab keyamp-map undo) ; Undo right away in insert mode
+  (keyamp--map keyamp-map '(("C-q" . nil) ("C-t" . nil))))
+
+(defun keyamp-map-override-command ()
+  "Toggle map override command mode only."
+  (keyamp--map-backtab keyamp-map nil)
+  (keyamp--map keyamp-map
+    '(("C-q" . execute-extended-command) ("C-t" . dired-jump))))
+
+(add-hook 'keyamp-insert-hook 'keyamp-map-override-insert)
+(add-hook 'keyamp-command-hook 'keyamp-map-override-command)
 
 (when (display-graphic-p) ; /lisp/indent.el.gz:816
   (keymap-set global-map "<tab>" 'indent-for-tab-command))
@@ -1377,12 +1416,12 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
   ;; After starting up an isearch press DEL to retreat to the previous
   ;; search string. Press SPC to pull string from kill ring into search string.
   (keyamp--map-leader keymap '(isearch-yank-kill . isearch-ring-retreat))
+  (keyamp--map-escape keymap save-buffer-isearch-cancel)
   (keyamp--map-return keymap isearch-direction-switch)
   (keyamp--map keymap
-    '(("C-t" . isearch-forward-regexp)
-      ("N" . save-buffer-isearch-cancel) ("B" . save-buffer-isearch-cancel)
-      ("<up>"   . isearch-ring-retreat)  ("<down>"  . isearch-ring-advance)
-      ("<left>" . isearch-double-back)   ("<right>" . isearch-forw)))
+    '(("C-t"    . isearch-forward-regexp) ("C-q"     . isearch-backward-regexp)
+      ("<up>"   . isearch-ring-retreat)   ("<down>"  . isearch-ring-advance)
+      ("<left>" . isearch-double-back)    ("<right>" . isearch-forw)))
   (keyamp--map-tab keymap isearch-forw) ; Repeat prev search forward
   (keyamp--map-backtab keymap isearch-double-back) ; Repeat prev search backward
   (keyamp--hook keymap '(isearch-mode-hook) nil nil :repeat))
@@ -1394,7 +1433,7 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
 (keyamp--map-tab isearch-mode-map isearch-forw)
 (keyamp--map-backtab isearch-mode-map isearch-back)
 (keyamp--map isearch-mode-map
-  '(("C-^" . keyamp-lleader-map)       ("C-t" . isearch-complete)
+  '(("C-^"    . keyamp-lleader-map)    ("C-t"     . isearch-complete)
     ("<up>"   . isearch-ring-retreat)  ("<down>"  . isearch-ring-advance)
     ("<left>" . isearch-back)          ("<right>" . isearch-forw)))
 (when keyamp-touch-screenp
@@ -1451,9 +1490,91 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
 
 ;; Repeat mode - screen commands
 
+(defun keyamp-toggle-which-key (Delay Echo &optional Prefix)
+  "Toggle which key mode to temporary change `which-key-idle-delay' to DELAY."
+  (when which-key-mode
+    (which-key-mode -1)
+    (setq which-key-idle-delay Delay)
+    (setq which-key-show-prefix Prefix)
+    (setq echo-keystrokes Echo)
+    (which-key-mode)
+    (setq keyamp-toggle-which-key-timer nil)))
+
+(defvar keyamp-toggle-which-key-timer nil "Timer for `keyamp-toggle-which-key'.")
+
+(defun keyamp-touch-prefix (Key)
+  "Simulate pressing KEY so that the next real key goes to its keymap.
+Make which key show help right away. Defer restore defaults with idle
+timer."
+  (let ((default-delay which-key-idle-delay)
+        (default-prefix which-key-show-prefix)
+        (default-echo echo-keystrokes))
+    (unless (timerp keyamp-toggle-which-key-timer)
+      (keyamp-toggle-which-key 0.1 0))
+    (setq unread-command-events
+          (cons (cons 'no-record (aref (kbd Key) 0)) unread-command-events))
+    (unless (timerp keyamp-toggle-which-key-timer)
+      (setq keyamp-toggle-which-key-timer
+            (run-with-idle-timer 4 nil 'keyamp-toggle-which-key
+                                 default-delay default-echo default-prefix)))))
+
 (when keyamp-touch-screenp
+  (defun keyamp-touch-backtab-cmd ()
+    "Prefix command."
+    (interactive)
+    (keyamp-touch-prefix "M-_"))
+
+  (keyamp--map global-map '(("M-_" . keyamp-touch-backtab)))
+
+  (define-prefix-command 'keyamp-touch-backtab)
+  (keyamp--map-escape keyamp-touch-backtab keyamp-touch-backtab-esc)
+  (keyamp--map keyamp-touch-backtab
+    '(("<left>" . open-line) ("<right>" . newline)
+      ("<up>"   . undo)      ("<down>"  . del-back)))
   (with-sparse-keymap
-    (keyamp--map-escape keymap terminal)
+    (keyamp--map keymap
+      '(("<left>" . open-line) ("<right>" . newline)
+        ("<up>"   . undo)      ("<down>"  . del-back)))
+    (keyamp--set keymap '(open-line newline del-back)))
+
+  (defvar keyamp-touch-backtab-esc (make-sparse-keymap)
+    "Touch screen backtab escape.")
+  (define-prefix-command 'keyamp-touch-backtab-esc)
+  (keyamp--map-escape keyamp-touch-backtab-esc keyamp-escape)
+  (keyamp--map keyamp-touch-backtab-esc
+    '(("<left>" . backward-del-word) ("<right>" . del-word)
+      ("<up>"   . org-ctrl-c-ctrl-c) ("<down>"  . universal-argument)))
+  (with-sparse-keymap
+    (keyamp--map keymap
+      '(("<left>" . backward-del-word) ("<right>" . del-word)
+        ("<up>"   . undo)              ("<down>"  . del-back)))
+    (keyamp--set keymap '(backward-del-word del-word)))
+
+  (defun keyamp-touch-tab-cmd ()
+    "Prefix command."
+    (interactive)
+    (keyamp-touch-prefix "M-^"))
+
+  (keyamp--map global-map '(("M-^" . keyamp-touch-tab)))
+
+  (define-prefix-command 'keyamp-touch-tab)
+  (keyamp--map-escape keyamp-touch-tab keyamp-touch-tab-esc)
+  (keyamp--map keyamp-touch-tab
+    '(("<left>" . enlarge-window-any) ("<right>" . isearch-forward)
+      ("<up>"   . beg-of-block)       ("<down>"  . save-close-buf)))
+
+  (defvar keyamp-touch-tab-esc (make-sparse-keymap) "Touch screen tab escape.")
+  (define-prefix-command 'keyamp-touch-tab-esc)
+  (keyamp--map-escape keyamp-touch-tab-esc keyamp-escape)
+  (keyamp--map keyamp-touch-tab-esc
+    '(("<left>" . list-timers)    ("<right>" . proced-defer)
+      ("<up>"   . list-processes) ("<down>"  . list-registers)))
+
+  (with-sparse-keymap
+    (keyamp--map-escape keymap toggle-terminal)
+    (keyamp--map-backtab keymap keyamp-touch-backtab-cmd)
+    (keyamp--map-tab keymap keyamp-touch-tab-cmd)
+    (keyamp--map keymap '(("C-q" . toggle-messages) ("C-t" . delete-other-windows)))
     (keyamp--map keymap
       '(("<left>" . tasks)             ("<right>" . alt-buf)
         ("<up>"   . scroll-up-command) ("<down>"  . screen-home-toggle)))
@@ -1464,14 +1585,8 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
   ;; by transient maps which set by following target commands subsets.
   (keyamp--map-leader keymap '(newline . open-line))
   (keyamp--map-return keymap keyamp-escape)
-  (keyamp--map-backtab keymap nil)
-  (keyamp--map-tab keymap nil)
   (when keyamp-touch-screenp
-    (keyamp--map keymap '(("C-q" . nil) ("C-t" . nil)))
-    (keyamp--remap keymap
-      '((up-line        . view-messages)
-        (down-line      . screen-home)
-        (toggle-comment . hide-virtual-keyboard))))
+    (keyamp--remap keymap '((up-line . page-dn-half) (down-line . screen-home))))
   (keyamp--remap keymap
     '((make-frame-command  . delete-frame)
       (insert-space-before . ignore)
@@ -1504,6 +1619,7 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
       find-prev-dir-file         find-next-dir-file
       shrink-window              enlarge-window
       shrink-window-horizontally enlarge-window-horizontally
+      enlarge-window-any         shrink-window-any
       volume-decrease            volume-increase
       org-agenda-tasks           split-window-horizontally)))
 
@@ -1511,9 +1627,6 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
   ;; DEL/SPC to switch other window after split as a result of the commands.
   (keyamp--map-leader keymap '(other-window . other-window))
   (keyamp--map-return keymap delete-other-windows)
-  (when keyamp-touch-screenp
-    (keyamp--remap keymap '((down-line . delete-other-windows)))
-    (keyamp--map keymap '(("C-t" . other-window))))
   (keyamp--set keymap
     '(describe-foo-at-point   describe-variable
       describe-function       describe-key
@@ -1537,16 +1650,12 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
   (keyamp--set keymap '(prev-proj-buf next-proj-buf)))
 
 (with-sparse-keymap
-  (keyamp--map-tab keymap nil)
-  (keyamp--map-backtab keymap nil)
   (keyamp--remap keymap
     '((open-line . prev-eww-buf) (newline . next-eww-buf)
       (del-back  . eww-reload)   (undo    . justify-buffer)))
   (keyamp--set keymap '(prev-eww-buf next-eww-buf)))
 
 (with-sparse-keymap
-  (keyamp--map-tab keymap nil)
-  (keyamp--map-backtab keymap nil)
   (keyamp--remap keymap '((open-line . prev-eshell-buf) (newline . next-eshell-buf)))
   (keyamp--set keymap '(prev-eshell-buf next-eshell-buf)))
 
@@ -1587,18 +1696,16 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
   (keyamp--set keymap '(save-close-buf)))
 
 (with-sparse-keymap
-  (keyamp--remap keymap '((open-line . shrink-window) (newline . enlarge-window)))
-  (keyamp--set keymap '(shrink-window enlarge-window) nil nil nil 2))
+  (keyamp--remap keymap
+    '((open-line . shrink-window-any) (newline . enlarge-window-any)))
+  (keyamp--map keymap '(("<up>" . shrink-window-any) ("<down>" . enlarge-window-any)))
+  (keyamp--set keymap
+    '(shrink-window enlarge-window enlarge-window-any shrink-window-any)
+    nil nil nil 2))
 
 (with-sparse-keymap
   (keyamp--remap keymap '((open-line . volume-decrease) (newline . volume-increase)))
   (keyamp--set keymap '(volume-increase volume-decrease) nil nil nil 2))
-
-(with-sparse-keymap
-  (keyamp--remap keymap
-    '((open-line . shrink-window-horizontally) (newline . enlarge-window-horizontally)))
-  (keyamp--set keymap '(enlarge-window-horizontally shrink-window-horizontally)
-    nil nil nil 2))
 
 
 ;; Repeat mode - read commands
@@ -1607,9 +1714,7 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
   ;; Initiate by triple DEL/SPC (hold down).
   ;; I/K or DEL/SPC to move by lines. See `return-before'.
   (keyamp--map-leader keymap '(down-line . down-line))
-  (keyamp--map-return keymap keyamp-escape)
-  (keyamp--map-tab keymap nil)
-  (keyamp--map-backtab keymap nil)
+  (keyamp--map-return keymap nil)
   (keyamp--map keymap '(("<up>" . up-line-rev)))
   (keyamp--remap keymap '((previous-line . up-line-rev) (next-line . down-line-rev)))
   (keyamp--set keymap '(up-line down-line))
@@ -1638,11 +1743,13 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
 (with-sparse-keymap
   (keyamp--map-leader keymap '(end-of-block . end-of-block-rev))
   (keyamp--remap keymap '((previous-line . beg-of-block-rev) (next-line . end-of-block)))
+  (keyamp--map keymap '(("<up>" . beg-of-block-rev) ("<down>" . end-of-block)))
   (keyamp--set keymap '(beg-of-block end-of-block)))
 
 (with-sparse-keymap
   (keyamp--map-leader keymap '(beg-of-block-rev . end-of-block-rev))
   (keyamp--remap keymap '((previous-line . beg-of-block) (next-line . end-of-block)))
+  (keyamp--map keymap '(("<up>" . beg-of-block) ("<down>" . end-of-block)))
   (keyamp--set keymap '(beg-of-block-rev end-of-block-rev)))
 
 ;; In case triple DEL received during `keyamp-key-repeat-delay',
@@ -1815,13 +1922,11 @@ keyboard ASCII CHAR."
 (with-sparse-keymap
   ;; Repeat half page up/down with I/K or DEL/SPC.
   (keyamp--map-leader keymap '(page-dn-half . page-up-half))
-  (keyamp--map-tab keymap nil)
-  (keyamp--map-backtab keymap nil)
   (keyamp--remap keymap
     '((previous-line . page-up-half-rev) (next-line . page-dn-half)
       (down-line     . page-dn-half)     (up-line   . page-up-half)))
   (when keyamp-touch-screenp
-    (keyamp--map keymap '(("C-q" . nil) ("C-t" . nil)))
+    (keyamp--map keymap '(("C-q" . end-of-buf) ("C-t" . beg-of-buf)))
     (keyamp--remap keymap
       '((down-line      . page-up-half)
         (up-line        . page-dn-half)
@@ -1835,14 +1940,12 @@ keyboard ASCII CHAR."
 
 (with-sparse-keymap
   (keyamp--map-leader keymap '(next-line . previous-line))
-  (keyamp--map-tab keymap nil)
-  (keyamp--map-backtab keymap nil)
   (keyamp--remap keymap
     '((previous-line . scroll-down-command) (next-line . scroll-up-command)
       (down-line     . page-dn-half)        (up-line   . page-up-half)))
   (when keyamp-touch-screenp
     ;; Arrows always do half page and keep transient, see previous keymap.
-    (keyamp--map keymap '(("C-q" . nil) ("C-t" . nil)))
+    (keyamp--map keymap '(("C-q" . beg-of-buf) ("C-t" . end-of-buf)))
     (keyamp--remap keymap '((down-line . page-up-half) (up-line . page-dn-half))))
   (keyamp--set keymap '(scroll-down-command scroll-up-command)))
 
@@ -1939,9 +2042,10 @@ keyboard ASCII CHAR."
     (keyamp--map-backtab keymap comp-forw-rev)
     (keyamp--map-std keymap 'keyamp-insert-minibuffer)
     (keyamp--map keymap '(("K" . comp-forw))) ; Exception
-    (keyamp--map keymap
-      '(("<left>"  . isearch-backward) ("<right>" . minibuffer-complete)
-        ("<up>"    . select-word)      ("<down>"  . comp-forw)))
+    (keyamp--map keymap '(("<up>" . select-word) ("<down>" . comp-forw)))
+    (when keyamp-touch-screenp
+      (keyamp--map keymap
+        '(("<left>"  . hist-back) ("<right>" . keyamp-minibuffer-return))))
 
     ;; The hook is last one run during minibuffer setup and set the keymap.
     (keyamp--hook keymap '(minibuffer-setup-hook) :command nil :repeat))
@@ -1957,6 +2061,11 @@ keyboard ASCII CHAR."
     '((select-word   . y-or-n-p-insert-y) (del-back  . y-or-n-p-insert-n)
       (paste-or-prev . y-or-n-p-insert-y) (next-line . y-or-n-p-insert-y)
       (select-block  . y-or-n-p-insert-n) (hist-back . y-or-n-p-insert-n)))
+  (when keyamp-touch-screenp
+    (keyamp--remap y-or-n-p-map
+      '((keyamp-minibuffer-return . y-or-n-p-insert-y)))
+    (keyamp--map y-or-n-p-map
+      '(("<left>" . y-or-n-p-insert-n) ("<right>" . y-or-n-p-insert-y))))
 
   (keyamp--remap minibuffer-local-map
     '((previous-line . hist-back) (next-line . hist-forw)
@@ -1986,7 +2095,7 @@ keyboard ASCII CHAR."
                     :after 'keyamp-insert-init)
 
   (keyamp--map minibuffer-inactive-mode-map
-    '(("<mouse-1>" . toggle-messages)      ("<double-mouse-1>" . ignore)
+    '(("<mouse-1>" . toggle-messages) ("<double-mouse-1>" . ignore)
       ("<left-fringe> <mouse-1>" . ignore) ("<right-fringe> <mouse-1>" . ignore)))
   (keyamp--remap minibuffer-inactive-mode-map '((mouse-3 . radio-next))))
 
@@ -2003,6 +2112,9 @@ keyboard ASCII CHAR."
     (keyamp--remap keymap '((previous-line . comp-back) (next-line . comp-forw)))
     (keyamp--remap keymap '((up-line . comp-back) (down-line . comp-forw)))
     (keyamp--map keymap '(("K" . comp-forw))) ; Exception: K hold down
+    (when keyamp-touch-screenp
+      (keyamp--map keymap
+        '(("<left>" . hist-back) ("<right>" . keyamp-minibuffer-return))))
     (keyamp--set keymap '(comp-back comp-forw)))
 
   (with-sparse-keymap
@@ -2024,6 +2136,9 @@ keyboard ASCII CHAR."
     (keyamp--map-return keymap exit-minibuffer)
     (keyamp--remap keymap '((previous-line . hist-back) (next-line . hist-forw)))
     (keyamp--remap keymap '((up-line . hist-back) (down-line . hist-forw)))
+    (when keyamp-touch-screenp
+      (keyamp--map keymap
+        '(("<left>" . comp-forw) ("<right>" . keyamp-minibuffer-return))))
     (keyamp--set keymap '(hist-back hist-forw))))
 
 (add-hook 'ido-setup-hook
@@ -2052,6 +2167,9 @@ keyboard ASCII CHAR."
   (keyamp--set keymap '(ido-prev-match-rev ido-next-match-rev)))
 
 (with-eval-after-load 'dired
+  (when keyamp-touch-screenp
+    (keyamp--remap dired-mode-map
+      '((back-char . dired-jump) (forw-char . dired-find-file))))
   (keyamp--map dired-mode-map
     '(("<double-mouse-1>" . dired-find-file)
       ("<mouse-1>" . mouse-set-point) ("<mouse-2>" . mouse-set-point)))
@@ -2093,10 +2211,9 @@ keyboard ASCII CHAR."
                     :after 'keyamp-command))
 
 (with-eval-after-load 'dired-utils
-  (keyamp--map-tab dired-mode-map dired-lleader-map)
-  (keyamp--map-tab (define-prefix-command 'dired-lleader-map) dired-omit-mode)
-  (keyamp--map-leader dired-lleader-map '(dired-size . nil))
-  (keyamp--map dired-lleader-map
+  (keyamp--map-tab dired-mode-map dired-leader-map)
+  (keyamp--map-tab (define-prefix-command 'dired-leader-map) dired-omit-mode)
+  (keyamp--map dired-leader-map
     '(("e" . dired-optimize-png)     ("u" . dired-2drawing)
       ("o" . dired-rotate-img-right) ("p" . dired-rotate-img-left)
       ("a" . dired-image-autocrop)   ("s" . dired-open-marked)
@@ -2120,8 +2237,8 @@ keyboard ASCII CHAR."
 
 (with-eval-after-load 'ibuf-ext
   (keyamp--map ibuffer-mode-map '(("<double-mouse-1>" . ibuffer-visit-buffer)))
-  (keyamp--map-tab ibuffer-mode-map ibuffer-visit-buffer)
-  (keyamp--map-backtab ibuffer-mode-map nil)
+  (when keyamp-touch-screenp
+    (keyamp--map-tab ibuffer-mode-map ibuffer-visit-buffer))
   (keyamp--remap ibuffer-mode-map
     '((previous-line       . up-line)
       (next-line           . down-line)
@@ -2145,8 +2262,7 @@ keyboard ASCII CHAR."
       (append-to-r1        . recentf-open-files)))
   (when keyamp-touch-screenp
     (keyamp--remap ibuffer-mode-map
-      '((forw-char . screen-home-left)
-        (back-char . screen-home))))
+      '((forw-char . screen-home-left) (back-char . screen-home))))
 
   (keyamp--map ibuffer-mode-filter-group-map '(("<mouse-1>" . ibuffer-toggle-filter-group)))
   (keyamp--map-tab ibuffer-mode-filter-group-map ibuffer-toggle-filter-group)
@@ -2706,14 +2822,11 @@ keyboard ASCII CHAR."
       (with-sparse-keymap
         (keyamp--map keymap
           '(("<left>" . vt-next-window) ("<right>" . vt-prev-window)
-            ("<up>"   . nil)            ("<down>"  . vt-page-up-half)))
-        (keyamp--set keymap '(terminal)))
-
-      (with-sparse-keymap
-        (keyamp--map keymap
-          '(("<left>" . vt-next-window) ("<right>" . vt-prev-window)
-            ("<up>"   . nil)            ("<down>"  . vt-page-up-half)))
-        (keyamp--set keymap '(vt-next-window vt-prev-window))))
+            ("<up>"   . terminal)       ("<down>"  . vt-page-up-half)))
+        (keyamp--set keymap
+          '(terminal
+            vt-next-window vt-prev-window
+            prev-vterm-buf next-vterm-buf))))
 
   ;;;;;; tmux.conf
   ;; bind -T copy-mode-vi c send-keys -X copy-pipe-and-cancel 'tee > /tmp/tmux-copy~$(date "+%Y-%m-%d_%H%M%S")~'
@@ -2884,7 +2997,6 @@ keyboard ASCII CHAR."
       (paste-or-prev . tasks)
       (paste-from-r1 . gnus-summary-save-parts)))
   (when keyamp-touch-screenp
-    (keyamp--map gnus-summary-mode-map '(("C-q" . nil) ("C-t" . nil)))
     (keyamp--remap gnus-summary-mode-map
       '((back-char . screen-home-right) (forw-char . screen-home)
         (toggle-comment . hide-virtual-keyboard)))
@@ -3596,6 +3708,7 @@ keyboard ASCII CHAR."
 (defconst keyamp-indicator-default   "•" "Default keyamp indicator.")
 (defconst keyamp-indicator-hand-swap "∘" "Hand swap indicator.")
 (defconst keyamp-indicator-standard  "•" "Standard keyboard indicator.")
+(defconst keyamp-indicator-input     "›" "Input keyamp indicator.")
 
 (defconst keyamp-transient-states '(idle screen read command io insert modify)
   "Keyamp transient states.")
@@ -3630,14 +3743,15 @@ keyboard ASCII CHAR."
        (set var (symbol-value (intern (format "%s-%s" var Type))))))
    keyamp-transient-states))
 
-(defvar keyamp-idle-color    "#AB82FF" "Idle color.")
-(defvar keyamp-screen-color  "#1E90FF" "Screen color.")
-(defvar keyamp-read-color    "#00BFFF" "Read color.")
-(defvar keyamp-command-color "#7CFC00" "Command color.")
-(defvar keyamp-accent-color  "#5FFF00" "Command accent color.")
-(defvar keyamp-io-color      "#FFD700" "IO color.")
-(defvar keyamp-insert-color  "#FF8C00" "Insert color.")
-(defvar keyamp-modify-color  "#FF0000" "Modify color.")
+(defvar keyamp-idle-color     "#AB82FF" "Idle color.")
+(defvar keyamp-idle2-color    "#B38EFF" "Idle accent color.")
+(defvar keyamp-screen-color   "#1E90FF" "Screen color.")
+(defvar keyamp-read-color     "#00BFFF" "Read color.")
+(defvar keyamp-command-color  "#7CFC00" "Command color.")
+(defvar keyamp-command2-color "#5FFF00" "Command accent color.")
+(defvar keyamp-io-color       "#FFD700" "IO color.")
+(defvar keyamp-insert-color   "#FF8C00" "Insert color.")
+(defvar keyamp-modify-color   "#FF0000" "Modify color.")
 
 (defface mode-line-front-space-face
   `((t :foreground ,keyamp-command-color :bold nil))
@@ -3957,7 +4071,7 @@ of quit minibuffer. Answer q to literal y or n question."
   "Indicate read."
   (unless keyamp-insert-p
     (keyamp-indicate keyamp-read-indicator keyamp-read-cursor keyamp-read-color))
-  (when (and (eq last-command 'keyamp--hook-indicate)
+  (when (and (eq this-command 'keyamp--hook-indicate)
              (minibufferp)
              (not (isearch-minibuffer-prompt)))
     (keyamp-blink-start keyamp-insert-color keyamp-read-color)))
@@ -4018,14 +4132,14 @@ called, with no arguments, after KEYMAP is deactivated."
 
 (defun keyamp-indicate-idle ()
   "Indicate idle."
-  (keyamp-blink-start keyamp-idle-color keyamp-command-color))
+  (keyamp-blink-start keyamp-idle2-color keyamp-idle-color))
 
 (defun keyamp-indicate-sleep ()
   "Indicate sleep."
-  (let ((no-color (if (display-graphic-p)
-                      (face-attribute 'default :background)
-                    "unspecified-bg")))
-    (keyamp-blink-start no-color keyamp-idle-color)))
+  (keyamp-blink-start keyamp-idle-color
+                      (if (display-graphic-p)
+                          (face-attribute 'default :background)
+                        "white")))
 
 (defun keyamp-indicate-screen ()
   "Indicate screen."
@@ -4046,11 +4160,25 @@ called, with no arguments, after KEYMAP is deactivated."
    ((memq this-command keyamp-screen-command-commands)
     (keyamp-blink-start keyamp-screen-color keyamp-command-color))
    (t
-    (keyamp-blink-start keyamp-accent-color keyamp-command-color))))
+    (keyamp-blink-start keyamp-command2-color keyamp-command-color))))
 
 (defun keyamp-indicate-io (&rest _)
   "Indicate io feedback from emacsclient evals or processes calls."
+  (oset keyamp-blinker-io indicator 'keyamp-io-indicator)
   (keyamp-blink keyamp-blinker-io))
+
+(defun keyamp-indicate-input ()
+  "Indicate input."
+  (keyamp-indicate keyamp-indicator-input keyamp-insert-cursor keyamp-insert-color)
+  (cond
+   ((gethash this-command keyamp-read-commands-hash)
+    (keyamp-blink-start keyamp-read-color keyamp-insert-color))
+   ((memq this-command keyamp-insert-commands)
+    (oset keyamp-blinker-io indicator 'keyamp-indicator-input)
+    (keyamp-blink keyamp-blinker-io))
+   ((gethash this-command keyamp-modify-commands-hash)
+    (oset keyamp-blinker-modify indicator 'keyamp-indicator-input)
+    (keyamp-blink keyamp-blinker-modify))))
 
 (defun keyamp-indicate-insert ()
   "Indicate insert."
@@ -4059,8 +4187,10 @@ called, with no arguments, after KEYMAP is deactivated."
    ((gethash this-command keyamp-read-commands-hash)
     (keyamp-blink-start keyamp-read-color keyamp-insert-color))
    ((memq this-command keyamp-insert-commands)
+    (oset keyamp-blinker-io indicator 'keyamp-io-indicator)
     (keyamp-blink keyamp-blinker-io))
    ((gethash this-command keyamp-modify-commands-hash)
+    (oset keyamp-blinker-modify indicator 'keyamp-modify-indicator)
     (keyamp-blink keyamp-blinker-modify))))
 
 (defun keyamp-indicate-modify ()
@@ -4082,9 +4212,10 @@ called, with no arguments, after KEYMAP is deactivated."
              (eq mode-line-front-space keyamp-command-indicator))
         (progn) ; Ease scroll
       (cond
-       ((or keyamp-insert-p
-            (and isearch-mode
-                 (not (memq this-command keyamp-isearch-not-insert))))
+       ((and isearch-mode
+             (not (memq this-command keyamp-isearch-not-insert)))
+        (keyamp-indicate-input))
+       (keyamp-insert-p
         (keyamp-indicate-insert))
        ((eq this-command 'activate-region)
         (keyamp-indicate keyamp-command-indicator
@@ -4099,15 +4230,23 @@ called, with no arguments, after KEYMAP is deactivated."
         (keyamp-indicate-modify))
        (t
         (keyamp-indicate-command)))
-      (when (or defining-kbd-macro
-                (memq this-command keyamp-blink-modify-commands))
+      (cond
+       ((or defining-kbd-macro
+            (memq this-command keyamp-blink-modify-commands))
+        (oset keyamp-blinker-modify indicator 'keyamp-modify-indicator)
         (keyamp-blink keyamp-blinker-modify))
-      (when (memq this-command '(keyamp-escape ignore keyamp-ignore))
+       ((eq this-command 'keyamp-escape)
+        (keyamp-blink
+         (if keyamp-touch-screenp keyamp-blinker-screen keyamp-blinker-idle)))
+       ((memq this-command '(ignore keyamp-ignore))
+        (oset keyamp-blinker-idle indicator 'keyamp-idle-indicator)
         (keyamp-blink keyamp-blinker-idle))
-      (when (memq this-command keyamp-blink-io-commands)
+       ((memq this-command keyamp-blink-io-commands)
+        (oset keyamp-blinker-io indicator 'keyamp-io-indicator)
         (keyamp-blink keyamp-blinker-io))
-      (when (memq this-command keyamp-blink-command-commands)
-        (keyamp-blink keyamp-blinker-command)))))
+       ((memq this-command keyamp-blink-command-commands)
+        (oset keyamp-blinker-command indicator 'keyamp-command-indicator)
+        (keyamp-blink keyamp-blinker-command))))))
 
 (defvar keyamp-blink-on-timer nil "Blink indicator on timer.")
 (defvar keyamp-blink-off-timer nil "Blink indicator off timer.")
@@ -4198,6 +4337,11 @@ called, with no arguments, after KEYMAP is deactivated."
                   :duration keyamp-blink-idle-duration)
   "Blinker idle.")
 
+(defconst keyamp-blinker-screen
+  (keyamp-blinker :indicator 'keyamp-screen-indicator :color 'keyamp-screen-color
+                  :duration keyamp-blink-idle-duration)
+  "Blinker screen.")
+
 (defconst keyamp-blinker-command
   (keyamp-blinker :indicator 'keyamp-command-indicator :color 'keyamp-command-color)
   "Blinker command.")
@@ -4260,10 +4404,17 @@ called, with no arguments, after KEYMAP is deactivated."
 
 (defvar keyamp-idle-timer nil "Idle timer.")
 
+(defun keyamp-prefix-key-waiting-p ()
+  "If a prefix key sequence is waiting for more input."
+  (when-let ((keys (this-command-keys-vector))
+             ((cl-plusp (length keys))))
+    (keymapp (key-binding keys))))
+
 (defun keyamp-idle-init ()
   "Idle init.
 Cancel isearch. Deactivate region. Deactivate transient keymaps.
-Cleanup echo area. Quit minibuffer. Indicate idle. Quit wait key sequence."
+Cleanup echo area. Quit minibuffer. Indicate idle. Hide which key popup.
+Quit wait key sequence."
   (let ((default-directory (expand-file-name "~/")))
     (when isearch-mode
       (isearch-cancel-clean))
@@ -4281,8 +4432,11 @@ Cleanup echo area. Quit minibuffer. Indicate idle. Quit wait key sequence."
       (minibuffer-line))
     (save-some-buffers t) ; Adjust auto-save-visited-predicate
     (keyamp-indicate-idle)
-    (when (keymapp (key-binding (this-command-keys-vector) t))
-      (discard-input))))
+    (when (and (fboundp 'which-key--popup-showing-p)
+               (which-key--popup-showing-p))
+      (which-key--hide-popup))
+    (when (keyamp-prefix-key-waiting-p) ; Defer to let keyamp-idle-init finish without error
+      (run-with-timer 1 nil 'keyboard-quit))))
 
 (defun keyamp-idle-detect ()
   "Idle detect."
