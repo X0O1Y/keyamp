@@ -2943,7 +2943,9 @@
               "key_code": "6",
               "modifiers": [
                 "left_shift"
-              ]
+              ],
+              "repeat": false,
+              "halt": true
             }
           ]
         },
@@ -3005,7 +3007,9 @@
               "key_code": "6",
               "modifiers": [
                 "left_shift"
-              ]
+              ],
+              "repeat": false,
+              "halt": true
             }
           ]
         },
@@ -3208,7 +3212,14 @@
           ],
           "to_if_held_down": [
             {
-              "shell_command": "/Applications/emacsclient --no-wait --eval \"(save-buffers-kill-terminal)\" && sleep 0.05 && open -a 'Emacs'",
+              "key_code": "equal_sign",
+              "modifiers": [
+                "left_shift",
+                "left_control"
+              ]
+            },
+            {
+              "key_code": "x",
               "repeat": false,
               "halt": true
             }
@@ -4072,7 +4083,7 @@
               ]
             },
             {
-              "key_code": "/",
+              "key_code": "slash",
               "repeat": false,
               "halt": true
             }
@@ -7524,7 +7535,10 @@
               }
             },
             {
-              "key_code": "escape",
+              "key_code": "k",
+              "modifiers": [
+                "left_control"
+              ],
               "repeat": false,
               "halt": true
             }
@@ -7563,7 +7577,10 @@
           ],
           "to_if_held_down": [
             {
-              "key_code": "escape",
+              "key_code": "k",
+              "modifiers": [
+                "left_control"
+              ],
               "repeat": false,
               "halt": true
             },
@@ -7784,6 +7801,14 @@
           ],
           "conditions": [
             {
+              "input_sources": [
+                {
+                  "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+                }
+              ],
+              "type": "input_source_if"
+            },
+            {
               "type": "frontmost_application_if",
               "file_paths": [
                 "/Emacs"
@@ -7820,6 +7845,98 @@
           "to_if_held_down": [
             {
               "key_code": "quote",
+              "modifiers": [
+                "left_control"
+              ],
+              "repeat": false,
+              "halt": true
+            }
+          ],
+          "conditions": [
+            {
+              "input_sources": [
+                {
+                  "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+                }
+              ],
+              "type": "input_source_if"
+            },
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 1
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "escape",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "to_after_key_up": [
+            {
+              "key_code": "escape"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "q",
+              "modifiers": [
+                "control"
+              ],
+              "repeat": false,
+              "halt": true
+            }
+          ],
+          "conditions": [
+            {
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Emacs"
+              ]
+            },
+            {
+              "type": "variable_if",
+              "name": "insert mode activated",
+              "value": 0
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "escape",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "to_after_key_up": [
+            {
+              "key_code": "escape"
+            },
+            {
+              "set_variable": {
+                "name": "left_command pressed",
+                "value": 0
+              }
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "key_code": "q",
               "modifiers": [
                 "left_control"
               ],
@@ -8618,7 +8735,7 @@
               "key_code": "play_or_pause"
             },
             {
-              "shell_command": "/Applications/emacsclient --no-wait --eval '(let ((message-log-max nil)) (message \"Play online\"))' && sleep 0.5 && killall Music",
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(let ((message-log-max nil)) (message \"Play streaming\"))' && sleep 0.5 && killall Music",
               "repeat": false,
               "halt": true
             }
@@ -8646,7 +8763,7 @@
           },
           "to_after_key_up": [
             {
-              "shell_command": "/Applications/emacsclient --no-wait --eval '(let ((echo-cleanup-timeout 1) (message-log-max nil)) (message \"Play next\"))' && /Applications/emacsclient --no-wait --eval '(play-next)'"
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(play-next)'"
             },
             {
               "key_code": "fastforward"
@@ -8654,7 +8771,7 @@
           ],
           "to_if_held_down": [
             {
-              "shell_command": "/Applications/emacsclient --no-wait --eval '(let ((echo-cleanup-timeout 1) (message-log-max nil)) (message \"Play prev\"))' && /Applications/emacsclient --no-wait --eval '(play-prev)'",
+              "shell_command": "/Applications/emacsclient --no-wait --eval '(play-prev)'",
               "repeat": false,
               "halt": true
             },
@@ -9006,7 +9123,7 @@
           "to_if_held_down": [
             {
               "select_input_source": {
-                "input_source_id": "com.apple.keylayout.Hebrew"
+                "input_source_id": "com.apple.keylayout.ABC"
               }
             },
             {
@@ -9109,7 +9226,7 @@
           "to_if_held_down": [
             {
               "select_input_source": {
-                "input_source_id": "com.apple.keylayout.Hebrew"
+                "input_source_id": "com.apple.keylayout.ABC"
               },
               "repeat": false,
               "halt": true
@@ -9157,7 +9274,7 @@
           "to_if_held_down": [
             {
               "select_input_source": {
-                "input_source_id": "com.apple.keylayout.Hebrew"
+                "input_source_id": "com.apple.keylayout.ABC"
               }
             },
             {
@@ -9248,7 +9365,7 @@
           "to_if_held_down": [
             {
               "select_input_source": {
-                "input_source_id": "com.apple.keylayout.Hebrew"
+                "input_source_id": "com.apple.keylayout.ABC"
               }
             },
             {
@@ -9296,7 +9413,7 @@
           "to_if_held_down": [
             {
               "select_input_source": {
-                "input_source_id": "com.apple.keylayout.Hebrew"
+                "input_source_id": "com.apple.keylayout.ABC"
               }
             },
             {

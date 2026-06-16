@@ -271,17 +271,15 @@ and so does the other one."
 (defun comp-forw-rev ()
   "Completion forward for transient use. Reverse."
   (interactive)
-  (if (not (icomplete--category))
-      (alt-buf)
-    (if (eq (icomplete--category) 'file)
-        (isearch-backward)
-      (if (equal before-last-command this-command)
-          (progn
-            (setq this-command 'abort-recursive-edit)
-            (abort-recursive-edit))
-        (command-execute 'icomplete-forward-completions)
-        (when (eq last-command 'comp-back-rev)
-          (before-last-command))))))
+  (if (eq (icomplete--category) 'file)
+      (isearch-backward)
+    (if (equal before-last-command this-command)
+        (progn
+          (setq this-command 'abort-recursive-edit)
+          (abort-recursive-edit))
+      (command-execute 'icomplete-forward-completions)
+      (when (eq last-command 'comp-back-rev)
+        (before-last-command)))))
 
 (defun hist-back ()
   "History backward for transient use."
@@ -3143,6 +3141,18 @@ before actually send the cd command."
     (setq this-command 'terminal)
     (terminal)))
 
+(defun toggle-dired ()
+  "Toggle dired."
+  (interactive)
+  (if (eq major-mode 'vterm-mode)
+      (vt-conn-tramp)
+    (if (eq major-mode 'dired-mode)
+        (progn
+          (setq this-command 'alt-buf)
+          (alt-buf))
+      (setq this-command 'dired-jump)
+      (dired-jump))))
+
 (defvar vterm-last-command "" "Vterm last command.")
 (defconst vterm-prompt-regexp "└" "Vterm prompt regexp.")
 
@@ -3445,7 +3455,7 @@ This checks in turn:
   "Open video file extensions with `open-in-external-app'.")
 
 (defconst external-extensions
-  '("mp3" "m4a" "flac" "torrent" "exe" "xlsx" "xlsb" "docx" "dmg" "ods" "7z")
+  '("mp3" "m4a" "flac" "torrent" "exe" "xlsx" "xlsb" "docx" "pptx" "dmg" "ods" "7z")
   "Open file extensions with `open-in-external-app'.")
 
 (setq external-extensions (append external-extensions video-extensions))
@@ -3534,10 +3544,11 @@ Use as around advice e.g. for mouse left click after double click."
     (apply fun r)))
 
 (defun quit ()
-  "Confirm and quit. Because restart without confirm."
+  "Quit."
   (interactive)
-  (if (y-or-n-p-with-timeout "Quit?" 3 nil)
-      (save-buffers-kill-terminal)))
+  ;; (when (y-or-n-p-with-timeout "Quit?" 3 nil) ; When restart without confirm.
+    ;; (save-buffers-kill-terminal))
+  (save-buffers-kill-terminal))
 
 (defun mouse-3 (e)
   "Mouse right click. Select word or if eww buffer then lookup translation.
@@ -4012,7 +4023,7 @@ The overlay is automatically removed after timeout. Tap it."
           (setq hide-virtual-keyboard-ov nil))
       (setq hide-virtual-keyboard-ov (make-overlay (point-min) (point-min)))
       (overlay-put hide-virtual-keyboard-ov 'before-string "kb://⌄ ")
-      (run-with-idle-timer 4 nil
+      (run-with-idle-timer 2 nil
                            (lambda () (when (overlayp hide-virtual-keyboard-ov)
                                         (delete-overlay hide-virtual-keyboard-ov)
                                         (setq hide-virtual-keyboard-ov nil)))))))
