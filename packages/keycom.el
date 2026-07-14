@@ -2138,6 +2138,8 @@ command, so that next buffer shown is a user buffer."
    ((string-equal (buffer-name) "tetris-scores") nil)
    ((string-equal (buffer-name) "snake-scores") nil)
    ((string-equal (buffer-name) "ai") nil)
+   ((and buffer-file-truename
+         (string-match-p "\\.gpg\\'" buffer-file-truename)) nil)
    ((string-equal buffer-file-truename org-agenda-file-1) nil)
    ((string-equal buffer-file-truename org-agenda-file-2) nil)
    ((string-equal buffer-file-truename org-agenda-file-3) nil)
@@ -2581,6 +2583,10 @@ for elisp files."
       (setq path
             (replace-regexp-in-string "^file://" ""
                                       (replace-regexp-in-string ":\\'" "" input)))
+      (when-let ((home (getenv "HOME"))
+                 ((or (string= path "$HOME")
+                      (string-prefix-p "$HOME/" path))))
+        (setq path (concat (directory-file-name home) (substring path (length "$HOME")))))
       (if (string-match "/ssh" path) ; No time to make it nice, case for TRAMP
           (if (string-match "^\\`\\(.+?\\):\\([0-9]+\\)\\(:[0-9]+\\)?\\'" path)
               (let ((fpath (match-string-no-properties 1 path))
@@ -3174,8 +3180,9 @@ before actually send the cd command."
 (advice-add 'vterm-send-return :before #'vterm-capture-command)
 
 (defun vterm-set-point (&rest _)
-  "Set point to cur point for vterm."
-  (when (eq major-mode 'vterm-mode)
+  "Set point to cur point for vterm. If `vterm-cursor-in-command-buffer-p'."
+  (when (and (eq major-mode 'vterm-mode)
+             (not (string-equal (buffer-name) "*vterm localhost*")))
     (vterm-goto-char (point))))
 
 (defun vterm-read-send-key ()
@@ -3455,7 +3462,8 @@ This checks in turn:
   "Open video file extensions with `open-in-external-app'.")
 
 (defconst external-extensions
-  '("mp3" "m4a" "flac" "torrent" "exe" "xlsx" "xlsb" "docx" "pptx" "dmg" "ods" "7z")
+  '("mp3" "m4a" "flac" "torrent" "exe" "xlsx" "xlsb" "docx" "pptx" "rtf" "dmg"
+    "ods" "7z")
   "Open file extensions with `open-in-external-app'.")
 
 (setq external-extensions (append external-extensions video-extensions))
@@ -4017,16 +4025,14 @@ Click mouse select a window and close the others."
 The overlay is automatically removed after timeout. Tap it."
   (interactive)
   (with-current-buffer (get-buffer " *Minibuf-0*")
-    (if (overlayp hide-virtual-keyboard-ov)
-        (progn
-          (delete-overlay hide-virtual-keyboard-ov)
-          (setq hide-virtual-keyboard-ov nil))
+    (unless (overlayp hide-virtual-keyboard-ov)
       (setq hide-virtual-keyboard-ov (make-overlay (point-min) (point-min)))
       (overlay-put hide-virtual-keyboard-ov 'before-string "kb://⌄ ")
       (run-with-idle-timer 2 nil
-                           (lambda () (when (overlayp hide-virtual-keyboard-ov)
-                                        (delete-overlay hide-virtual-keyboard-ov)
-                                        (setq hide-virtual-keyboard-ov nil)))))))
+                           (lambda ()
+                             (when (overlayp hide-virtual-keyboard-ov)
+                               (delete-overlay hide-virtual-keyboard-ov)
+                               (setq hide-virtual-keyboard-ov nil)))))))
 
 (provide 'keycom)
 

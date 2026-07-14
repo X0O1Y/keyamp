@@ -862,6 +862,38 @@ Prefix sequence may contain last key ESC."
     (keymap-set key-translation-map "ESC" "<escape>")))
 
 
+;; Bracketed paste
+
+(defun keyamp-xterm-translate-bracketed-paste (_prompt)
+  "Translate single-character bracketed paste back to a normal key event.
+
+Some Android terminal keyboards, notably Termius with Cyrillic IME input,
+send each typed non-ASCII character as an xterm bracketed paste sequence:
+
+  ESC [ 200 ~
+  UTF-8 character bytes
+  ESC [ 201 ~
+
+Emacs normally translates that sequence in `input-decode-map' into one
+`xterm-paste' event, so command-mode key handling sees `<xterm-paste>'
+instead of the actual character and keyamp cannot process the key through
+its normal input-method/layout translation path.
+
+This translator runs at the same level as Emacs'
+`xterm-translate-bracketed-paste'.  It reads the bracketed payload with
+`xterm--pasted-text'.  If the payload is exactly one character, return it
+as a normal input event vector, so keyamp receives the original character.
+If the payload contains more than one character, keep the standard Emacs
+paste behavior by returning an `xterm-paste' event."
+  (let ((s (xterm--pasted-text)))
+    (if (= (length s) 1)
+        (vconcat (string-to-list s))
+      (vector (list 'xterm-paste s)))))
+
+(unless (display-graphic-p)
+  (define-key input-decode-map "\e[200~" #'keyamp-xterm-translate-bracketed-paste))
+
+
 ;; Keymaps
 
 (defvar keyamp-map (make-sparse-keymap)
@@ -1251,8 +1283,13 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
       ("<mouse-2>" . ignore)
       ("<mouse-3>" . ignore))))
 
+(keyamp--map keyamp-script-leader-map
+  '(("G" . bookmark-jump-remote) ; Left leader slash
+    ("(" . quit)                 ; Left leader backslash
+    ))
+
 (keyamp--map-double
-  '((keyamp-escape . toggle-terminal)      (other-win   . jump-mark)
+  '((keyamp-escape . toggle-agent)         (other-win   . jump-mark)
     (beg-of-line   . beg-of-buf)           (end-of-lyne . end-of-buf)
     (proced-defer  . save-close-buf)       (sh-defer    . delete-other-windows)))
 
@@ -1339,6 +1376,7 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
     (keymap-set key-translation-map "S-<backspace>" "<backtab>")
     (keymap-set key-translation-map "S-<return>"    "C-t")
     (keymap-set key-translation-map "C-k"           "C-t") ; Temp qwerty to engram
+    (keymap-set key-translation-map "C-b"           "C-q") ; Temp bug
     (keymap-set key-translation-map "S-<escape>"    "<escape>"))
   (when keyamp-touchp
     (keymap-set key-translation-map "TAB"      "<escape>")  ; Double tap
@@ -1503,6 +1541,7 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
       (keyamp-touch-prefix key)))
 
   (define-prefix-command 'keyamp-touch-backtab)
+  (keyamp--map-std keyamp-touch-backtab 'ignore)
   (keyamp--map-escape keyamp-touch-backtab keyamp-escape)
   (keyamp--map-backtab keyamp-touch-backtab backward-del-word)
   (keyamp--map-tab keyamp-touch-backtab del-word)
@@ -1519,22 +1558,23 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
       (keyamp-touch-prefix key)))
 
   (define-prefix-command 'keyamp-touch-tab)
+  (keyamp--map-std keyamp-touch-tab 'ignore)
   (keyamp--map-escape keyamp-touch-tab keyamp-escape)
   (keyamp--map-backtab keyamp-touch-tab list-timers)
   (keyamp--map-tab keyamp-touch-tab proced-defer)
   (keyamp--map keyamp-touch-tab
     '(("C-q"    . list-processes)     ("C-t"     . list-registers)
-      ("<left>" . enlarge-window-any) ("<right>" . help-command)
+      ("<left>" . enlarge-window-any) ("<right>" . keyamp-insert)
       ("<up>"   . save-close-buf)     ("<down>"  . beg-of-block)))
 
   (with-sparse-keymap
-    (keyamp--map-escape keymap toggle-terminal)
+    (keyamp--map-escape keymap toggle-agent)
     (keyamp--map-backtab keymap keyamp-touch-backtab-cmd)
     (keyamp--map-tab keymap keyamp-touch-tab-cmd)
     (keyamp--map keymap
       '(("C-q"    . toggle-messages) ("C-t"     . delete-other-windows)
-        ("<left>" . tasks)           ("<right>" . alt-buf)
-        ("<up>"   . page-dn-half)    ("<down>"  . screen-home-toggle)))
+        ("<left>" . tasks)           ("<right>" . screen-home-toggle)
+        ("<up>"   . page-dn-half)    ("<down>"  . page-up-half)))
     (keyamp--set keymap '(keyamp-escape) nil nil nil 1)))
 
 (with-sparse-keymap
@@ -1993,7 +2033,6 @@ keyboard ASCII CHAR."
     (keyamp--map-leader keymap '(paste-or-prev . hist-back))
     (keyamp--map-escape keymap keyamp-minibuffer-escape)
     (keyamp--map-return keymap keyamp-minibuffer-return)
-    (keyamp--map keymap '(("C-q" . nil) ("C-t" . nil)))
     (keyamp--map-tab keymap comp-forw)
     (keyamp--map-backtab keymap comp-forw-rev)
     (keyamp--map-std keymap 'keyamp-insert-minibuffer)
@@ -2133,8 +2172,8 @@ keyboard ASCII CHAR."
       (backward-bracket     . dired-jump)
       (insert-space-before  . dired-size)
       (del-word             . dired-unmark-all-marks)
-      (query-replace        . dired-unzip)
-      (query-replace-regexp . dired-zip)
+      (query-replace        . dired-zip)
+      (query-replace-regexp . dired-unzip)
       (backward-del-word    . dired-do-chmod)
       (shrink-whitespaces   . dired-hide-details-mode)
       (kill-line            . vt-conn-tramp-docker)
@@ -2538,7 +2577,7 @@ keyboard ASCII CHAR."
   (keyamp--map-backtab eshell-mode-map nil)
   (keyamp--remap eshell-mode-map
     '((cut-line       . eshell-clear)
-      (select-block   . eshell-previous-input)
+      (select-word    . eshell-previous-input)
       (open-line      . prev-eshell-buf)
       (newline        . next-eshell-buf)
       (toggle-comment . ignore)))
@@ -2553,7 +2592,7 @@ keyboard ASCII CHAR."
   (with-sparse-keymap
     ;; Insert mode primary for eshell. The keymap ready after eshell start,
     ;; command submit or cancel. DEL to list history, SPC to paste.
-    (keyamp--map-leader keymap '(paste-or-prev . eshell-previous-input))
+    (keyamp--map-leader keymap '(eshell-previous-input . eshell-next-input))
     (keyamp--map-tab keymap change-wd)
     (keyamp--map-backtab keymap eshell-search-input)
     (keyamp--set keymap '(eshell-send-input eshell-interrupt-process) nil :insert)
@@ -2579,7 +2618,7 @@ keyboard ASCII CHAR."
   (keyamp--map vterm-mode-map '(("C-t" . vterm-send-tab)))
   (keyamp--remap vterm-mode-map
     '(;; Left half
-      (insert-space-before . vt-shell-vi-cmd)     ; Q Sync point and activate shell vi cmd mode transient
+      (insert-space-before . vt-enter-copy-mode)  ; Q
       (periodic-chart      . vt-split-view)       ; SPC 1
       (backward-del-word   . vt-shell-vi-cmd)     ; W Sync point or do modify if in transient
       (undo                . vterm-undo)          ; E
@@ -2601,6 +2640,46 @@ keyboard ASCII CHAR."
       (toggle-prev-case    . vt-command-copy)     ; SPC B
       (revert-buffer       . prev-vterm-buf)      ; SPC 3
       (select-word         . vt-shell-vi-cmd-up)  ; SPC SPC
+      (org-ctrl-c-ctrl-c   . vterm-send-c-c)      ; SPC W
+
+      ;; Right half
+      (page-up-half        . vt-page-up-half)     ; DEL H
+      (page-dn-half        . vt-page-dn-half)     ; DEL ;
+      (dired-jump          . vt-conn-tramp)       ; DEL M
+      (copy-all            . vt-copy)             ; DEL C
+      (back-char           . vterm-left)
+      (forw-char           . vterm-right)
+      (up-line             . vterm-up)
+      (down-line           . vterm-down)))
+
+  (keyamp--map-tab vterm-copy-mode-map vterm-send-tab)
+  (keyamp--map-backtab vterm-copy-mode-map nil)
+
+  (keyamp--map vterm-copy-mode-map '(("C-t" . vterm-send-tab)))
+  (keyamp--remap vterm-copy-mode-map
+    '(;; Left half
+      (insert-space-before . vt-exit-copy-mode)   ; Q
+      (periodic-chart      . vt-split-view)       ; SPC 1
+      (backward-del-word   . vt-shell-vi-cmd)     ; W Sync point or do modify if in transient
+      (undo                . vterm-undo)          ; E
+      (del-word            . vt-shell-vi-cmd)     ; R Sync point or do modify if in transient
+      (query-replace       . vt-vi)               ; SPC R Activate vi mode (TUI)
+      (cut-text-block      . vt-conn-reconnect)   ; T
+      (copy-text-block     . nil)                 ; SPC T
+      (shrink-whitespaces  . vt-conn-localhost)   ; A
+      (kill-line           . vt-close-window)     ; SPC A
+      (open-line           . vt-prev-window)      ; S
+      (del-back            . vt-shell-vi-cmd)     ; D Sync point or do modify if in transient
+      (newline             . vt-next-window)      ; F
+      (new-empty-buffer    . vt-new-window)       ; SPC G
+      (toggle-comment      . vterm-read-send-key) ; Z
+      (cut-line            . vterm-clear)         ; X
+      (paste-or-prev       . vterm-yank)          ; V
+      (paste-from-r1       . paste-from-r1-vt)    ; SPC V
+      (toggle-case         . vt-position)         ; B
+      (toggle-prev-case    . vt-command-copy)     ; SPC B
+      (revert-buffer       . prev-vterm-buf)      ; SPC 3
+      (select-word         . nil)                 ; SPC SPC
       (org-ctrl-c-ctrl-c   . vterm-send-c-c)      ; SPC W
 
       ;; Right half
@@ -2781,9 +2860,9 @@ keyboard ASCII CHAR."
           '(("<left>" . vt-next-window) ("<right>" . vt-prev-window)
             ("<up>"   . terminal)       ("<down>"  . vt-page-up-half)))
         (keyamp--set keymap
-          '(terminal
-            vt-next-window vt-prev-window
-            prev-vterm-buf next-vterm-buf))))
+          '(terminal        vt-conn-localhost
+            vt-next-window  vt-prev-window
+            prev-vterm-buf  next-vterm-buf))))
 
   ;;;;;; tmux.conf
   ;; bind -T copy-mode-vi c send-keys -X copy-pipe-and-cancel 'tee > /tmp/tmux-copy~$(date "+%Y-%m-%d_%H%M%S")~'
@@ -4001,8 +4080,8 @@ of quit minibuffer. Answer q to literal y or n question."
    (cdr (assoc (minibuffer-prompt)
                '(("M-x"           . buf-or-bookmark)
                  ("Buffer"        . describe-function)
-                 ("Secret copy"   . pass-user)
-                 ("Secret user"   . pass-otp)
+                 ("Secret copy"   . pass-otp)
+                 ("Secret OTP"    . pass-user)
                  ("Query replace" . query-replace-regexp))
                #'string-match-p)))
   (abort-recursive-edit))
@@ -4014,8 +4093,8 @@ of quit minibuffer. Answer q to literal y or n question."
    (cdr (assoc (minibuffer-prompt)
                '(("M-x"         . isearch-forward)
                  ("Buffer"      . execute-extended-command)
-                 ("Secret copy" . pass-otp)
-                 ("Secret otp"  . pass-user))
+                 ("Secret copy" . pass-user)
+                 ("Secret user" . pass-otp))
                #'string-match-p)))
   (abort-recursive-edit))
 

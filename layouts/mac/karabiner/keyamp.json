@@ -8146,45 +8146,6 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Firefox"
-              ]
-            }
-          ],
-          "to_if_held_down": [
-            {
-              "shell_command": "open -a 'Thorium'",
-              "repeat": false,
-              "halt": true
-            }
-          ],
-          "to_after_key_up": [
-            {
-              "key_code": "tab",
-              "modifiers": [
-                "command"
-              ]
-            },
-            {
-              "select_input_source": {
-                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
-              }
-            }
-          ]
-        },
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "f1",
-            "modifiers": {
-              "optional": [
-                "any"
-              ]
-            }
-          },
-          "conditions": [
-            {
-              "type": "frontmost_application_if",
-              "file_paths": [
                 "/Thorium"
               ]
             }
@@ -8220,14 +8181,53 @@
               ]
             }
           },
-          "to_after_key_up": [
+          "conditions": [
             {
-              "shell_command": "open -a 'Firefox'"
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Firefox"
+              ]
             }
           ],
           "to_if_held_down": [
             {
               "shell_command": "open -a 'Thorium'",
+              "repeat": false,
+              "halt": true
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "tab",
+              "modifiers": [
+                "command"
+              ]
+            },
+            {
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              }
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "f1",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "to_after_key_up": [
+            {
+              "shell_command": "open -a 'Thorium'"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "shell_command": "open -a 'Firefox'",
               "repeat": false,
               "halt": true
             }
@@ -8464,7 +8464,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Thorium"
+                "/Firefox"
               ]
             }
           ],
@@ -8478,7 +8478,7 @@
               "key_code": "c"
             },
             {
-              "shell_command": "sleep 0.2 && /Applications/emacsclient --no-wait --eval '(url-paste-and-go)' && sleep 0.05 && open -a 'Emacs' && osascript -e \"tell application \\\"Finder\\\" to set visible of process \\\"Thorium\\\" to false\"",
+              "shell_command": "sleep 0.2 && /Applications/emacsclient --no-wait --eval '(url-paste-and-go)' && sleep 0.05 && open -a 'Emacs' && osascript -e \"tell application \\\"Finder\\\" to set visible of process \\\"Firefox\\\" to false\"",
               "repeat": false,
               "halt": true
             }
@@ -8962,45 +8962,6 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Firefox"
-              ]
-            }
-          ],
-          "to_if_held_down": [
-            {
-              "shell_command": "open -a 'Thorium'",
-              "repeat": false,
-              "halt": true
-            }
-          ],
-          "to_after_key_up": [
-            {
-              "key_code": "tab",
-              "modifiers": [
-                "command"
-              ]
-            },
-            {
-              "select_input_source": {
-                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
-              }
-            }
-          ]
-        },
-        {
-          "type": "basic",
-          "from": {
-            "key_code": "f13",
-            "modifiers": {
-              "optional": [
-                "any"
-              ]
-            }
-          },
-          "conditions": [
-            {
-              "type": "frontmost_application_if",
-              "file_paths": [
                 "/Thorium"
               ]
             }
@@ -9036,14 +8997,53 @@
               ]
             }
           },
-          "to_after_key_up": [
+          "conditions": [
             {
-              "shell_command": "open -a 'Firefox'"
+              "type": "frontmost_application_if",
+              "file_paths": [
+                "/Firefox"
+              ]
             }
           ],
           "to_if_held_down": [
             {
               "shell_command": "open -a 'Thorium'",
+              "repeat": false,
+              "halt": true
+            }
+          ],
+          "to_after_key_up": [
+            {
+              "key_code": "tab",
+              "modifiers": [
+                "command"
+              ]
+            },
+            {
+              "select_input_source": {
+                "input_source_id": "org.sil.ukelele.keyboardlayout.engram2.0.engineerengram"
+              }
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "f13",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "to_after_key_up": [
+            {
+              "shell_command": "open -a 'Thorium'"
+            }
+          ],
+          "to_if_held_down": [
+            {
+              "shell_command": "open -a 'Firefox'",
               "repeat": false,
               "halt": true
             }
@@ -9447,7 +9447,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Firefox"
+                "/Thorium"
               ]
             }
           ],
@@ -9491,7 +9491,7 @@
           ],
           "to_after_key_up": [
             {
-              "shell_command": "open -a 'Thorium' && sleep 0.1 && /Applications/emacsclient --no-wait --eval '(frame-title-en)'"
+              "shell_command": "open -a 'Firefox' && sleep 0.1 && /Applications/emacsclient --no-wait --eval '(frame-title-en)'"
             },
             {
               "select_input_source": {
@@ -9556,7 +9556,7 @@
             {
               "type": "frontmost_application_if",
               "file_paths": [
-                "/Thorium"
+                "/Firefox"
               ]
             }
           ],
@@ -9609,7 +9609,7 @@
           ],
           "to_if_held_down": [
             {
-              "shell_command": "open -a 'Thorium' && /Applications/emacsclient --no-wait --eval '(frame-title-en)'",
+              "shell_command": "open -a 'Firefox' && /Applications/emacsclient --no-wait --eval '(frame-title-en)'",
               "repeat": false,
               "halt": true
             },
