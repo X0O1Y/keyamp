@@ -2975,9 +2975,8 @@ If there more than one frame, switch to next frame."
 (defun change-wd-p ()
   "Ensure terminal input contains a command to change working directory
 before actually send the cd command."
-  (let ((prompt "└ $ pushd . && ") (prompt2 "└ $ % pushd . && "))
-    (or (and (terminal-prompt prompt) (terminal-input prompt))
-        (and (terminal-prompt prompt2) (terminal-input prompt2)))))
+  (let ((prompt (concat shell-prompt-regexp "pushd . && ")))
+    (and (terminal-prompt prompt) (terminal-input prompt))))
 
 (defun get-wd ()
   "Get working directory."
@@ -3015,7 +3014,8 @@ before actually send the cd command."
             (lambda (fun &rest r) "no need complete empty command"
               (if (and (eq major-mode 'eshell-mode)
                        (zerop (length (buffer-substring-no-properties
-                                       (+ (length "└ $ ") (line-beginning-position))
+                                       (+ (length (concat shell-prompt-regexp))
+                                          (line-beginning-position))
                                        (line-end-position)))))
                   (change-wd)
                 (apply fun r))))
@@ -3159,17 +3159,17 @@ before actually send the cd command."
       (setq this-command 'dired-jump)
       (dired-jump))))
 
-(defvar vterm-last-command "" "Vterm last command.")
-(defconst vterm-prompt-regexp "└" "Vterm prompt regexp.")
+(defvar vterm-last-command "" "Vterm last command. Must be a string.")
+(defconst shell-prompt-regexp "└ › " "Vterm prompt regexp.")
 
 (defun vterm-capture-command ()
   "Advice for `vterm-send-return' to capture the command."
   (let (p1 p2)
     (save-excursion
       (goto-char (point-max))
-      (re-search-backward vterm-prompt-regexp nil t 1)
+      (re-search-backward shell-prompt-regexp nil t 1)
       (when (< (point) (point-max))
-        (setq p1 (1+ (point)))
+        (setq p1 (+ (1- (length shell-prompt-regexp)) (point)))
         (end-of-line)
         (setq p2 (point))))
     (when (and p1 p2)
@@ -3463,7 +3463,7 @@ This checks in turn:
 
 (defconst external-extensions
   '("mp3" "m4a" "flac" "torrent" "exe" "xlsx" "xlsb" "docx" "pptx" "rtf" "dmg"
-    "ods" "7z")
+    "ods" "7z" "drawio")
   "Open file extensions with `open-in-external-app'.")
 
 (setq external-extensions (append external-extensions video-extensions))

@@ -936,8 +936,8 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
     ("C-+" . keyamp-lleader-map)           ("C-И" . keyamp-rleader-map) ; Russian-computer
                                            ("C-b" . keyamp-rleader-map) ; Hebrew (experimental)
 
-    ("C-q" . quoted-insert-custom) ; Escape hold down
-    ("C-t" . hippie-expand)        ; Return hold down
+    ("C-q" . quoted-insert-custom)         ("C-S-q" . quoted-insert)       ; Escape hold down
+    ("C-t" . hippie-expand)                ("C-S-t" . hippie-expand-reset) ; Return hold down
 
     ("<home>"   . ignore)
     ("<end>"    . ignore)
@@ -947,6 +947,9 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
 
 (keyamp--map-leader keyamp-command-map '(keyamp-lleader-map . keyamp-rleader-map))
 (keyamp--map-return keyamp-command-map keyamp-insert)
+(keyamp--map keyamp-command-map
+  '(("C-q" . toggle-agent)                 ("C-S-q" . terminal)
+    ("C-t" . terminal)                     ("C-S-t" . toggle-agent)))
 (keyamp--map keyamp-command-map
   '(;; Left half
     ("`" . alternate-frame)                ("~"  . keyamp-insert-and-self-insert)
@@ -1005,9 +1008,6 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
     ("." . forward-bracket)                (">"  . keyamp-insert-and-self-insert)
     ("/" . buf-or-bookmark)                ("?"  . keyamp-insert-and-self-insert)
 
-    ("C-q" . execute-extended-command)
-    ("C-t" . toggle-dired)
-
     ("<left>"  . back-char)
     ("<right>" . forw-char)
     ("<up>"    . up-line)
@@ -1027,9 +1027,15 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
     ("<f19>" . ignore) ("<f20>" . ignore) ("<f21>" . ignore)
     ("<f22>" . ignore) ("<f23>" . ignore) ("<f24>" . ignore)))
 
+(when keyamp-touchp
+  (keyamp--map keyamp-command-map
+    '(("C-q" . execute-extended-command) ("C-t" . toggle-dired))))
+
 (keyamp--map-leader keyamp-lleader-map '(select-word . select-quote))
 (keyamp--map-return keyamp-lleader-map execute-extended-command)
-(keyamp--map keyamp-lleader-map '(("C-t" . display-line-numbers-mode)))
+(keyamp--map keyamp-lleader-map
+  '(("C-q" . ignore)                       ("C-S-q" . ignore)
+    ("C-t" . display-line-numbers-mode)    ("C-S-t" . ignore)))
 (keyamp--map-escape keyamp-lleader-map ignore)
 (keyamp--map-tab keyamp-lleader-map read-only-mode)
 (keyamp--map-backtab keyamp-lleader-map ignore)
@@ -1160,10 +1166,12 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
 
 (keyamp--map-leader keyamp-rleader-map '(select-line . select-block))
 (keyamp--map-return keyamp-rleader-map open-file)
-(keyamp--map keyamp-rleader-map '(("C-t" . toggle-truncate-lines)))
+(keyamp--map keyamp-rleader-map
+  '(("C-q" . ignore)                       ("C-S-q" . ignore)
+    ("C-t" . toggle-truncate-lines)        ("C-S-t" . ignore)))
 (keyamp--map-escape keyamp-rleader-map ignore)
 (keyamp--map-backtab keyamp-rleader-map ignore)
-(keyamp--map-tab keyamp-rleader-map ignore)
+(keyamp--map-tab keyamp-rleader-map open-in-external-app)
 (keyamp--map keyamp-rleader-map
   '(;; Right leader left half
     ("`" . toggle-std-to-cur-layout)
@@ -1289,52 +1297,55 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
     ))
 
 (keyamp--map-double
-  '((keyamp-escape . toggle-agent)         (other-win   . jump-mark)
+  '((keyamp-escape . toggle-ibuffer)       (other-win   . jump-mark)
     (beg-of-line   . beg-of-buf)           (end-of-lyne . end-of-buf)
     (proced-defer  . save-close-buf)       (sh-defer    . delete-other-windows)))
 
+(when keyamp-touchp
+  (keyamp--map-double '((keyamp-escape . toggle-agent))) )
+
 (when keyamp-touchp ; Standard iOS hold down candidates
   (keyamp--map keyamp-command-map
-    '(("ŵ" . org-ctrl-c-ctrl-c)            ("é" . split-window-r)
-      ("è" . split-window-below)           ("ê" . ignore)
-      ("ě" . ignore)                       ("ẽ" . ignore)
-      ("ē" . ignore)                       ("ė" . ignore)
-      ("ę" . ignore)                       ("ř" . query-replace)
-      ("ț" . copy-text-block)              ("ť" . calc)
-      ("þ" . ignore)                       ("ý" . password-store)
-      ("ŷ" . pass-otp)                     ("ÿ" . ignore)
-      ("ú" . backward-punct)               ("ü" . flymake-goto-prev-error)
-      ("ũ" . ignore)                       ("ū" . ignore)
-      ("ű" . ignore)                       ("ů" . ignore)
-      ("ų" . ignore)                       ("ù" . ignore)
-      ("û" . ignore)                       ("ǔ" . ignore)
-      ("į" . ignore)                       ("ı" . ignore)
-      ("ī" . ignore)                       ("ĩ" . ignore)
-      ("ǐ" . ignore)                       ("ï" . ignore)
-      ("í" . copy-file-path)               ("ì" . ignore)
-      ("î" . ignore)                       ("ò" . ignore)
-      ("ó" . ignore)                       ("ô" . ignore)
-      ("ö" . ignore)                       ("ǒ" . ignore)
-      ("œ" . ignore)                       ("õ" . ignore)
-      ("ō" . ignore)                       ("ő" . ignore)
-      ("à" . kill-line)                    ("á" . ignore)
-      ("â" . ignore)                       ("ä" . ignore)
-      ("ǎ" . ignore)                       ("æ" . ignore)
-      ("ã" . ignore)                       ("å" . ignore)
-      ("ā" . ignore)                       ("ă" . ignore)
-      ("ą" . ignore)                       ("ß" . prev-buf)
-      ("ş" . ignore)                       ("ș" . ignore)
-      ("ś" . ignore)                       ("š" . ignore)
-      ("ď" . del-forw)                     ("ð" . eval-region-or-sexp)
-      ("ğ" . new-empty-buffer)             ("ġ" . ignore)
-      ("ħ" . page-up-half)                 ("ķ" . other-win)
-      ("ł" . end-of-lyne)                  ("ļ" . end-of-buf)
-      ("ľ" . ignore)                       ("ź" . universal-argument)
-      ("ž" . hide-virtual-keyboard)        ("ż" . ignore)
-      ("ç" . copy-to-r1)                   ("ć" . copy-all)
-      ("č" . ignore)                       ("ċ" . ignore)
-      ("ñ" . buf-or-bookmark)              ("ń" . save-all-unsaved)
-      ("ņ" . ignore)                       ("ň" . ignore))))
+    '(("ŵ" . org-ctrl-c-ctrl-c)              ("é" . ignore)
+      ("è" . split-window-below)             ("ê" . ignore)
+      ("ě" . ignore)                         ("ẽ" . ignore)
+      ("ē" . ignore)                         ("ė" . ignore)
+      ("ę" . ignore)                         ("ř" . ignore)
+      ("ț" . ignore)                         ("ť" . ignore)
+      ("þ" . ignore)                         ("ý" . ignore)
+      ("ŷ" . ignore)                         ("ÿ" . ignore)
+      ("ú" . ignore)                         ("ü" . ignore)
+      ("ũ" . ignore)                         ("ū" . ignore)
+      ("ű" . ignore)                         ("ů" . ignore)
+      ("ų" . ignore)                         ("ù" . ignore)
+      ("û" . ignore)                         ("ǔ" . ignore)
+      ("į" . ignore)                         ("ı" . ignore)
+      ("ī" . ignore)                         ("ĩ" . ignore)
+      ("ǐ" . ignore)                         ("ï" . ignore)
+      ("í" . ignore)                         ("ì" . ignore)
+      ("î" . ignore)                         ("ò" . ignore)
+      ("ó" . ignore)                         ("ô" . ignore)
+      ("ö" . ignore)                         ("ǒ" . ignore)
+      ("œ" . ignore)                         ("õ" . ignore)
+      ("ō" . ignore)                         ("ő" . ignore)
+      ("à" . ignore)                         ("á" . ignore)
+      ("â" . ignore)                         ("ä" . ignore)
+      ("ǎ" . ignore)                         ("æ" . ignore)
+      ("ã" . ignore)                         ("å" . ignore)
+      ("ā" . ignore)                         ("ă" . ignore)
+      ("ą" . ignore)                         ("ß" . ignore)
+      ("ş" . ignore)                         ("ș" . ignore)
+      ("ś" . ignore)                         ("š" . ignore)
+      ("ď" . ignore)                         ("ð" . ignore)
+      ("ğ" . ignore)                         ("ġ" . ignore)
+      ("ħ" . page-up-half)                   ("ķ" . other-win)
+      ("ł" . end-of-lyne)                    ("ļ" . end-of-buf)
+      ("ľ" . ignore)                         ("ź" . universal-argument)
+      ("ž" . hide-virtual-keyboard)          ("ż" . ignore)
+      ("ç" . ignore)                         ("ć" . ignore)
+      ("č" . ignore)                         ("ċ" . ignore)
+      ("ñ" . ignore)                         ("ń" . ignore)
+      ("ņ" . ignore)                         ("ň" . ignore))))
 
 
 ;; Remaps
@@ -1346,8 +1357,11 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
 
 (defun keyamp-wdired-exit ()
   "Dynamically change mapping on wdired exit."
-  (keyamp--map keyamp-command-map
-    '(("C-q" . execute-extended-command) ("C-t" . toggle-dired))))
+  (if keyamp-touchp
+      (keyamp--map keyamp-command-map
+        '(("C-q" . execute-extended-command) ("C-t" . toggle-dired)))
+    (keyamp--map keyamp-command-map
+      '(("C-q" . toggle-agent) ("C-t" . terminal)))))
 
 (add-hook 'wdired-mode-hook 'keyamp-wdired-enter)
 (advice-add 'wdired-change-to-dired-mode :after 'keyamp-wdired-exit)
@@ -1374,7 +1388,7 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
   (when (display-graphic-p)
     (keymap-set key-translation-map "S-SPC"         "<tab>")
     (keymap-set key-translation-map "S-<backspace>" "<backtab>")
-    (keymap-set key-translation-map "S-<return>"    "C-t")
+    (keymap-set key-translation-map "S-<return>"    "<escape>") ; Test
     (keymap-set key-translation-map "C-k"           "C-t") ; Temp qwerty to engram
     (keymap-set key-translation-map "C-b"           "C-q") ; Temp bug
     (keymap-set key-translation-map "S-<escape>"    "<escape>"))
@@ -1463,9 +1477,10 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
   (keyamp--map-escape keymap save-buffer-isearch-cancel)
   (keyamp--map-return keymap isearch-direction-switch)
   (keyamp--map keymap
-    '(("C-t"    . isearch-forward-regexp) ("C-q"     . isearch-backward-regexp)
-      ("<up>"   . isearch-ring-retreat)   ("<down>"  . isearch-ring-advance)
-      ("<left>" . isearch-double-back)    ("<right>" . isearch-forw)))
+    '(("C-t"    . isearch-forward-regexp)  ("C-q"     . isearch-backward-regexp)
+      ("C-S-t"  . isearch-backward-regexp) ("C-S-q"   . isearch-forward-regexp)
+      ("<up>"   . isearch-ring-retreat)    ("<down>"  . isearch-ring-advance)
+      ("<left>" . isearch-double-back)     ("<right>" . isearch-forw)))
   (keyamp--map-tab keymap isearch-forw) ; Repeat prev search forward
   (keyamp--map-backtab keymap isearch-double-back) ; Repeat prev search backward
   (keyamp--hook keymap '(isearch-mode-hook) nil nil :repeat))
@@ -1477,7 +1492,7 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
 (keyamp--map-tab isearch-mode-map isearch-forw)
 (keyamp--map-backtab isearch-mode-map isearch-back)
 (keyamp--map isearch-mode-map
-  '(("C-^"    . keyamp-lleader-map)    ("C-t"     . isearch-complete)
+  '(("C-^"    . keyamp-lleader-map)    ("C-t"     . ignore)
     ("<up>"   . isearch-ring-retreat)  ("<down>"  . isearch-ring-advance)
     ("<left>" . isearch-back)          ("<right>" . isearch-forw)))
 (keyamp--remap isearch-mode-map '((paste-from-r1 . isearch-yank-r1)))
@@ -1490,7 +1505,7 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
   (keyamp--map-return keymap isearch-exit)
   (keyamp--map-std keymap 'isearch-printing-char)
   (keyamp--map keymap
-    '(("C-t" . isearch-exit)
+    '(("C-t" . ignore)
       ("i" . isearch-ring-retreat) ("j" . isearch-back)
       ("k" . isearch-ring-advance) ("l" . isearch-forw)
       ("e" . isearch-ring-retreat) ("s" . isearch-back)
@@ -2038,10 +2053,11 @@ keyboard ASCII CHAR."
     (keyamp--map-std keymap 'keyamp-insert-minibuffer)
     (keyamp--map keymap '(("<up>" . select-word) ("<down>" . comp-forw)))
     (keyamp--map keymap
-      '(("C-q" . keyamp-minibuffer-shift-up) ("C-t" . keyamp-minibuffer-shift-down)))
+      '(("C-q" . keyamp-minibuffer-shift-up)   ("C-S-q" . keyamp-minibuffer-shift-down)
+        ("C-t" . keyamp-minibuffer-shift-down) ("C-S-t" . keyamp-minibuffer-shift-up)))
     (when keyamp-touchp
       (keyamp--map keymap
-        '(("<left>"  . hist-back) ("<right>" . keyamp-minibuffer-return))))
+        '(("<left>" . hist-back) ("<right>" . keyamp-minibuffer-return))))
 
     ;; The hook is last one run during minibuffer setup and set the keymap.
     (keyamp--hook keymap '(minibuffer-setup-hook) :command nil :repeat))
@@ -2618,35 +2634,36 @@ keyboard ASCII CHAR."
   (keyamp--map vterm-mode-map '(("C-t" . vterm-send-tab)))
   (keyamp--remap vterm-mode-map
     '(;; Left half
-      (insert-space-before . vt-enter-copy-mode)  ; Q
-      (periodic-chart      . vt-split-view)       ; SPC 1
-      (backward-del-word   . vt-shell-vi-cmd)     ; W Sync point or do modify if in transient
-      (undo                . vterm-undo)          ; E
-      (del-word            . vt-shell-vi-cmd)     ; R Sync point or do modify if in transient
-      (query-replace       . vt-vi)               ; SPC R Activate vi mode (TUI)
-      (cut-text-block      . vt-conn-reconnect)   ; T
-      (copy-text-block     . vt-sftp-jump)        ; SPC T
-      (shrink-whitespaces  . vt-conn-localhost)   ; A
-      (kill-line           . vt-close-window)     ; SPC A
-      (open-line           . vt-prev-window)      ; S
-      (del-back            . vt-shell-vi-cmd)     ; D Sync point or do modify if in transient
-      (newline             . vt-next-window)      ; F
-      (new-empty-buffer    . vt-new-window)       ; SPC G
-      (toggle-comment      . vterm-read-send-key) ; Z
-      (cut-line            . vterm-clear)         ; X
-      (paste-or-prev       . vterm-yank)          ; V
-      (paste-from-r1       . paste-from-r1-vt)    ; SPC V
-      (toggle-case         . vt-position)         ; B
-      (toggle-prev-case    . vt-command-copy)     ; SPC B
-      (revert-buffer       . prev-vterm-buf)      ; SPC 3
-      (select-word         . vt-shell-vi-cmd-up)  ; SPC SPC
-      (org-ctrl-c-ctrl-c   . vterm-send-c-c)      ; SPC W
+      (insert-space-before . vt-enter-copy-mode)    ; Q
+      (periodic-chart      . vt-split-view)         ; SPC 1
+      (backward-del-word   . vt-shell-vi-cmd)       ; W Sync point or do modify if in transient
+      (undo                . vterm-undo)            ; E
+      (del-word            . vt-shell-vi-cmd)       ; R Sync point or do modify if in transient
+      (query-replace       . vt-vi)                 ; SPC R Activate vi mode (TUI)
+      (cut-text-block      . vt-conn-reconnect)     ; T
+      (copy-text-block     . vt-sftp-jump)          ; SPC T
+      (shrink-whitespaces  . vt-conn-localhost)     ; A
+      (kill-line           . vt-close-window)       ; SPC A
+      (open-line           . vt-prev-window)        ; S
+      (del-back            . vt-shell-vi-cmd)       ; D Sync point or do modify if in transient
+      (newline             . vt-next-window)        ; F
+      (new-empty-buffer    . vt-new-window)         ; SPC G
+      (toggle-comment      . vterm-read-send-key)   ; Z
+      (cut-line            . vterm-clear)           ; X
+      (paste-or-prev       . vterm-yank)            ; V
+      (paste-from-r1       . paste-from-r1-vt)      ; SPC V
+      (toggle-case         . vt-position)           ; B
+      (toggle-prev-case    . vt-command-copy)       ; SPC B
+      (revert-buffer       . prev-vterm-buf)        ; SPC 3
+      (select-word         . vt-shell-vi-cmd-up)    ; SPC SPC
+      (org-ctrl-c-ctrl-c   . vterm-send-c-c)        ; SPC W
 
       ;; Right half
-      (page-up-half        . vt-page-up-half)     ; DEL H
-      (page-dn-half        . vt-page-dn-half)     ; DEL ;
-      (dired-jump          . vt-conn-tramp)       ; DEL M
-      (copy-all            . vt-copy)             ; DEL C
+      (page-up-half        . vt-page-up-half)       ; DEL H
+      (page-dn-half        . vt-page-dn-half)       ; DEL ;
+      (dired-jump          . vt-conn-tramp)         ; DEL M
+      (copy-all            . vt-copy)               ; DEL C
+      (password-store      . vt-sudo-password-copy) ; DEL Y
       (back-char           . vterm-left)
       (forw-char           . vterm-right)
       (up-line             . vterm-up)
@@ -2658,34 +2675,34 @@ keyboard ASCII CHAR."
   (keyamp--map vterm-copy-mode-map '(("C-t" . vterm-send-tab)))
   (keyamp--remap vterm-copy-mode-map
     '(;; Left half
-      (insert-space-before . vt-exit-copy-mode)   ; Q
-      (periodic-chart      . vt-split-view)       ; SPC 1
-      (backward-del-word   . vt-shell-vi-cmd)     ; W Sync point or do modify if in transient
-      (undo                . vterm-undo)          ; E
-      (del-word            . vt-shell-vi-cmd)     ; R Sync point or do modify if in transient
-      (query-replace       . vt-vi)               ; SPC R Activate vi mode (TUI)
-      (cut-text-block      . vt-conn-reconnect)   ; T
-      (copy-text-block     . nil)                 ; SPC T
-      (shrink-whitespaces  . vt-conn-localhost)   ; A
-      (kill-line           . vt-close-window)     ; SPC A
-      (open-line           . vt-prev-window)      ; S
-      (del-back            . vt-shell-vi-cmd)     ; D Sync point or do modify if in transient
-      (newline             . vt-next-window)      ; F
-      (new-empty-buffer    . vt-new-window)       ; SPC G
-      (toggle-comment      . vterm-read-send-key) ; Z
-      (cut-line            . vterm-clear)         ; X
-      (paste-or-prev       . vterm-yank)          ; V
-      (paste-from-r1       . paste-from-r1-vt)    ; SPC V
-      (toggle-case         . vt-position)         ; B
-      (toggle-prev-case    . vt-command-copy)     ; SPC B
-      (revert-buffer       . prev-vterm-buf)      ; SPC 3
-      (select-word         . nil)                 ; SPC SPC
-      (org-ctrl-c-ctrl-c   . vterm-send-c-c)      ; SPC W
+      (insert-space-before . vt-exit-copy-mode)      ; Q
+      (periodic-chart      . vt-split-view)          ; SPC 1
+      (backward-del-word   . vt-shell-vi-cmd)        ; W Sync point or do modify if in transient
+      (undo                . vterm-undo)             ; E
+      (del-word            . vt-shell-vi-cmd)        ; R Sync point or do modify if in transient
+      (query-replace       . vt-vi)                  ; SPC R Activate vi mode (TUI)
+      (cut-text-block      . vt-conn-reconnect)      ; T
+      (copy-text-block     . nil)                    ; SPC T
+      (shrink-whitespaces  . vt-conn-localhost)      ; A
+      (kill-line           . vt-close-window)        ; SPC A
+      (open-line           . vt-prev-window)         ; S
+      (del-back            . vt-shell-vi-cmd)        ; D Sync point or do modify if in transient
+      (newline             . vt-next-window)         ; F
+      (new-empty-buffer    . vt-new-window)          ; SPC G
+      (toggle-comment      . vterm-read-send-key)    ; Z
+      (cut-line            . vterm-clear)            ; X
+      (paste-or-prev       . vterm-yank)             ; V
+      (paste-from-r1       . paste-from-r1-vt)       ; SPC V
+      (toggle-case         . vt-position)            ; B
+      (toggle-prev-case    . vt-command-copy)        ; SPC B
+      (revert-buffer       . prev-vterm-buf)         ; SPC 3
+      (select-word         . nil)                    ; SPC SPC
+      (org-ctrl-c-ctrl-c   . vterm-send-c-c)         ; SPC W
 
       ;; Right half
-      (page-up-half        . vt-page-up-half)     ; DEL H
-      (page-dn-half        . vt-page-dn-half)     ; DEL ;
-      (dired-jump          . vt-conn-tramp)       ; DEL M
+      (page-up-half        . vt-page-up-half)        ; DEL H
+      (page-dn-half        . vt-page-dn-half)        ; DEL ;
+      (dired-jump          . vt-conn-tramp)          ; DEL M
       (back-char           . vterm-left)
       (forw-char           . vterm-right)
       (up-line             . vterm-up)
@@ -2841,7 +2858,7 @@ keyboard ASCII CHAR."
         (activate-region . vt-tmux-copy-self-insert)
         (isearch-forward . vt-tmux-copy-self-insert)))
     (keyamp--set keymap
-      '(vt-tmux-copy vt-tmux-copy-self-insert
+      '(vt-tmux-copy    vt-tmux-copy-self-insert
         vt-page-up-half vt-page-dn-half) :command))
 
   (with-sparse-keymap
@@ -2912,7 +2929,57 @@ keyboard ASCII CHAR."
       (keyamp-command)
       (keyamp-command-execute 'vt-vi)))
 
-  (advice-add 'vterm-send-return :after #'vt-vi-auto '((depth . 90))))
+  (advice-add 'vterm-send-return :after #'vt-vi-auto '((depth . 90)))
+
+  ;;;;;; Codex vi
+  (with-sparse-keymap
+    (keyamp--remap keymap
+      '((bchar             . vt-codex-vi-left)
+        (fchar             . vt-codex-vi-right)
+        (previous-line     . vt-codex-vi-up)
+        (next-line         . vt-codex-vi-down)
+        (back-word         . vt-codex-vi-back-word)
+        (forw-word         . vt-codex-vi-forward-word)
+        (del-word          . vt-codex-vi-delete-word)
+        (backward-del-word . vt-codex-vi-back-delw)
+        (beg-of-line       . vt-codex-vi-bol)
+        (end-of-lyne       . vt-codex-vi-eol)
+        (paste-or-prev     . vt-codex-vi-yank)
+        (paste-from-r1     . vt-codex-vi-paste-from-r1)))
+
+    (keyamp--set keymap
+      '(vt-codex-vi-sync-point   vt-codex-vi-paste-from-r1
+        vt-codex-vi-left
+        vt-codex-vi-right        vt-codex-vi-up
+        vt-codex-vi-down         vt-codex-vi-back-word
+        vt-codex-vi-forward-word vt-codex-vi-delete-word
+        vt-codex-vi-back-delw    vt-codex-vi-bol
+        vt-codex-vi-eol          vt-codex-vi-yank) :command))
+
+  (with-sparse-keymap ; Move word repeat
+    (keyamp--remap keymap
+      '((bchar . vt-codex-vi-back-word) (fchar . vt-codex-vi-forward-word)))
+    (keyamp--set keymap '(vt-codex-vi-back-word vt-codex-vi-forward-word)))
+
+  (add-hook 'keyamp-insert-hook 'vt-codex-vi-insert)
+  (advice-add 'vt-shell-vi-cmd :after #'vt-codex-vi-cmd)
+
+  ;;;;;; config.toml
+  ;; [tui.keymap.vim_normal]
+  ;; enter_insert = "f12"
+  ;; open_line_below = []
+  ;; substitute_char = []
+  ;; move_up = "i"
+  ;; move_left = "j"
+  ;; move_down = "k"
+  ;; move_right = "l"
+  ;; move_word_backward = "u"
+  ;; move_word_forward = "o"
+  ;; move_word_end = []
+  ;; move_line_start = "h"
+  ;; move_line_end = ";"
+  ;; delete_char = "f"
+  )
 
 (defvar keyamp-ignore-map (make-sparse-keymap)
   "Keymap ignores any key. Maybe trigger action with post command hook.")
@@ -3704,7 +3771,7 @@ keyboard ASCII CHAR."
 (defconst keyamp-blink-modify-commands
   '(kmacro-record               stopwatch
     python-format-buffer        save-buffer-isearch-cancel
-    emacs-lisp-indent)
+    emacs-lisp-indent           vterm-send-backspace)
   "List of commands to blink modify after.")
 
 (defconst keyamp-blink-io-commands
@@ -3713,7 +3780,7 @@ keyboard ASCII CHAR."
     vt-tmux-copy        vt-tmux-copy-self-insert   vterm-read-send-key
     vt-vi               vt-vi-self-insert          vt-vi-escape
     vt-shell-vi-del     vterm-left                 vterm-right
-    vterm-up            vterm-down
+    vterm-up            vterm-down                 vterm--self-insert
     copy-to-r1          append-to-r1)
   "List of commands to blink io after.")
 
@@ -3760,12 +3827,12 @@ keyboard ASCII CHAR."
                             (intern (format "keyamp-indicator-%s" type))))
           (put var 'variable-documentation
                (format "Indicator %s %s." (symbol-name state) type)))
-        (when (string-equal type "default")
-          (let ((var (intern (format "keyamp-%s-indicator" state))))
-            (set-default var (symbol-value
-                              (intern (format "keyamp-indicator-%s" type))))
-            (put var 'variable-documentation
-                 (format "Indicator %s." (symbol-name state))))))
+        (when-let (((string-equal type "default"))
+                   (var (intern (format "keyamp-%s-indicator" state))))
+          (set-default var (symbol-value
+                            (intern (format "keyamp-indicator-%s" type))))
+          (put var 'variable-documentation
+               (format "Indicator %s." (symbol-name state)))))
       keyamp-transient-states))
    '("default" "hand-swap" "standard")))
 
@@ -4001,7 +4068,8 @@ insert cancel the timer.")
             (setq key (keyamp--convert-kbd-str
                        (car
                         (rassoc
-                         (or (car (rassoc key keyamp--convert-table)) key)
+                         (or (car (rassoc key keyamp--convert-table))
+                             key)
                          keyamp--hand-swap)))))
           (if key ; This key code comes from OS
               (execute-kbd-macro (kbd key))
