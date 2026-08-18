@@ -2999,10 +2999,15 @@ before actually send the cd command."
       (when (change-wd-p)
         (eshell-send-input)))
      ((eq major-mode 'vterm-mode)
-      (vterm-insert "pushd . && ")
-      (vterm-yank)
-      (when (change-wd-p)
-        (vterm-send-return))))))
+      (let ((kill-ring
+             (cons (if (file-remote-p (car kill-ring))
+                       (file-local-name (car kill-ring))
+                     (car kill-ring))
+                   (cdr kill-ring))))
+        (vterm-insert "pushd . && ")
+        (vterm-yank)
+        (when (change-wd-p)
+          (vterm-send-return)))))))
 
 (defun change-wd ()
   "Change working directory."
@@ -4040,4 +4045,3 @@ The overlay is automatically removed after timeout. Tap it."
 ;; byte-compile-warnings: (not free-vars lexical unresolved)
 ;; End:
 ;;; keycom.el ends here
-

@@ -1588,7 +1588,7 @@ Huge amount of bindings from `keyamp-script-leader-map' goes here."
     (keyamp--map-tab keymap keyamp-touch-tab-cmd)
     (keyamp--map keymap
       '(("C-q"    . toggle-messages) ("C-t"     . delete-other-windows)
-        ("<left>" . tasks)           ("<right>" . screen-home-toggle)
+        ("<left>" . alt-buf)         ("<right>" . screen-home-toggle)
         ("<up>"   . page-dn-half)    ("<down>"  . page-up-half)))
     (keyamp--set keymap '(keyamp-escape) nil nil nil 1)))
 
@@ -2435,12 +2435,10 @@ keyboard ASCII CHAR."
 
 (when keyamp-touchp
   (defvar screen-home-keymap (make-sparse-keymap))
-
   (keyamp--map screen-home-keymap
     '(("<right>" . screen-home-right) ("<left>" . screen-home-left)
-      ("<up>"    . alt-buf)           ("<down>" . screen-lock)))
-
-  (keyamp--set screen-home-keymap '(screen-lock alt-buf))
+      ("<up>"    . tasks)             ("<down>" . screen-lock)))
+  (keyamp--set screen-home-keymap '(screen-lock))
 
   (advice-add 'delete-other-windows :after
               (lambda (&rest _) "screen-home-keymap"
@@ -2697,16 +2695,15 @@ keyboard ASCII CHAR."
       (toggle-prev-case    . vt-command-copy)        ; SPC B
       (revert-buffer       . prev-vterm-buf)         ; SPC 3
       (select-word         . nil)                    ; SPC SPC
-      (org-ctrl-c-ctrl-c   . vterm-send-c-c)         ; SPC W
+      (org-ctrl-c-ctrl-c   . vt-exit-copy-mode)      ; SPC W
 
       ;; Right half
       (page-up-half        . vt-page-up-half)        ; DEL H
       (page-dn-half        . vt-page-dn-half)        ; DEL ;
       (dired-jump          . vt-conn-tramp)          ; DEL M
-      (back-char           . vterm-left)
-      (forw-char           . vterm-right)
-      (up-line             . vterm-up)
-      (down-line           . vterm-down)))
+      (copy-all            . vt-copy)                ; DEL C
+      (password-store      . vt-sudo-password-copy)  ; DEL Y
+      ))
 
   ;; Sync point on insert
   (add-hook 'keyamp-insert-hook 'vterm-reset-cursor-point)
@@ -2933,8 +2930,12 @@ keyboard ASCII CHAR."
 
   ;;;;;; Codex vi
   (with-sparse-keymap
+    (keyamp--map keymap ; No need map following in shell
+      '(("<up>"   . vt-codex-vi-up)   ("<down>"  . vt-codex-vi-down)
+        ("<left>" . vt-codex-vi-left) ("<right>" . vt-codex-vi-right)))
     (keyamp--remap keymap
-      '((bchar             . vt-codex-vi-left)
+      '((select-word       . vt-codex-vi-up)
+        (bchar             . vt-codex-vi-left)
         (fchar             . vt-codex-vi-right)
         (previous-line     . vt-codex-vi-up)
         (next-line         . vt-codex-vi-down)
@@ -2945,16 +2946,17 @@ keyboard ASCII CHAR."
         (beg-of-line       . vt-codex-vi-bol)
         (end-of-lyne       . vt-codex-vi-eol)
         (paste-or-prev     . vt-codex-vi-yank)
-        (paste-from-r1     . vt-codex-vi-paste-from-r1)))
+        (paste-from-r1     . vt-codex-vi-paste-from-r1)
+        (toggle-case       . vt-codex-toggle-raw-output)))
 
     (keyamp--set keymap
-      '(vt-codex-vi-sync-point   vt-codex-vi-paste-from-r1
-        vt-codex-vi-left
-        vt-codex-vi-right        vt-codex-vi-up
-        vt-codex-vi-down         vt-codex-vi-back-word
-        vt-codex-vi-forward-word vt-codex-vi-delete-word
-        vt-codex-vi-back-delw    vt-codex-vi-bol
-        vt-codex-vi-eol          vt-codex-vi-yank) :command))
+      '(vt-codex-vi-sync-point      vt-codex-vi-paste-from-r1
+        vt-codex-toggle-raw-output  vt-codex-vi-left
+        vt-codex-vi-right           vt-codex-vi-up
+        vt-codex-vi-down            vt-codex-vi-back-word
+        vt-codex-vi-forward-word    vt-codex-vi-delete-word
+        vt-codex-vi-back-delw       vt-codex-vi-bol
+        vt-codex-vi-eol             vt-codex-vi-yank) :command))
 
   (with-sparse-keymap ; Move word repeat
     (keyamp--remap keymap
@@ -2962,7 +2964,7 @@ keyboard ASCII CHAR."
     (keyamp--set keymap '(vt-codex-vi-back-word vt-codex-vi-forward-word)))
 
   (add-hook 'keyamp-insert-hook 'vt-codex-vi-insert)
-  (advice-add 'vt-shell-vi-cmd :after #'vt-codex-vi-cmd)
+  ;; (add-hook 'keyamp-command-hook 'vt-codex-vi-cmd)
 
   ;;;;;; config.toml
   ;; [tui.keymap.vim_normal]
@@ -3446,6 +3448,9 @@ keyboard ASCII CHAR."
         (keyamp-repeat-deactivate-init keymap)))
 
     (advice-add 'keyamp-input-timer-payload :after #'keyamp-input-timer-payload-calc)))
+
+(with-eval-after-load 'markdown-mode
+  (keyamp--remap markdown-mode-map '((open-in-external-app . markdown-preview))))
 
 (with-eval-after-load 'dslide
   (keyamp--map-backtab dslide-mode-map nil)
